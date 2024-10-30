@@ -162,11 +162,18 @@ def defineMacBuildTasks =  { architecture ->
       ant.move (file:"$globalDist/Freeplane-${majorVersion}.dmg", tofile:"$globalDist/Freeplane-${distVersion}-${architecture}.dmg")
     }
   }
+  def signDmg = tasks.create ("signDmg_${architecture}", Exec) {
+    commandLine 'bash', '-e', '-c', """
+    set -x; codesign --sign "Developer ID Application: ${macAppProperties['macapp.codesign.identity']}" $globalDist/Freeplane-${distVersion}-${architecture}.dmg
+    """
+    dependsOn dmg4mac
+  }
+
   def notarytool = tasks.create ("notarytool_${architecture}", Exec) {
     commandLine 'bash', '-e', '-c', """
     set -x; xcrun notarytool submit $globalDist/Freeplane-${distVersion}-${architecture}.dmg --keychain-profile ${macAppProperties['macapp.notarytool.keychainprofile']} --no-s3-acceleration
     """
-    mustRunAfter dmg4mac
+    dependsOn signDmg
   }
 }
 
