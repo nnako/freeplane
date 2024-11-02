@@ -23,7 +23,6 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
@@ -143,7 +142,9 @@ public class DefaultMapMouseListener implements IMouseListener {
             e.consume();
             return;
 		}
-		if((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0)
+		boolean isCtrlEvent = Compat.isCtrlEvent(e);
+        if(isCtrlEvent && e.getButton() == MouseEvent.BUTTON1
+		     || !isCtrlEvent && e.getButton() == MouseEvent.BUTTON3)
 		    rectangleMemorizer.mousePressed(e);
         if(! e.isConsumed() && e.getButton() == MouseEvent.BUTTON1){
 			if(mapView != null){
