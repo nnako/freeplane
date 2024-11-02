@@ -127,7 +127,7 @@ public class FormatController implements IExtension, IFreeplanePropertyListener 
 	public static FormatController getController(Controller controller) {
 		return controller.getExtension(FormatController.class);
 	}
-	
+
 	public static void install(final FormatController formatController) {
 		Controller.getCurrentController().addExtension(FormatController.class, formatController);
 		Controller.getCurrentController().addOptionValidator(formatController.createValidator());
@@ -314,11 +314,10 @@ public class FormatController implements IExtension, IFreeplanePropertyListener 
 	 * Removes format if <a>formatString</a> is null. */
 	public static Object format(final Object obj, final String formatString, final Object defaultObject) {
 		try {
-			final PatternFormat format = PatternFormat.guessPatternFormat(formatString);
-			// logging for invalid pattern is done in guessPatternFormat()
-            if (obj == null)
-                return obj;
+		    if (obj == null)
+		        return obj;
 			Object toFormat = extractObject(obj);
+			final PatternFormat format = PatternFormat.guessPatternFormat(formatString, toFormat);
 			if (format == null || format == PatternFormat.getIdentityPatternFormat())
 				return toFormat;
 			if (toFormat instanceof String) {

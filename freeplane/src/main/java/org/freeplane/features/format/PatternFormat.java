@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.format;
 
+import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,11 +68,11 @@ public abstract class PatternFormat /*extends Format*/ {
 	public String getName() {
 		return name;
     }
-	
+
 	public void setName(final String name) {
 		this.name = name;
 	}
-	
+
 	public Locale getLocale() {
 		return locale;
 	}
@@ -82,7 +83,7 @@ public abstract class PatternFormat /*extends Format*/ {
 
 	/** selects the formatter implementation, e.g. "formatter" or "date" */
 	public abstract String getStyle();
-	
+
 	// yyyy-MM-dd HH:mm:ss
 	final static Pattern datePattern = Pattern.compile("yy|[Hh]{1,2}:mm");
 
@@ -147,16 +148,36 @@ public abstract class PatternFormat /*extends Format*/ {
 					return f;
 				}
 			}
-			LogUtils.warn("not a pattern format: '" + pattern + "'");
 			return null;
 		}
 		catch (Exception e) {
-			LogUtils.warn("can't build a formatter for this pattern '" + pattern + "'", e);
 			return null;
 		}
 	}
 
-	public static PatternFormat getIdentityPatternFormat() {
+
+    public static PatternFormat guessPatternFormat(String pattern, Object toFormat) {
+        PatternFormat format = guessPatternFormat(pattern);
+        if(format != null)
+            return format;
+        if(toFormat instanceof Number) {
+            try {
+                FormatController.getController().getDecimalFormat(pattern);
+                return new DecimalPatternFormat(pattern);
+            } catch (IllegalArgumentException e) {/**/}
+        }
+        if(toFormat instanceof Date) {
+            try {
+                FormatController.getController().getDateFormat(pattern);
+                return new DatePatternFormat(pattern);
+            } catch (IllegalArgumentException e) {/**/}
+
+        }
+        LogUtils.warn("not a pattern format: '" + pattern + "'");
+        return null;
+    }
+
+    public static PatternFormat getIdentityPatternFormat() {
 	    return IDENTITY;
     }
 
@@ -177,7 +198,7 @@ public abstract class PatternFormat /*extends Format*/ {
 	}
 
 	public String serialize() {
-		return getType() + SERIALIZATION_SEPARATOR +  getStyle() + SERIALIZATION_SEPARATOR + TypeReference.encode(getPattern()); 
+		return getType() + SERIALIZATION_SEPARATOR +  getStyle() + SERIALIZATION_SEPARATOR + TypeReference.encode(getPattern());
     }
 
 	public static PatternFormat deserialize(String string) {
@@ -188,11 +209,11 @@ public abstract class PatternFormat /*extends Format*/ {
 	public boolean acceptsDate() {
 	    return getType().equals(IFormattedObject.TYPE_DATE) || getPattern().equals(STANDARD_FORMAT_PATTERN);
     }
-	
+
 	public boolean acceptsNumber() {
 		return getType().equals(IFormattedObject.TYPE_NUMBER) || getPattern().equals(STANDARD_FORMAT_PATTERN);
 	}
-	
+
 	public boolean acceptsString() {
 		return getType().equals(IFormattedObject.TYPE_STRING) || getPattern().equals(STANDARD_FORMAT_PATTERN);
 	}
