@@ -1329,10 +1329,14 @@ public class NodeView extends JComponent implements INodeView {
 		}
 		if(child == map.getRoot().getNode())
 		    return;
-		if(! map.isSelected() && parent.getChildCount() == 1 && map.getFilter().getCondition() == null) {
+		if(! map.isSelected() && parent.getChildCount() == 1
+		        && map.getFilter().getCondition() == null
+		        && ! getNode().isRoot()) {
             this.isFolded = true;
-            revalidate();
-            return;
+            if(!isRoot()) {
+                revalidate();
+                return;
+            }
         }
 		NodeView newChild = addChildView(child, index);
 		if(map.getRoot().getNode().getParentNode() != parent)
