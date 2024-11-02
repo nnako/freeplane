@@ -561,13 +561,13 @@ public class MTextController extends TextController {
 			return;
 		}
 		final Object oldText = node.getUserObject();
-		if (oldText.equals(newObject)) {
+		if (newObject.equals(oldText)) {
 			return;
 		}
 		final IActor actor = new IActor() {
 			@Override
 			public void act() {
-				if (!oldText.equals(newObject)) {
+				if (!newObject.equals(oldText)) {
 					node.setUserObject(newObject);
 					Controller.getCurrentModeController().getMapController().nodeChanged(node, NodeModel.NODE_TEXT,
 					    oldText, newObject);
@@ -581,7 +581,7 @@ public class MTextController extends TextController {
 
 			@Override
 			public void undo() {
-				if (!oldText.equals(newObject)) {
+				if (!newObject.equals(oldText)) {
 					node.setUserObject(oldText);
 					Controller.getCurrentModeController().getMapController().nodeChanged(node, NodeModel.NODE_TEXT,
 					    newObject, oldText);
