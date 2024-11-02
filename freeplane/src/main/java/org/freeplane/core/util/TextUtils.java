@@ -167,6 +167,8 @@ public class TextUtils {
     }
 
     public static String getShortText(String text, int maximumCharacters, String continuationMark) {
+        if(text == null)
+            return "";
         if (text.length() > maximumCharacters) {
             text = text.substring(0, maximumCharacters) + continuationMark;
         }
