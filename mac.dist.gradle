@@ -127,6 +127,20 @@ def defineMacBuildTasks =  { architecture ->
 
       }
     }
+  def signFlatlaf= tasks.create ("signFlatlaf_${architecture}", Exec) {
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
+    commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
+                'build/macosapp/app-image-apple/Freeplane.app/Contents/app/core/org.freeplane.core/lib/flatlaf-*.jar',
+                macAppProperties['macapp.codesign.identity']
+    dependsOn macosapp_makeapp
+  }
+  def signJline= tasks.create ("signJline_${architecture}", Exec) {
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
+    commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
+                'build/macosapp/app-image-apple/Freeplane.app/Contents/app/plugins/org.freeplane.plugin.script/lib/jline-*.jar',
+                macAppProperties['macapp.codesign.identity']
+    dependsOn macosapp_makeapp
+}
   
   def signMacApp= tasks.create ("signMacApp_${architecture}", Exec) {
         onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
@@ -136,7 +150,7 @@ def defineMacBuildTasks =  { architecture ->
      '--app-image', "build/macosapp/app-image-${architecture}/Freeplane.app",
      '--mac-sign',
      '--mac-signing-key-user-name', macAppProperties['macapp.codesign.identity']
-        dependsOn macosapp_makeapp
+        dependsOn macosapp_makeapp, signFlatlaf, signJline
     }
 
   def dmg4mac = tasks.create ("dmg4mac_${architecture}", Exec) {
