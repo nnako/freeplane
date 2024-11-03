@@ -12,6 +12,7 @@ import javax.swing.JViewport;
 import javax.swing.event.MouseInputAdapter;
 
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.util.Compat;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.view.swing.map.MapView;
@@ -30,7 +31,7 @@ class MapOverviewImageMouseHandler extends MouseInputAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (e.isPopupTrigger()) {
+        if (Compat.isPopupTrigger(e)) {
             MapOverviewImage image = (MapOverviewImage) e.getComponent();
             image.showPopupMenu(e.getX(), e.getY());
         } else if (e.getButton() == 1) {

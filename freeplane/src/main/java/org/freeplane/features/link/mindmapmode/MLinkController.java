@@ -59,6 +59,7 @@ import org.freeplane.core.ui.components.JComboBoxFactory;
 import org.freeplane.core.ui.components.RenderedContent;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.undo.IActor;
+import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.link.ConnectorArrows;
@@ -571,7 +572,7 @@ public class MLinkController extends LinkController {
             }
 
             private void handlePopup(MouseEvent e) {
-                if(e.isPopupTrigger()){
+                if(Compat.isPopupTrigger(e)){
                     e.consume();
                     popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }

@@ -60,7 +60,7 @@ public class DefaultMapMouseListener implements IMouseListener {
 	}
 
 	protected void handlePopup(final MouseEvent e) {
-		if (e.isPopupTrigger()) {
+		if (Compat.isPopupTrigger(e)) {
 			Component popup = null;
 			final Component popupForModel;
 			final MapView mapView = (MapView) Controller.getCurrentController().getMapViewManager().getMapViewComponent();
@@ -137,7 +137,7 @@ public class DefaultMapMouseListener implements IMouseListener {
 		final MapView mapView = MapView.getMapView(e.getComponent());
 		if(mapView != null)
 			mapView.select();
-		if (e.isPopupTrigger()) {
+		if (Compat.isPopupTrigger(e)) {
 			handlePopup(e);
             e.consume();
             return;

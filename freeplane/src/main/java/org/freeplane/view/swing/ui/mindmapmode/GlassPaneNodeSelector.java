@@ -30,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.IMouseListener;
+import org.freeplane.core.util.Compat;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
@@ -190,7 +191,7 @@ class GlassPaneNodeSelector extends MouseAdapter implements IMouseListener{
 				componentPoint.x,
 				componentPoint.y,
 				e.getClickCount(),
-				e.isPopupTrigger());
+				Compat.isPopupTrigger(e));
 			return componentEvent;
 		}
 

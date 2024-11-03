@@ -50,6 +50,7 @@ import javax.swing.text.JTextComponent;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.LabelAndMnemonicSetter;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
@@ -153,7 +154,7 @@ public class EditNodeDialog extends EditNodeBase {
 			});
 			textComponent.addMouseListener(new MouseListener() {
 				private void conditionallyShowPopup(final MouseEvent e) {
-					if (e.isPopupTrigger()) {
+					if (Compat.isPopupTrigger(e)) {
 						final JPopupMenu popupMenu = createPopupMenu(textComponent);
 						popupMenu.show(textComponent, e.getX(), e.getY());
 						e.consume();

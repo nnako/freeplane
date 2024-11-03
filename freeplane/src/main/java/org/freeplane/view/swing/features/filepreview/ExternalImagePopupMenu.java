@@ -29,6 +29,7 @@ import java.net.URI;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.NodeModel;
@@ -171,7 +172,7 @@ class ExternalImagePopupMenu extends JPopupMenu implements MouseListener {
 
 	protected void maybeShowPopup(final MouseEvent e) {
 		MainView mv = null;
-		if (e.isPopupTrigger()) {
+		if (Compat.isPopupTrigger(e)) {
 			for (final Component cmp : e.getComponent().getParent().getComponents()) {
 				if (cmp instanceof MainView) {
 					mv = (MainView) cmp;
