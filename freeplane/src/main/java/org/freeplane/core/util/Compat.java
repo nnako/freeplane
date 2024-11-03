@@ -216,9 +216,13 @@ public class Compat {
         				);
     }
 
-	static public boolean isCtrlEvent(final MouseEvent e) {
-         return isExtendedCtrlEvent(e, 0);
-    }
+    static public boolean isCtrlEvent(final MouseEvent e) {
+        return isExtendedCtrlEvent(e, 0);
+   }
+
+    static public boolean isPopupTrigger(final MouseEvent e) {
+        return e.isPopupTrigger() && ! e.isShiftDown() && ! e.isAltDown() && ! e.isAltGraphDown();
+   }
 
 	public static boolean isCtrlShiftEvent(MouseEvent e) {
 		return isExtendedCtrlEvent(e, InputEvent.SHIFT_DOWN_MASK);

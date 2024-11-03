@@ -316,7 +316,7 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
 		private void conditionallyShowPopup(final MouseEvent e) {
-			if (e.isPopupTrigger()) {
+			if (Compat.isPopupTrigger(e)) {
 				final JComponent component = (JComponent) e.getComponent();
 				final JPopupMenu popupMenu = createPopupMenu(component);
 				popupShown = true;

@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.IMouseWheelEventHandler;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.util.Compat;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.MapView;
@@ -65,7 +66,7 @@ public class DefaultMouseWheelListener implements MouseWheelListener {
 			UITools.convertPointToAncestor(mapView, location, scrollPane);
 			final MouseWheelEvent mapWheelEvent = new MouseWheelEvent(scrollPane, e.getID(), e.getWhen(), e.getModifiers() | e.getModifiersEx(),
 					location.x, location.y, e.getXOnScreen(), e.getYOnScreen(),
-					e.getClickCount(), e.isPopupTrigger(), e.getScrollType(),
+					e.getClickCount(), Compat.isPopupTrigger(e), e.getScrollType(),
 					e.getScrollAmount(), e.getWheelRotation());
 			if(scrollPane != null) {
 				for (MouseWheelListener l : scrollPane.getMouseWheelListeners())

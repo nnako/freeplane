@@ -8,6 +8,7 @@ Ignore whitespace between CJK characters in node list
 Autosave saves map file itself and not only temporary files
 Option to paste HTML as plain text node hierarchy
 Option to search in subtree using find dialog
+Upgrade embedded Java to Java 21
 
 ==============================
 1.12.6

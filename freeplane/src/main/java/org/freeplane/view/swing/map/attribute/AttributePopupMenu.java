@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
@@ -347,7 +348,7 @@ class AttributePopupMenu extends JPopupMenu implements MouseListener {
 	}
 
 	private void maybeShowPopup(final MouseEvent e) {
-		if (e.isPopupTrigger()) {
+		if (Compat.isPopupTrigger(e)) {
 			selectTable(e.getComponent(), e.getPoint());
 			if (table.isEditing()) {
 				return;

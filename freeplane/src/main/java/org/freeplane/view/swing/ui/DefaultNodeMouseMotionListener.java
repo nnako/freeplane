@@ -245,14 +245,14 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		mapView.select();
 		doubleClickTimer.cancel();
 		popupMenuIsShown = false;
-		if (e.isPopupTrigger())
+		if (Compat.isPopupTrigger(e))
 			showPopupMenu(e);
 	}
 
 	@Override
 	public void mouseReleased(final MouseEvent e) {
 		nodeSelector.stopTimerForDelayedSelection();
-        if (e.isPopupTrigger())
+        if (Compat.isPopupTrigger(e))
             showPopupMenu(e);
 	}
 

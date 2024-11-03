@@ -109,7 +109,7 @@ public class MMapMouseListener extends DefaultMapMouseListener{
 
 	public void mousePressed(final MouseEvent e) {
 		super.mousePressed(e);
-		if(e.isPopupTrigger())
+		if(Compat.isPopupTrigger(e))
 			return;
 		final MapView mapView = (MapView) e.getComponent();
 		if(mapView.getClientProperty(Connectors.class) != null)

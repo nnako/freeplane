@@ -25,6 +25,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.ControllerPopupMenuListener;
+import org.freeplane.core.util.Compat;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.NodeView;
@@ -49,7 +50,7 @@ public class NodePopupMenuDisplayer {
 	}
 
 	public void showNodePopupMenu(final MouseEvent e) {
-		if (e.isPopupTrigger()) {
+		if (Compat.isPopupTrigger(e)) {
 			ModeController mc = Controller.getCurrentController().getModeController();
 			final NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, e.getComponent());
 			if (nodeView == null)
