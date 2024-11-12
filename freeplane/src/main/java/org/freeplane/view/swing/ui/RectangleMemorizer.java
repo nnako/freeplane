@@ -26,8 +26,6 @@ class RectangleMemorizer extends MouseAdapter {
         Component component = e.getComponent();
         if(component instanceof MapView) {
             startPoint = e.getPoint();
-            mapView = (MapView) component;
-            e.consume();
         }
     }
 
@@ -35,17 +33,23 @@ class RectangleMemorizer extends MouseAdapter {
     public void mouseReleased(MouseEvent e) {
         if (startPoint == null)
             return;
-        e.consume();
-        mapView.selectNodeViewBySelectionRectangle();
-        mapView.setSelectionRectangle(null);
+        if(mapView != null) {
+        	e.consume();
+	        mapView.selectNodeViewBySelectionRectangle();
+	        mapView.setSelectionRectangle(null);
+	        mapView = null;
+        }
         startPoint = null;
-        mapView = null;
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         if (startPoint == null)
             return;
+        Component component = e.getComponent();
+        if(! (component instanceof MapView))
+        	return;
+        mapView = (MapView) component;
         e.consume();
         Point endPoint = e.getPoint();
         Rectangle newRectangle = new Rectangle(
@@ -54,6 +58,7 @@ class RectangleMemorizer extends MouseAdapter {
                 Math.abs(startPoint.x - endPoint.x),
                 Math.abs(startPoint.y - endPoint.y)
         );
+        
         mapView.setSelectionRectangle(newRectangle);
     }
 

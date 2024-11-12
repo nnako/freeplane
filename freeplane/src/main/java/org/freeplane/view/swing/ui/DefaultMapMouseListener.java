@@ -146,7 +146,7 @@ public class DefaultMapMouseListener implements IMouseListener {
         if(isCtrlEvent && e.getButton() == MouseEvent.BUTTON1
 		     || !isCtrlEvent && e.getButton() == MouseEvent.BUTTON3)
 		    rectangleMemorizer.mousePressed(e);
-        if(! e.isConsumed() && e.getButton() == MouseEvent.BUTTON1){
+        if(! isCtrlEvent && e.getButton() == MouseEvent.BUTTON1){
 			if(mapView != null){
 				mapView.setMoveCursor(true);
 				originX = e.getX();
