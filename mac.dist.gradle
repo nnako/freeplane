@@ -143,7 +143,7 @@ def defineMacBuildTasks =  { architecture ->
 }
 
   def signJnr= tasks.create ("signJnr_${architecture}", Exec) {
-        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null && architecture=='intel'}
     commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
                 "build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib/jnr-*.jar",
                 macAppProperties['macapp.codesign.identity']
@@ -167,7 +167,7 @@ def defineMacBuildTasks =  { architecture ->
 }
 
   def signMacApp= tasks.create ("signMacApp_${architecture}", Exec) {
-        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null && architecture=='intel'}
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
  
    	commandLine jpackage,
      '--type', 'app-image',
