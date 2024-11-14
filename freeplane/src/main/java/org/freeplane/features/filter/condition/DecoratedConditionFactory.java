@@ -21,33 +21,39 @@ public class DecoratedConditionFactory {
         byDescription.put(TextUtils.createTranslatedString(FILTER_FOR_SELF), x -> x);
         byDescription.put(TextUtils.createTranslatedString(ParentConditionDecorator.DESCRIPTION), ParentConditionDecorator::new);
         byDescription.put(TextUtils.createTranslatedString(AnyAncestorConditionDecorator.DESCRIPTION), AnyAncestorConditionDecorator::new);
+        byDescription.put(TextUtils.createTranslatedString(NoAncestorConditionDecorator.DESCRIPTION), NoAncestorConditionDecorator::new);
         byDescription.put(TextUtils.createTranslatedString(AnyChildConditionDecorator.DESCRIPTION), AnyChildConditionDecorator::new);
         byDescription.put(TextUtils.createTranslatedString(AllChildrenConditionDecorator.DESCRIPTION), AllChildrenConditionDecorator::new);
+        byDescription.put(TextUtils.createTranslatedString(NoChildConditionDecorator.DESCRIPTION), NoChildConditionDecorator::new);
         byDescription.put(TextUtils.createTranslatedString(AnyDescendantConditionDecorator.DESCRIPTION), AnyDescendantConditionDecorator::new);
         byDescription.put(TextUtils.createTranslatedString(AllDescendantsConditionDecorator.DESCRIPTION), AllDescendantsConditionDecorator::new);
-        
+        byDescription.put(TextUtils.createTranslatedString(NoDescendantConditionDecorator.DESCRIPTION), NoDescendantConditionDecorator::new);
+
         keys = new Vector<>(byDescription.size());
         byDescription.keySet().forEach(keys::add);
-        
+
         byName = new HashMap<>();
         byName.put(ConditionNotSatisfiedDecorator.NAME.toLowerCase(), ConditionNotSatisfiedDecorator::load);
         byName.put(ParentConditionDecorator.NAME.toLowerCase(), ParentConditionDecorator::load);
         byName.put(AnyAncestorConditionDecorator.NAME.toLowerCase(), AnyAncestorConditionDecorator::load);
+        byName.put(NoAncestorConditionDecorator.NAME.toLowerCase(), NoAncestorConditionDecorator::load);
         byName.put(AnyChildConditionDecorator.NAME.toLowerCase(), AnyChildConditionDecorator::load);
         byName.put(AllChildrenConditionDecorator.NAME.toLowerCase(), AllChildrenConditionDecorator::load);
+        byName.put(NoChildConditionDecorator.NAME.toLowerCase(), NoChildConditionDecorator::load);
         byName.put(AnyDescendantConditionDecorator.NAME.toLowerCase(), AnyDescendantConditionDecorator::load);
         byName.put(AllDescendantsConditionDecorator.NAME.toLowerCase(), AllDescendantsConditionDecorator::load);
+        byName.put(NoDescendantConditionDecorator.NAME.toLowerCase(), NoDescendantConditionDecorator::load);
     }
-    
+
     public ASelectableCondition createRelativeCondition(TranslatedObject key, ASelectableCondition originalCondition) {
         return byDescription.get(key).apply(originalCondition);
     }
-    
+
     public ASelectableCondition createRelativeCondition(ConditionFactory factory, XMLElement element) {
         BiFunction<ConditionFactory, XMLElement, ASelectableCondition> decoratorFactory = byName.get(element.getName().toLowerCase());
         return decoratorFactory == null ? null : decoratorFactory.apply(factory, element);
     }
-    
+
     public Vector<TranslatedObject> getKeys(){
         return keys;
     }

@@ -335,10 +335,10 @@ public class FilterConditionEditor {
     private ASelectableCondition decorate(ASelectableCondition decoratedCondition) {
         if (decoratedCondition == null)
             return decoratedCondition;
-        if(filterTargetSelector != null)
-            decoratedCondition = DECORATED_CONDITION_FACTORY.createRelativeCondition((TranslatedObject) filterTargetSelector.getSelectedItem(), decoratedCondition);
         if (btnDeny.isSelected())
             decoratedCondition = new ConditionNotSatisfiedDecorator(decoratedCondition);
+        if(filterTargetSelector != null)
+            decoratedCondition = DECORATED_CONDITION_FACTORY.createRelativeCondition((TranslatedObject) filterTargetSelector.getSelectedItem(), decoratedCondition);
         return decoratedCondition;
     }
 
