@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +48,7 @@ public class ArchUnitServer implements IFreeplanePropertyListener {
     private void start(int port) {
         if (running.compareAndSet(false, true)) {
             try {
-                serverSocket = new ServerSocket(port);
+                serverSocket = new ServerSocket(port, 10, InetAddress.getByName("127.0.0.1"));
                 LogUtils.info("ArchUnit Server started on port " + port);
 
                 new Thread(() -> {

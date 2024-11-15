@@ -104,7 +104,7 @@ public class SingleInstanceManager {
 	private boolean startAsMaster() {
 		try {
 			// port number 0: use any free socket
-			final ServerSocket socket = new ServerSocket(0, 10, InetAddress.getByName(null));
+			final ServerSocket socket = new ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"));
 			port = socket.getLocalPort();
 			LogUtils.info("Listening for application instances on socket " + port);
 			createLockFile();
