@@ -44,14 +44,14 @@ public class TextIcon implements Icon {
             g2d.setStroke(borderStroke);
             int lineWidth = (int)(borderStroke.getLineWidth() / 2 + 0.99);
             g2d.drawRoundRect(x + lineWidth, y + lineWidth, iconWidth - 2 * lineWidth - 1, iconHeight - 2 * lineWidth - 1, iconHeight / 8, iconHeight / 8);
-            g2d.setColor(textColor);
         }
-        else
+        if(text != null) {
             g2d.setColor(textColor);
-        g2d.setFont(fontMetrics.getFont());
-        int textX = x + padding;
-        int textY = y + padding + fontMetrics.getAscent();
-        g2d.drawString(text, textX, textY);
+            g2d.setFont(fontMetrics.getFont());
+            int textX = x + padding;
+            int textY = y + padding + fontMetrics.getAscent();
+            g2d.drawString(text, textX, textY);
+        }
     }
 
 
@@ -96,7 +96,7 @@ public class TextIcon implements Icon {
 
     @Override
     public int getIconWidth() {
-        return fontMetrics.stringWidth(text) +  2 * padding;
+        return (text == null ? 0 : fontMetrics.stringWidth(text)) +  2 * padding;
     }
 
     @Override
