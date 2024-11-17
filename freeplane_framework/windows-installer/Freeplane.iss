@@ -24,7 +24,7 @@
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{D3941722-C4DD-4509-88C4-0E87F675A859}
-AppCopyright=Copyright © 2000-2024 Freeplane team and others
+AppCopyright=Copyright ï¿½ 2000-2024 Freeplane team and others
 AppName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
@@ -99,10 +99,10 @@ Root: "HKCR"; Subkey: ".mm"; ValueType: string; ValueData: "FreeplaneApplication
 Root: "HKCR"; Subkey: "freeplane"; ValueType: string; ValueData: "URL:Freeplane protocol"; Flags: uninsdeletekey; Tasks: associate
 Root: "HKCR"; Subkey: "freeplane"; ValueType: string; ValueName: "URL Protocol"; Flags: uninsdeletekey; Tasks: associate
 Root: "HKCR"; Subkey: "freeplane\Shell\Open\Command"; ValueType: string; ValueData: """{app}\freeplane.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: associate
-Root: "HKCR"; Subkey: "freeplane\DefaultIcon"; ValueType: string; ValueData: "{app}\app\freeplaneIcons.dll,0"; Flags: uninsdeletevalue; Tasks: associate
+Root: "HKCR"; Subkey: "freeplane\DefaultIcon"; ValueType: string; ValueData: "{app}\freeplaneIcons.dll,0"; Flags: uninsdeletevalue; Tasks: associate
 Root: "HKCR"; Subkey: "FreeplaneApplication"; ValueType: string; ValueData: "Freeplane mind map"; Flags: uninsdeletekey; Tasks: associate
 Root: "HKCR"; Subkey: "FreeplaneApplication\Shell\Open\Command"; ValueType: string; ValueData: """{app}\freeplane.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: associate
-Root: "HKCR"; Subkey: "FreeplaneApplication\DefaultIcon"; ValueType: string; ValueData: "{app}\app\freeplaneIcons.dll,0"; Flags: uninsdeletevalue; Tasks: associate
+Root: "HKCR"; Subkey: "FreeplaneApplication\DefaultIcon"; ValueType: string; ValueData: "{app}\freeplaneIcons.dll,0"; Flags: uninsdeletevalue; Tasks: associate
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\core"
