@@ -815,7 +815,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
             @Override
             public Point getToolTipLocation(MouseEvent event) {
                 int height = getHeight();
-                return new Point(height / 5, height / 5);
+                return new Point(height / 5, 4 * height / 5);
             }
 
 
@@ -898,8 +898,21 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 			mapViewComponent.repaint();
 	}
 
-	private void initConditions() {
-		filterConditions = new DefaultComboBoxModel();
+	@SuppressWarnings("serial")
+    private void initConditions() {
+		filterConditions = new DefaultComboBoxModel() {
+
+            @Override
+            public void setSelectedItem(Object anObject) {
+                int selectedItemIndex = getIndexOf(anObject);
+                if(selectedItemIndex > 3)
+                    removeElementAt(selectedItemIndex);
+                if(selectedItemIndex == -1 || selectedItemIndex > 3)
+                    insertElementAt(anObject, 3);
+                super.setSelectedItem(anObject);
+            }
+
+		};
 		addStandardConditions();
 		filterConditions.setSelectedItem(filterConditions.getElementAt(0));
 		if(activeFilterConditionComboBox == null)
@@ -1098,10 +1111,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 			applyFilter(true);
         else {
             activeFilterConditionComboBox.setEditable(true);
-            if(filterConditions.getSize() > 3)
-                filterConditions.removeElement(condition);
             filterConditions.setSelectedItem(condition);
-            filterConditions.insertElementAt(condition, 3);
             activeFilterConditionComboBox.setEditable(false);
         }
     }
