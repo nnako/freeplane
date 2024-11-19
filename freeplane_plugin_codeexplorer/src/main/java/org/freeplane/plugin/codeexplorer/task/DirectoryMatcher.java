@@ -6,26 +6,31 @@
 package org.freeplane.plugin.codeexplorer.task;
 
 import java.io.File;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.domain.JavaModifier;
 
 public class DirectoryMatcher implements GroupMatcher{
 
-    public static final DirectoryMatcher ALLOW_ALL = new DirectoryMatcher(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     private static String toGroupName(String location) {
         if (location.endsWith(".jar!/")) {
             int lastSlashIndex = location.lastIndexOf('/', location.length() - ".jar!/".length());
@@ -62,6 +67,52 @@ public class DirectoryMatcher implements GroupMatcher{
         coreLocationsByPaths = new TreeMap<>();
         groupNamesByLocation = new HashMap<>();
         findDirectories((directory, location) -> coreLocationsByPaths.put(directory.toURI().getRawPath(), location.toURI().getRawPath()));
+    }
+
+
+
+    @Override
+    public void initialize(JavaClasses javaClasses) {
+        if(groupMatchers.isEmpty() || ! groupsClassesByName) {
+            Set<String> updatedLocations = new HashSet<>();
+            javaClasses.forEach(jc -> initializeGroupNamesForRemoteInterfaces(jc, updatedLocations));
+        }
+    }
+
+    private void initializeGroupNamesForRemoteInterfaces(JavaClass javaClass, Set<String> updatedLocations) {
+       if(javaClass.isInterface()
+               && javaClass.isAssignableTo(Remote.class)
+               && ! groupMatchers.stream().anyMatch(matcher -> matcher.isIgnored(javaClass))) {
+           Optional<String> optionalPath = CodeNode.classSourceLocationOf(javaClass);
+           optionalPath.ifPresent(
+                   path -> {
+                       if(updatedLocations.add(path)) {
+                           String coreLocation = coreLocationsByPaths.getOrDefault(path, path);
+                           String implementationLocation = coreLocationsByPaths.put(path, computeCoreLocationForRemoteInterface(coreLocation, javaClass));
+                           javaClass.getAllSubclasses()
+                           .forEach(jc ->
+                           CodeNode.classSourceLocationOf(jc).ifPresent(x ->
+                           {
+                               if(updatedLocations.add(path))
+                                   coreLocationsByPaths.put(x, implementationLocation);
+                        }));
+                       }
+                   });
+       }
+    }
+
+    private String computeCoreLocationForRemoteInterface(String coreLocation, JavaClass javaClass) {
+        String implementationLocation = javaClass.getAllSubclasses().stream()
+        .filter(jc -> jc.getSubclasses().isEmpty() && ! jc.isInterface() && ! jc.getModifiers().contains(JavaModifier.ABSTRACT))
+        .findFirst()
+        .flatMap(this::coreLocationOf)
+        .orElse(coreLocation);
+        return implementationLocation;
+    }
+
+    private Optional<String> coreLocationOf(JavaClass javaClass){
+        return CodeNode.classSourceLocationOf(javaClass)
+                .map(path -> coreLocationsByPaths.getOrDefault(path, path));
     }
 
     private void findDirectories(BiConsumer<File, File> consumer) {
@@ -104,8 +155,7 @@ public class DirectoryMatcher implements GroupMatcher{
 
     @Override
     public Optional<GroupIdentifier> groupIdentifier(JavaClass javaClass) {
-        Optional<String> optionalPath = CodeNode.classSourceLocationOf(javaClass);
-        final Optional<String> optionalCoreLocation = optionalPath.map(path -> coreLocationsByPaths.getOrDefault(path, path));
+        final Optional<String> optionalCoreLocation = coreLocationOf(javaClass);
         if(! optionalCoreLocation.isPresent())
             return Optional.empty();
         final String coreLocation = optionalCoreLocation.get();

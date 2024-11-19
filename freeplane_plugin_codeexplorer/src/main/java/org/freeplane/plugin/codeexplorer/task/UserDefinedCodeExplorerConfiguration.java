@@ -126,11 +126,12 @@ public class UserDefinedCodeExplorerConfiguration implements CodeExplorerConfigu
         LogUtils.info("Starting import from " + locations.size() + " locations");
         JavaClasses  importedClasses = classFileImporter.importLocations(locations);
         LogUtils.info("Import done");
+        directoryMatcher.initialize(importedClasses);
         return importedClasses;
     }
 
     @Override
-    public GroupMatcher createGroupMatcher() {
+    public DirectoryMatcher createGroupMatcher() {
         return parsedConfiguration.directoryMatcher(projectLocations);
     }
 
