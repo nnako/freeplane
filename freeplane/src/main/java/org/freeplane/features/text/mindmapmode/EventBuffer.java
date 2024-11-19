@@ -30,6 +30,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
+
 /**
  * @author Dimitry Polivaev
  * Aug 23, 2011
@@ -62,9 +64,9 @@ public class EventBuffer implements KeyEventDispatcher, FocusListener {
 			return false;
 		}
 		addKeyEvent(ke);
-		
+
 		// Prevent Freeplane freeze
-		if(ke.getKeyCode() == KeyEvent.VK_ESCAPE 
+		if(ke.getKeyCode() == KeyEvent.VK_ESCAPE
 				&& ke.getID() == KeyEvent.KEY_RELEASED){
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
@@ -80,28 +82,30 @@ public class EventBuffer implements KeyEventDispatcher, FocusListener {
 			KeyEvent newEvent = new KeyEvent(textComponent, ke.getID(), ke.getWhen(), ke.getModifiers(), ke.getKeyCode(), ke.getKeyChar(), ke.getKeyLocation());
 			events.add(newEvent);
 		}
-        else {
-	        events.add(ke);
-        }
+		else {
+			events.add(ke);
+		}
 	}
-	
+
 	public void focusGained(final FocusEvent e) {
-		try{
-			textComponent.removeFocusListener(this);
-			for (int i = 0; i < events.size(); i++) {
-				final KeyEvent ke = events.get(i);
-				if(ke.getComponent().equals(textComponent))
-					dispatchedEvent = ke;
-				else{
-					dispatchedEvent = new KeyEvent(textComponent, ke.getID(), ke.getWhen(), ke.getModifiers(), ke.getKeyCode(), ke.getKeyChar(), ke.getKeyLocation());
+		textComponent.removeFocusListener(this);
+		SwingUtilities.invokeLater(() -> {
+			try{
+				for (int i = 0; i < events.size(); i++) {
+					final KeyEvent ke = events.get(i);
+					if(ke.getComponent().equals(textComponent))
+						dispatchedEvent = ke;
+					else{
+						dispatchedEvent = new KeyEvent(textComponent, ke.getID(), ke.getWhen(), ke.getModifiers(), ke.getKeyCode(), ke.getKeyChar(), ke.getKeyLocation());
+					}
+					e.getComponent().dispatchEvent(dispatchedEvent);
+					dispatchedEvent = null;
 				}
-				e.getComponent().dispatchEvent(dispatchedEvent);
-				dispatchedEvent = null;
 			}
-		}
-		finally{
-			deactivate();
-		}
+			finally{
+				deactivate();
+			}
+		});
 	}
 
 	public void focusLost(final FocusEvent e) {
