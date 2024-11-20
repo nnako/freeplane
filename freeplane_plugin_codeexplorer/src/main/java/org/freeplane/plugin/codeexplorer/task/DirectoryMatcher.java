@@ -69,47 +69,6 @@ public class DirectoryMatcher implements GroupMatcher{
         findDirectories((directory, location) -> coreLocationsByPaths.put(directory.toURI().getRawPath(), location.toURI().getRawPath()));
     }
 
-
-
-    @Override
-    public void initialize(JavaClasses javaClasses) {
-        if(groupMatchers.isEmpty() || ! groupsClassesByName) {
-            Set<String> updatedLocations = new HashSet<>();
-            javaClasses.forEach(jc -> initializeGroupNamesForRemoteInterfaces(jc, updatedLocations));
-        }
-    }
-
-    private void initializeGroupNamesForRemoteInterfaces(JavaClass javaClass, Set<String> updatedLocations) {
-       if(javaClass.isInterface()
-               && javaClass.isAssignableTo(Remote.class)
-               && ! groupMatchers.stream().anyMatch(matcher -> matcher.isIgnored(javaClass))) {
-           Optional<String> optionalPath = CodeNode.classSourceLocationOf(javaClass);
-           optionalPath.ifPresent(
-                   path -> {
-                       if(updatedLocations.add(path)) {
-                           String coreLocation = coreLocationsByPaths.getOrDefault(path, path);
-                           String implementationLocation = coreLocationsByPaths.put(path, computeCoreLocationForRemoteInterface(coreLocation, javaClass));
-                           javaClass.getAllSubclasses()
-                           .forEach(jc ->
-                           CodeNode.classSourceLocationOf(jc).ifPresent(x ->
-                           {
-                               if(updatedLocations.add(path))
-                                   coreLocationsByPaths.put(x, implementationLocation);
-                        }));
-                       }
-                   });
-       }
-    }
-
-    private String computeCoreLocationForRemoteInterface(String coreLocation, JavaClass javaClass) {
-        String implementationLocation = javaClass.getAllSubclasses().stream()
-        .filter(jc -> jc.getSubclasses().isEmpty() && ! jc.isInterface() && ! jc.getModifiers().contains(JavaModifier.ABSTRACT))
-        .findFirst()
-        .flatMap(this::coreLocationOf)
-        .orElse(coreLocation);
-        return implementationLocation;
-    }
-
     private Optional<String> coreLocationOf(JavaClass javaClass){
         return CodeNode.classSourceLocationOf(javaClass)
                 .map(path -> coreLocationsByPaths.getOrDefault(path, path));
