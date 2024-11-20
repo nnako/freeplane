@@ -2,25 +2,21 @@ package org.freeplane.plugin.codeexplorer.map;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.NodeModel;
-import org.freeplane.plugin.codeexplorer.graph.GraphCycleFinder;
 
 import com.tngtech.archunit.core.domain.Dependency;
+import com.tngtech.archunit.core.domain.Formatters;
 import com.tngtech.archunit.core.domain.JavaAnnotation;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.core.domain.properties.HasName;
-import com.tngtech.archunit.core.domain.Formatters;
 
 
 public class ClassNode extends CodeNode {
@@ -149,37 +145,5 @@ public class ClassNode extends CodeNode {
         if(javaClass.getModifiers().contains(JavaModifier.ABSTRACT))
             return ABSTRACT_CLASS_ICON_NAME;
         return CLASS_ICON_NAME;
-    }
-
-    @Override
-    Set<CodeNode> findCyclicDependencies() {
-        GraphCycleFinder<CodeNode> cycleFinder = new GraphCycleFinder<CodeNode>();
-        cycleFinder.addNode(this);
-        cycleFinder.stopSearchHere();
-        cycleFinder.exploreGraph(Collections.singleton(this),
-                this::connectedTargetNodesInGroup,
-                this::connectedOriginNodesInGroup);
-        LinkedHashSet<CodeNode> cycles = cycleFinder.findSimpleCycles().stream()
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return cycles;
-    }
-
-    private Stream<CodeNode> connectedOriginNodesInGroup(CodeNode node) {
-        Stream<JavaClass> originClasses = node.getIncomingDependenciesWithKnownOrigins()
-        .map(Dependency::getOriginClass);
-        return nodes(originClasses);
-    }
-
-    private Stream<CodeNode> connectedTargetNodesInGroup(CodeNode node) {
-        Stream<JavaClass> targetClasses = node.getOutgoingDependenciesWithKnownTargets()
-        .map(Dependency::getTargetClass);
-        return nodes(targetClasses);
-    }
-    private Stream<CodeNode> nodes(Stream<JavaClass> classes) {
-        return classes
-        .map(this::idWithGroupIndex)
-        .map(getMap()::getNodeForID)
-        .map(CodeNode.class::cast);
     }
 }

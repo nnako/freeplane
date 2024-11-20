@@ -7,9 +7,12 @@ package org.freeplane.plugin.codeexplorer.map;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.freeplane.core.extension.Configurable;
@@ -22,11 +25,13 @@ import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.NodeLinks;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.NodeRelativePath;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.plugin.codeexplorer.CodeModeController;
 import org.freeplane.plugin.codeexplorer.connectors.CodeLinkController;
 import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
+import org.freeplane.plugin.codeexplorer.graph.GraphCycleFinder;
 import org.freeplane.plugin.codeexplorer.task.AnnotationMatcher;
 import org.freeplane.plugin.codeexplorer.task.DependencyJudge;
 
@@ -213,7 +218,6 @@ public abstract class CodeNode extends NodeModel {
     abstract HasName getCodeElement();
 
 
-    Set<CodeNode> findCyclicDependencies() {return Collections.emptySet();}
     abstract Stream<Dependency> getOutgoingDependencies();
     abstract Stream<Dependency> getIncomingDependencies();
     abstract String getUIIconName();
@@ -364,4 +368,53 @@ public abstract class CodeNode extends NodeModel {
         if(getParentNode().getChildCount() > 1 && getChildCount() > 0)
             setFolded(true);
     }
+
+    Set<CodeNode> findCyclicDependencies() {
+        GraphCycleFinder<CodeNode> cycleFinder = new GraphCycleFinder<CodeNode>();
+        cycleFinder.addNode(this);
+        cycleFinder.stopSearchHere();
+        cycleFinder.exploreGraph(Collections.singleton(this),
+                this::connectedTargetNodes,
+                this::connectedOriginNodes);
+        Set<Entry<CodeNode, CodeNode>> cycles = cycleFinder.findSimpleCycles();
+
+        return cycles.stream().flatMap(edge ->
+        edge.getKey().getOutgoingDependenciesWithKnownTargets().flatMap(dep ->
+        classNodes(edge, dep.getOriginClass(), dep.getTargetClass())))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+    private Stream<CodeNode> connectedOriginNodes(CodeNode node) {
+        Stream<JavaClass> originClasses = node.getIncomingDependenciesWithKnownOrigins()
+        .map(Dependency::getOriginClass);
+        return commonAncestorChildTowards(originClasses);
+    }
+
+    private Stream<CodeNode> connectedTargetNodes(CodeNode node) {
+        Stream<JavaClass> targetClasses = node.getOutgoingDependenciesWithKnownTargets()
+        .map(Dependency::getTargetClass);
+        return commonAncestorChildTowards(targetClasses);
+    }
+
+    private Stream<? extends CodeNode> classNodes(Entry<CodeNode, CodeNode> edge,
+            final JavaClass originClass, final JavaClass targetClass) {
+        final String targetId = idWithGroupIndex(targetClass);
+        final CodeNode targetClassNode = (CodeNode) getMap().getNodeForID(targetId);
+        CodeNode targetNode = edge.getValue();
+        if(targetNode == targetClassNode || targetClassNode.isDescendantOf(targetNode)) {
+            final String originId = idWithGroupIndex(originClass);
+            final CodeNode originNode = (CodeNode) getMap().getNodeForID(originId);
+            return Stream.of(originNode, targetClassNode);
+        }
+        else
+            return Stream.empty();
+    }
+
+    private Stream<CodeNode> commonAncestorChildTowards(Stream<JavaClass> classes) {
+        return classes
+        .map(this::idWithGroupIndex)
+        .map(getMap()::getNodeForID)
+        .map(CodeNode.class::cast)
+        .map(node -> (CodeNode) new NodeRelativePath(this, node).endPathElement(1));
+    }
+
 }
