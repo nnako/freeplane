@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.freeplane.plugin.codeexplorer.map.CodeNode;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
@@ -27,30 +28,37 @@ import com.tngtech.archunit.core.domain.properties.HasName;
 
 import static com.tngtech.archunit.thirdparty.com.google.common.collect.Sets.union;
 
-public class ServerMatcher implements GroupMatcher {
+class RmiMatcher implements GroupMatcher {
+
+    enum Mode {IMPLEMENTATIONS, INSTANTIATIONS}
+
     private final GroupMatcher matcher;
     private Map<String, GroupIdentifier> bundledGroups;
 
-    public static class Factory {
+    static class Factory {
         private final GroupMatcher matcher;
         private final JavaClasses javaClasses;
         private final Graph<GroupIdentifier, DefaultEdge> componentGraph;
-        private final ServerMatcher serverMatcher;
+        private final RmiMatcher rmiMatcher;
+        private final ClassMatcher ignoredRmi;
+        private final Mode mode;
 
-        public Factory(GroupMatcher matcher, JavaClasses javaClasses){
+        Factory(GroupMatcher matcher, JavaClasses javaClasses, Mode mode, ClassMatcher ignoredRmi){
             this.matcher = matcher;
             this.javaClasses = javaClasses;
+            this.mode = mode;
+            this.ignoredRmi = ignoredRmi;
             this.componentGraph = new SimpleDirectedGraph<>(DefaultEdge.class);
             fillComponentGraph();
-            ServerMatcher serverMatcher = createMatcherFromGraph();
-            this.serverMatcher = serverMatcher;
+            RmiMatcher rmiMatcher = createMatcherFromGraph();
+            this.rmiMatcher = rmiMatcher;
 
         }
         private void fillComponentGraph() {
             javaClasses.forEach(this::addComponentsToGraph);
         }
 
-        private ServerMatcher createMatcherFromGraph() {
+        private RmiMatcher createMatcherFromGraph() {
             Map<String, GroupIdentifier> bundledGroups = new HashMap<>();
             ConnectivityInspector<GroupIdentifier, DefaultEdge> inspector = new ConnectivityInspector<>(componentGraph);
             List<Set<GroupIdentifier>> componentGroups = inspector.connectedSets();
@@ -73,11 +81,12 @@ public class ServerMatcher implements GroupMatcher {
                     }
                 }
             }
-            ServerMatcher serverMatcher = new ServerMatcher(this.matcher, bundledGroups);
-            return serverMatcher;
+            RmiMatcher rmiMatcher = new RmiMatcher(this.matcher, bundledGroups);
+            return rmiMatcher;
         }
-        public GroupMatcher createMatcher() {
-            return serverMatcher;
+
+        GroupMatcher createMatcher() {
+            return rmiMatcher;
         }
 
         private void addComponentsToGraph(JavaClass javaClass) {
@@ -86,22 +95,32 @@ public class ServerMatcher implements GroupMatcher {
         }
 
         private void addSubclassDependencies(Optional<GroupIdentifier> dependingGroupIdentifier, JavaClass javaClass){
-            Optional<GroupIdentifier> groupIdentifier = matcher.groupIdentifier(javaClass);
-            groupIdentifier.ifPresent(gi -> {
-//                union(javaClass.getConstructorCallsToSelf(), javaClass.getConstructorReferencesToSelf())
-//                    .forEach(access -> addConstructorDependencies(gi, access));
-                Set<JavaClass> subclasses = javaClass.getSubclasses();
-                if(dependingGroupIdentifier.isPresent())
-                    addEdge(dependingGroupIdentifier.get(), gi);
-                subclasses.forEach(x -> addSubclassDependencies(groupIdentifier, x));
-            });
+            if(! ignoredRmi.matches(CodeNode.findEnclosingNamedClass(javaClass))) {
+                Optional<GroupIdentifier> groupIdentifier = matcher.groupIdentifier(javaClass);
+                groupIdentifier.ifPresent(gi -> {
+                    if (dependingGroupIdentifier.isPresent()) {
+                        if(gi.getName().contentEquals("buyer.server"))
+                            System.out.println(javaClass);
+                        addEdge(dependingGroupIdentifier.get(), gi);
+                    }
+                    if(mode == Mode.INSTANTIATIONS)
+                        union(javaClass.getConstructorCallsToSelf(), javaClass.getConstructorReferencesToSelf())
+                        .forEach(access -> addConstructorDependencies(gi, access));
+                    Set<JavaClass> subclasses = javaClass.getSubclasses();
+                    subclasses.forEach(x -> addSubclassDependencies(groupIdentifier, x));
+                });
+            }
         }
 
         private void addConstructorDependencies(
                 GroupIdentifier groupIdentifier, JavaCodeUnitAccess<? extends CodeUnitAccessTarget> access) {
             JavaClass callingClass = access.getOriginOwner();
             Optional<GroupIdentifier> callingGroupIdentifier = matcher.groupIdentifier(callingClass);
-            callingGroupIdentifier.ifPresent(cgi -> addEdge(groupIdentifier, cgi));
+            callingGroupIdentifier.ifPresent(cgi -> {
+                if(cgi.getName().contentEquals("buyer.server"))
+                    System.out.println(access);
+                addEdge(groupIdentifier, cgi);
+            });
         }
 
         private void addEdge(GroupIdentifier dependingGroupIdentifier, GroupIdentifier groupIdentifier) {
@@ -118,7 +137,7 @@ public class ServerMatcher implements GroupMatcher {
         }
     }
 
-    public ServerMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups) {
+    RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups) {
         this.matcher = matcher;
         this.bundledGroups = bundledGroups;
     }

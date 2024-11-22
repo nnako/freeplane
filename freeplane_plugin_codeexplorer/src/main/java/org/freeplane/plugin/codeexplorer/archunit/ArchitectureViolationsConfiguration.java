@@ -108,7 +108,7 @@ public class ArchitectureViolationsConfiguration implements CodeExplorerConfigur
     }
 
     @Override
-    public GroupMatcher createGroupMatcher() {
+    public GroupMatcher createGroupMatcher(JavaClasses classes) {
         return this::location;
     }
 

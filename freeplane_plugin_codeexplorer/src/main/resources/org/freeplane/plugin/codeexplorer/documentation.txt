@@ -13,6 +13,9 @@ Define rules one per line in the following formats:
   class group [classPattern]
   class group [classPattern] as [group name]
   ignore class group [classPattern]
+  group RMI
+  group RMI instances
+  ignore RMI [classPattern]
 
 Commands:
 - Commands such as 'allow', 'forbid', 'ignore', and 'group' are integral to dependency management.
