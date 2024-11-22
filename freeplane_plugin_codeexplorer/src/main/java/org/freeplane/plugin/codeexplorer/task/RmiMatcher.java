@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.freeplane.core.util.LogUtils;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
@@ -42,12 +43,14 @@ class RmiMatcher implements GroupMatcher {
         private final RmiMatcher rmiMatcher;
         private final ClassMatcher ignoredRmi;
         private final Mode mode;
+        private final Set<String> loggedRmi;
 
-        Factory(GroupMatcher matcher, JavaClasses javaClasses, Mode mode, ClassMatcher ignoredRmi){
+        Factory(GroupMatcher matcher, JavaClasses javaClasses, Mode mode, ClassMatcher ignoredRmi, Set<String> loggedRmi){
             this.matcher = matcher;
             this.javaClasses = javaClasses;
             this.mode = mode;
             this.ignoredRmi = ignoredRmi;
+            this.loggedRmi = loggedRmi;
             this.componentGraph = new SimpleDirectedGraph<>(DefaultEdge.class);
             fillComponentGraph();
             RmiMatcher rmiMatcher = createMatcherFromGraph();
@@ -99,9 +102,12 @@ class RmiMatcher implements GroupMatcher {
                 Optional<GroupIdentifier> groupIdentifier = matcher.groupIdentifier(javaClass);
                 groupIdentifier.ifPresent(gi -> {
                     if (dependingGroupIdentifier.isPresent()) {
-                        if(gi.getName().contentEquals("buyer.server"))
-                            System.out.println(javaClass);
-                        addEdge(dependingGroupIdentifier.get(), gi);
+                        GroupIdentifier dgi = dependingGroupIdentifier.get();
+                        if (!dgi.equals(gi)) {
+                            if(loggedRmi.contains(gi.getName()))
+                                LogUtils.info("RMI class "  + javaClass);
+                            addEdge(dgi, gi);
+                        }
                     }
                     if(mode == Mode.INSTANTIATIONS)
                         union(javaClass.getConstructorCallsToSelf(), javaClass.getConstructorReferencesToSelf())
@@ -117,18 +123,18 @@ class RmiMatcher implements GroupMatcher {
             JavaClass callingClass = access.getOriginOwner();
             Optional<GroupIdentifier> callingGroupIdentifier = matcher.groupIdentifier(callingClass);
             callingGroupIdentifier.ifPresent(cgi -> {
-                if(cgi.getName().contentEquals("buyer.server"))
-                    System.out.println(access);
-                addEdge(groupIdentifier, cgi);
+                if (!cgi.equals(groupIdentifier)) {
+                    if(loggedRmi.contains(cgi.getName()))
+                        LogUtils.info("RMI access "  + access);
+                    addEdge(groupIdentifier, cgi);
+                }
             });
         }
 
         private void addEdge(GroupIdentifier dependingGroupIdentifier, GroupIdentifier groupIdentifier) {
-            if(! dependingGroupIdentifier.equals(groupIdentifier)) {
-                componentGraph.addVertex(dependingGroupIdentifier);
-                componentGraph.addVertex(groupIdentifier);
-                componentGraph.addEdge(dependingGroupIdentifier, groupIdentifier);
-            }
+            componentGraph.addVertex(dependingGroupIdentifier);
+            componentGraph.addVertex(groupIdentifier);
+            componentGraph.addEdge(dependingGroupIdentifier, groupIdentifier);
         }
 
         private static boolean isRemoteInterface(JavaClass javaClass) {

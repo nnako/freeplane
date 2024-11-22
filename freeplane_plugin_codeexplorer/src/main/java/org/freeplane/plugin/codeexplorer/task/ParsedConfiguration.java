@@ -8,6 +8,7 @@ package org.freeplane.plugin.codeexplorer.task;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +63,9 @@ public class ParsedConfiguration {
     private static final Pattern IGNORED_RMI_PATTERN = Pattern.compile(
             "^\\s*ignore\\s+(?:RMI|rmi)\\s+(" + CLASS_PATTERN + ")\\s*$");
 
+    private static final Pattern LOG_RMI = Pattern.compile(
+            "^\\s*log\\s+(?:RMI|rmi)\\s+(.+?)\\s*$");
+
     private final List<DependencyRule> rules;
     private final ClassMatcher ignoredClasses;
     private final AnnotationMatcher annotationMatcher;
@@ -69,17 +73,20 @@ public class ParsedConfiguration {
     private final List<ClassNameMatcher> groupMatchers;
     private final Optional<RmiMatcher.Mode> rmiMatcherMode;
     private final ClassMatcher ignoredRmi;
+    private final Set<String> loggedRmi;
 
 
 
     public ParsedConfiguration(String dsl) {
         List<DependencyRule> dependencyRules = new ArrayList<>();
         List<String> ignoredClasses = new ArrayList<>();
-        RmiMatcher.Mode rmiMatcherMode = null;
-        List<String> ignoredRmi = new ArrayList<>();
         List<String> importedAnnotations = new ArrayList<>();
         List<String> subpaths = new ArrayList<>();
         List<ClassNameMatcher> groupMatchers = new ArrayList<>();
+        RmiMatcher.Mode rmiMatcherMode = null;
+        List<String> ignoredRmi = new ArrayList<>();
+        Set<String> loggedRmi = new HashSet<>();
+
         String[] dslRules = dsl.split("\\n\\s*");
 
         for (String dslRuleLine : dslRules) {
@@ -114,6 +121,11 @@ public class ParsedConfiguration {
                 rmiMatcherMode = groupRmiMatcher.group(1) != null ? Mode.INSTANTIATIONS : Mode.IMPLEMENTATIONS;
                 continue;
             }
+            Matcher logRmiMatcher = LOG_RMI.matcher(dslRule);
+            if (logRmiMatcher.find()) {
+                loggedRmi.add(logRmiMatcher.group(1));
+                continue;
+            }
             Matcher ignoredRmiMatcher = IGNORED_RMI_PATTERN.matcher(dslRule);
             if (ignoredRmiMatcher.find()) {
                 ignoredRmi.add(ignoredRmiMatcher.group(1));
@@ -146,6 +158,7 @@ public class ParsedConfiguration {
         this.groupMatchers = groupMatchers;
         this.rmiMatcherMode = Optional.ofNullable(rmiMatcherMode);
         this.ignoredRmi = new ClassMatcher(ignoredRmi);
+        this.loggedRmi = loggedRmi;
     }
 
     public DependencyRuleJudge judge() {
@@ -182,7 +195,7 @@ public class ParsedConfiguration {
     public GroupMatcher createGroupMatcher(Set<File> projectLocations, JavaClasses classes) {
         DirectoryMatcher groupMatcher = createDirectoryMatcher(projectLocations);
         return rmiMatcherMode.map(mode ->
-                new RmiMatcher.Factory(groupMatcher, classes, mode, ignoredRmi).createMatcher())
+                new RmiMatcher.Factory(groupMatcher, classes, mode, ignoredRmi, loggedRmi).createMatcher())
             .orElse(groupMatcher);
     }
 }
