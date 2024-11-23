@@ -123,7 +123,7 @@ public class Compat {
 	}
 
 	public static void macAppChanges() {
-		if (!Compat.isMacOsX()) {
+		if (!Compat.isMacOsX() || Compat.isJavaVersionLessThan(Compat.JAVA_VERSION_15)) {
 			return;
 		}
 		try {
