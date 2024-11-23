@@ -210,7 +210,8 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            applyFilter(true);
+            if(getSelectedCondition() != null)
+                applyFilter(true);
         }
 	}
 
