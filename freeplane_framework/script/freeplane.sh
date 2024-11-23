@@ -177,6 +177,9 @@ if [ -z "${freedir}" ]; then
 fi
 
 #--------- Call (at last) Freeplane -------------------------------------
+JAVA_OPTS="-XX:+IgnoreUnrecognizedVMOptions $JAVA_OPTS"
+JAVA_OPTS="-XX:-ProfileExceptionHandlers $JAVA_OPTS"
+
 if [ "${JAVA_TYPE}" != "sun" ]; then
   # OpenJDK(7) fixes (don't use OpenJDK6!!)
   JAVA_OPTS="-Dgnu.java.awt.peer.gtk.Graphics=Graphics2D $JAVA_OPTS"
