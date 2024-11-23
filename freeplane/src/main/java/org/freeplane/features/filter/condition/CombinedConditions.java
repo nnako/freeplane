@@ -97,7 +97,7 @@ abstract class CombinedConditions extends ASelectableCondition implements ICombi
 
     @Override
     protected IconListComponent createIconListComponent(List<Icon> icons) {
-        return new IconListComponent(icons);
+        return new IconListComponent(icons, toString());
     }
 
     @Override
