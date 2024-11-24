@@ -7,7 +7,6 @@ package org.freeplane.view.swing.map;
 
 import java.util.List;
 
-import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.components.IconListComponent;
@@ -21,7 +20,7 @@ public class MapViewIconListComponent extends IconListComponent{
     }
 
     public MapViewIconListComponent(List<TagIcon> icons) {
-        super(icons);
+        super(icons, null);
         setWrapIcons(true);
     }
 

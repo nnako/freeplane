@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.accessibility.Accessible;
+import javax.accessibility.AccessibleContext;
+import javax.accessibility.AccessibleRole;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
@@ -25,10 +28,11 @@ import javax.swing.SwingConstants;
  * IconListComponent is a custom JComponent that displays a list of icons with support for
  * wrapping, alignment, preferred size calculation, zooming, hit detection, and highlighting removed icons.
  */
-public class IconListComponent extends JComponent {
+public class IconListComponent extends JComponent implements Accessible {
     private static final long serialVersionUID = 1L;
 
     private final List<Icon> icons;
+    private final String description;
     private int horizontalAlignment;
     private int verticalAlignment;
     private boolean wrapsIcons;
@@ -39,11 +43,12 @@ public class IconListComponent extends JComponent {
     private IconBounds iconBoundsCache;
     private float currentZoom = 1f;
 
+
     /**
      * Constructs an empty IconListComponent.
      */
     public IconListComponent() {
-        this(Collections.emptyList());
+        this(Collections.emptyList(), null);
     }
 
     /**
@@ -51,8 +56,9 @@ public class IconListComponent extends JComponent {
      *
      * @param icons List of icons to display.
      */
-    public IconListComponent(List<? extends Icon> icons) {
+    public IconListComponent(List<? extends Icon> icons, String description) {
         super();
+        this.description = description;
         this.icons = new ArrayList<>(icons);
         this.horizontalAlignment = SwingConstants.LEFT;
         this.verticalAlignment = SwingConstants.CENTER;
@@ -67,6 +73,10 @@ public class IconListComponent extends JComponent {
      */
     public List<Icon> getIcons() {
         return Collections.unmodifiableList(icons);
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -593,4 +603,29 @@ public class IconListComponent extends JComponent {
                 return rowY;
         }
     }
+
+    @Override
+    public AccessibleContext getAccessibleContext() {
+        if (accessibleContext == null) {
+            accessibleContext = new AccessibleIconListComponent();
+        }
+        return accessibleContext;
+    }
+
+    protected class AccessibleIconListComponent extends AccessibleJComponent {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String getAccessibleName() {
+            return (IconListComponent.this.description != null)
+                ? IconListComponent.this.description
+                : super.getAccessibleName();
+        }
+
+        @Override
+        public AccessibleRole getAccessibleRole() {
+            return AccessibleRole.LABEL;
+        }
+    }
+
 }
