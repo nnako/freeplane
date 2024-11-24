@@ -42,9 +42,9 @@ class SelectCyclesAction extends AFreeplaneAction {
 
 	        Set<CodeNode> cycleNodes = node.findCyclicDependencies();
 	        if(! cycleNodes.isEmpty()) {
-	            DependencySelection dependencySelection = new DependencySelection(selection);
+	            SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
 	            CodeNode[] newSelection = cycleNodes.stream()
-	            .map(dependencySelection::findVisibleAncestorOrSelf)
+	            .map(selectedNodeDependencies::findVisibleAncestorOrSelf)
 	            .toArray(CodeNode[]::new);
 	            selection.replaceSelection(newSelection);
 	        }

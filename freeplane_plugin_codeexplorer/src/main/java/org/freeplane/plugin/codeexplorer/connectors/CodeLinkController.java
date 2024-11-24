@@ -16,6 +16,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,8 +28,6 @@ import javax.swing.JLabel;
 import org.freeplane.core.extension.Configurable;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.Hyperlink;
-import org.freeplane.features.filter.Filter;
-import org.freeplane.features.filter.Filter.FilteredElement;
 import org.freeplane.features.link.ConnectorArrows;
 import org.freeplane.features.link.ConnectorModel;
 import org.freeplane.features.link.ConnectorShape;
@@ -46,9 +45,10 @@ import org.freeplane.plugin.codeexplorer.CodeModeController;
 import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.dependencies.DependencyVerdict;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
-import org.freeplane.plugin.codeexplorer.map.DependencySelection;
+import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
 import org.freeplane.view.swing.map.MapView;
 
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 
 public class CodeLinkController extends LinkController {
@@ -85,8 +85,14 @@ public class CodeLinkController extends LinkController {
         }
     }
 
+    private final CodeConnectorFilter connectorFilter;
+    private ConnectorModel lastCheckedConnector;
+    private boolean isLastCheckedConnectorSelected;
     public CodeLinkController(ModeController modeController) {
         super(modeController);
+        connectorFilter = new CodeConnectorFilter();
+        lastCheckedConnector = null;
+        isLastCheckedConnectorSelected = false;
     }
 
     @Override
@@ -134,19 +140,26 @@ public class CodeLinkController extends LinkController {
     }
 
     private boolean isConnectorSelected(ConnectorModel connector) {
+        if(lastCheckedConnector == connector)
+            return isLastCheckedConnectorSelected;
+        lastCheckedConnector = null;
         Controller controller = Controller.getCurrentController();
         if (controller.getModeController().getModeName() != CodeModeController.MODENAME)
             return false;
         IMapSelection selection = controller.getSelection();
         if(selection == null)
             return false;
-        return isConnectorSelected((CodeConnectorModel)connector, selection);
+        lastCheckedConnector = connector;
+        if(connectorFilter.isActive())
+            return isLastCheckedConnectorSelected = connectorFilter.isFiltered((CodeConnectorModel)connector);
+        else
+            return isLastCheckedConnectorSelected = isConnectorSelected((CodeConnectorModel)connector, selection);
     }
 
     private boolean isConnectorSelected(CodeConnectorModel connector, IMapSelection selection) {
-        CodeNode source = (CodeNode) connector.getSource();
-        CodeNode target = (CodeNode) connector.getTarget();
-        boolean connectorSelected = new DependencySelection(selection).isConnectorSelected(source, target);
+        CodeNode source = connector.getSource();
+        CodeNode target = connector.getTarget();
+        boolean connectorSelected = new SelectedNodeDependencies(selection).isConnectorSelected(source, target);
         return connectorSelected;
     }
 
@@ -207,11 +220,11 @@ public class CodeLinkController extends LinkController {
     public Collection<? extends NodeLinkModel> getLinksTo(NodeModel node, Configurable component) {
         IMapSelection selection = ((MapView)component).getMapSelection();
         if (node.isLeaf() || selection.isFolded(node)) {
-            DependencySelection dependencySelection = new DependencySelection(selection);
+            SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
             CodeNode codeNode = (CodeNode) node;
             Stream<CodeDependency> codeDependencies = codeNode.incomingCodeDependenciesWithKnownOrigins()
-                    .filter(dep -> dependencySelection.getVisibleNode(dep.getTargetClass()) != null);
-            Map<DependencyVerdict, Map<CodeNode, Long>> countedDependencies = countCodeDependencies(codeNode, dependencySelection, codeDependencies, CodeDependency::getOriginClass);
+                    .filter(dep -> selectedNodeDependencies.getVisibleNode(dep.getTargetClass()) != null);
+            Map<DependencyVerdict, Map<CodeNode, Long>> countedDependencies = countCodeDependencies(codeNode, selectedNodeDependencies, codeDependencies, CodeDependency::getOriginClass);
             List<CodeConnectorModel> connectors = countedDependencies.entrySet().stream()
             .flatMap(targetsByVerdict ->
                 targetsByVerdict.getValue().entrySet().stream()
@@ -230,15 +243,15 @@ public class CodeLinkController extends LinkController {
             Configurable component) {
         IMapSelection selection = ((MapView)component).getMapSelection();
         if (node.isLeaf() || selection.isFolded(node)) {
-            DependencySelection dependencySelection = new DependencySelection(selection);
+            SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
             CodeNode codeNode = (CodeNode) node;
             Stream<CodeDependency> codeDependencies = codeNode.outgoingCodeDependenciesWithKnownTargets()
-                    .filter(dep -> dependencySelection.getVisibleNode(dep.getOriginClass()) != null);
-            Map<DependencyVerdict, Map<CodeNode, Long>> countedDependencies = countCodeDependencies(codeNode, dependencySelection, codeDependencies, CodeDependency::getTargetClass);
+                    .filter(dep -> selectedNodeDependencies.getVisibleNode(dep.getOriginClass()) != null);
+            Map<DependencyVerdict, Map<CodeNode, Long>> countedDependencies = countCodeDependencies(codeNode, selectedNodeDependencies, codeDependencies, CodeDependency::getTargetClass);
             List<CodeConnectorModel> connectors = countedDependencies.entrySet().stream()
             .flatMap(targetsByVerdict ->
                 targetsByVerdict.getValue().entrySet().stream()
-                    .map(countedTargets -> createConnector(node, countedTargets.getKey().getID(), targetsByVerdict.getKey(), countedTargets.getValue().intValue()))
+                    .map(countedTargets -> createConnector(codeNode, countedTargets.getKey().getID(), targetsByVerdict.getKey(), countedTargets.getValue().intValue()))
             )
             .collect(Collectors.toList());
 
@@ -249,11 +262,11 @@ public class CodeLinkController extends LinkController {
     }
 
     private Map<DependencyVerdict, Map<CodeNode, Long>> countCodeDependencies(CodeNode node,
-            DependencySelection dependencySelection, Stream<CodeDependency> codeDependencies,
+            SelectedNodeDependencies selectedNodeDependencies, Stream<CodeDependency> codeDependencies,
             Function<CodeDependency, JavaClass> dependencyToJavaClass) {
         Map<DependencyVerdict, Map<CodeNode, Long>> countedDependencies = codeDependencies
                 .map(dep -> new AbstractMap.SimpleEntry<>(dep.dependencyVerdict(),
-                        dependencySelection.getVisibleNode(dependencyToJavaClass.apply(dep))))
+                        selectedNodeDependencies.getVisibleNode(dependencyToJavaClass.apply(dep))))
                 .filter(e -> e.getValue() != null && ! e.getValue().equals(node))
                 .collect(Collectors.groupingBy(
                         Entry::getKey,
@@ -295,12 +308,16 @@ public class CodeLinkController extends LinkController {
     }
 
 
-    private CodeConnectorModel createConnector(NodeModel source, String targetId, DependencyVerdict verdict, int weight) {
+    private CodeConnectorModel createConnector(CodeNode source, String targetId, DependencyVerdict verdict, int weight) {
         NodeModel target = source.getMap().getNodeForID(targetId);
         NodeRelativePath nodeRelativePath = new NodeRelativePath(source, target);
         boolean goesUp = nodeRelativePath.compareNodePositions() > 0;
         return new CodeConnectorModel(source, targetId, weight, verdict, goesUp);
     }
 
-
+    public void updateFilteredDependencies(Set<Dependency> filteredDependencies) {
+        lastCheckedConnector = null;
+        isLastCheckedConnectorSelected = false;
+        connectorFilter.setFilteredDependencies(filteredDependencies);
+    }
 }

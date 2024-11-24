@@ -20,7 +20,9 @@
 package org.freeplane.plugin.codeexplorer.configurator;
 
 import java.awt.Graphics2D;
+import java.util.Collections;
 import java.util.Set;
+
 import javax.swing.JTabbedPane;
 
 import org.freeplane.core.extension.IExtension;
@@ -31,6 +33,7 @@ import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.highlight.HighlightController;
 import org.freeplane.features.highlight.NodeHighlighter;
+import org.freeplane.features.link.LinkController;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.NodeModel;
@@ -38,11 +41,13 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.plugin.codeexplorer.archunit.ArchUnitServer;
 import org.freeplane.plugin.codeexplorer.archunit.ArchitectureViolationsConfiguration;
-import org.freeplane.plugin.codeexplorer.map.DependencySelection;
+import org.freeplane.plugin.codeexplorer.connectors.CodeLinkController;
+import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorer;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorerConfigurations;
 import org.freeplane.plugin.codeexplorer.task.UserDefinedCodeExplorerConfiguration;
 
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 
 /**
@@ -143,19 +148,28 @@ public class CodeProjectController implements IExtension {
 	    hideControlPanel();
 	}
 
+	public Set<Dependency> getFilteredDependencies(){
+	    return codeDependenciesPanel != null ? codeDependenciesPanel.getFilteredDependencies() : Collections.emptySet();
+	}
+
     private boolean isDependencySelectedForNode(NodeModel node) {
         if(selectedClasses == null)
             return false;
         IMapSelection selection = Controller.getCurrentController().getSelection();
         if(selection == null || node.getMap() != selection.getMap())
             return false;
-        DependencySelection dependencySelection = new DependencySelection(selection);
+        SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
         return selectedClasses.stream()
-                .anyMatch(javaClass -> node.equals(dependencySelection.getVisibleNode(javaClass)));
+                .anyMatch(javaClass -> node.equals(selectedNodeDependencies.getVisibleNode(javaClass)));
     }
 
-    public void updateSelectedDependency(final Set<JavaClass> selectedClasses) {
-        this.selectedClasses = selectedClasses;
+    public void updateSelectedDependency(Object source) {
+        if(source == architectureViolationsPanel)
+            this.selectedClasses = architectureViolationsPanel.getSelectedClasses();
+        if(source == codeDependenciesPanel) {
+            ((CodeLinkController) modeController.getExtension(LinkController.class))
+                .updateFilteredDependencies(codeDependenciesPanel.getFilteredDependencies());
+        }
         modeController.getController().getMapViewManager().getMapViewComponent().repaint();
     }
 

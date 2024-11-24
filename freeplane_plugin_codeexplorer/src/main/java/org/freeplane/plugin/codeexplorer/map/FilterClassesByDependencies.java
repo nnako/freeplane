@@ -43,10 +43,10 @@ class FilterClassesByDependencies extends AFreeplaneAction {
 	@Override
     public void actionPerformed(ActionEvent e) {
         IMapSelection selection = Controller.getCurrentController().getSelection();
-        DependencySelection dependencySelection = new DependencySelection(selection);
-        Set<String> dependentNodeIDs = dependencySelection.getSelectedClasses()
+        SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
+        Set<String> dependentNodeIDs = selectedNodeDependencies.getSelectedClasses()
                 .stream()
-                .map(dependencySelection.getMap()::getClassNodeId)
+                .map(selectedNodeDependencies.getMap()::getClassNodeId)
                 .collect(Collectors.toSet());
         if(dependentNodeIDs.isEmpty()) {
             UITools.informationMessage(TextUtils.getRawText("code.no_dependencies_found"));

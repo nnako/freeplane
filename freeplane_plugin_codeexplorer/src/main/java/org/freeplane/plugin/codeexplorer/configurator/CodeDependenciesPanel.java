@@ -50,8 +50,9 @@ import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
-import org.freeplane.plugin.codeexplorer.map.DependencySelection;
+import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
 
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 
 class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IMapSelectionListener, IFreeplanePropertyListener, IMapChangeListener{
@@ -63,6 +64,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private final JTextField filterField;
     private final JTable dependencyViewer;
     private final JLabel countLabel;
+    private final List<Consumer<Object>> dependencySelectionCallbacks;
     private List<CodeDependency> allDependencies;
 
     private class DependenciesWrapper extends AbstractTableModel {
@@ -102,6 +104,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     }
 
     CodeDependenciesPanel() {
+         dependencySelectionCallbacks = new ArrayList<>();
          // Create the top panel for sorting options
          JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -216,6 +219,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
             rowSorter.setRowFilter(dependencyFilter);
         }
+        dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
         scrollSelectedToVisible();
         countLabel.setText("( " + rowSorter.getViewRowCount() + " / " + rowSorter.getModelRowCount() + " )");
     }
@@ -250,11 +254,11 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
 
     private void update(IMapSelection selection) {
-        Set<CodeDependency> selectedDependencies = getSelectedDependencies().collect(Collectors.toSet());
+        Set<CodeDependency> selectedDependencies = getSelectedCodeDependencies().collect(Collectors.toSet());
         int selectedColumn = dependencyViewer.getSelectedColumn();
         this.allDependencies = selection == null || ! (selection.getMap() instanceof CodeMap)
                 ? Collections.emptyList() :
-                    selectedDependencies(new DependencySelection(selection));
+                    selectedDependencies(new SelectedNodeDependencies(selection));
         ((DependenciesWrapper)dependencyViewer.getModel()).fireTableDataChanged();
         updateRowCountLabel();
         if(! selectedDependencies.isEmpty()) {
@@ -267,17 +271,43 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                 SwingUtilities.invokeLater(this::scrollSelectedToVisible);
             }
         }
+        if(isShowing())
+            dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
     }
 
-    private List<CodeDependency> selectedDependencies(DependencySelection dependencySelection) {
-        return dependencySelection.getSelectedDependencies().map(dependencySelection.getMap()::toCodeDependency)
+    private List<CodeDependency> selectedDependencies(SelectedNodeDependencies selectedNodeDependencies) {
+        return selectedNodeDependencies.getSelectedDependencies().map(selectedNodeDependencies.getMap()::toCodeDependency)
         .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private Stream<CodeDependency> getSelectedDependencies() {
+    private Stream<CodeDependency> getSelectedCodeDependencies() {
         return IntStream.of(dependencyViewer.getSelectedRows())
         .map(dependencyViewer::convertRowIndexToModel)
         .mapToObj(allDependencies::get);
+    }
+
+    private Set<Dependency> getSelectedDependencies() {
+        return getSelectedCodeDependencies()
+                .map(CodeDependency::getDependency)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Dependency> getFilteredDependencies() {
+        Set<Dependency> selectedDependencies = getSelectedDependencies();
+        if(! selectedDependencies.isEmpty())
+            return selectedDependencies;
+        else if(dependencyViewer.getRowCount() < allDependencies.size())
+            return getVisibleDependencies();
+        else
+            return Collections.emptySet();
+    }
+
+    private Set<Dependency> getVisibleDependencies() {
+        return IntStream.range(0, dependencyViewer.getRowCount())
+        .map(dependencyViewer::convertRowIndexToModel)
+        .mapToObj(allDependencies::get)
+        .map(CodeDependency::getDependency)
+        .collect(Collectors.toSet());
     }
 
     private void updateRowCountLabel() {
@@ -301,30 +331,23 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
     }
 
-    void addDependencySelectionCallback(Consumer<Set<JavaClass> > listener) {
+    void addDependencySelectionCallback(Consumer<Object > listener) {
         dependencyViewer.getSelectionModel().addListSelectionListener(
                 e -> {
                     if(!e.getValueIsAdjusting())
-                        listener.accept(getSelectedClasses());
+                        listener.accept(this);
                 });
         dependencyViewer.addFocusListener(new FocusAdapter() {
 
             @Override
             public void focusGained(FocusEvent e) {
                 if(! e.isTemporary())
-                    listener.accept(getSelectedClasses());
+                    listener.accept(this);
             }
 
         });
+        dependencySelectionCallbacks.add(listener);
     }
-
-
-    private Set<JavaClass> getSelectedClasses() {
-        return getSelectedDependencies().map(CodeDependency::getDependency)
-                .flatMap(d -> Stream.of(d.getOriginClass(), d.getTargetClass()))
-                .collect(Collectors.toSet());
-    }
-
 
     private String toDisplayedFullName(JavaClass originClass) {
         return CodeNode.findEnclosingNamedClass(originClass).getName().replace('$', '.');

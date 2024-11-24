@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -304,11 +305,11 @@ class ArchitectureViolationsPanel extends JPanel {
         return toolbar;
     }
 
-    void addDependencySelectionCallback(Consumer<Set<JavaClass> > listener) {
+    void addDependencySelectionCallback(Consumer<Object> listener) {
         violationTable.getSelectionModel().addListSelectionListener(
                 e -> {
                     if(!e.getValueIsAdjusting()) {
-                        listener.accept(getSelectedClasses());
+                        listener.accept(this);
                     }
                 });
         violationTable.addFocusListener(new FocusAdapter() {
@@ -316,13 +317,13 @@ class ArchitectureViolationsPanel extends JPanel {
             @Override
             public void focusGained(FocusEvent e) {
                 if(! e.isTemporary())
-                    listener.accept(getSelectedClasses());
+                    listener.accept(this);
             }
 
         });
     }
 
-    private Set<JavaClass> getSelectedClasses() {
+    public Set<JavaClass> getSelectedClasses() {
         if(exploredTestResultIndex == -1 || exploredTestResultIndex != selectedTestResultIndex)
             return Collections.emptySet();
 
