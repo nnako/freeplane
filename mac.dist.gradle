@@ -9,8 +9,6 @@ if (macAppPropertiesFile.exists())
     macAppProperties.load(new FileInputStream(macAppPropertiesFile))
 }
 
-task macDist {}
-
 String macosapp_input_dir
 
 task macosapp_extractzip {
