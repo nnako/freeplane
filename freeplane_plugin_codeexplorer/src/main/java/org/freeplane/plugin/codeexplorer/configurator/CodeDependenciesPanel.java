@@ -3,6 +3,7 @@ package org.freeplane.plugin.codeexplorer.configurator;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ import javax.swing.table.TableRowSorter;
 
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.IMapSelection;
@@ -64,14 +67,13 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private static final String[] COLUMN_NAMES = new String[]{"Verdict", "Origin", "Target","Dependency"};
 
     private static final long serialVersionUID = 1L;
-    private static final Icon filterIcon = ResourceController.getResourceController().getIcon("filterDependencyIncormation.icon");
     private final JTextField filterField;
     private final JTable dependencyViewer;
     private final JLabel countLabel;
     private final List<Consumer<Object>> dependencySelectionCallbacks;
     private List<CodeDependency> allDependencies;
 
-    private JButton filterButton;
+    private AFreeplaneAction filterAction;
 
     private class DependenciesWrapper extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
@@ -109,14 +111,14 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
     }
 
-    CodeDependenciesPanel() {
-         dependencySelectionCallbacks = new ArrayList<>();
+    CodeDependenciesPanel(AFreeplaneAction filterAction) {
+         this.filterAction = filterAction;
+        dependencySelectionCallbacks = new ArrayList<>();
          // Create the top panel for sorting options
          JPanel topPanel = new JPanel(new BorderLayout());
 
-         filterButton = new JButton(filterIcon);
+         JButton filterButton = TranslatedElementFactory.createButtonWithIcon(filterAction);
          filterButton.setEnabled(false);
-         filterButton.addActionListener(new FilterClassesByDependencies(this::getSelectedClasses));
          countLabel = new JLabel();
          final int countLabelMargin = (int) (UITools.FONT_SCALE_FACTOR * 10);
          Box filterBox = Box.createHorizontalBox();
@@ -245,7 +247,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
         dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
         scrollSelectedToVisible();
-        updateRowCountLabel();
+        updateRowCountLabelAndFilterAction();
     }
 
     private void updateColumn(TableColumnModel columns, int index, int columnWidth, TableCellRenderer cellRenderer) {
@@ -285,7 +287,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                 ? Collections.emptyList() :
                     selectedDependencies(new SelectedNodeDependencies(selection));
         ((DependenciesWrapper)dependencyViewer.getModel()).fireTableDataChanged();
-        updateRowCountLabel();
+        updateRowCountLabelAndFilterAction();
         if(! selectedDependencies.isEmpty()) {
             IntStream.range(0, allDependencies.size())
             .filter(i -> selectedDependencies.contains(allDependencies.get(i)))
@@ -327,7 +329,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
             return Collections.emptySet();
     }
 
-    private Set<JavaClass> getSelectedClasses() {
+    public Set<JavaClass> getSelectedClasses() {
         return getFilteredDependencies().stream()
                 .flatMap(d -> Stream.of(d.getOriginClass(), d.getTargetClass()))
                 .collect(Collectors.toSet());
@@ -341,11 +343,18 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         .collect(Collectors.toSet());
     }
 
-    private void updateRowCountLabel() {
+    private void updateRowCountLabelAndFilterAction() {
         int rowCount = dependencyViewer.getRowCount();
         int dependencyCount = allDependencies.size();
         countLabel.setText("( " + rowCount + " / " + dependencyCount + " )");
-        filterButton.setEnabled(rowCount > 0 && rowCount < dependencyCount);
+        enableFilterAction();
+    }
+    private void enableFilterAction() {
+        int rowCount = dependencyViewer.getRowCount();
+        int dependencyCount = allDependencies.size();
+        int selectedRowCount = dependencyViewer.getSelectedRowCount();
+        filterAction.setEnabled(rowCount > 0 && rowCount < dependencyCount
+                || selectedRowCount > 0 && selectedRowCount  < dependencyCount);
     }
 
     private void scrollSelectedToVisible() {
@@ -368,8 +377,10 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     void addDependencySelectionCallback(Consumer<Object > listener) {
         dependencyViewer.getSelectionModel().addListSelectionListener(
                 e -> {
-                    if(!e.getValueIsAdjusting())
+                    if(!e.getValueIsAdjusting()) {
                         listener.accept(this);
+                        enableFilterAction();
+                    }
                 });
         dependencyViewer.addFocusListener(new FocusAdapter() {
 

@@ -17,6 +17,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
 
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.LabelAndMnemonicSetter;
 import org.freeplane.core.ui.components.JAutoToggleButton;
 import org.freeplane.core.util.TextUtils;
@@ -104,7 +105,10 @@ public class TranslatedElementFactory {
 		TranslatedElement.TOOLTIP.setKey(component, labelKey);
 	}
 
-	public static JButton createButtonWithIcon(Action action, final String iconKey, final String tooltipKey) {
+    public static JButton createButtonWithIcon(AFreeplaneAction action) {
+        return createButtonWithIcon(action, action.getIconKey(), action.getTextKey());
+    }
+    public static JButton createButtonWithIcon(Action action, final String iconKey, final String tooltipKey) {
 		final Icon icon = ResourceController.getResourceController().getImageIcon(iconKey);
 		final JButton button;
 		if (action == null)

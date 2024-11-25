@@ -62,6 +62,7 @@ public class CodeProjectController implements IExtension {
     private CodeExplorerConfigurations explorerConfigurations;
     private final ArchUnitServer archUnitServer;
     private ArchitectureViolationsPanel architectureViolationsPanel;
+    private FilterClassesBySelectedDependencies filterClassesBySelectedDependencies;
     /**
 	 * @param modeController
 	 */
@@ -92,6 +93,8 @@ public class CodeProjectController implements IExtension {
         modeController.addAction(new DeleteLocationsAction(this));
         modeController.addAction(new RunAnalysisAction(this));
         modeController.addAction(new SetBooleanPropertyAction(ArchUnitServer.ARCHUNIT_SERVER_ENABLED_PROPERTY));
+        filterClassesBySelectedDependencies = new FilterClassesBySelectedDependencies();
+        modeController.addAction(filterClassesBySelectedDependencies);
 
 	}
 
@@ -102,7 +105,8 @@ public class CodeProjectController implements IExtension {
         configurator = new CodeExplorerConfigurator(this);
         informationPanel.addTab(TextUtils.getText("code.configurations"), configurator);
 
-        codeDependenciesPanel = new CodeDependenciesPanel();
+        codeDependenciesPanel = new CodeDependenciesPanel(filterClassesBySelectedDependencies);
+        filterClassesBySelectedDependencies.setSelectedClassesSupplier(codeDependenciesPanel::getSelectedClasses);
         codeDependenciesPanel.addDependencySelectionCallback(this::updateSelectedDependency);
         informationPanel.addTab(TextUtils.getText("code.dependencies"), codeDependenciesPanel);
 
@@ -127,6 +131,7 @@ public class CodeProjectController implements IExtension {
         configurator = null;
         codeDependenciesPanel = null;
         selectedClasses = null;
+        filterClassesBySelectedDependencies.setSelectedClassesSupplier(null);
     }
 
     public void startupController() {

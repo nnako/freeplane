@@ -89,6 +89,7 @@
 			<Entry name="SetBooleanPropertyAction.code_showOutsideDependencies" />
 			<Entry builder="separator" />
 			<Entry name="code.FilterClassesByDependencies" />
+			<Entry name="code.FilterClassesBySelectedDependencies" />
 			<Entry builder="separator" />
 			<Entry name="code.ShowDependingNodesAction.INHERITING.NO_RECURSION" />
 			<Entry name="code.ShowDependingNodesAction.INHERITED.NO_RECURSION" />
