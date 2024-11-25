@@ -132,21 +132,21 @@ public class CodeMapController extends MapController implements CodeExplorer{
         loadingHintMap.addExtension(new LoadedMap(projectMap));
         WeakReference<CodeMap> oldMapReference = new WeakReference<CodeMap>(oldMap);
         JavaClasses oldImportedClasses;
-        if(! reloadCodebase && (oldMap.getRootNode() instanceof ProjectRootNode)) {
-            oldImportedClasses = ((ProjectRootNode)oldMap.getRootNode()).getImportedClasses();
+        if(! reloadCodebase && (oldMap.getRootNode() instanceof ProjectNode)) {
+            oldImportedClasses = ((ProjectNode)oldMap.getRootNode()).getImportedClasses();
         }
         else
             oldImportedClasses = null;
         oldMap = null;
         classImportService.execute(() -> {
 
-            ProjectRootNode projectRoot = null;
+            ProjectNode projectRoot = null;
             CodeMap nextMap = null;
             try {
                 JavaClasses importedClasses = oldImportedClasses != null ? oldImportedClasses :codeExplorerConfiguration.importClasses();
                 if(LoadedMap.containsProjectMap(loadingHintMap, projectMap)) {
                     GroupMatcher groupMatcher = codeExplorerConfiguration.createGroupMatcher(importedClasses);
-                    projectRoot = ProjectRootNode.asMapRoot(codeExplorerConfiguration.getProjectName(),
+                    projectRoot = ProjectNode.asMapRoot(codeExplorerConfiguration.getProjectName(),
                             projectMap, importedClasses, groupMatcher);
 
                     projectMap.setJudge(codeExplorerConfiguration.getDependencyJudge());

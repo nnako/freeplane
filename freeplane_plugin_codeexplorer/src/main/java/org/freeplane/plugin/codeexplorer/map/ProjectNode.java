@@ -34,10 +34,10 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaPackage;
 import com.tngtech.archunit.core.domain.properties.HasName;
 
-class ProjectRootNode extends CodeNode implements GroupFinder{
+class ProjectNode extends CodeNode implements GroupFinder{
     static final String UI_ICON_NAME = "code_project";
     static {
-        IconStoreFactory.INSTANCE.createStateIcon(ProjectRootNode.UI_ICON_NAME, "code/homeFolder.svg");
+        IconStoreFactory.INSTANCE.createStateIcon(ProjectNode.UI_ICON_NAME, "code/homeFolder.svg");
     }
     private static final Entry<Integer, String> UNKNOWN = new AbstractMap.SimpleEntry<>(-1, ":unknown:");
     private final JavaPackage rootPackage;
@@ -47,15 +47,15 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
     private final JavaClasses classes;
     private final long classCount;
     private final GroupMatcher groupMatcher;
-    static ProjectRootNode asMapRoot(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        ProjectRootNode projectRootNode = new ProjectRootNode(projectName, ":projectRoot:", map, classes, groupMatcher);
-        map.setRoot(projectRootNode);
-        if(projectRootNode.getChildCount() > 20)
-            projectRootNode.getChildren()
+    static ProjectNode asMapRoot(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
+        ProjectNode projectNode = new ProjectNode(projectName, ":projectRoot:", map, classes, groupMatcher);
+        map.setRoot(projectNode);
+        if(projectNode.getChildCount() > 20)
+            projectNode.getChildren()
                 .forEach(node -> ((CodeNode)node).memoizeCodeDependencies());
-        return projectRootNode;
+        return projectNode;
     }
-    private ProjectRootNode(String projectName, String id, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
+    private ProjectNode(String projectName, String id, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
         super(map, 0);
         this.classes = classes;
         this.groupMatcher = groupMatcher;
@@ -102,7 +102,7 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
                 .parallel()
                 .map(e ->
                     groupMatcher.subgroupMatcher(e.getKey()).map(subgroupMatcher ->
-                     (CodeNode) new ProjectRootNode(e.getValue().getValue(), ":subproject:" + e.getKey() + ":", getMap(), classes, subgroupMatcher))
+                     (CodeNode) new ProjectNode(e.getValue().getValue(), ":subproject:" + e.getKey() + ":", getMap(), classes, subgroupMatcher))
                     .orElseGet(() ->
                     new PackageNode(rootPackage, getMap(), e.getValue().getValue(), e.getValue().getKey().intValue(), true)))
                 .collect(Collectors.toList());
