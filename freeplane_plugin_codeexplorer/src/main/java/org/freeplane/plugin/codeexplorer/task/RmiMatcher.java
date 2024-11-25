@@ -170,10 +170,10 @@ class RmiMatcher implements GroupMatcher {
 
     @Override
     public Optional<MatchingCriteria> matchingCriteria(JavaClass originClass, JavaClass targetClass){
-        GroupIdentifier originIdentifier = rmiClasses.get(originClass);
+        GroupIdentifier originIdentifier = rmiClasses.get(CodeNode.findEnclosingNamedClass(originClass));
         if(originIdentifier == null)
             return Optional.empty();
-        GroupIdentifier targetIdentifier = rmiClasses.get(targetClass);
+        GroupIdentifier targetIdentifier = rmiClasses.get(CodeNode.findEnclosingNamedClass(targetClass));
         if(targetIdentifier == null)
             return Optional.empty();
         return ! originIdentifier.equals(targetIdentifier) ? Optional.of(MatchingCriteria.RMI) : Optional.empty();

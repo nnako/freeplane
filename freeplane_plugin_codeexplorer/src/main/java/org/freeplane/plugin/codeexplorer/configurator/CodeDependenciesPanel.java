@@ -16,8 +16,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,6 +52,7 @@ import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
+import org.freeplane.plugin.codeexplorer.map.FilterClassesByDependencies;
 import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
 import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 
@@ -67,6 +70,8 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private final JLabel countLabel;
     private final List<Consumer<Object>> dependencySelectionCallbacks;
     private List<CodeDependency> allDependencies;
+
+    private JButton filterButton;
 
     private class DependenciesWrapper extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
@@ -109,14 +114,19 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
          // Create the top panel for sorting options
          JPanel topPanel = new JPanel(new BorderLayout());
 
-         // Create a box to hold the components that should be aligned to the left
-         countLabel = new JLabel(filterIcon);
+         filterButton = new JButton(filterIcon);
+         filterButton.setEnabled(false);
+         filterButton.addActionListener(new FilterClassesByDependencies(this::getSelectedClasses));
+         countLabel = new JLabel();
          final int countLabelMargin = (int) (UITools.FONT_SCALE_FACTOR * 10);
-         countLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, countLabelMargin));
-         countLabel.setIconTextGap(countLabelMargin / 2);
+         Box filterBox = Box.createHorizontalBox();
+         filterBox.add(filterButton);
+         filterBox.add(Box.createHorizontalStrut(countLabelMargin));
+         filterBox.add(countLabel);
+         filterBox.add(Box.createHorizontalStrut(countLabelMargin));
 
          // Add the box of left-aligned components to the top panel at the WEST
-         topPanel.add(countLabel, BorderLayout.WEST);
+         topPanel.add(filterBox, BorderLayout.WEST);
 
          // Configure filterField to expand and fill the remaining space
          filterField = new JTextField();
@@ -235,8 +245,9 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
         dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
         scrollSelectedToVisible();
-        countLabel.setText("( " + rowSorter.getViewRowCount() + " / " + rowSorter.getModelRowCount() + " )");
+        updateRowCountLabel();
     }
+
     private void updateColumn(TableColumnModel columns, int index, int columnWidth, TableCellRenderer cellRenderer) {
         int scaledWidth = (int) (columnWidth*UITools.FONT_SCALE_FACTOR);
         TableColumn columnModel = columns.getColumn(index);
@@ -316,6 +327,12 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
             return Collections.emptySet();
     }
 
+    private Set<JavaClass> getSelectedClasses() {
+        return getFilteredDependencies().stream()
+                .flatMap(d -> Stream.of(d.getOriginClass(), d.getTargetClass()))
+                .collect(Collectors.toSet());
+    }
+
     private Set<Dependency> getVisibleDependencies() {
         return IntStream.range(0, dependencyViewer.getRowCount())
         .map(dependencyViewer::convertRowIndexToModel)
@@ -325,7 +342,10 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     }
 
     private void updateRowCountLabel() {
-        countLabel.setText("( " + dependencyViewer.getRowCount() + " / " + allDependencies.size() + " )");
+        int rowCount = dependencyViewer.getRowCount();
+        int dependencyCount = allDependencies.size();
+        countLabel.setText("( " + rowCount + " / " + dependencyCount + " )");
+        filterButton.setEnabled(rowCount > 0 && rowCount < dependencyCount);
     }
 
     private void scrollSelectedToVisible() {

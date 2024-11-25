@@ -20,7 +20,10 @@
 package org.freeplane.plugin.codeexplorer.map;
 
 import java.awt.event.ActionEvent;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.freeplane.core.ui.AFreeplaneAction;
@@ -33,20 +36,29 @@ import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.mode.Controller;
 
-@SuppressWarnings("serial")
-class FilterClassesByDependencies extends AFreeplaneAction {
+import com.tngtech.archunit.core.domain.JavaClass;
 
-	public FilterClassesByDependencies() {
-	    super("code.FilterClassesByDependencies");
+@SuppressWarnings("serial")
+public class FilterClassesByDependencies extends AFreeplaneAction {
+
+    private final Supplier<Collection<JavaClass>> selectedClassesSupplier;
+
+    public FilterClassesByDependencies() {
+        this(FilterClassesByDependencies::getSelectedClasses);
+    }
+
+    public FilterClassesByDependencies(Supplier<Collection<JavaClass>> selectedClassesSupplier) {
+        super("code.FilterClassesByDependencies");
+        this.selectedClassesSupplier = selectedClassesSupplier;
     }
 
 	@Override
     public void actionPerformed(ActionEvent e) {
         IMapSelection selection = Controller.getCurrentController().getSelection();
-        SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
-        Set<String> dependentNodeIDs = selectedNodeDependencies.getSelectedClasses()
+        Collection<JavaClass> selectedClasses = selectedClassesSupplier.get();
+        Set<String> dependentNodeIDs = selectedClasses
                 .stream()
-                .map(selectedNodeDependencies.getMap()::getClassNodeId)
+                .map(((CodeMap)selection.getMap())::getClassNodeId)
                 .collect(Collectors.toSet());
         if(dependentNodeIDs.isEmpty()) {
             UITools.informationMessage(TextUtils.getRawText("code.no_dependencies_found"));
@@ -63,4 +75,11 @@ class FilterClassesByDependencies extends AFreeplaneAction {
         }
 
 	}
+
+    private static Collection<JavaClass> getSelectedClasses() {
+        IMapSelection selection = Controller.getCurrentController().getSelection();
+        SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
+        List<JavaClass> selectedClasses = selectedNodeDependencies.getSelectedClasses();
+        return selectedClasses;
+    }
 }
