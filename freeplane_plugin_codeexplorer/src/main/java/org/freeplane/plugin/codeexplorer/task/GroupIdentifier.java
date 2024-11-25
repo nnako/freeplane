@@ -36,4 +36,8 @@ public class GroupIdentifier {
         GroupIdentifier other = (GroupIdentifier) obj;
         return Objects.equals(id, other.id);
     }
+    @Override
+    public String toString() {
+        return "GroupIdentifier [id=" + id + ", name=" + name + "]";
+    }
 }

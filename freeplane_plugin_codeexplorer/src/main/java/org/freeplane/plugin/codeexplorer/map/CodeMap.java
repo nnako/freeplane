@@ -109,7 +109,7 @@ public class CodeMap extends MMapModel {
     }
 
     public int groupIndexOf(JavaClass javaClass) {
-        return groupFinder.groupIndexOf(javaClass);
+        return groupFinder.projectIndexOf(javaClass);
     }
 
     public int groupIndexOf(String groupId) {

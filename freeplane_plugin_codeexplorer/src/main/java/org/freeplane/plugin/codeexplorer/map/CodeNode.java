@@ -99,14 +99,14 @@ public abstract class CodeNode extends NodeModel {
     }
 
     private boolean isTargetSourceKnown(Dependency dep) {
-        return isKnown(dep.getTargetClass());
+        return belongsToMap(dep.getTargetClass());
     }
 
     private boolean isOriginSourceKnown(Dependency dep) {
-        return isKnown(dep.getOriginClass());
+        return belongsToMap(dep.getOriginClass());
     }
 
-    public boolean isKnown(JavaClass javaClass) {
+    public boolean belongsToMap(JavaClass javaClass) {
         return getMap().isKnown(javaClass);
     }
 
@@ -203,11 +203,11 @@ public abstract class CodeNode extends NodeModel {
     }
 
     private boolean validClassBelongsToSameGroup(JavaClass javaClass) {
-        int anotherGroupIndex = groupIndexOf(javaClass);
+        int anotherGroupIndex = projectIndexOf(javaClass);
         return anotherGroupIndex == groupIndex;
     }
 
-    int groupIndexOf(JavaClass javaClass) {
+    int projectIndexOf(JavaClass javaClass) {
         return getMap().groupIndexOf(javaClass);
     }
 
@@ -265,14 +265,14 @@ public abstract class CodeNode extends NodeModel {
     Stream<JavaClass> getInheriting(){
         return getClasses()
                 .flatMap(javaClass -> javaClass.getSubclasses().stream())
-                .filter(this::isKnown);
+                .filter(this::belongsToMap);
     }
     Stream<JavaClass> getInherited(){
         return getClasses()
                 .flatMap(javaClass -> Stream.concat(
                         javaClass.getRawInterfaces().stream(),
                         javaClass.getRawSuperclass().map(Stream::of).orElse(Stream.empty())))
-                .filter(this::isKnown);
+                .filter(this::belongsToMap);
     }
 
     @Override

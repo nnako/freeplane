@@ -16,7 +16,7 @@ interface GroupFinder {
     GroupFinder EMPTY = new GroupFinder() {
 
         @Override
-        public int groupIndexOf(JavaClass javaClass) {
+        public int projectIndexOf(JavaClass javaClass) {
             return -1;
         }
 
@@ -51,7 +51,7 @@ interface GroupFinder {
         }
     };
     boolean isKnown(JavaClass javaClass);
-    int groupIndexOf(JavaClass javaClass);
+    int projectIndexOf(JavaClass javaClass);
     int groupIndexOf(String groupId);
     String getIdByIndex(int index);
     Stream<JavaClass> allClasses();

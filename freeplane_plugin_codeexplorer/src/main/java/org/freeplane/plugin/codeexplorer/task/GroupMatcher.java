@@ -13,6 +13,11 @@ import com.tngtech.archunit.core.domain.JavaClass;
 public interface GroupMatcher {
     public enum MatchingCriteria{RMI}
     Optional<GroupIdentifier> groupIdentifier(JavaClass javaClass);
+
+    default Optional<GroupIdentifier> projectIdentifier(JavaClass javaClass) {
+        return groupIdentifier(javaClass);
+    }
+
     default boolean belongsToGroup(JavaClass javaClass) {
         return groupIdentifier(javaClass).isPresent();
     }

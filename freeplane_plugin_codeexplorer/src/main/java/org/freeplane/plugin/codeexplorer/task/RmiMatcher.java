@@ -162,6 +162,11 @@ class RmiMatcher implements GroupMatcher {
     }
 
     @Override
+    public Optional<GroupIdentifier> projectIdentifier(JavaClass javaClass) {
+        return matcher.groupIdentifier(javaClass);
+    }
+
+    @Override
     public boolean belongsToGroup(JavaClass javaClass) {
         return matcher.belongsToGroup(javaClass);
     }

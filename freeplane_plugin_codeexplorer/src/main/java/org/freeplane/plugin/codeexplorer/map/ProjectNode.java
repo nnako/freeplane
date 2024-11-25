@@ -8,12 +8,12 @@ package org.freeplane.plugin.codeexplorer.map;
 import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,7 +41,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
     }
     private static final Entry<Integer, String> UNKNOWN = new AbstractMap.SimpleEntry<>(-1, ":unknown:");
     private final JavaPackage rootPackage;
-    private final Map<String, Map.Entry<Integer, String>> groupsById;
+    private final Map<String, Map.Entry<Integer, String>> projectIdsByLocation;
     private final String[] idBySubrojectIndex;
     private final Set<String> badLocations;
     private final JavaClasses classes;
@@ -56,33 +56,33 @@ class ProjectNode extends CodeNode implements GroupFinder{
         return projectNode;
     }
     private ProjectNode(String projectName, String id, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        super(map, 0);
+        this(projectName, id, map, 0, classes, groupMatcher, new ConcurrentHashMap<>());
+    }
+    private ProjectNode(String projectName, String id, CodeMap map, int groupIndex, JavaClasses classes, GroupMatcher groupMatcher, Map<String, Map.Entry<Integer, String>> groupIdsByLocation) {
+        super(map, groupIndex);
         this.classes = classes;
         this.groupMatcher = groupMatcher;
         this.rootPackage = classes.getDefaultPackage();
+        this.projectIdsByLocation = groupIdsByLocation;
         setID(id);
 
-        groupsById = new LinkedHashMap<>();
-        classes.stream()
-        .map(groupMatcher::groupIdentifier)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach(this::addLocation);
+        if(groupIndex == 0) {
+            classes.stream()
+            .map(groupMatcher::projectIdentifier)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .forEach(this::addLocation);
+            map.setGroupFinder(this);
+        }
         badLocations = new HashSet<>();
-        map.setGroupFinder(this);
-        initializeChildNodes();
+        initializeChildNodes(map);
         classCount = super.getChildrenInternal().stream()
                 .map(CodeNode.class::cast)
                 .mapToLong(CodeNode::getClassCount)
                 .sum();
         setText(projectName + formatClassCount(classCount));
-        final CodeExplorerConfiguration configuration = map.getConfiguration();
-        if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
-            ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
-            .forEach(this::addDeletedLocation);
-        }
-        idBySubrojectIndex = new String[groupsById.size()];
-        groupsById.entrySet().forEach(e -> idBySubrojectIndex[e.getValue().getKey()] = e.getKey());
+        idBySubrojectIndex = new String[groupIdsByLocation.size()];
+        groupIdsByLocation.entrySet().forEach(e -> idBySubrojectIndex[e.getValue().getKey()] = e.getKey());
     }
     private void addDeletedLocation(String location) {
         final Entry<Integer, String> locationEntry = addLocation(new GroupIdentifier(location, location));
@@ -92,35 +92,43 @@ class ProjectNode extends CodeNode implements GroupFinder{
     }
 
     private Entry<Integer, String> addLocation(GroupIdentifier identifier) {
-        return groupsById.computeIfAbsent(identifier.getId(),
-                key -> new AbstractMap.SimpleEntry<>(groupsById.size(), identifier.getName()));
+        return projectIdsByLocation.computeIfAbsent(identifier.getId(),
+                key -> new AbstractMap.SimpleEntry<>(projectIdsByLocation.size(), identifier.getName()));
     }
 
-    private void initializeChildNodes() {
+    private void initializeChildNodes(CodeMap map) {
+        Set<GroupIdentifier> groups =
+        classes.stream()
+        .map(groupMatcher::groupIdentifier)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(Collectors.toSet());
         List<NodeModel> children = super.getChildrenInternal();
-        List<CodeNode> nodes = groupsById.entrySet().stream()
+        Map<Integer, CodeNode> nodes = groups.stream()
                 .parallel()
-                .map(e ->
-                    groupMatcher.subgroupMatcher(e.getKey()).map(subgroupMatcher ->
-                     (CodeNode) new ProjectNode(e.getValue().getValue(), ":subproject:" + e.getKey() + ":", getMap(), classes, subgroupMatcher))
+                .map(gi ->
+                    groupMatcher.subgroupMatcher(gi.getId()).map(subgroupMatcher ->
+                     (CodeNode) new ProjectNode(gi.getName(), ":subproject:" + gi.getId() + ":", map, projectIdsByLocation.get(gi.getId()).getKey(), classes, subgroupMatcher, projectIdsByLocation))
                     .orElseGet(() ->
-                    new PackageNode(rootPackage, getMap(), e.getValue().getValue(), e.getValue().getKey().intValue(), true)))
-                .collect(Collectors.toList());
+                    new PackageNode(rootPackage, getMap(), gi.getName(), projectIdsByLocation.get(gi.getId()).getKey(), true)))
+                .collect(Collectors.toMap(x -> x.groupIndex, x -> x));
         GraphNodeSort<Integer> childNodes = new GraphNodeSort<>();
-        Integer[] subrojectIndices = IntStream.range(0, groupsById.size())
+        Integer[] subrojectIndices = IntStream.range(0, projectIdsByLocation.size())
                 .mapToObj(Integer::valueOf)
                 .toArray(Integer[]::new);
-
-        nodes
+        nodes.values()
         .stream()
         .filter(node ->node.getClassCount() > 0)
         .forEach(node -> {
-            childNodes.addNode(subrojectIndices[node.groupIndex]);
+            childNodes.addNode(node.groupIndex);
             DistinctTargetDependencyFilter filter = new DistinctTargetDependencyFilter();
             Map<Integer, Long> referencedGroups = node.getOutgoingDependenciesWithKnownTargets()
                     .map(filter::knownDependency)
                     .map(Dependency::getTargetClass)
-                    .collect(Collectors.groupingBy(t -> subrojectIndices[groupIndexOf(t)], Collectors.counting()));
+                    .mapToInt(t -> groupIndexOf(t))
+                    .filter(i -> i >= 0)
+                    .mapToObj(i -> subrojectIndices[i])
+                    .collect(Collectors.groupingBy(i -> i, Collectors.counting()));
             referencedGroups.entrySet()
             .forEach(e -> childNodes.addEdge(subrojectIndices[node.groupIndex], e.getKey(), e.getValue()));
         });
@@ -143,6 +151,11 @@ class ProjectNode extends CodeNode implements GroupFinder{
         }
         for(NodeModel child: children)
             ((CodeNode) child).setInitialFoldingState();
+        final CodeExplorerConfiguration configuration = map.getConfiguration();
+        if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
+            ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
+            .forEach(this::addDeletedLocation);
+        }
 
     }
 
@@ -153,13 +166,27 @@ class ProjectNode extends CodeNode implements GroupFinder{
 
     @Override
     Stream<Dependency> getOutgoingDependencies() {
-        return Stream.empty();
+        if(isRoot())
+            return Stream.empty();
+        return getChildren()
+            .stream()
+            .map(CodeNode.class::cast)
+            .flatMap(CodeNode::getOutgoingDependencies)
+            .filter(d -> belongsToMap(d.getTargetClass()))
+            .filter(d -> ! getMap().getNodeByClass(d.getTargetClass()).isDescendantOf(this));
 
     }
 
     @Override
     Stream<Dependency> getIncomingDependencies() {
-        return Stream.empty();
+        if(isRoot())
+            return Stream.empty();
+        return getChildren()
+                .stream()
+                .map(CodeNode.class::cast)
+                .flatMap(CodeNode::getIncomingDependencies)
+                .filter(d -> belongsToMap(d.getOriginClass()))
+                .filter(d -> ! getMap().getNodeByClass(d.getOriginClass()).isDescendantOf(this));
     }
 
     @Override
@@ -173,10 +200,21 @@ class ProjectNode extends CodeNode implements GroupFinder{
     }
 
     @Override
-    public int groupIndexOf(JavaClass javaClass) {
+    public int projectIndexOf(JavaClass javaClass) {
+        Optional<String> classSourceLocation = groupMatcher.projectIdentifier(javaClass).map(GroupIdentifier::getId);
+        Optional <Map.Entry<Integer, String>> groupEntry = classSourceLocation
+                .map( s -> projectIdsByLocation.getOrDefault(s, UNKNOWN));
+
+        if(groupEntry.filter(UNKNOWN::equals).isPresent() && badLocations.add(classSourceLocation.get())) {
+            LogUtils.info("Unknown class source location " + javaClass.getSource().get().getUri());
+         }
+        return groupEntry.orElse(UNKNOWN).getKey().intValue();
+    }
+
+    private int groupIndexOf(JavaClass javaClass) {
         Optional<String> classSourceLocation = groupMatcher.groupIdentifier(javaClass).map(GroupIdentifier::getId);
-        Optional <Entry<Integer, String>> groupEntry = classSourceLocation
-                .map( s -> groupsById.getOrDefault(s, UNKNOWN));
+        Optional <Map.Entry<Integer, String>> groupEntry = classSourceLocation
+                .map( s -> projectIdsByLocation.getOrDefault(s, UNKNOWN));
 
         if(groupEntry.filter(UNKNOWN::equals).isPresent() && badLocations.add(classSourceLocation.get())) {
             LogUtils.info("Unknown class source location " + javaClass.getSource().get().getUri());
@@ -186,7 +224,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
 
     @Override
     public int groupIndexOf(String location) {
-        return groupsById.getOrDefault(location, UNKNOWN).getKey().intValue();
+        return projectIdsByLocation.getOrDefault(location, UNKNOWN).getKey().intValue();
     }
 
     @Override
