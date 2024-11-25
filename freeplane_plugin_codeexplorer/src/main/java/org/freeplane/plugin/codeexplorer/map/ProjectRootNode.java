@@ -48,19 +48,19 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
     private final long classCount;
     private final GroupMatcher groupMatcher;
     static ProjectRootNode asMapRoot(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        ProjectRootNode projectRootNode = new ProjectRootNode(projectName, map, classes, groupMatcher);
+        ProjectRootNode projectRootNode = new ProjectRootNode(projectName, ":projectRoot:", map, classes, groupMatcher);
         map.setRoot(projectRootNode);
         if(projectRootNode.getChildCount() > 20)
             projectRootNode.getChildren()
                 .forEach(node -> ((CodeNode)node).memoizeCodeDependencies());
         return projectRootNode;
     }
-    private ProjectRootNode(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
+    private ProjectRootNode(String projectName, String id, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
         super(map, 0);
         this.classes = classes;
         this.groupMatcher = groupMatcher;
         this.rootPackage = classes.getDefaultPackage();
-        setID("projectRoot");
+        setID(id);
 
         groupsById = new LinkedHashMap<>();
         classes.stream()
@@ -72,8 +72,8 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
         map.setGroupFinder(this);
         initializeChildNodes();
         classCount = super.getChildrenInternal().stream()
-                .map(PackageNode.class::cast)
-                .mapToLong(PackageNode::getClassCount)
+                .map(CodeNode.class::cast)
+                .mapToLong(CodeNode::getClassCount)
                 .sum();
         setText(projectName + formatClassCount(classCount));
         final CodeExplorerConfiguration configuration = map.getConfiguration();
@@ -98,10 +98,13 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
 
     private void initializeChildNodes() {
         List<NodeModel> children = super.getChildrenInternal();
-        List<PackageNode> nodes = groupsById.values().stream()
+        List<CodeNode> nodes = groupsById.entrySet().stream()
                 .parallel()
                 .map(e ->
-                    new PackageNode(rootPackage, getMap(), e.getValue(), e.getKey().intValue(), true))
+                    groupMatcher.subgroupMatcher(e.getKey()).map(subgroupMatcher ->
+                     (CodeNode) new ProjectRootNode(e.getValue().getValue(), ":subproject:" + e.getKey() + ":", getMap(), classes, subgroupMatcher))
+                    .orElseGet(() ->
+                    new PackageNode(rootPackage, getMap(), e.getValue().getValue(), e.getValue().getKey().intValue(), true)))
                 .collect(Collectors.toList());
         GraphNodeSort<Integer> childNodes = new GraphNodeSort<>();
         Integer[] subrojectIndices = IntStream.range(0, groupsById.size())
@@ -124,7 +127,7 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
         Comparator<Set<Integer>> comparingByReversedClassCount = Comparator.comparing(
                 indices -> -indices.stream()
                     .map(nodes::get)
-                    .mapToLong(PackageNode::getClassCount)
+                    .mapToLong(CodeNode::getClassCount)
                     .sum()
                 );
         List<List<Integer>> orderedPackages = childNodes.sortNodes(
@@ -196,6 +199,10 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
         return allClasses();
     }
 
+    @Override
+    long getClassCount() {
+         return classCount;
+    }
     JavaClasses getImportedClasses() {
         return classes;
     }

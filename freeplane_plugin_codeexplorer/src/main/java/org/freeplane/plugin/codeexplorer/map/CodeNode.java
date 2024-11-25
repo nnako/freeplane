@@ -217,6 +217,8 @@ public abstract class CodeNode extends NodeModel {
 
     abstract HasName getCodeElement();
 
+    abstract long getClassCount();
+
 
     abstract Stream<Dependency> getOutgoingDependencies();
     abstract Stream<Dependency> getIncomingDependencies();

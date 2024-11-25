@@ -17,6 +17,10 @@ public interface GroupMatcher {
         return groupIdentifier(javaClass).isPresent();
     }
 
+    default Optional<GroupMatcher> subgroupMatcher(String id) {
+        return Optional.empty();
+    }
+
     default Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass){
         return Optional.empty();
     }

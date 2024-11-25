@@ -132,4 +132,9 @@ class ClassesNode extends CodeNode {
                 ? UI_SAME_PACKAGE_ICON_NAME
                         : UI_CHILD_PACKAGE_ICON_NAME;
     }
+
+    @Override
+    long getClassCount() {
+        return getClasses().count();
+    }
 }

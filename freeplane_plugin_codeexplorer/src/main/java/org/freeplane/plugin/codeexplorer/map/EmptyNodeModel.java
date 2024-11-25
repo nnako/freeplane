@@ -61,4 +61,9 @@ class EmptyNodeModel extends CodeNode {
     HasName getCodeElement() {
         return () -> "";
     }
+
+    @Override
+    long getClassCount() {
+         return 0;
+    }
 }

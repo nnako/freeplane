@@ -32,10 +32,6 @@ class RmiMatcher implements GroupMatcher {
 
     enum Mode {IMPLEMENTATIONS, INSTANTIATIONS}
 
-    private final GroupMatcher matcher;
-    private final Map<String, GroupIdentifier> bundledGroups;
-    private final Map<JavaClass, GroupIdentifier> rmiClasses;
-
     static class Factory {
         private final GroupMatcher matcher;
         private final JavaClasses javaClasses;
@@ -147,9 +143,16 @@ class RmiMatcher implements GroupMatcher {
         }
     }
 
+    private final GroupMatcher matcher;
+    private final Map<String, GroupIdentifier> bundledGroups;
+    private final Map<JavaClass, GroupIdentifier> rmiClasses;
+    private final Set<String> bundledGroupIs;
+
+
     RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups, Map<JavaClass, GroupIdentifier> rmiClasses) {
         this.matcher = matcher;
         this.bundledGroups = bundledGroups;
+        this.bundledGroupIs =bundledGroups.values().stream().map(GroupIdentifier::getId).collect(Collectors.toSet());
         this.rmiClasses = rmiClasses;
     }
 
@@ -178,4 +181,21 @@ class RmiMatcher implements GroupMatcher {
             return Optional.empty();
         return ! originIdentifier.equals(targetIdentifier) ? Optional.of(MatchingCriteria.RMI) : Optional.empty();
     }
+
+    @Override
+    public Optional<GroupMatcher> subgroupMatcher(String id){
+        if(! bundledGroupIs.contains(id))
+            return Optional.empty();
+        else
+            return Optional.of(jc -> subgroupIdentifier(jc, id));
+    }
+
+    private Optional<GroupIdentifier> subgroupIdentifier(JavaClass javaClass, String identifier) {
+        Optional<GroupIdentifier> groupIdentifier = groupIdentifier(javaClass);
+        if(! groupIdentifier.isPresent() || ! groupIdentifier.get().getId().equals(identifier))
+            return Optional.empty();
+        else
+            return matcher.groupIdentifier(javaClass);
+    }
+
 }

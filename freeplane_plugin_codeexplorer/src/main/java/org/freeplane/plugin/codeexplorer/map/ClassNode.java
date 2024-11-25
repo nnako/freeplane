@@ -158,4 +158,9 @@ public class ClassNode extends CodeNode {
             return ABSTRACT_CLASS_ICON_NAME;
         return CLASS_ICON_NAME;
     }
+
+    @Override
+    long getClassCount() {
+        return 1;
+    }
 }
