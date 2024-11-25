@@ -5,6 +5,8 @@
  */
 package org.freeplane.plugin.codeexplorer.task;
 
+import static com.tngtech.archunit.thirdparty.com.google.common.collect.Sets.union;
+
 import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +16,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.freeplane.core.util.LogUtils;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
@@ -27,31 +28,30 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnitAccess;
 import com.tngtech.archunit.core.domain.properties.HasName;
 
-import static com.tngtech.archunit.thirdparty.com.google.common.collect.Sets.union;
-
 class RmiMatcher implements GroupMatcher {
 
     enum Mode {IMPLEMENTATIONS, INSTANTIATIONS}
 
     private final GroupMatcher matcher;
-    private Map<String, GroupIdentifier> bundledGroups;
+    private final Map<String, GroupIdentifier> bundledGroups;
+    private final Map<JavaClass, GroupIdentifier> rmiClasses;
 
     static class Factory {
         private final GroupMatcher matcher;
         private final JavaClasses javaClasses;
         private final Graph<GroupIdentifier, DefaultEdge> componentGraph;
+        private final Map<JavaClass, GroupIdentifier> rmiClasses;
         private final RmiMatcher rmiMatcher;
         private final ClassMatcher ignoredRmi;
         private final Mode mode;
-        private final Set<String> loggedRmi;
 
-        Factory(GroupMatcher matcher, JavaClasses javaClasses, Mode mode, ClassMatcher ignoredRmi, Set<String> loggedRmi){
+        Factory(GroupMatcher matcher, JavaClasses javaClasses, Mode mode, ClassMatcher ignoredRmi){
             this.matcher = matcher;
             this.javaClasses = javaClasses;
             this.mode = mode;
             this.ignoredRmi = ignoredRmi;
-            this.loggedRmi = loggedRmi;
             this.componentGraph = new SimpleDirectedGraph<>(DefaultEdge.class);
+            this.rmiClasses = new HashMap<>();
             fillComponentGraph();
             RmiMatcher rmiMatcher = createMatcherFromGraph();
             this.rmiMatcher = rmiMatcher;
@@ -84,7 +84,7 @@ class RmiMatcher implements GroupMatcher {
                     }
                 }
             }
-            RmiMatcher rmiMatcher = new RmiMatcher(this.matcher, bundledGroups);
+            RmiMatcher rmiMatcher = new RmiMatcher(this.matcher, bundledGroups, rmiClasses);
             return rmiMatcher;
         }
 
@@ -94,18 +94,19 @@ class RmiMatcher implements GroupMatcher {
 
         private void addComponentsToGraph(JavaClass javaClass) {
             if(isRemoteInterface(javaClass))
-                addSubclassDependencies(Optional.empty(), javaClass);
+                addSubclassDependencies(Optional.empty(), null, javaClass);
         }
 
-        private void addSubclassDependencies(Optional<GroupIdentifier> dependingGroupIdentifier, JavaClass javaClass){
-            if(! ignoredRmi.matches(CodeNode.findEnclosingNamedClass(javaClass))) {
+        private void addSubclassDependencies(Optional<GroupIdentifier> dependingGroupIdentifier, JavaClass superClass, JavaClass javaClass){
+            JavaClass enclosingNamedClass = CodeNode.findEnclosingNamedClass(javaClass);
+            if(! ignoredRmi.matches(enclosingNamedClass)) {
                 Optional<GroupIdentifier> groupIdentifier = matcher.groupIdentifier(javaClass);
                 groupIdentifier.ifPresent(gi -> {
                     if (dependingGroupIdentifier.isPresent()) {
                         GroupIdentifier dgi = dependingGroupIdentifier.get();
                         if (!dgi.equals(gi)) {
-                            if(loggedRmi.contains(gi.getName()))
-                                LogUtils.info("RMI class "  + javaClass);
+                            addRmiClass(superClass, dgi);
+                            addRmiClass(javaClass, gi);
                             addEdge(dgi, gi);
                         }
                     }
@@ -113,9 +114,12 @@ class RmiMatcher implements GroupMatcher {
                         union(javaClass.getConstructorCallsToSelf(), javaClass.getConstructorReferencesToSelf())
                         .forEach(access -> addConstructorDependencies(gi, access));
                     Set<JavaClass> subclasses = javaClass.getSubclasses();
-                    subclasses.forEach(x -> addSubclassDependencies(groupIdentifier, x));
+                    subclasses.forEach(x -> addSubclassDependencies(groupIdentifier, javaClass, x));
                 });
             }
+        }
+        private void addRmiClass(JavaClass javaClass, GroupIdentifier identifier) {
+            rmiClasses.put(CodeNode.findEnclosingNamedClass(javaClass), identifier);
         }
 
         private void addConstructorDependencies(
@@ -124,8 +128,8 @@ class RmiMatcher implements GroupMatcher {
             Optional<GroupIdentifier> callingGroupIdentifier = matcher.groupIdentifier(callingClass);
             callingGroupIdentifier.ifPresent(cgi -> {
                 if (!cgi.equals(groupIdentifier)) {
-                    if(loggedRmi.contains(cgi.getName()))
-                        LogUtils.info("RMI access "  + access);
+                    addRmiClass(callingClass, cgi);
+                    addRmiClass(access.getTargetOwner(), groupIdentifier);
                     addEdge(groupIdentifier, cgi);
                 }
             });
@@ -143,9 +147,10 @@ class RmiMatcher implements GroupMatcher {
         }
     }
 
-    RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups) {
+    RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups, Map<JavaClass, GroupIdentifier> rmiClasses) {
         this.matcher = matcher;
         this.bundledGroups = bundledGroups;
+        this.rmiClasses = rmiClasses;
     }
 
     @Override
@@ -156,5 +161,21 @@ class RmiMatcher implements GroupMatcher {
     @Override
     public boolean belongsToGroup(JavaClass javaClass) {
         return matcher.belongsToGroup(javaClass);
+    }
+
+    @Override
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass){
+        return rmiClasses.containsKey(CodeNode.findEnclosingNamedClass(javaClass)) ? Optional.of(MatchingCriteria.RMI) : Optional.empty();
+    }
+
+    @Override
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass originClass, JavaClass targetClass){
+        GroupIdentifier originIdentifier = rmiClasses.get(originClass);
+        if(originIdentifier == null)
+            return Optional.empty();
+        GroupIdentifier targetIdentifier = rmiClasses.get(targetClass);
+        if(targetIdentifier == null)
+            return Optional.empty();
+        return ! originIdentifier.equals(targetIdentifier) ? Optional.of(MatchingCriteria.RMI) : Optional.empty();
     }
 }

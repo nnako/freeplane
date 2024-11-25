@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.plugin.codeexplorer.dependencies.DependencyVerdict;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
-import org.freeplane.plugin.codeexplorer.task.AnnotationMatcher;
+import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorerConfiguration;
 import org.freeplane.plugin.codeexplorer.task.DependencyJudge;
 import org.freeplane.plugin.codeexplorer.task.GroupIdentifier;
@@ -136,8 +136,8 @@ public class ArchitectureViolationsConfiguration implements CodeExplorerConfigur
     }
 
     @Override
-    public AnnotationMatcher getAnnotationMatcher() {
-        return AnnotationMatcher.IGNORING_ALL;
+    public CodeAttributeMatcher getCodeAttributeMatcher() {
+        return CodeAttributeMatcher.IGNORING_ALL;
     }
 
     @Override

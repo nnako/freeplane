@@ -51,6 +51,7 @@ import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -201,9 +202,22 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                     } else if (searchedString.startsWith("dependency:")) {
                         String value = searchedString.substring("dependency:".length());
                         return (dependency, row) -> row[3].contains(value);
+                    } else if (searchedString.equalsIgnoreCase("speciality:rmi")) {
+                        return this::isRmiDependency;
                     } else {
                         return (dependency, row) -> Stream.of(row).anyMatch(s-> s.contains(searchedString));
                     }
+                }
+
+                private boolean isRmiDependency(CodeDependency codeDependency, String[] row) {
+                    MapModel map = Controller.getCurrentController().getSelection().getMap();
+                    if(! (map instanceof CodeMap))
+                        return false;
+                    CodeMap codeMap = (CodeMap) map;
+                    if(codeMap.matchingCriteria(codeDependency.getOriginClass(), codeDependency.getTargetClass())
+                            .filter(MatchingCriteria.RMI::equals).isPresent())
+                        return row[3].contains(" implements ") || row[3].contains(" extends ") || row[3].contains(" constructor ");
+                    return false;
                 }
 
                 @Override

@@ -19,7 +19,7 @@ public interface CodeExplorerConfiguration {
 
     DependencyJudge getDependencyJudge();
 
-    AnnotationMatcher getAnnotationMatcher();
+    CodeAttributeMatcher getCodeAttributeMatcher();
 
     boolean canBeSaved();
 

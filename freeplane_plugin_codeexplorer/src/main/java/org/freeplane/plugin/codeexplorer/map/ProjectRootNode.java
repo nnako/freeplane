@@ -25,6 +25,7 @@ import org.freeplane.plugin.codeexplorer.graph.GraphNodeSort;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorerConfiguration;
 import org.freeplane.plugin.codeexplorer.task.GroupIdentifier;
 import org.freeplane.plugin.codeexplorer.task.GroupMatcher;
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 import org.freeplane.plugin.codeexplorer.task.UserDefinedCodeExplorerConfiguration;
 
 import com.tngtech.archunit.core.domain.Dependency;
@@ -205,5 +206,16 @@ class ProjectRootNode extends CodeNode implements GroupFinder{
             return idBySubrojectIndex[index];
         else
             throw new IllegalArgumentException("Bad index " + index);
+    }
+
+    @Override
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass) {
+        return groupMatcher.matchingCriteria(javaClass);
+    }
+
+    @Override
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass originClass,
+            JavaClass targetClass) {
+        return groupMatcher.matchingCriteria(originClass, targetClass);
     }
 }

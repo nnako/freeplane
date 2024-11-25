@@ -7,8 +7,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.Formatters;
@@ -43,6 +45,16 @@ public class ClassNode extends CodeNode {
 		String nodeText = classNameWithEnclosingClasses(javaClass);
         setText(nodeText);
 	}
+
+    @Override
+    void updateCodeAttributes(CodeAttributeMatcher codeAttributeMatcher) {
+         super.updateCodeAttributes(codeAttributeMatcher);
+         getMap().matchingCriteria(javaClass).ifPresent(criteria -> {
+             NodeAttributeTableModel attributes = NodeAttributeTableModel.getModel(this);
+             attributes.addRowNoUndo(this, new CodeAttribute("Speciality", criteria.name()));
+         });
+    }
+
 
 
     @Override

@@ -5,7 +5,10 @@
  */
 package org.freeplane.plugin.codeexplorer.map;
 
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 
@@ -36,10 +39,22 @@ interface GroupFinder {
         public boolean isKnown(JavaClass javaClass) {
              return false;
         }
+
+        @Override
+        public Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass) {
+             return Optional.empty();
+        }
+
+        @Override
+        public Optional<MatchingCriteria> matchingCriteria(JavaClass originClass, JavaClass targetClass) {
+             return Optional.empty();
+        }
     };
     boolean isKnown(JavaClass javaClass);
     int groupIndexOf(JavaClass javaClass);
     int groupIndexOf(String groupId);
     String getIdByIndex(int index);
     Stream<JavaClass> allClasses();
+    Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass);
+    Optional<MatchingCriteria> matchingCriteria(JavaClass originClass, JavaClass targetClass);
 }

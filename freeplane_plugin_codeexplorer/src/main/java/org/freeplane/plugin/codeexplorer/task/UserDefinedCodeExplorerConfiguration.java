@@ -109,8 +109,8 @@ public class UserDefinedCodeExplorerConfiguration implements CodeExplorerConfigu
     }
 
     @Override
-    public AnnotationMatcher getAnnotationMatcher() {
-        return parsedConfiguration.annotationMatcher();
+    public CodeAttributeMatcher getCodeAttributeMatcher() {
+        return parsedConfiguration.codeAttributeMatcher();
     }
 
     @Override

@@ -18,6 +18,7 @@ import com.tngtech.archunit.core.domain.JavaClass;
 public class CodeDependency {
     private static final Pattern ARRAYS = Pattern.compile("\\[+L?([\\w$]+);?");
     private static final Pattern PACKAGES = Pattern.compile("(?<=\\b|\\[L)(?:[a-z0-9_]+\\.)+");
+    private static final Pattern ARGUMENTS = Pattern.compile("\\([\\w\\s,<>]+\\)");
 
     private final Dependency dependency;
     private final boolean goesUp;
@@ -68,6 +69,8 @@ public class CodeDependency {
 
         description = result.toString()
                 .replace('$', '.');
+
+        description = ARGUMENTS.matcher(description).replaceAll("(...)");
         return description;
     }
 

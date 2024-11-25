@@ -15,13 +15,13 @@ import com.tngtech.archunit.core.domain.JavaAnnotation;
 import com.tngtech.archunit.core.domain.PackageMatcher;
 import com.tngtech.archunit.core.domain.properties.HasName;
 
-public class AnnotationMatcher {
-    public static final AnnotationMatcher IGNORING_ALL = new AnnotationMatcher(Collections.emptyList());
+public class CodeAttributeMatcher {
+    public static final CodeAttributeMatcher IGNORING_ALL = new CodeAttributeMatcher(Collections.emptyList());
 
     private final List<PackageMatcher> matchers;
     private final List<String> patterns;
 
-    public AnnotationMatcher(List<String> patterns) {
+    public CodeAttributeMatcher(List<String> patterns) {
         super();
         this.patterns = patterns;
         this.matchers = patterns.stream()
@@ -65,7 +65,7 @@ public class AnnotationMatcher {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AnnotationMatcher other = (AnnotationMatcher) obj;
+        CodeAttributeMatcher other = (CodeAttributeMatcher) obj;
         return Objects.equals(patterns, other.patterns);
     }
 
