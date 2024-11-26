@@ -155,7 +155,7 @@ public abstract class ASelectableCondition  implements ICondition{
 
 	final public IconListComponent getListCellRendererComponent(FontMetrics fontMetrics) {
 	    IconListComponent renderer = createGraphicComponent(fontMetrics);
-		renderer.setToolTipText(description);
+		renderer.setToolTipText(toString());
 		return renderer;
 	}
 
@@ -175,7 +175,7 @@ public abstract class ASelectableCondition  implements ICondition{
         IconRow icon = new IconRow(icons);
         ObjectIcon o = new ObjectIcon(this, icon);
         List<ObjectIcon> singletonList = Collections.singletonList(o);
-        return new IconListComponent(singletonList);
+        return new IconListComponent(singletonList, toString());
     }
 
 	abstract protected List<Icon> createRenderedIcons(FontMetrics  fontMetrics);
