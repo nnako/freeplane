@@ -3,7 +3,6 @@ package org.freeplane.plugin.codeexplorer.configurator;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
@@ -16,10 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -39,7 +36,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.freeplane.core.resources.IFreeplanePropertyListener;
-import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
@@ -55,7 +51,6 @@ import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
-import org.freeplane.plugin.codeexplorer.map.FilterClassesByDependencies;
 import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
 import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 
@@ -214,7 +209,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                     } else if (searchedString.startsWith("dependency:")) {
                         String value = searchedString.substring("dependency:".length());
                         return (dependency, row) -> row[3].contains(value);
-                    } else if (searchedString.equalsIgnoreCase("speciality:rmi")) {
+                    } else if (searchedString.equalsIgnoreCase(":rmi")) {
                         return this::isRmiDependency;
                     } else {
                         return (dependency, row) -> Stream.of(row).anyMatch(s-> s.contains(searchedString));
