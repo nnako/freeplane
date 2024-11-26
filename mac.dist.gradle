@@ -68,7 +68,6 @@ def defineMacBuildTasks =  { architecture ->
      '--icon', 'freeplane_framework/mac-appbundler/freeplane.icns',
      '--app-version', majorVersion,
      '--java-options', "-XX:-IgnoreUnrecognizedVMOptions",
-     '--java-options', "-XX:-ProfileExceptionHandlers",
      '--java-options', "-XX:MaxRAM=20g",
      '--java-options', "-XX:MaxRAMPercentage=15.0",
      '--java-options', '-Djava.security.manager=allow',

@@ -41,7 +41,6 @@ task winapp_input(type: Copy) {
      '--icon', 'freeplane_framework/launch4j/Freeplane_app.ico',
      '--app-version', majorVersion,
      '--java-options', "-XX:-IgnoreUnrecognizedVMOptions",
-     '--java-options', "-XX:-ProfileExceptionHandlers",
      '--java-options', "-XX:MaxRAM=20g",
      '--java-options', "-XX:MaxRAMPercentage=15.0",
      '--java-options', '-Djava.security.manager=allow',
