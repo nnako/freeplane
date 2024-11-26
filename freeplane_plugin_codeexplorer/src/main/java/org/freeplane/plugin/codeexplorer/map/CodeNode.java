@@ -134,7 +134,7 @@ public abstract class CodeNode extends NodeModel {
 
         if(! codeAttributeMatcher.isEmpty()) {
             getAnnotations().forEach(annotation -> {
-                String annotationName = ClassNode.classNameWithEnclosingClasses(annotation.getRawType());
+                String annotationName = ClassNode.classNameWithNestedClasses(annotation.getRawType());
                 annotation.getProperties().entrySet().stream()
                 .filter(attributeEntry -> codeAttributeMatcher.matches(annotation, attributeEntry.getKey()))
                 .forEach(attributeEntry -> addCodeAttributes(attributes, "@" +annotationName, attributeEntry.getKey(), attributeEntry.getValue()));
@@ -144,7 +144,7 @@ public abstract class CodeNode extends NodeModel {
             });
             getInterfaces().forEach(javaInterface -> {
                 final JavaClass javaClass = javaInterface.toErasure();
-                String interfaceName = ClassNode.classNameWithEnclosingClasses(javaClass);
+                String interfaceName = ClassNode.classNameWithNestedClasses(javaClass);
                  if(codeAttributeMatcher.matches(javaClass))
                     addCodeAttributes(attributes, "interface", "value", interfaceName);
             });

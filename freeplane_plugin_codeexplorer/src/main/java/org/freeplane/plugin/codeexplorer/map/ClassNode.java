@@ -13,7 +13,6 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 
 import com.tngtech.archunit.core.domain.Dependency;
-import com.tngtech.archunit.core.domain.Formatters;
 import com.tngtech.archunit.core.domain.JavaAnnotation;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
@@ -42,7 +41,7 @@ public class ClassNode extends CodeNode {
         this.innerClasses = null;
 		setFolded(false);
 		setIdWithIndex(javaClass.getName());
-		String nodeText = classNameWithEnclosingClasses(javaClass);
+		String nodeText = classNameWithNestedClasses(javaClass);
         setText(nodeText);
 	}
 
@@ -73,22 +72,32 @@ public class ClassNode extends CodeNode {
         return Stream.of(javaClass);
     }
 
-    public static String classNameWithEnclosingClasses(final JavaClass javaClass) {
+    public static String classNameWithNestedClasses(final JavaClass javaClass) {
         String simpleName = getSimpleName(javaClass);
-        return javaClass.getEnclosingClass()
-                .map(ec -> classNameWithEnclosingClasses(ec) + "." + simpleName)
+        if(javaClass.isMemberClass())
+            return javaClass.getEnclosingClass()
+                .map(ec -> classNameWithNestedClasses(ec) + "." + simpleName)
                 .orElse(simpleName);
+        else
+            return simpleName;
     }
 
     public static String getSimpleName(final JavaClass javaClass) {
         String simpleName = javaClass.getSimpleName();
         if(simpleName.isEmpty()) {
             final String fullName = javaClass.getName();
-            int lastIndexOfNon$ = fullName.length() - 1;
-            while (lastIndexOfNon$ >= 0 && fullName.charAt(lastIndexOfNon$) == '$')
-                lastIndexOfNon$--;
-            return Formatters.ensureSimpleName(fullName.substring(0, lastIndexOfNon$+1))
-                    + fullName.substring(lastIndexOfNon$+1);
+            if (javaClass.isAnonymousClass()) {
+                JavaClass enclosingNamedClass = findEnclosingNamedClass(javaClass.getEnclosingClass().get());
+                return getSimpleName(enclosingNamedClass) + fullName.substring(enclosingNamedClass.getName().length());
+            }
+            if(javaClass.isArray())
+                return getSimpleName(javaClass.getBaseComponentType()) + "[]";
+            if(javaClass.isMemberClass()) {
+                JavaClass enclosingNamedClass = javaClass.getEnclosingClass().get();
+                return fullName.substring(enclosingNamedClass.getName().length() + 1);
+            }
+            String packageName = javaClass.getPackage().getName();
+            return packageName.isEmpty() ? fullName : fullName.substring(packageName.length() + 1);
         }
         return simpleName;
     }
