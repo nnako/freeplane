@@ -202,7 +202,7 @@ public abstract class CodeNode extends NodeModel {
         return hasValidTopLevelClass(javaClass) && validClassBelongsToSameGroup(javaClass);
     }
 
-    private boolean validClassBelongsToSameGroup(JavaClass javaClass) {
+    boolean validClassBelongsToSameGroup(JavaClass javaClass) {
         int anotherGroupIndex = projectIndexOf(javaClass);
         return anotherGroupIndex == groupIndex;
     }

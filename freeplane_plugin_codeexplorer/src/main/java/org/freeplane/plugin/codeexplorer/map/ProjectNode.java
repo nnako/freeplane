@@ -35,6 +35,7 @@ import com.tngtech.archunit.core.domain.JavaPackage;
 import com.tngtech.archunit.core.domain.properties.HasName;
 
 class ProjectNode extends CodeNode implements GroupFinder{
+    private static final int ROOT_INDEX = -1;
     static final String UI_ICON_NAME = "code_project";
     static {
         IconStoreFactory.INSTANCE.createStateIcon(ProjectNode.UI_ICON_NAME, "code/homeFolder.svg");
@@ -48,25 +49,30 @@ class ProjectNode extends CodeNode implements GroupFinder{
     private final long classCount;
     private final GroupMatcher groupMatcher;
     static ProjectNode asMapRoot(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        ProjectNode projectNode = new ProjectNode(projectName, ":projectRoot:", map, classes, groupMatcher);
+        ProjectNode projectNode = new ProjectNode(projectName, map, classes, groupMatcher);
         map.setRoot(projectNode);
         if(projectNode.getChildCount() > 20)
             projectNode.getChildren()
                 .forEach(node -> ((CodeNode)node).memoizeCodeDependencies());
         return projectNode;
     }
-    private ProjectNode(String projectName, String id, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        this(projectName, id, map, 0, classes, groupMatcher, new ConcurrentHashMap<>());
+    private ProjectNode(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
+        this(projectName, map, ROOT_INDEX, classes, groupMatcher, new ConcurrentHashMap<>());
     }
-    private ProjectNode(String projectName, String id, CodeMap map, int groupIndex, JavaClasses classes, GroupMatcher groupMatcher, Map<String, Map.Entry<Integer, String>> groupIdsByLocation) {
+
+    @Override
+    String idWithOwnGroupIndex(String idWithoutIndex) {
+        return groupIndex >= 0 ? super.idWithOwnGroupIndex(idWithoutIndex) : idWithoutIndex;
+    }
+    private ProjectNode(String projectName, CodeMap map, int groupIndex, JavaClasses classes, GroupMatcher groupMatcher, Map<String, Map.Entry<Integer, String>> projectIdsByLocation) {
         super(map, groupIndex);
         this.classes = classes;
         this.groupMatcher = groupMatcher;
         this.rootPackage = classes.getDefaultPackage();
-        this.projectIdsByLocation = groupIdsByLocation;
-        setID(id);
+        this.projectIdsByLocation = projectIdsByLocation;
+        setID(idWithOwnGroupIndex(":projectRoot:"));
 
-        if(groupIndex == 0) {
+        if(groupIndex == ROOT_INDEX) {
             classes.stream()
             .map(groupMatcher::projectIdentifier)
             .filter(Optional::isPresent)
@@ -81,8 +87,8 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 .mapToLong(CodeNode::getClassCount)
                 .sum();
         setText(projectName + formatClassCount(classCount));
-        idBySubrojectIndex = new String[groupIdsByLocation.size()];
-        groupIdsByLocation.entrySet().forEach(e -> idBySubrojectIndex[e.getValue().getKey()] = e.getKey());
+        idBySubrojectIndex = new String[projectIdsByLocation.size()];
+        projectIdsByLocation.entrySet().forEach(e -> idBySubrojectIndex[e.getValue().getKey()] = e.getKey());
     }
     private void addDeletedLocation(String location) {
         final Entry<Integer, String> locationEntry = addLocation(new GroupIdentifier(location, location));
@@ -108,7 +114,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 .parallel()
                 .map(gi ->
                     groupMatcher.subgroupMatcher(gi.getId()).map(subgroupMatcher ->
-                     (CodeNode) new ProjectNode(gi.getName(), ":subproject:" + gi.getId() + ":", map, projectIdsByLocation.get(gi.getId()).getKey(), classes, subgroupMatcher, projectIdsByLocation))
+                     (CodeNode) new ProjectNode(gi.getName(), map, projectIdsByLocation.get(gi.getId()).getKey(), classes, subgroupMatcher, projectIdsByLocation))
                     .orElseGet(() ->
                     new PackageNode(rootPackage, getMap(), gi.getName(), projectIdsByLocation.get(gi.getId()).getKey(), true)))
                 .collect(Collectors.toMap(x -> x.groupIndex, x -> x));
@@ -149,19 +155,26 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 node.setParent(this);
             }
         }
-        for(NodeModel child: children)
-            ((CodeNode) child).setInitialFoldingState();
-        final CodeExplorerConfiguration configuration = map.getConfiguration();
-        if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
-            ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
-            .forEach(this::addDeletedLocation);
+        if(isRoot()) {
+            for(NodeModel child: children)
+                ((CodeNode) child).setInitialFoldingState();
+            final CodeExplorerConfiguration configuration = map.getConfiguration();
+            if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
+                ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
+                .forEach(this::addDeletedLocation);
+            }
         }
 
     }
 
     @Override
+    public boolean isRoot() {
+        return groupIndex == ROOT_INDEX;
+    }
+
+    @Override
     HasName getCodeElement() {
-        return () -> "root";
+        return isRoot() ? () -> "root" : () -> "subproject";
     }
 
     @Override
@@ -172,8 +185,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
             .stream()
             .map(CodeNode.class::cast)
             .flatMap(CodeNode::getOutgoingDependencies)
-            .filter(d -> belongsToMap(d.getTargetClass()))
-            .filter(d -> ! getMap().getNodeByClass(d.getTargetClass()).isDescendantOf(this));
+            .filter(d -> ! groupMatcher.belongsToGroup(d.getTargetClass()));
 
     }
 
@@ -185,8 +197,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 .stream()
                 .map(CodeNode.class::cast)
                 .flatMap(CodeNode::getIncomingDependencies)
-                .filter(d -> belongsToMap(d.getOriginClass()))
-                .filter(d -> ! getMap().getNodeByClass(d.getOriginClass()).isDescendantOf(this));
+                .filter(d -> ! groupMatcher.belongsToGroup(d.getOriginClass()));
     }
 
     @Override
@@ -201,18 +212,15 @@ class ProjectNode extends CodeNode implements GroupFinder{
 
     @Override
     public int projectIndexOf(JavaClass javaClass) {
-        Optional<String> classSourceLocation = groupMatcher.projectIdentifier(javaClass).map(GroupIdentifier::getId);
-        Optional <Map.Entry<Integer, String>> groupEntry = classSourceLocation
-                .map( s -> projectIdsByLocation.getOrDefault(s, UNKNOWN));
-
-        if(groupEntry.filter(UNKNOWN::equals).isPresent() && badLocations.add(classSourceLocation.get())) {
-            LogUtils.info("Unknown class source location " + javaClass.getSource().get().getUri());
-         }
-        return groupEntry.orElse(UNKNOWN).getKey().intValue();
+        return indexOf(javaClass, groupMatcher.projectIdentifier(javaClass));
     }
 
     private int groupIndexOf(JavaClass javaClass) {
-        Optional<String> classSourceLocation = groupMatcher.groupIdentifier(javaClass).map(GroupIdentifier::getId);
+        return indexOf(javaClass, groupMatcher.groupIdentifier(javaClass));
+    }
+
+    private int indexOf(JavaClass javaClass, Optional<GroupIdentifier> identifier) {
+        Optional<String> classSourceLocation = identifier.map(GroupIdentifier::getId);
         Optional <Map.Entry<Integer, String>> groupEntry = classSourceLocation
                 .map( s -> projectIdsByLocation.getOrDefault(s, UNKNOWN));
 
@@ -229,12 +237,13 @@ class ProjectNode extends CodeNode implements GroupFinder{
 
     @Override
     public Stream<JavaClass> allClasses() {
-        return classes.stream();
+        return getClasses();
     }
 
     @Override
     public Stream<JavaClass> getClasses() {
-        return allClasses();
+        Stream<JavaClass> allClasses = classes.stream();
+        return isRoot() ? allClasses : allClasses.filter(this::belongsToSameGroup);
     }
 
     @Override
