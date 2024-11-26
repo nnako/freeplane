@@ -178,7 +178,6 @@ fi
 
 #--------- Call (at last) Freeplane -------------------------------------
 JAVA_OPTS="-XX:+IgnoreUnrecognizedVMOptions $JAVA_OPTS"
-JAVA_OPTS="-XX:-ProfileExceptionHandlers $JAVA_OPTS"
 
 if [ "${JAVA_TYPE}" != "sun" ]; then
   # OpenJDK(7) fixes (don't use OpenJDK6!!)
