@@ -1,12 +1,9 @@
 package org.freeplane.plugin.codeexplorer.map;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -18,7 +15,6 @@ import org.freeplane.features.attribute.ManagedAttribute;
 import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.NodeModel;
-import org.freeplane.plugin.codeexplorer.graph.GraphCycleFinder;
 import org.freeplane.plugin.codeexplorer.graph.GraphNodeSort;
 
 import com.tngtech.archunit.core.domain.Dependency;
