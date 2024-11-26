@@ -36,9 +36,9 @@ import com.tngtech.archunit.core.domain.properties.HasName;
 
 class ProjectNode extends CodeNode implements GroupFinder{
     private static final int ROOT_INDEX = -1;
-    static final String UI_ICON_NAME = "code_project";
+    static final String UI_ROOT_ICON_NAME = "code_project";
     static {
-        IconStoreFactory.INSTANCE.createStateIcon(ProjectNode.UI_ICON_NAME, "code/homeFolder.svg");
+        IconStoreFactory.INSTANCE.createStateIcon(ProjectNode.UI_ROOT_ICON_NAME, "code/homeFolder.svg");
     }
     private static final Entry<Integer, String> UNKNOWN = new AbstractMap.SimpleEntry<>(-1, ":unknown:");
     private final JavaPackage rootPackage;
@@ -202,7 +202,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
 
     @Override
     String getUIIconName() {
-        return UI_ICON_NAME;
+        return isRoot() ? UI_ROOT_ICON_NAME : PackageNode.UI_ROOT_PACKAGE_ICON_NAME;
     }
 
     @Override
