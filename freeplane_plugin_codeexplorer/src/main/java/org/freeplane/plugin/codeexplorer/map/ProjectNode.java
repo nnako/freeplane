@@ -72,7 +72,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
         this.projectIdsByLocation = projectIdsByLocation;
         setID(idWithOwnGroupIndex(":projectRoot:"));
 
-        if(groupIndex == ROOT_INDEX) {
+        if(isRoot()) {
             classes.stream()
             .map(groupMatcher::projectIdentifier)
             .filter(Optional::isPresent)
@@ -87,6 +87,9 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 .mapToLong(CodeNode::getClassCount)
                 .sum();
         setText(projectName + formatClassCount(classCount));
+        if(isRoot()) {
+            addDeletedLocations(map);
+        }
         idBySubrojectIndex = new String[projectIdsByLocation.size()];
         projectIdsByLocation.entrySet().forEach(e -> idBySubrojectIndex[e.getValue().getKey()] = e.getKey());
     }
@@ -155,16 +158,15 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 node.setParent(this);
             }
         }
-        if(isRoot()) {
-            for(NodeModel child: children)
-                ((CodeNode) child).setInitialFoldingState();
-            final CodeExplorerConfiguration configuration = map.getConfiguration();
-            if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
-                ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
-                .forEach(this::addDeletedLocation);
-            }
+        for(NodeModel child: children)
+            ((CodeNode) child).setInitialFoldingState();
+    }
+    private void addDeletedLocations(CodeMap map) {
+        final CodeExplorerConfiguration configuration = map.getConfiguration();
+        if(configuration instanceof UserDefinedCodeExplorerConfiguration) {
+            ((UserDefinedCodeExplorerConfiguration)configuration).getUserContent().keySet()
+            .forEach(this::addDeletedLocation);
         }
-
     }
 
     @Override
