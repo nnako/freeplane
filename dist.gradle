@@ -21,6 +21,8 @@ task historyDist(type:Copy) {
 	into(globalDist)
 }
 
+task dist {}
+
 apply from: './bin.dist.gradle'
 apply from: './win.dist.gradle'
 apply from: './mac.dist.gradle'
@@ -28,11 +30,10 @@ apply from: './src.dist.gradle'
 apply from: './linux-packages.gradle'
 
 // meta task
-task dist {
+dist {
     dependsOn binZip
     dependsOn srcTarGz
     dependsOn srcpureTarGz
-    dependsOn windowsInstaller
     dependsOn windowsPortableInstaller
     dependsOn gitinfoDist
     dependsOn historyDist
