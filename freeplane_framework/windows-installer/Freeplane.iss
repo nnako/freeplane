@@ -73,8 +73,8 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 Name: associate; Description: {cm:AssocFileExtension,Freeplane,.mm}; GroupDescription: {cm:AssocingFileExtension,Freeplane,.mm}
 
 [Files]
-Source: "..\..\build\winapp\app-image\freeplane\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs; Excludes: "\app\*.cfg"
-Source: "..\..\build\winapp\app-image\freeplane\app\*.cfg"; DestDir: "{app}\app"; Flags: ignoreversion onlyifdoesntexist
+Source: "{#AppImage}\freeplane\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs; Excludes: "\app\*.cfg"
+Source: "{#AppImage}\freeplane\app\*.cfg"; DestDir: "{app}\app"; Flags: ignoreversion onlyifdoesntexist
 
 [Icons]
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks:

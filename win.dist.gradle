@@ -3,99 +3,114 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 String winapp_input_dir = 'BIN'
 
-def winapp_deleteAppImage = tasks.create("winapp_deleteAppImage", Delete) { 
-onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
-    delete "build/winapp/app-image" 
-}
+def defineWinDistTasks =  { javaRuntime, distName -> 
 
-task winapp_input(type: Copy) {
+    def appImageDir = file("build/winapp/${javaRuntime}")
+    def winapp_deleteAppImage = tasks.create("winapp_deleteAppImage_${javaRuntime}", Delete) { 
     onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
-    
-    from(winapp_input_dir) {
-        include '*.jar'
-    }
-    
-    into 'build/winapp'
-
-    doLast {
-        mkdir "build/winapp/input"
+        delete "${appImageDir}" 
     }
 
-    dependsOn winapp_deleteAppImage
+    def winapp_input = tasks.create("winapp_input_${javaRuntime}", Copy) {
+        onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
+        
+        from(winapp_input_dir) {
+            include '*.jar'
+        }
+        
+        into "${appImageDir}"
 
-    for (p in subprojects) {
-        dependsOn p.tasks.getByPath("build")
+        doLast {
+            mkdir "${appImageDir}/input"
+        }
+
+        dependsOn winapp_deleteAppImage
+
+        for (p in subprojects) {
+            dependsOn p.tasks.getByPath("build")
+        }
+
     }
 
-}
 
+    def jpackage = 'jpackage'
 
-   def jpackage = 'jpackage'
+    def jpackage_winapp = tasks.create ("jpackage_winapp_${javaRuntime}", Exec) {
+        onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
 
-   def jpackage_winapp = tasks.create ("jpackage_winapp", Exec) {
-    onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
+        commandLine jpackage,
+                '--name' , 'freeplane',
+        '--type', 'app-image',
+        '--icon', 'freeplane_framework/launch4j/Freeplane_app.ico',
+        '--app-version', majorVersion,
+        '--java-options', "-XX:-IgnoreUnrecognizedVMOptions",
+        '--java-options', "-XX:MaxRAM=20g",
+        '--java-options', "-XX:MaxRAMPercentage=15.0",
+        '--java-options', '-Djava.security.manager=allow',
+        '--java-options', '-Dorg.freeplane.userfpdir=%APPDATA%\\Freeplane',
+        '--java-options', '--add-exports', 
+        '--java-options', 'java.desktop/sun.awt=ALL-UNNAMED',
+        '--java-options', '--add-exports', 
+        '--java-options', 'java.desktop/sun.awt.shell=ALL-UNNAMED',
+        '--java-options', '--add-exports', 
+        '--java-options', 'java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED',
+        '--java-options', '--add-exports', 
+        '--java-options', 'java.desktop/sun.swing=ALL-UNNAMED',
+        '--java-options', '--add-opens', 
+        '--java-options', 'java.desktop/javax.swing.text.html=ALL-UNNAMED',
+        '--input', "build/winapp/${javaRuntime}/input",
+        '--main-class', 'org.freeplane.launcher.Launcher',
+        '--main-jar', '../freeplanelauncher.jar',
+        '--add-launcher', 'freeplaneConsole=freeplane_framework/launch4j/freeplaneConsole.properties',
+        '--runtime-image', "java-runtime-${javaRuntime}",
+        '--copyright', "Freeplane ${distVersion}",
+        '--dest', "${appImageDir}"
+        dependsOn winapp_deleteAppImage, winapp_input
 
-   	commandLine jpackage,
-        	 '--name' , 'freeplane',
-   	 '--type', 'app-image',
-     '--icon', 'freeplane_framework/launch4j/Freeplane_app.ico',
-     '--app-version', majorVersion,
-     '--java-options', "-XX:-IgnoreUnrecognizedVMOptions",
-     '--java-options', "-XX:MaxRAM=20g",
-     '--java-options', "-XX:MaxRAMPercentage=15.0",
-     '--java-options', '-Djava.security.manager=allow',
-     '--java-options', '-Dorg.freeplane.userfpdir=%APPDATA%\\Freeplane',
-     '--java-options', '--add-exports', 
-     '--java-options', 'java.desktop/sun.awt=ALL-UNNAMED',
-     '--java-options', '--add-exports', 
-     '--java-options', 'java.desktop/sun.awt.shell=ALL-UNNAMED',
-     '--java-options', '--add-exports', 
-     '--java-options', 'java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED',
-     '--java-options', '--add-exports', 
-     '--java-options', 'java.desktop/sun.swing=ALL-UNNAMED',
-     '--java-options', '--add-opens', 
-     '--java-options', 'java.desktop/javax.swing.text.html=ALL-UNNAMED',
-     '--input', 'build/winapp/input',
-     '--main-class', 'org.freeplane.launcher.Launcher',
-  	 '--main-jar', '../freeplanelauncher.jar',
-     '--add-launcher', 'freeplaneConsole=freeplane_framework/launch4j/freeplaneConsole.properties',
-     '--runtime-image', 'java-runtime',
-     '--copyright', "Freeplane ${distVersion}",
-   	 '--dest', "build/winapp/app-image"
-    dependsOn winapp_deleteAppImage, winapp_input
-
-    for (p in subprojects) {
-        dependsOn p.tasks.getByPath("build")
-    }
-   }
-   
-task winapp_makeapp(type: Copy) {
-    onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
-    dependsOn jpackage_winapp
-    
-    from(winapp_input_dir) {
-        include '*/**'
-        exclude '/*.exe'
-        exclude '/*.l4j.ini'
+        for (p in subprojects) {
+            dependsOn p.tasks.getByPath("build")
+        }
     }
     
-    into 'build/winapp/app-image/Freeplane/'
+    def winapp_makeapp = tasks.create("winapp_makeapp_${javaRuntime}", Copy) {
+        onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
+        dependsOn jpackage_winapp
+        
+        from(winapp_input_dir) {
+            include '*/**'
+            exclude '/*.exe'
+            exclude '/*.l4j.ini'
+        }
+        
+        into "${appImageDir}/Freeplane/"
+    }
+
+
+    def windowsInstaller = tasks.create("windowsInstaller_${javaRuntime}", Exec) {
+        onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
+
+        ignoreExitValue = true
+        workingDir = rootDir.path + '/freeplane_framework/windows-installer'
+
+        commandLine 'cmd.exe', '/c', "ISCC.exe /DAppImage=${appImageDir} /Q Freeplane.iss "
+        doLast {
+            new File(workingDir, 'Freeplane-Setup.exe').renameTo(new File(globalDist, "Freeplane-Setup${distName}-${distVersion}.exe"))
+        }
+
+        dependsOn winapp_makeapp
+    }
+    
+    dist {
+        dependsOn windowsInstaller
+    }
+
 }
 
-
-task windowsInstaller(type: Exec) {
-    onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
-
-    ignoreExitValue = true
-    workingDir = rootDir.path + '/freeplane_framework/windows-installer'
-
-    commandLine 'cmd.exe', '/c', 'ISCC.exe /Q Freeplane.iss'
-	doLast {
-         new File(workingDir, 'Freeplane-Setup.exe').renameTo(new File(globalDist, "Freeplane-Setup-${distVersion}.exe"))
-	}
-
-    dependsOn winapp_makeapp
+if ( Os.isFamily(Os.FAMILY_WINDOWS)) {
+    defineWinDistTasks('jbr', '')
+    defineWinDistTasks('zulu', '-touchscreen')
 }
+
 
 def portableInstallerDir = new File(globalDist, 'FreeplanePortable').path
 
@@ -129,6 +144,7 @@ task copyWindowsPortableInstallerIcon(type: Copy) {
     into(portableInstallerDir + '/App/AppInfo/')
 }
 
+
 task copyWindowsPortableInstallerFiles(type: Copy) {
     onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
 
@@ -157,6 +173,7 @@ task copyWindowsPortableInstallerFiles(type: Copy) {
     dependsOn copyWindowsPortableInstallerLicense
     dependsOn copyWindowsPortableInstallerIcon
 }
+
 
 task windowsPortableInstaller(type: Exec) {
     onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
