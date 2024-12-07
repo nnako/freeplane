@@ -12,7 +12,7 @@
 /build/
 /BIN*/
 
-/java-runtime/
+/java-runtime*/
 
 #Ignore everything form IntelliJ
 .idea/

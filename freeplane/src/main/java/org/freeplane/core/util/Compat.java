@@ -177,7 +177,18 @@ public class Compat {
 
 	protected static void findApplicationUserDirectory() {
 		final String userFpDirByProperty = System.getProperty(FREEPLANE_USERDIR_PROPERTY);
-		final String userFpDirPath = userFpDirByProperty != null ? userFpDirByProperty : getDefaultFreeplaneUserDirectory();
+		final String userFpDirPath;
+		if (userFpDirByProperty != null) {
+			if(Compat.isWindowsOS() && userFpDirByProperty.startsWith("%APPDATA%\\")) {
+				String appdataDirectory = System.getenv("APPDATA");
+				userFpDirPath = appdataDirectory + userFpDirByProperty.substring("%APPDATA%\\".length() - 1);
+				System.setProperty(FREEPLANE_USERDIR_PROPERTY, userFpDirPath);
+			}
+			else
+				userFpDirPath = userFpDirByProperty;
+		}
+		else
+			userFpDirPath = getDefaultFreeplaneUserDirectory();
 		try {
 			userFpDir = new File(userFpDirPath).getCanonicalPath();
 		} catch (IOException e) {

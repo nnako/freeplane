@@ -11,7 +11,7 @@
 ; Predrag Cuklin 18/06/2009 - Universial Version
 ;****************************************************************************
 
-#define MyVersion "1.12.7"
+#define MyVersion "1.12.8"
 #define MyStatus ""
 #define MyAppName "Freeplane"
 #define MyAppPublisher "Open source"
@@ -73,12 +73,8 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 Name: associate; Description: {cm:AssocFileExtension,Freeplane,.mm}; GroupDescription: {cm:AssocingFileExtension,Freeplane,.mm}
 
 [Files]
-Source: "..\..\BIN\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs; Excludes: "*.l4j.ini"
-Source: "..\..\BIN\*.l4j.ini"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
-
-#ifdef includeJavaRuntime
-Source: "..\..\java-runtime\*"; DestDir: "{app}\runtime"; Flags: ignoreversion createallsubdirs recursesubdirs
-#endif
+Source: "{#AppImage}\freeplane\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs; Excludes: "\app\*.cfg"
+Source: "{#AppImage}\freeplane\app\*.cfg"; DestDir: "{app}\app"; Flags: ignoreversion onlyifdoesntexist
 
 [Icons]
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks:
