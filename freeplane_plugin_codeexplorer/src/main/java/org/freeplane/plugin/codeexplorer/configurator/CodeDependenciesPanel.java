@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,8 +36,9 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.freeplane.core.resources.IFreeplanePropertyListener;
-import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.IMapSelection;
@@ -50,8 +51,10 @@ import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
-import org.freeplane.plugin.codeexplorer.map.DependencySelection;
+import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 
+import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 
 class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IMapSelectionListener, IFreeplanePropertyListener, IMapChangeListener{
@@ -59,11 +62,13 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private static final String[] COLUMN_NAMES = new String[]{"Verdict", "Origin", "Target","Dependency"};
 
     private static final long serialVersionUID = 1L;
-    private static final Icon filterIcon = ResourceController.getResourceController().getIcon("filterDependencyIncormation.icon");
     private final JTextField filterField;
     private final JTable dependencyViewer;
     private final JLabel countLabel;
+    private final List<Consumer<Object>> dependencySelectionCallbacks;
     private List<CodeDependency> allDependencies;
+
+    private AFreeplaneAction filterAction;
 
     private class DependenciesWrapper extends AbstractTableModel {
         private static final long serialVersionUID = 1L;
@@ -83,8 +88,8 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
             CodeDependency row = allDependencies.get(rowIndex);
             switch (columnIndex) {
                 case 0: return row.describeVerdict();
-                case 1: return ClassNode.classNameWithEnclosingClasses(row.getOriginClass());
-                case 2: return ClassNode.classNameWithEnclosingClasses(row.getTargetClass());
+                case 1: return ClassNode.classNameWithNestedClasses(row.getOriginClass());
+                case 2: return ClassNode.classNameWithNestedClasses(row.getTargetClass());
                 case 3: return row.getDescription();
                 default: return null;
             }
@@ -101,18 +106,24 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
     }
 
-    CodeDependenciesPanel() {
+    CodeDependenciesPanel(AFreeplaneAction filterAction) {
+         this.filterAction = filterAction;
+        dependencySelectionCallbacks = new ArrayList<>();
          // Create the top panel for sorting options
          JPanel topPanel = new JPanel(new BorderLayout());
 
-         // Create a box to hold the components that should be aligned to the left
-         countLabel = new JLabel(filterIcon);
+         JButton filterButton = TranslatedElementFactory.createButtonWithIcon(filterAction);
+         filterButton.setEnabled(false);
+         countLabel = new JLabel();
          final int countLabelMargin = (int) (UITools.FONT_SCALE_FACTOR * 10);
-         countLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, countLabelMargin));
-         countLabel.setIconTextGap(countLabelMargin / 2);
+         Box filterBox = Box.createHorizontalBox();
+         filterBox.add(filterButton);
+         filterBox.add(Box.createHorizontalStrut(countLabelMargin));
+         filterBox.add(countLabel);
+         filterBox.add(Box.createHorizontalStrut(countLabelMargin));
 
          // Add the box of left-aligned components to the top panel at the WEST
-         topPanel.add(countLabel, BorderLayout.WEST);
+         topPanel.add(filterBox, BorderLayout.WEST);
 
          // Configure filterField to expand and fill the remaining space
          filterField = new JTextField();
@@ -198,9 +209,22 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                     } else if (searchedString.startsWith("dependency:")) {
                         String value = searchedString.substring("dependency:".length());
                         return (dependency, row) -> row[3].contains(value);
+                    } else if (searchedString.equalsIgnoreCase(":rmi")) {
+                        return this::isRmiDependency;
                     } else {
                         return (dependency, row) -> Stream.of(row).anyMatch(s-> s.contains(searchedString));
                     }
+                }
+
+                private boolean isRmiDependency(CodeDependency codeDependency, String[] row) {
+                    MapModel map = Controller.getCurrentController().getSelection().getMap();
+                    if(! (map instanceof CodeMap))
+                        return false;
+                    CodeMap codeMap = (CodeMap) map;
+                    if(codeMap.matchingCriteria(codeDependency.getOriginClass(), codeDependency.getTargetClass())
+                            .filter(MatchingCriteria.RMI::equals).isPresent())
+                        return row[3].contains(" implements ") || row[3].contains(" extends ") || row[3].contains(" constructor ");
+                    return false;
                 }
 
                 @Override
@@ -216,9 +240,11 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
             rowSorter.setRowFilter(dependencyFilter);
         }
+        dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
         scrollSelectedToVisible();
-        countLabel.setText("( " + rowSorter.getViewRowCount() + " / " + rowSorter.getModelRowCount() + " )");
+        updateRowCountLabelAndFilterAction();
     }
+
     private void updateColumn(TableColumnModel columns, int index, int columnWidth, TableCellRenderer cellRenderer) {
         int scaledWidth = (int) (columnWidth*UITools.FONT_SCALE_FACTOR);
         TableColumn columnModel = columns.getColumn(index);
@@ -250,13 +276,13 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
 
     private void update(IMapSelection selection) {
-        Set<CodeDependency> selectedDependencies = getSelectedDependencies().collect(Collectors.toSet());
+        Set<CodeDependency> selectedDependencies = getSelectedCodeDependencies().collect(Collectors.toSet());
         int selectedColumn = dependencyViewer.getSelectedColumn();
         this.allDependencies = selection == null || ! (selection.getMap() instanceof CodeMap)
                 ? Collections.emptyList() :
-                    selectedDependencies(new DependencySelection(selection));
+                    selectedDependencies(new SelectedNodeDependencies(selection));
         ((DependenciesWrapper)dependencyViewer.getModel()).fireTableDataChanged();
-        updateRowCountLabel();
+        updateRowCountLabelAndFilterAction();
         if(! selectedDependencies.isEmpty()) {
             IntStream.range(0, allDependencies.size())
             .filter(i -> selectedDependencies.contains(allDependencies.get(i)))
@@ -267,21 +293,63 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                 SwingUtilities.invokeLater(this::scrollSelectedToVisible);
             }
         }
+        if(isShowing())
+            dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
     }
 
-    private List<CodeDependency> selectedDependencies(DependencySelection dependencySelection) {
-        return dependencySelection.getSelectedDependencies().map(dependencySelection.getMap()::toCodeDependency)
+    private List<CodeDependency> selectedDependencies(SelectedNodeDependencies selectedNodeDependencies) {
+        return selectedNodeDependencies.getSelectedDependencies().map(selectedNodeDependencies.getMap()::toCodeDependency)
         .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private Stream<CodeDependency> getSelectedDependencies() {
+    private Stream<CodeDependency> getSelectedCodeDependencies() {
         return IntStream.of(dependencyViewer.getSelectedRows())
         .map(dependencyViewer::convertRowIndexToModel)
         .mapToObj(allDependencies::get);
     }
 
-    private void updateRowCountLabel() {
-        countLabel.setText("( " + dependencyViewer.getRowCount() + " / " + allDependencies.size() + " )");
+    private Set<Dependency> getSelectedDependencies() {
+        return getSelectedCodeDependencies()
+                .map(CodeDependency::getDependency)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Dependency> getFilteredDependencies() {
+        Set<Dependency> selectedDependencies = getSelectedDependencies();
+        if(! selectedDependencies.isEmpty())
+            return selectedDependencies;
+        else if(dependencyViewer.getRowCount() < allDependencies.size())
+            return getVisibleDependencies();
+        else
+            return Collections.emptySet();
+    }
+
+    public Set<JavaClass> getSelectedClasses() {
+        return getFilteredDependencies().stream()
+                .flatMap(d -> Stream.of(d.getOriginClass(), d.getTargetClass()))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Dependency> getVisibleDependencies() {
+        return IntStream.range(0, dependencyViewer.getRowCount())
+        .map(dependencyViewer::convertRowIndexToModel)
+        .mapToObj(allDependencies::get)
+        .map(CodeDependency::getDependency)
+        .collect(Collectors.toSet());
+    }
+
+    private void updateRowCountLabelAndFilterAction() {
+        int rowCount = dependencyViewer.getRowCount();
+        int dependencyCount = allDependencies.size();
+        countLabel.setText("( " + rowCount + " / " + dependencyCount + " )");
+        enableFilterAction();
+    }
+    private void enableFilterAction() {
+        int rowCount = dependencyViewer.getRowCount();
+        int dependencyCount = allDependencies.size();
+        int selectedRowCount = dependencyViewer.getSelectedRowCount();
+        filterAction.setEnabled(rowCount > 0 && rowCount < dependencyCount
+                || selectedRowCount > 0 && selectedRowCount  < dependencyCount);
     }
 
     private void scrollSelectedToVisible() {
@@ -301,30 +369,25 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         }
     }
 
-    void addDependencySelectionCallback(Consumer<Set<JavaClass> > listener) {
+    void addDependencySelectionCallback(Consumer<Object > listener) {
         dependencyViewer.getSelectionModel().addListSelectionListener(
                 e -> {
-                    if(!e.getValueIsAdjusting())
-                        listener.accept(getSelectedClasses());
+                    if(!e.getValueIsAdjusting()) {
+                        listener.accept(this);
+                        enableFilterAction();
+                    }
                 });
         dependencyViewer.addFocusListener(new FocusAdapter() {
 
             @Override
             public void focusGained(FocusEvent e) {
                 if(! e.isTemporary())
-                    listener.accept(getSelectedClasses());
+                    listener.accept(this);
             }
 
         });
+        dependencySelectionCallbacks.add(listener);
     }
-
-
-    private Set<JavaClass> getSelectedClasses() {
-        return getSelectedDependencies().map(CodeDependency::getDependency)
-                .flatMap(d -> Stream.of(d.getOriginClass(), d.getTargetClass()))
-                .collect(Collectors.toSet());
-    }
-
 
     private String toDisplayedFullName(JavaClass originClass) {
         return CodeNode.findEnclosingNamedClass(originClass).getName().replace('$', '.');

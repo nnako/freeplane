@@ -11,16 +11,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.PackageMatcher;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.core.importer.Location;
 
-class IgnoredClassMatcher implements ImportOption{
+class ClassMatcher implements ImportOption{
     private static final Pattern CLASS_LOCATION_PATTERN = Pattern.compile("(?<=/)[\\w/]+(?=(?:\\$[\\w\\$/]*)?\\.class$)");
     private final List<PackageMatcher> matchers;
     private final List<String> patterns;
 
-    public IgnoredClassMatcher(List<String> patterns) {
+    ClassMatcher(List<String> patterns) {
         super();
         this.patterns = patterns;
         this.matchers = patterns.stream()
@@ -28,20 +29,24 @@ class IgnoredClassMatcher implements ImportOption{
                 .map(PackageMatcher::of).collect(Collectors.toList());
     }
 
-    public boolean anyMatch(Location location) {
+    boolean matches(Location location) {
         String locationString = location.asURI().toString();
         if(locationString.endsWith("/package-info.class"))
             return true;
         Matcher matcher = CLASS_LOCATION_PATTERN.matcher(locationString);
         if (matcher.find()) {
             String namedClass = matcher.group().replace('/', '.');
-            return anyMatch(namedClass);
+            return matches(namedClass);
         } else
             return false;
     }
 
-    public boolean anyMatch(String name) {
-        return matchers.stream().anyMatch(m -> m.matches(name));
+    boolean matches(JavaClass javaClass) {
+        return matches(javaClass.getFullName());
+    }
+
+    private boolean matches(String className) {
+        return matchers.stream().anyMatch(m -> m.matches(className));
     }
 
     @Override
@@ -57,12 +62,12 @@ class IgnoredClassMatcher implements ImportOption{
             return false;
         if (getClass() != obj.getClass())
             return false;
-        IgnoredClassMatcher other = (IgnoredClassMatcher) obj;
+        ClassMatcher other = (ClassMatcher) obj;
         return Objects.equals(patterns, other.patterns);
     }
 
     @Override
     public boolean includes(Location location) {
-       return matchers.isEmpty() ? true : ! anyMatch(location);
+       return matchers.isEmpty() ? true : ! matches(location);
     }
 }

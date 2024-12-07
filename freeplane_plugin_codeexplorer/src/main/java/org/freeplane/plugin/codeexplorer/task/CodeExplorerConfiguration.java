@@ -15,11 +15,11 @@ public interface CodeExplorerConfiguration {
 
     String getProjectName();
 
-    GroupMatcher createGroupMatcher();
+    GroupMatcher createGroupMatcher(JavaClasses classes);
 
     DependencyJudge getDependencyJudge();
 
-    AnnotationMatcher getAnnotationMatcher();
+    CodeAttributeMatcher getCodeAttributeMatcher();
 
     boolean canBeSaved();
 

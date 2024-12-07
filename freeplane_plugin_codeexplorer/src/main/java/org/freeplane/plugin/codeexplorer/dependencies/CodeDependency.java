@@ -18,6 +18,8 @@ import com.tngtech.archunit.core.domain.JavaClass;
 public class CodeDependency {
     private static final Pattern ARRAYS = Pattern.compile("\\[+L?([\\w$]+);?");
     private static final Pattern PACKAGES = Pattern.compile("(?<=\\b|\\[L)(?:[a-z0-9_]+\\.)+");
+    private static final Pattern ARGUMENTS = Pattern.compile("\\([\\w\\s,<>]+\\)");
+    private static final Pattern SWITCH = Pattern.compile("\\$SWITCH_TABLE\\$[\\w$]+\\$Status\\(\\)");
 
     private final Dependency dependency;
     private final boolean goesUp;
@@ -50,11 +52,9 @@ public class CodeDependency {
     public String getDescription() {
         JavaClass originClass = getOriginClass();
         JavaClass targetClass = getTargetClass();
-        JavaClass namedOrigin = CodeNode.findEnclosingNamedClass(originClass);
-        JavaClass namedTarget = CodeNode.findEnclosingNamedClass(targetClass);
         String description = dependency.getDescription()
-                .replace(namedOrigin.getName(), ClassNode.getSimpleName(namedOrigin))
-                .replace(namedTarget.getName(), ClassNode.getSimpleName(namedTarget));
+                .replace(originClass.getName(), ClassNode.getSimpleName(originClass))
+                .replace(targetClass.getName(), ClassNode.getSimpleName(targetClass));
         Matcher packagesMatcher = PACKAGES.matcher(description);
         description = packagesMatcher.replaceAll("");
 
@@ -66,8 +66,11 @@ public class CodeDependency {
         }
         arraysMatcher.appendTail(result);
 
-        description = result.toString()
-                .replace('$', '.');
+        description = result.toString();
+
+        description = ARGUMENTS.matcher(description).replaceAll("(...)");
+
+        description = SWITCH.matcher(description).replaceAll("\\$SWITCH_TABLE...()");
         return description;
     }
 

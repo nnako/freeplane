@@ -11,20 +11,31 @@ import org.freeplane.features.filter.Filter;
 import org.freeplane.features.link.ConnectorModel;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.plugin.codeexplorer.dependencies.DependencyVerdict;
+import org.freeplane.plugin.codeexplorer.map.CodeNode;
 
 class CodeConnectorModel extends ConnectorModel {
 
     private final int weight;
     private final boolean goesUp;
     private final DependencyVerdict dependencyVerdict;
-    CodeConnectorModel(NodeModel source, String targetID, int weight, DependencyVerdict dependencyVerdict, boolean goesUp) {
+    CodeConnectorModel(CodeNode source, String targetID, int weight, DependencyVerdict dependencyVerdict, boolean goesUp) {
         super(source, targetID);
         this.weight = weight;
         this.goesUp = goesUp;
         this.dependencyVerdict = dependencyVerdict;
-        int i = 0;
     }
 
+
+
+    @Override
+    public CodeNode getSource() {
+         return (CodeNode)super.getSource();
+    }
+
+    @Override
+    public CodeNode getTarget() {
+         return (CodeNode)super.getTarget();
+    }
 
 
     @Override

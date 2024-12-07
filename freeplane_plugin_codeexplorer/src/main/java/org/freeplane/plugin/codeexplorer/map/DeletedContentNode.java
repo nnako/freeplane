@@ -52,4 +52,9 @@ public class DeletedContentNode extends CodeNode{
     String getUIIconName() {
         return UI_DELETED_CONTENT_NODE_ICON_NAME;
     }
+
+    @Override
+    long getClassCount() {
+         return 0;
+    }
 }

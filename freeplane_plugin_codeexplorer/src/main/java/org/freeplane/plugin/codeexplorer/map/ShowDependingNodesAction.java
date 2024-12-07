@@ -161,15 +161,15 @@ class ShowDependingNodesAction extends AFreeplaneAction {
 
     private Set<String> recursiveDependencies(IMapSelection selection, ICondition currentCondition,
             MapModel map, DependencyDirection dependencyDirection) {
-        DependencySelection dependencySelection = new DependencySelection(selection);
+        SelectedNodeDependencies selectedNodeDependencies = new SelectedNodeDependencies(selection);
 	    final Filter filter = selection.getFilter();
-        Set<String> dependentNodeIDs = dependencies(selectedNodes(), dependencySelection.getMap(), filter, dependencyDirection);
+        Set<String> dependentNodeIDs = dependencies(selectedNodes(), selectedNodeDependencies.getMap(), filter, dependencyDirection);
 	    for(int recursionCounter = allNodesSatisfyFilter(selection, dependentNodeIDs) ? 0 : 1;
 	        recursionCounter < maximumRecursionDepth;
 	        recursionCounter++) {
 	        Set<String> next = dependencies(dependentNodeIDs.stream()
 	                .map(map::getNodeForID)
-	                .map(CodeNode.class::cast), dependencySelection.getMap(), null, dependencyDirection);
+	                .map(CodeNode.class::cast), selectedNodeDependencies.getMap(), null, dependencyDirection);
 	        next.removeAll(dependentNodeIDs);
 	        if(next.isEmpty()) {
 	            if(recursionCounter == 0)

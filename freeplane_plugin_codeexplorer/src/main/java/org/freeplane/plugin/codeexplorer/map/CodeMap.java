@@ -1,6 +1,7 @@
 package org.freeplane.plugin.codeexplorer.map;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -11,9 +12,10 @@ import org.freeplane.features.map.mindmapmode.MMapModel;
 import org.freeplane.features.styles.MapStyleModel;
 import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
 import org.freeplane.plugin.codeexplorer.dependencies.DependencyVerdict;
-import org.freeplane.plugin.codeexplorer.task.AnnotationMatcher;
+import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 import org.freeplane.plugin.codeexplorer.task.DependencyJudge;
 import org.freeplane.plugin.codeexplorer.task.DependencyRuleJudge;
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher.MatchingCriteria;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorerConfiguration;
 
 import com.tngtech.archunit.core.domain.Dependency;
@@ -68,9 +70,9 @@ public class CodeMap extends MMapModel {
     public void enableAutosave() {/**/}
 
 
-    public void updateAnnotations(AnnotationMatcher annotationMatcher) {
+    public void updateAnnotations(CodeAttributeMatcher codeAttributeMatcher) {
         boolean saved = isSaved();
-        getRootNode().updateAnnotations(annotationMatcher);
+        getRootNode().updateCodeAttributes(codeAttributeMatcher);
         if(saved)
             setSaved(true);
     }
@@ -107,14 +109,20 @@ public class CodeMap extends MMapModel {
     }
 
     public int groupIndexOf(JavaClass javaClass) {
-        return groupFinder.groupIndexOf(javaClass);
+        return groupFinder.projectIndexOf(javaClass);
     }
 
     public int groupIndexOf(String groupId) {
         return groupFinder.groupIndexOf(groupId);
     }
 
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass javaClass) {
+        return groupFinder.matchingCriteria(javaClass);
+    }
 
+    public Optional<MatchingCriteria> matchingCriteria(JavaClass originClass, JavaClass targetClass) {
+        return groupFinder.matchingCriteria(originClass, targetClass);
+    }
 
     public boolean isKnown(JavaClass javaClass) {
         return groupFinder.isKnown(javaClass);

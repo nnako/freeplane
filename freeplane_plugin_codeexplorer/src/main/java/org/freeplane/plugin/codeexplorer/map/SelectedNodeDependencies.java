@@ -21,7 +21,7 @@ import org.freeplane.features.map.NodeModel;
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
 
-public class DependencySelection {
+public class SelectedNodeDependencies {
     private enum Visibility {VISIBLE, HIDDEN_BY_FILTER, HIDDEN_BY_FOLDING, UNKNOWN}
 
     private final IMapSelection selection;
@@ -29,11 +29,11 @@ public class DependencySelection {
     private Set<NodeModel> selectedNodeSet;
     private final boolean showsOutsideDependencies;
 
-    public DependencySelection(IMapSelection selection) {
+    public SelectedNodeDependencies(IMapSelection selection) {
         this(selection, ResourceController.getResourceController().getBooleanProperty("code_showOutsideDependencies", true));
     }
 
-    public DependencySelection(IMapSelection selection, boolean showsOutsideDependencies) {
+    public SelectedNodeDependencies(IMapSelection selection, boolean showsOutsideDependencies) {
         this.selection = selection;
         this.showsOutsideDependencies = showsOutsideDependencies;
     }

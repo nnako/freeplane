@@ -9,8 +9,8 @@ import org.freeplane.features.attribute.ManagedAttribute;
 
 import com.tngtech.archunit.core.domain.JavaEnumConstant;
 
-class AnnotationAttribute extends ManagedAttribute{
-    AnnotationAttribute(String name, Object value) {
+class CodeAttribute extends ManagedAttribute{
+    CodeAttribute(String name, Object value) {
         super(name, unwrap(value));
     }
 

@@ -2,17 +2,15 @@ package org.freeplane.plugin.codeexplorer.map;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.NodeModel;
-import org.freeplane.plugin.codeexplorer.graph.GraphCycleFinder;
+import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaAnnotation;
@@ -20,7 +18,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.core.domain.properties.HasName;
-import com.tngtech.archunit.core.domain.Formatters;
 
 
 public class ClassNode extends CodeNode {
@@ -44,9 +41,19 @@ public class ClassNode extends CodeNode {
         this.innerClasses = null;
 		setFolded(false);
 		setIdWithIndex(javaClass.getName());
-		String nodeText = classNameWithEnclosingClasses(javaClass);
+		String nodeText = classNameWithNestedClasses(javaClass);
         setText(nodeText);
 	}
+
+    @Override
+    void updateCodeAttributes(CodeAttributeMatcher codeAttributeMatcher) {
+         super.updateCodeAttributes(codeAttributeMatcher);
+         getMap().matchingCriteria(javaClass).ifPresent(criteria -> {
+             NodeAttributeTableModel attributes = NodeAttributeTableModel.getModel(this);
+             attributes.addRowNoUndo(this, new CodeAttribute("Speciality", criteria.name()));
+         });
+    }
+
 
 
     @Override
@@ -65,22 +72,32 @@ public class ClassNode extends CodeNode {
         return Stream.of(javaClass);
     }
 
-    public static String classNameWithEnclosingClasses(final JavaClass javaClass) {
+    public static String classNameWithNestedClasses(final JavaClass javaClass) {
         String simpleName = getSimpleName(javaClass);
-        return javaClass.getEnclosingClass()
-                .map(ec -> classNameWithEnclosingClasses(ec) + "." + simpleName)
+        if(javaClass.isMemberClass())
+            return javaClass.getEnclosingClass()
+                .map(ec -> classNameWithNestedClasses(ec) + "." + simpleName)
                 .orElse(simpleName);
+        else
+            return simpleName;
     }
 
     public static String getSimpleName(final JavaClass javaClass) {
         String simpleName = javaClass.getSimpleName();
         if(simpleName.isEmpty()) {
             final String fullName = javaClass.getName();
-            int lastIndexOfNon$ = fullName.length() - 1;
-            while (lastIndexOfNon$ >= 0 && fullName.charAt(lastIndexOfNon$) == '$')
-                lastIndexOfNon$--;
-            return Formatters.ensureSimpleName(fullName.substring(0, lastIndexOfNon$+1))
-                    + fullName.substring(lastIndexOfNon$+1);
+            if (javaClass.isAnonymousClass()) {
+                JavaClass enclosingNamedClass = findEnclosingNamedClass(javaClass.getEnclosingClass().get());
+                return getSimpleName(enclosingNamedClass) + fullName.substring(enclosingNamedClass.getName().length());
+            }
+            if(javaClass.isArray())
+                return getSimpleName(javaClass.getBaseComponentType()) + "[]";
+            if(javaClass.isMemberClass()) {
+                JavaClass enclosingNamedClass = javaClass.getEnclosingClass().get();
+                return fullName.substring(enclosingNamedClass.getName().length() + 1);
+            }
+            String packageName = javaClass.getPackage().getName();
+            return packageName.isEmpty() ? fullName : fullName.substring(packageName.length() + 1);
         }
         return simpleName;
     }
@@ -152,34 +169,7 @@ public class ClassNode extends CodeNode {
     }
 
     @Override
-    Set<CodeNode> findCyclicDependencies() {
-        GraphCycleFinder<CodeNode> cycleFinder = new GraphCycleFinder<CodeNode>();
-        cycleFinder.addNode(this);
-        cycleFinder.stopSearchHere();
-        cycleFinder.exploreGraph(Collections.singleton(this),
-                this::connectedTargetNodesInGroup,
-                this::connectedOriginNodesInGroup);
-        LinkedHashSet<CodeNode> cycles = cycleFinder.findSimpleCycles().stream()
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return cycles;
-    }
-
-    private Stream<CodeNode> connectedOriginNodesInGroup(CodeNode node) {
-        Stream<JavaClass> originClasses = node.getIncomingDependenciesWithKnownOrigins()
-        .map(Dependency::getOriginClass);
-        return nodes(originClasses);
-    }
-
-    private Stream<CodeNode> connectedTargetNodesInGroup(CodeNode node) {
-        Stream<JavaClass> targetClasses = node.getOutgoingDependenciesWithKnownTargets()
-        .map(Dependency::getTargetClass);
-        return nodes(targetClasses);
-    }
-    private Stream<CodeNode> nodes(Stream<JavaClass> classes) {
-        return classes
-        .map(this::idWithGroupIndex)
-        .map(getMap()::getNodeForID)
-        .map(CodeNode.class::cast);
+    long getClassCount() {
+        return 1;
     }
 }

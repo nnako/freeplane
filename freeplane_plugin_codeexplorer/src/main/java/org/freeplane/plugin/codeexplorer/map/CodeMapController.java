@@ -34,10 +34,11 @@ import org.freeplane.features.nodestyle.NodeStyleModel;
 import org.freeplane.features.styles.MapStyleModel;
 import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.plugin.codeexplorer.map.ShowDependingNodesAction.DependencyDirection;
-import org.freeplane.plugin.codeexplorer.task.AnnotationMatcher;
+import org.freeplane.plugin.codeexplorer.task.CodeAttributeMatcher;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorer;
 import org.freeplane.plugin.codeexplorer.task.CodeExplorerConfiguration;
 import org.freeplane.plugin.codeexplorer.task.DependencyJudge;
+import org.freeplane.plugin.codeexplorer.task.GroupMatcher;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
 
@@ -131,21 +132,22 @@ public class CodeMapController extends MapController implements CodeExplorer{
         loadingHintMap.addExtension(new LoadedMap(projectMap));
         WeakReference<CodeMap> oldMapReference = new WeakReference<CodeMap>(oldMap);
         JavaClasses oldImportedClasses;
-        if(! reloadCodebase && (oldMap.getRootNode() instanceof ProjectRootNode)) {
-            oldImportedClasses = ((ProjectRootNode)oldMap.getRootNode()).getImportedClasses();
+        if(! reloadCodebase && (oldMap.getRootNode() instanceof ProjectNode)) {
+            oldImportedClasses = ((ProjectNode)oldMap.getRootNode()).getImportedClasses();
         }
         else
             oldImportedClasses = null;
         oldMap = null;
         classImportService.execute(() -> {
 
-            ProjectRootNode projectRoot = null;
+            ProjectNode projectRoot = null;
             CodeMap nextMap = null;
             try {
                 JavaClasses importedClasses = oldImportedClasses != null ? oldImportedClasses :codeExplorerConfiguration.importClasses();
                 if(LoadedMap.containsProjectMap(loadingHintMap, projectMap)) {
-                    projectRoot = ProjectRootNode.asMapRoot(codeExplorerConfiguration.getProjectName(),
-                            projectMap, importedClasses, codeExplorerConfiguration.createGroupMatcher());
+                    GroupMatcher groupMatcher = codeExplorerConfiguration.createGroupMatcher(importedClasses);
+                    projectRoot = ProjectNode.asMapRoot(codeExplorerConfiguration.getProjectName(),
+                            projectMap, importedClasses, groupMatcher);
 
                     projectMap.setJudge(codeExplorerConfiguration.getDependencyJudge());
                     CodeMapPersistenceManager.getCodeMapPersistenceManager(getModeController()).restoreUserContent(projectMap);
@@ -183,7 +185,7 @@ public class CodeMapController extends MapController implements CodeExplorer{
                 if(newSelection.length > 0)
                     selection.replaceSelection(newSelection);
                 if(codeExplorerConfiguration != null)
-                    projectMap.updateAnnotations(codeExplorerConfiguration.getAnnotationMatcher());
+                    projectMap.updateAnnotations(codeExplorerConfiguration.getCodeAttributeMatcher());
                 FilterController.getCurrentFilterController().mapRootNodeChanged(viewedMap);
                 Controller.getCurrentController().getMapViewManager().setMapTitles();
                 EventQueue.invokeLater(() -> Controller.getCurrentController().getViewController().setWaitingCursor(false));
@@ -203,12 +205,12 @@ public class CodeMapController extends MapController implements CodeExplorer{
     }
 
     @Override
-    public void setProjectConfiguration(DependencyJudge judge, AnnotationMatcher annotationMatcher) {
+    public void setProjectConfiguration(DependencyJudge judge, CodeAttributeMatcher codeAttributeMatcher) {
         Controller currentController = Controller.getCurrentController();
         IMapSelection selection = currentController.getSelection();
         CodeMap map = (CodeMap) selection.getMap();
         map.setJudge(judge);
-        map.updateAnnotations(annotationMatcher);
+        map.updateAnnotations(codeAttributeMatcher);
         IMapViewManager mapViewManager = currentController.getMapViewManager();
         MapView mapView = (MapView) mapViewManager.getMapViewComponent();
         mapView.repaint();
