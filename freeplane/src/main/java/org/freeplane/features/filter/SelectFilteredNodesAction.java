@@ -49,7 +49,7 @@ class SelectFilteredNodesAction extends AFreeplaneAction {
 		final IMapSelection selection = Controller.getCurrentController().getSelection();
 		final MapController mapController = Controller.getCurrentModeController().getMapController();
 		final NodeModel selected = selection.getSelected();
-        final NodeModel rootNode = selected.getMap().getRootNode();
+        final NodeModel rootNode = selection.getSelectionRoot();
 		Filter filter = selection.getFilter();
         boolean nodeFound = filter.getFilterInfo(rootNode).isMatched();
 		if(nodeFound){
