@@ -60,6 +60,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.FileOpener;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.mode.Controller;
@@ -79,6 +80,7 @@ import net.infonode.docking.SplitWindow;
 import net.infonode.docking.TabWindow;
 import net.infonode.docking.View;
 import net.infonode.docking.WindowPopupMenuFactory;
+import net.infonode.docking.action.CloseWindowAction;
 import net.infonode.docking.internalutil.InternalDockingUtil;
 import net.infonode.docking.properties.DockingWindowProperties;
 import net.infonode.docking.properties.RootWindowProperties;
@@ -237,24 +239,28 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 				   return null;
 				}
 				JPopupMenu menu = new JPopupMenu(window.getTitle());
-				JMenuItem menuItem = new JMenuItem(TextUtils.getText("TabPopUpMenu.rename.text","Rename"));
-				menuItem.setToolTipText(TextUtils.getText("TabPopUpMenu.rename.tooltip","Windows layout changes may reset the tab title."));
-				menuItem.addActionListener(new ActionListener() {
-				    public void actionPerformed(ActionEvent e) {
-						JComponent mapView = (JComponent) getContainedMapView(window);
-						String customizedTabName = (String) mapView.getClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY);
-						customizedTabName = customizedTabName!=null ? customizedTabName : mapView.getName();
-						String newName = JOptionPane.showInputDialog(TextUtils.getText("TabPopUpMenu.rename.inputDialog","Input new temporary name: "), customizedTabName);
-				        if(Objects.equals(newName, "") || newName==null ){
-				            mapView.putClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY, null);
-				        } else {
-				            mapView.putClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY, newName);
-				        }
-						addTitleProvider(window); //TODO: revisar
-				        setTitle();
-				    }
- 				});
-				menu.add(menuItem);
+                JMenuItem closeItem = TranslatedElementFactory.createMenuItem("close_map");
+                closeItem.setIcon(new CloseIcon(tabIconSize()));
+                closeItem.addActionListener(e -> {
+                    Controller.getCurrentController().getMapViewManager().close(getContainedMapView(window));
+                });
+                menu.add(closeItem);
+                JMenuItem renameItem = new JMenuItem(TextUtils.getText("TabPopUpMenu.rename.text","Rename"));
+				renameItem.setToolTipText(TextUtils.getText("TabPopUpMenu.rename.tooltip","Windows layout changes may reset the tab title."));
+				renameItem.addActionListener(e -> {
+                	JComponent mapView = (JComponent) getContainedMapView(window);
+                	String customizedTabName = (String) mapView.getClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY);
+                	customizedTabName = customizedTabName!=null ? customizedTabName : mapView.getName();
+                	String newName = JOptionPane.showInputDialog(TextUtils.getText("TabPopUpMenu.rename.inputDialog","Input new temporary name: "), customizedTabName);
+                    if(Objects.equals(newName, "") || newName==null ){
+                        mapView.putClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY, null);
+                    } else {
+                        mapView.putClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY, newName);
+                    }
+                	addTitleProvider(window); //TODO: revisar
+                    setTitle();
+                });
+				menu.add(renameItem);
 				return menu;
 			}
 		});
@@ -281,7 +287,6 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 
 			@Override
 			public void lookAndFeelChanging() {
-				String lf = UIManager.getLookAndFeel().getID();
 				DockingWindowsTheme newTheme;
 				boolean existingDockingThemeMatchesLookAndFeel = lf.endsWith("Aqua") != (theme instanceof LookAndFeelDockingTheme);
 				if(existingDockingThemeMatchesLookAndFeel)
@@ -313,7 +318,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		tabbedPanelProperties.getContentPanelProperties()
 		    .getComponentProperties().setInsets(new Insets(0, 0, 0, 0)).setBorder(BorderFactory.createEmptyBorder());
 
-		int buttonSize = Math.round(UITools.FONT_SCALE_FACTOR * InternalDockingUtil.DEFAULT_BUTTON_ICON_SIZE);
+		int buttonSize = tabIconSize();
 		tabWindowProperties.getMaximizeButtonProperties().setIcon(new MaximizeIcon(buttonSize));
 		tabWindowProperties.getMinimizeButtonProperties().setIcon(new MinimizeIcon(buttonSize));
 		tabWindowProperties.getCloseButtonProperties().setIcon(new CloseIcon(buttonSize));
@@ -343,6 +348,10 @@ class MapViewDockingWindows implements IMapViewChangeListener {
         normalButtonProperties.getMinimizeButtonProperties().setIcon(new MinimizeIcon(buttonSize));
         normalButtonProperties.getRestoreButtonProperties().setIcon(new RestoreIcon(buttonSize));
 	}
+
+    private static int tabIconSize() {
+        return Math.round(UITools.FONT_SCALE_FACTOR * InternalDockingUtil.DEFAULT_BUTTON_ICON_SIZE);
+    }
 
 	private void removeDesktopPaneAccelerators() {
 		 final InputMap map = new InputMap();
