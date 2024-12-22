@@ -221,7 +221,7 @@ public class AttributeController implements IExtension {
 						tooltip.append(object);
 						tooltip.append("\"");
                         tooltip.append(">");
-                        tooltip.append(text);
+                        tooltip.append(HtmlUtils.toXMLEscapedText(text));
 						tooltip.append("</a>");
 					}
 					else{
