@@ -19,27 +19,39 @@
  */
 package org.freeplane.features.icon;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import javax.swing.SwingUtilities;
 
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
-import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.TagIcon;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.ui.components.html.CssRuleBuilder;
+import org.freeplane.core.util.HtmlUtils;
+import org.freeplane.core.util.Hyperlink;
+import org.freeplane.core.util.LogUtils;
+import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.attribute.AttributeRegistry;
+import org.freeplane.features.attribute.AttributeTableLayoutModel;
+import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.filter.condition.ConditionFactory;
 import org.freeplane.features.icon.factory.IconStoreFactory;
+import org.freeplane.features.map.ITooltipProvider;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
@@ -50,10 +62,14 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.styles.IStyle;
 import org.freeplane.features.styles.LogicalStyleController;
-import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;
+import org.freeplane.features.text.ShortenedTextModel;
+import org.freeplane.features.text.TextController;
+import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.MapStyleModel;
 import org.freeplane.features.styles.StyleNode;
+import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.map.TagLocation;
 
 /**
  * @author Dimitry Polivaev
@@ -61,7 +77,11 @@ import org.freeplane.features.styles.StyleNode;
 public class IconController implements IExtension {
     private static final Quantity<LengthUnit> DEFAULT_ICON_SIZE = new Quantity<LengthUnit>(12, LengthUnit.pt);
 
+    private static final int TAG_TOOLTIP = 5;
+
 	final private CombinedPropertyChain<Collection<NamedIcon>, NodeModel> iconHandlers;
+
+	private UIIcon tagsIcon;
 	public static IconController getController() {
 		final ModeController modeController = Controller.getCurrentModeController();
 		return getController(modeController);
@@ -78,8 +98,61 @@ public class IconController implements IExtension {
 
 	public void install(final ModeController modeController) {
 		modeController.addExtension(IconController.class, this);
+		registerStateIconProvider();
+		registerTooltipProvider();
 	}
+    private void registerStateIconProvider() {
+        addStateIconProvider(new IStateIconProvider() {
+            @Override
+            public UIIcon getStateIcon(NodeModel node) {
+                if (getTags(node).isEmpty()) {
+                    return null;
+                }
+                final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
+                TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
+                final boolean showIcon = tagLocation == TagLocation.NEVER || ShortenedTextModel.isShortened(node);
+                if(showIcon) {
+                    if (tagsIcon == null) {
+                        tagsIcon = IconStoreFactory.ICON_STORE.getUIIcon("tags.svg");
+                    }
+                    return tagsIcon;
+                }
+                else
+                    return null;
+            }
 
+            @Override
+            public boolean mustIncludeInIconRegistry() {
+                return true;
+            }
+        });
+    }
+    private void registerTooltipProvider() {
+        modeController.addToolTipProvider(TAG_TOOLTIP, new ITooltipProvider() {
+            @Override
+            public String getTooltip(ModeController modeController, NodeModel node, Component view) {
+                List<Tag> tags = getTags(node);
+                if (tags.isEmpty()) {
+                    return null;
+                }
+                final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
+                TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
+                final boolean showTooltip = tagLocation == TagLocation.NEVER || ShortenedTextModel.isShortened(node);
+                if(! showTooltip)
+                    return null;
+                final Font font = getTagFont(node);
+                final StringBuilder tooltip = new StringBuilder();
+                tooltip.append("<html><body><p style=\"");
+                tooltip.append( new CssRuleBuilder().withHTMLFont(font));
+                tooltip.append(" \">");
+                tooltip.append(tags.stream().map(Tag::getContent)
+                        .map(HtmlUtils::toXMLEscapedText)
+                        .collect(Collectors.joining("] [", "[", "]")));
+                tooltip.append("</p></body></html>");
+                return tooltip.toString();
+            }
+        });
+    }
 	final private Collection<IStateIconProvider> stateIconProviders;
 
 	final private List<IconMouseListener> iconMouseListeners;

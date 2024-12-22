@@ -1470,7 +1470,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             return;
         }
 		if(property.equals(AttributeController.SHOW_ICON_FOR_ATTRIBUTES)
-				||property.equals(NoteController.SHOW_NOTE_ICONS))
+				||property.equals(NoteController.SHOW_NOTE_ICONS)
+				|| property.equals(MapStyle.SHOW_TAGS_PROPERTY))
 			updateIconsRecursively(getRoot());
 		if(property.equals(NoteController.SHOW_NOTES_IN_MAP))
 			setShowNotes();
