@@ -33,6 +33,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -110,6 +111,7 @@ import net.infonode.tabbedpanel.TabLayoutPolicy;
 import net.infonode.tabbedpanel.TabbedPanelProperties;
 import net.infonode.tabbedpanel.titledtab.TitledTabProperties;
 import net.infonode.tabbedpanel.titledtab.TitledTabSizePolicy;
+import net.infonode.tabbedpanel.titledtab.TitledTabStateProperties;
 import net.infonode.util.Direction;
 
 class MapViewDockingWindows implements IMapViewChangeListener {
@@ -482,6 +484,14 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	private void addDockedWindow(final Component pOldMap, final Component pNewMap) {
 	    final View viewFrame = viewSerializer.newDockedView(pNewMap, createTitle(pNewMap));
 		addDockedView(pOldMap != null ? getContainingDockedWindow(pOldMap) : null, viewFrame);
+        updateTabTooltip(pNewMap);
+    }
+
+    private void updateTabTooltip(final Component pNewMap) {
+        File file = ((MapView)pNewMap).getMap().getFile();
+        TitledTabStateProperties tabProperties = getContainingDockedWindow(pNewMap)
+                .getWindowProperties().getTabProperties().getTitledTabProperties().getNormalProperties();
+        tabProperties.setToolTipText(file != null ? file.getAbsolutePath() :  null);
     }
 
 	@Override
@@ -626,6 +636,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		if(containingDockedWindow != null) {
 			String title = createTitle(mapViewComponent);
 			containingDockedWindow.getViewProperties().setTitle(title);
+			updateTabTooltip(mapViewComponent);
 		}
     }
 
