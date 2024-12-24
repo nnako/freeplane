@@ -10,6 +10,7 @@ assignees: ''
 ### Title
 
 Describe the requested feature in one sentence.
+
 Example: “Add a batch rename function for tags.”
 
 ### 1. Current Workflow Challenges
