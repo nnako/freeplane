@@ -1,11 +1,8 @@
 package org.freeplane.plugin.bugreport;
 
 import java.awt.GraphicsEnvironment;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -26,18 +23,14 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.freeplane.core.resources.ResourceController;
-import org.freeplane.core.ui.components.resizer.UIComponentVisibilityDispatcher;
-import org.freeplane.core.ui.sounds.SoundClipPlayer;
 import org.freeplane.core.util.FreeplaneVersion;
 import org.freeplane.core.util.HtmlUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.logging.ErrorLogButton;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.ui.ViewController;
 
@@ -66,7 +59,6 @@ public class ReportGenerator extends StreamHandler {
 	private final static String BUG_TRACKER_REFERENCE_URL = "https://www.freeplane.org/info/bugtracker.ref.txt";
 	private static String BUG_TRACKER_URL = null;
 	static boolean isDisabled = false;
-	private static int errorCounter = 0;
 	private static String info;
 	static final private String OPTION = "org.freeplane.plugin.bugreport";
 	private static ByteArrayOutputStream out = null;
@@ -188,24 +180,6 @@ public class ReportGenerator extends StreamHandler {
 		}
 	}
 
-	private static class LogOpener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			final String freeplaneLogDirectoryPath = LogUtils.getLogDirectory();
-			final File file = new File(freeplaneLogDirectoryPath);
-			if (file.isDirectory()) {
-				final ViewController viewController = Controller.getCurrentController().getViewController();
-				try {
-					viewController.openDocument(file.toURL());
-				}
-				catch (Exception ex) {
-				}
-			}
-		}
-	}
-
-	private JButton logButton;
-
 	@Override
 	public synchronized void publish(final LogRecord record) {
 		final Controller controller = Controller.getCurrentController();
@@ -241,30 +215,10 @@ public class ReportGenerator extends StreamHandler {
 				@Override
 				@SuppressWarnings("serial")
 				public void run() {
-					try {
-						errorCounter++;
-						if (TextUtils.getRawText("internal_error.tooltip", null) != null) {
-							if (logButton == null) {
-								final Icon errorIcon = ResourceController.getResourceController()
-								    .getIcon("warning_icon");
-								logButton = new JButton();
-								logButton.addActionListener(new LogOpener());
-								logButton.setIcon(errorIcon);
-								String tooltip = TextUtils.getText("internal_error.tooltip");
-								logButton.setToolTipText(tooltip);
-								viewController.addStatusComponent("internal_error", logButton);
-							}
-							logButton.setText(TextUtils.format("errornumber", errorCounter));
-							final JComponent statusBar = viewController.getStatusBar();
-							if (!statusBar.isVisible())
-								UIComponentVisibilityDispatcher.of(statusBar).setVisible(true);
-							SoundClipPlayer.playSound("error");
-						}
-					}
-					catch (Exception e) {
-					}
+				    ErrorLogButton.showButton();
 					runSubmitAfterTimeout();
 				}
+
 			});
 		}
 		if (!isDisabled)
