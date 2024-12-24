@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-### 1. Feature Overview
+### 1. Title
 
 Describe the feature you are requesting in one sentence.
 Example: “Add a batch rename function for tags.”
