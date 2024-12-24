@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
+title: Describe the requested feature in one sentence
 labels: feature request
 assignees: ''
 
@@ -9,7 +9,7 @@ assignees: ''
 
 ### 1. Title
 
-Describe the feature you are requesting in one sentence.
+Describe the requested feature in one sentence.
 Example: “Add a batch rename function for tags.”
 
 ### 2. Current Workflow Challenges
