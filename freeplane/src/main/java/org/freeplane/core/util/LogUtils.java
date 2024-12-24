@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.util.logging.ErrorLogButton;
 
 /**
  * Utilities for logging to the standard logfile.
@@ -100,4 +101,8 @@ public class LogUtils {
 	public static Logger getLogger() {
 	    return LOGGER;
     }
+
+	public static void showErrorLogButton() {
+	    ErrorLogButton.showButton();
+	}
 }
