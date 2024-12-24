@@ -157,6 +157,9 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 		    notePanel.setViewedContent("", bodyCssRule, noteStyleSheet, noteForeground, noteBackground);
 			return;
 		}
+        if (ignoreEditorUpdate) {
+            return;
+        }
 		final String note = this.node != null ? NoteModel.getNoteText(this.node) : null;
 		if (note != null) {
 			try {
@@ -166,9 +169,6 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 				if(icon != null)
 					notePanel.setViewedImage(icon, noteStyleAccessor.getHorizontalAlignment());
 				else if (transformedContent == note) {
-					if (ignoreEditorUpdate) {
-						return;
-					}
 					notePanel.removeDocumentListener();
 					notePanel.setEditedContent(note, bodyCssRule, noteStyleSheet, noteForeground, noteBackground);
 					SwingUtilities.invokeLater(new Runnable() {

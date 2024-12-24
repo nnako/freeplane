@@ -23,8 +23,10 @@ import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
@@ -175,10 +177,17 @@ class NotePanel extends JPanel {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (isEditing && e.getOppositeComponent() != null) {
-					noteManager.saveNote();
-				    noteManager.updateEditor();
-				}
+			    if(! isEditing)
+			        return;
+				Component oppositeComponent = e.getOppositeComponent();
+                if (oppositeComponent == null)
+                    return;
+                if(oppositeComponent.getClass().equals(JRootPane.class))
+                    return;
+                if (SwingUtilities.getWindowAncestor(oppositeComponent) instanceof JFrame) {
+                    noteManager.saveNote();
+                    noteManager.updateEditor();
+                }
 			}
 
 			@Override
