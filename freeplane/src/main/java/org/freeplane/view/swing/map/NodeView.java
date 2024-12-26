@@ -21,6 +21,7 @@ package org.freeplane.view.swing.map;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -1857,8 +1858,10 @@ public class NodeView extends JComponent implements INodeView {
             }
             else
                 component.setIcons(tagIcons);
-            component.setComponentOrientation(mainView.getComponentOrientation());
+            ComponentOrientation componentOrientation = mainView.getComponentOrientation();
+            component.setComponentOrientation(componentOrientation);
             component.setHorizontalAlignment(mainView.getHorizontalAlignment());
+            component.setAlignmentX(componentOrientation.isLeftToRight() ? 0f : componentOrientation.isHorizontal() ? 1f:0.5f);
             component.setSize(mainView.getMaximumWidth(), component.getHeight());
         }
         else
