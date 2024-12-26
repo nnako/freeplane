@@ -687,7 +687,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private static final String HIDE_CONNECTORS = "never".intern();
 	private static final String SHOW_CONNECTORS_FOR_SELECTION_ONLY = "for_selection".intern();
 	private static final String SHOW_ARROWS_FOR_SELECTION_ONLY = "only_arrows_for_selection".intern();
-	private static final String SHOW_ICONS_PROPERTY = "show_icons";
 	private static final String OUTLINE_VIEW_FITS_WINDOW_WIDTH = "outline_view_fits_window_width";
 	private static final String OUTLINE_HGAP_PROPERTY = "outline_hgap";
 	private static final String DRAGGING_AREA_WIDTH_PROPERTY = "dragging_area_width";
@@ -740,7 +739,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private static boolean hideSingleEndConnectorsPropertyValue;
 	private String showConnectors;
 	private boolean hideSingleEndConnectors;
-	private static boolean showIcons;
 	private boolean fitToViewport;
 	private static Color spotlightBackgroundColor;
 	private static int outlineHGap;
@@ -752,7 +750,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private final INodeChangeListener connectorChangeListener;
 	private boolean scrollsViewAfterLayout = true;
 	private boolean allowsCompactLayout;
-	private TagLocation tagLocation;
+    private TagLocation tagLocation;
+    private IconLocation iconLocation;
     private boolean repaintsViewOnSelectionChange;
 
     public static final int SCROLL_VELOCITY_PX = (int) (UITools.FONT_SCALE_FACTOR  * 10);
@@ -771,7 +770,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	    spotlightBackgroundColor = resourceController.getColorProperty(SPOTLIGHT_BACKGROUND_COLOR);
 	    hideSingleEndConnectorsPropertyValue = resourceController.getBooleanProperty(HIDE_SINGLE_END_CONNECTORS);
 	    showConnectorsPropertyValue = resourceController.getProperty(SHOW_CONNECTORS_PROPERTY).intern();
-	    showIcons = resourceController.getBooleanProperty(SHOW_ICONS_PROPERTY);
 	    outlineHGap = resourceController.getLengthProperty(OUTLINE_HGAP_PROPERTY);
 	    draggingAreaWidth = resourceController.getLengthProperty(DRAGGING_AREA_WIDTH_PROPERTY);
 	    outlineViewFitsWindowWidth = resourceController.getBooleanProperty(OUTLINE_VIEW_FITS_WINDOW_WIDTH);
@@ -847,6 +845,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         fitToViewport = Boolean.parseBoolean(fitToViewportAsString);
         allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
         tagLocation = mapStyle.tagLocation(viewedMap);
+        iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
         filter = Filter.createTransparentFilter();
         viewedMap.addMapChangeListener(this);
@@ -1004,12 +1003,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
                     mapView.repaint();
                     return;
                 }
-				if (propertyName.equals(SHOW_ICONS_PROPERTY)) {
-					MapView.showIcons = ResourceController.getResourceController().getBooleanProperty(SHOW_ICONS_PROPERTY);
-					mapView.updateIconsRecursively(mapView.getRoot());
-					mapView.repaint();
-					return;
-				}
 				if (propertyName.equals(OUTLINE_HGAP_PROPERTY)) {
 					MapView.outlineHGap = ResourceController.getResourceController().getLengthProperty(OUTLINE_HGAP_PROPERTY);
 					if (mapView.isOutlineLayoutSet()) {
@@ -1492,6 +1485,12 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
             tagLocation = mapStyle.tagLocation(viewedMap);
             updateAllNodeViews();
+            repaint();
+        }
+        if (property.equals(MapStyle.SHOW_ICONS_PROPERTY)) {
+            final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
+            iconLocation = mapStyle.iconLocation(viewedMap);
+            updateIconsRecursively(getRoot());
             repaint();
         }
 		if (property.equals(MapStyle.FIT_TO_VIEWPORT)) {
@@ -2905,10 +2904,15 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	}
 
 	public boolean showsIcons() {
-		return showIcons;
+		return iconLocation != IconLocation.HIDE;
 	}
 
-	public int getLayoutSpecificMaxNodeWidth() {
+
+	public IconLocation getIconLocation() {
+        return iconLocation;
+    }
+
+    public int getLayoutSpecificMaxNodeWidth() {
 		return usesLayoutSpecificMaxNodeWidth() ? Math.max(0, getViewportSize().width - 10 * getZoomed(outlineHGap)) : 0;
 	}
 

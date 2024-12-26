@@ -2,6 +2,7 @@
 1.12.9
 ==============================
 Tooltips with Tags
+Option to show icons above nodes
 Bug fixes
 
 ==============================

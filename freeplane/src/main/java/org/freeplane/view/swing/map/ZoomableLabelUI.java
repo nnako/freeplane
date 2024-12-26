@@ -132,7 +132,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 
 						if(viewPreferredWidth > availableTextWidth){
 							v.setWidth(availableTextWidth);
-							super.layoutCL(zLabel, zLabel.getFontMetrics(), text, icon, viewR, iconR, textR);
+							extracted(text, icon, viewR, iconR, textR, zLabel);
 							return text;
 						}
 						else if(currentWidth != viewPreferredWidth)
@@ -144,9 +144,8 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		Icon textRenderingIcon = zLabel.getTextRenderingIcon();
 		if(textRenderingIcon != null){
 			layoutLabelWithTextIcon(textRenderingIcon, icon, viewR, iconR, textR, zLabel);
-		}
-		else
-			super.layoutCL(zLabel, zLabel.getFontMetrics(), text, icon, viewR, iconR, textR);
+		} else
+            extracted(text, icon, viewR, iconR, textR, zLabel);
 
 		if(isPainting) {
 			ScaledHTML.Renderer v = (ScaledHTML.Renderer) label.getClientProperty(BasicHTML.propertyKey);
@@ -179,9 +178,30 @@ public class ZoomableLabelUI extends BasicLabelUI {
 					}
 				}
 			}
+			if(label.getVerticalTextPosition() == SwingConstants.BOTTOM)
+			    iconR.x = viewR.x;
 		}
 		return text;
 	}
+
+    private void extracted(final String text, final Icon icon, final Rectangle viewR,
+            final Rectangle iconR, final Rectangle textR, final ZoomableLabel zLabel) {
+        int verticalTextPosition = zLabel.getVerticalTextPosition();
+        int horizontalTextPosition = zLabel.getHorizontalTextPosition();
+        SwingUtilities.layoutCompoundLabel(
+        (JComponent) zLabel,
+        zLabel.getFontMetrics(),
+        text,
+        icon,
+        zLabel.getVerticalAlignment(),
+        zLabel.getHorizontalAlignment(),
+        verticalTextPosition,
+        verticalTextPosition != SwingConstants.BOTTOM ? horizontalTextPosition : SwingConstants.CENTER,
+        viewR,
+        iconR,
+        textR,
+        zLabel.getIconTextGap());
+    }
 
 	static private void layoutLabelWithTextIcon(final Icon textRenderingIcon, final Icon icon,
 			final Rectangle viewR, final Rectangle iconR,

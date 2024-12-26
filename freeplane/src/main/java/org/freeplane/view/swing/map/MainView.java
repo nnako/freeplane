@@ -486,7 +486,13 @@ public class MainView extends ZoomableLabel {
 	    }
 	    final ModeController modeController = getNodeView().getMap().getModeController();
 	    IconController iconController = IconController.getController(modeController);
-		if(nodeView.getMap().showsIcons()) {
+		MapView map = nodeView.getMap();
+        if(map.showsIcons()) {
+            IconLocation iconLocation = map.getIconLocation();
+            if(iconLocation == IconLocation.BESIDE_NODES)
+                setVerticalTextPosition(TOP);
+            else if(iconLocation == IconLocation.ABOVE_NODES)
+                setVerticalTextPosition(BOTTOM);
             for (final UIIcon icon : iconController.getStateIcons(node)) {
 		        iconImages.addIcon(icon, iconHeight);
 		    }
@@ -495,7 +501,7 @@ public class MainView extends ZoomableLabel {
 		        iconImages.addIcon(myIcon, iconHeight);
 		    }
 		}
-		if(TagLocation.BESIDE_NODES == nodeView.getMap().getTagLocation()) {
+		if(TagLocation.BESIDE_NODES == map.getTagLocation()) {
 		    for (final TagIcon icon : iconController.getTagIcons(node)) {
 		        iconImages.addTag(icon);
 		    }

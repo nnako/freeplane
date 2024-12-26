@@ -332,7 +332,13 @@
 				<Entry name="SetBooleanPropertyAction.outline_view_fits_window_width" />
 				<Entry name="ToggleFullScreenAction" accelerator="F11" />
 				<Entry name="SetBooleanMapViewPropertyAction.spotlight" />
-				<Entry name="SetBooleanPropertyAction.show_icons" />
+				<Entry name="show_icons" textKey="MapProperty.show_icons">
+					<Entry builder="radio_button_group">
+						<Entry name="SetStringMapPropertyAction.show_icons.ABOVE_NODES" />
+						<Entry name="SetStringMapPropertyAction.show_icons.BESIDE_NODES" />
+						<Entry name="SetStringMapPropertyAction.show_icons.HIDE" />
+					</Entry>
+				</Entry>
 				<Entry name="show_tags" textKey="MapProperty.show_tags">
 					<Entry builder="radio_button_group">
 						<Entry name="SetStringMapPropertyAction.show_tags.BESIDE_NODES" />
