@@ -415,8 +415,8 @@ public class IconListComponent extends JComponent implements Accessible {
         Insets insets = getInsets();
         // Apply zoom to preferred size
         float zoom = getZoom();
-        int scaledWidth = Math.round((preferredWidth + insets.left + insets.right) * zoom);
-        int scaledHeight = Math.round((preferredHeight + insets.top + insets.bottom) * zoom);
+        int scaledWidth = (int) Math.ceil((preferredWidth + insets.left + insets.right) * zoom);
+        int scaledHeight = (int) Math.ceil((preferredHeight + insets.top + insets.bottom) * zoom);
 
         return new Dimension(scaledWidth, scaledHeight);
     }
