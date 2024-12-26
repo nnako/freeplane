@@ -1,6 +1,7 @@
 package org.freeplane.view.swing.ui;
 
 import java.awt.Cursor;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JPopupMenu;
@@ -77,22 +78,23 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 
 		boolean isDelayedFoldingActive = false;
 		final boolean inside = nodeSelector.isInside(e);
+		Point point = e.getPoint();
 		if(e.getButton() == 1){
-			if(Compat.isCtrlEvent(e) || Compat.isPlainEvent(e) && ResourceController.getResourceController().getBooleanProperty(OPEN_LINKS_ON_PLAIN_CLICKS)){
-				NamedIcon uiIcon = component.getUIIconAt(e.getPoint());
+            if(Compat.isCtrlEvent(e) || Compat.isPlainEvent(e) && ResourceController.getResourceController().getBooleanProperty(OPEN_LINKS_ON_PLAIN_CLICKS)){
+				NamedIcon uiIcon = component.getUIIconAt(point);
 				if(uiIcon != null){
 					final IconController iconController = mc.getExtension(IconController.class);
 					if(iconController.onIconClicked(node, uiIcon))
 						return;
 				}
-				if (component.isClickableLink(e.getX())) {
+				if (component.isClickableLink(point)) {
 					LinkController.getController(mc).loadURL(node, e);
 					e.consume();
 					return;
 				}
 
 
-				final String link = component.getLink(e.getPoint());
+				final String link = component.getLink(point);
 				if (link != null) {
 					doubleClickTimer.start(new Runnable() {
 						@Override
@@ -105,13 +107,13 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 				}
 			}
 			else if(Compat.isShiftEvent(e)){
-		                if (component.isClickableLink(e.getX())) {
+		                if (component.isClickableLink(point)) {
 		                    mapController.forceViewChange(() -> LinkController.getController(mc).loadURL(node, e));
 		                    e.consume();
 		                    return;
 		                }
 
-		                final String link = component.getLink(e.getPoint());
+		                final String link = component.getLink(point);
 		                if (link != null) {
 		                    doubleClickTimer.start(new Runnable() {
 		                        @Override
@@ -210,11 +212,12 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		if (!nodeSelector.isRelevant(e))
 			return;
 		final MainView node = ((MainView) e.getComponent());
-		String link = node.getLink(e.getPoint());
+		Point point = e.getPoint();
+        String link = node.getLink(point);
 		boolean followLink = link != null;
 		Controller currentController = Controller.getCurrentController();
         if(! followLink){
-        	followLink = node.isClickableLink(e.getX());
+        	followLink = node.isClickableLink(point);
         	if(followLink){
 				link = LinkController.getController(currentController.getModeController()).getLinkShortText(node.getNodeView().getNode());
         	}

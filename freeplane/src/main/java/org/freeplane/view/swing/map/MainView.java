@@ -284,12 +284,12 @@ public class MainView extends ZoomableLabel {
     }
 
 
-	public boolean isClickableLink(final double xCoord) {
+	public boolean isClickableLink(final Point point) {
 		final NodeView nodeView = getNodeView();
 		final NodeModel model = nodeView.getNode();
 		if (NodeLinks.getValidLink(model) == null)
 			return false;
-		return isInIconRegion(xCoord);
+		return isInIconRegion(point.getX()) && getTagAt(point) == null;
 	}
 
 	public boolean isInIconRegion(final double xCoord)

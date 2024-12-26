@@ -29,7 +29,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -164,11 +163,13 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 			            if(iconController instanceof MIconController) {
 			                ((MIconController)iconController).editTags(mainView.getNodeView().getNode());
 			            }
+			            return;
 			        }
 			        else {
 			            final MTextController textController = MTextController.getController();
 			            textController.getEventQueue().activate(e);
 			            textController.edit(FirstAction.EDIT_CURRENT, false);
+			            return;
 			        }
 				}
 			}
