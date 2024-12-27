@@ -277,6 +277,10 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		            properties.put(key, valueAsString);
 		        }
 		    }
+		    if(! properties.containsKey(SHOW_ICONS_PROPERTY)) {
+		        final boolean showsIcons = ResourceController.getResourceController().getBooleanProperty(SHOW_ICONS_PROPERTY);
+		        properties.put(SHOW_ICONS_PROPERTY, showsIcons ? IconLocation.BESIDE_NODES.name() : IconLocation.HIDE.name());
+		    }
 		}
 
 		private void loadTagProperties(IconRegistry iconRegistry, XMLElement xml) {
