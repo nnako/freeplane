@@ -825,8 +825,8 @@ public class UITools {
 	}
 
 	public static Font getUIFont() {
-		return new JMenuItem().getFont();
-	}
+	    Font font = UIManager.getFont("MenuItem.font");
+	    return (font != null) ? font : new JMenuItem().getFont();	}
 
 	public static Font getDefaultLabelFont() {
 		return UIManager.getDefaults().getFont("Label.font");
