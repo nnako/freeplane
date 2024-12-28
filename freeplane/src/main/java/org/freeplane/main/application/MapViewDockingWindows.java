@@ -352,7 +352,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	}
 
     private static int tabIconSize() {
-        return Math.round(UITools.FONT_SCALE_FACTOR * InternalDockingUtil.DEFAULT_BUTTON_ICON_SIZE);
+        return UITools.getUIFontSize(0.8);
     }
 
 	private void removeDesktopPaneAccelerators() {
