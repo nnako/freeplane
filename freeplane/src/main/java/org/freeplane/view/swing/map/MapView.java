@@ -370,11 +370,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 
 		@Override
-		public void setSiblingMaxLevel(final int nodeLevel) {
-			MapView.this.setSiblingMaxLevel(nodeLevel);
-		}
-
-		@Override
 		public int size() {
 			return selection.size();
 		}
@@ -1756,7 +1751,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             newSelected = ancestorView.selectNearest(PreferredChild.NEAREST_SIBLING, ChildrenSides.ofTopOrLeft(! isTopOrLeft), oldSelected);
         }
         if(newSelected != null) {
-            select(newSelected, continious);
+            selectPreservingSiblingMaxLevel(newSelected, continious);
             return true;
         }
         return false;
@@ -1770,9 +1765,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
         final NodeView oldSelected = selection.getSelectionEnd();
         if (! oldSelected.isRoot()) {
-            NodeView newSelectedAncestor = suggestNewSelectedAncestor(direction, oldSelected);
-            NodeView newSelectedSibling = suggestNewSelectedSibling(direction, oldSelected);
-            NodeView newSelectedSummary = suggestNewSelectedSummary(direction, oldSelected);
+            final NodeView newSelectedAncestor = suggestNewSelectedAncestor(direction, oldSelected);
+            final NodeView newSelectedSibling = suggestNewSelectedSibling(direction, oldSelected);
+            final NodeView newSelectedSummary = suggestNewSelectedSummary(direction, oldSelected);
 
             NodeView newSelected = newSelectedSibling;
 
@@ -1792,20 +1787,30 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
                 if(newSelected.getParent() == parentView && parentView.layoutOrientation() == LayoutOrientation.TOP_TO_BOTTOM) {
                     ChildNodesAlignment childNodesAlignment = parentView.getChildNodesAlignment();
                     if (childNodesAlignment == ChildNodesAlignment.AFTER_PARENT && direction == SelectionDirection.UP) {
-                        getDescendant(newSelected, continious, PreferredChild.LAST);
+                        selectDescendant(newSelected, continious, PreferredChild.LAST);
                         return true;
                     }
                     if (childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT && direction == SelectionDirection.DOWN) {
-                        getDescendant(newSelected, continious, PreferredChild.FIRST);
+                        selectDescendant(newSelected, continious, PreferredChild.FIRST);
                         return true;
                     }
                 }
-                select(newSelected, continious);
+                if(newSelected == newSelectedAncestor)
+                    select(newSelected, continious);
+                else
+                    selectPreservingSiblingMaxLevel(newSelected, continious);
                 return true;
             }
 
         }
         return false;
+    }
+
+    private void selectPreservingSiblingMaxLevel(NodeView newSelected, final boolean continious) {
+        int oldSiblingMaxLevel = this.siblingMaxLevel;
+        this.siblingMaxLevel = -1;
+        select(newSelected, continious);
+        this.siblingMaxLevel = oldSiblingMaxLevel;
     }
 
     private NodeView suggestNewSelectedSibling(SelectionDirection direction,
@@ -1904,7 +1909,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         return suggestNewSelectedSummary(direction, parent);
     }
 
-    private void getDescendant(NodeView newSelected, boolean continious, PreferredChild preferredChild) {
+    private void selectDescendant(NodeView newSelected, boolean continious, PreferredChild preferredChild) {
         newSelected = newSelected.getDescendant(preferredChild);
         select(newSelected, continious);
     }
@@ -1972,7 +1977,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
 	private NodeView getNextVisibleSibling(final NodeView node, LayoutOrientation layoutOrientation, final boolean down) {
-	    setSiblingMaxLevel(node.getNode().getNodeLevel(filter));
 	    return down ? node.getNextVisibleSibling(layoutOrientation) : node.getPreviousVisibleSibling(layoutOrientation);
     }
 
@@ -2558,6 +2562,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		if (selectionParent instanceof NodeView) {
 			((NodeView) selectionParent).setLastSelectedChild(newSelected);
 		}
+		setSiblingMaxLevel();
 	}
 
 	/**
@@ -2625,8 +2630,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 	}
 
-	void setSiblingMaxLevel(final int level) {
-		siblingMaxLevel = level;
+	private void setSiblingMaxLevel() {
+	    if (siblingMaxLevel >= 0)
+	        siblingMaxLevel = getSelected().getNode().getNodeLevel(filter);
 	}
 
     public void setZoom(final float zoom) {

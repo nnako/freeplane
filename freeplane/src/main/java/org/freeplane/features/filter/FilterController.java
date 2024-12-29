@@ -559,7 +559,6 @@ public class FilterController implements IExtension, IMapViewChangeListener {
                     selection.selectAsTheOnlyOneSelected(visibleAncestorOrSelf);
             }
         }
-        selection.setSiblingMaxLevel(selection.getSelected().getNodeLevel(filter));
     }
 	void applySelectedViewCondition() {
 		if (getFilterConditions().getSelectedItem() != selectedViewCondition) {

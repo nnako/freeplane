@@ -80,8 +80,6 @@ public interface IMapSelection {
 
 	public void selectRoot();
 
-	public void setSiblingMaxLevel(int nodeLevel);
-
 	public int size();
 
 	public void toggleSelected(final NodeModel node);
