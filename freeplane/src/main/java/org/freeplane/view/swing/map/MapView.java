@@ -1442,6 +1442,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	        revalidate();
 	        repaint();
 		}
+        if (property.equals(Filter.class)){
+            setSiblingMaxLevel();
+        }
+        if (property.equals(IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT)){
+            currentRootView.updateIcons();
+            setSiblingMaxLevel();
+        }
 		if (property.equals(MapStyle.MAP_STYLES) && event.getMap().equals(viewedMap)
 		        || property.equals(ModelessAttributeController.ATTRIBUTE_VIEW_TYPE)
 		        || property.equals(Filter.class)
@@ -3079,7 +3086,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     private void fireRootChanged() {
         modeController.getMapController().fireMapChanged(
                 new MapChangeEvent(this, getMap(), IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT, null, null, false));
-        currentRootView.updateIcons();
     }
 
     static enum RootChange{JUMP_IN, JUMP_OUT, ANY}
