@@ -367,6 +367,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
         controller.addAction(new SelectFilteredElementAction(applyToNodes, FilteredElement.NODE));
         controller.addAction(new SelectFilteredElementAction(applyToNodesAndConnectors, FilteredElement.NODE_AND_CONNECTOR));
         controller.addAction(new SelectFilteredElementAction(applyToConnectors, FilteredElement.CONNECTOR));
+        controller.addAction(new SelectSearchRootAction());
 		quickFilterAction = new QuickFilterAction(this, quickEditor);
 		controller.addAction(quickFilterAction);
 		controller.addAction(new QuickAndFilterAction(this, quickEditor));
@@ -623,7 +624,9 @@ public class FilterController implements IExtension, IMapViewChangeListener {
         final AbstractButton applyAndFilterBtn = FreeplaneToolBar.createButton(controller.getAction("QuickAndFilterAction"));
         final AbstractButton applyOrFilterBtn = FreeplaneToolBar.createButton(controller.getAction("QuickOrFilterAction"));
         final AbstractButton applyQuickSelectBtn = FreeplaneToolBar.createButton(controller.getAction("QuickFindAllAction"));
-		final AbstractButton applyQuickHighlightBtn = FreeplaneToolBar.createButton(controller.getAction("QuickHighlightAction"));
+        final AbstractButton applyQuickHighlightBtn = FreeplaneToolBar.createButton(controller.getAction("QuickHighlightAction"));
+        final AbstractButton selectSearchRootActionBtn = FreeplaneToolBar.createButton(controller.getAction("SelectSearchRootAction"));
+
 
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
@@ -639,7 +642,8 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		searchOptionPanel.add(applyQuickSelectBtn, constraints);
 		searchOptionPanel.add(applyQuickFilterBtn, constraints);
 		searchOptionPanel.add(applyAndFilterBtn, constraints);
-		searchOptionPanel.add(applyOrFilterBtn, constraints);
+        searchOptionPanel.add(applyOrFilterBtn, constraints);
+        searchOptionPanel.add(selectSearchRootActionBtn, constraints);
 
 		JComponent searchPanel = new FreeplaneToolBar("searchPanel", JToolBar.HORIZONTAL);
 

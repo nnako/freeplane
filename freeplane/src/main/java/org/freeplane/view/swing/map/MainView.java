@@ -481,9 +481,14 @@ public class MainView extends ZoomableLabel {
 	    final NodeModel node = nodeView.getNode();
 	    StyleOption styleOption = nodeView.getStyleOption();
 	    final Quantity<LengthUnit> iconHeight = IconController.getController().getIconSize(node, styleOption);
-	    if(nodeView.isRoot() && ! node.isRoot()) {
-	        iconImages.addIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg"), iconHeight);
-	    }
+	    if(! node.isRoot()) {
+            if (nodeView.isRoot()) {
+                iconImages.addIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg"), iconHeight);
+            }
+            else if (nodeView.isSearchRoot()) {
+                iconImages.addIcon(IconStoreFactory.ICON_STORE.getUIIcon("searchRoot.svg"), iconHeight);
+            }
+        }
 	    final ModeController modeController = getNodeView().getMap().getModeController();
 	    IconController iconController = IconController.getController(modeController);
 		MapView map = nodeView.getMap();

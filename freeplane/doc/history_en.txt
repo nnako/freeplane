@@ -5,6 +5,7 @@ Tooltips with Tags
 Option to show icons above nodes
 Selection with keys works like in Freeplane
 Add nodes inside selection rectangle to selection if shift is pressed
+Subtree search
 Bug fixes
 
 ==============================

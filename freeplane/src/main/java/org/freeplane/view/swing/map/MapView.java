@@ -268,12 +268,26 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			return selected != null ? selected.getNode() : null;
 		}
 
-		@Override
-		public NodeModel getSelectionRoot() {
-			final NodeView root = MapView.this.getRoot();
-			return root != null ? root.getNode() : null;
-		}
+        @Override
+        public NodeModel getSelectionRoot() {
+            final NodeView root = MapView.this.getRoot();
+            return root != null ? root.getNode() : null;
+        }
 
+        @Override
+        public NodeModel getSearchRoot() {
+            return MapView.this.getSearchRoot();
+        }
+
+        @Override
+        public NodeModel getEffectiveSearchRoot() {
+            if(currentRootView == null)
+                return null;
+            final NodeModel searchRoot = getSearchRoot();
+            NodeModel currentRoot = currentRootView.getNode();
+            return searchRoot == null || searchRoot == currentRoot
+                    || ! searchRoot.isDescendantOf(currentRoot) ? currentRoot : searchRoot;
+        }
 		@Override
 		public Set<NodeModel> getSelection() {
 			return getSelectedNodes();
@@ -327,13 +341,18 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 
 
-		@Override
-		public void makeTheSelected(final NodeModel node) {
-			final NodeView nodeView = getNodeView(node);
-			if (nodeView != null) {
-				addSelected(nodeView, false);
-			}
-		}
+        @Override
+        public void makeTheSelected(final NodeModel node) {
+            final NodeView nodeView = getNodeView(node);
+            if (nodeView != null) {
+                addSelected(nodeView, false);
+            }
+        }
+
+        @Override
+        public void makeTheSearchRoot(final NodeModel node) {
+            setSearchRoot(node);
+        }
 
 		@Override
 		public void scrollNodeToVisible(final NodeModel node) {
@@ -711,6 +730,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private MapModel viewedMap;
 
 	private NodeView currentRootView = null;
+	private NodeModel currentSearchRoot = null;
 	private NodeView currentRootParentView = null;
 	private NodeView mapRootView = null;
 	private List<NodeView> rootsHistory;
@@ -820,6 +840,10 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		setMap(viewedMap);
         mapScroller.setAnchorView(currentRootView);
 	}
+
+    private NodeModel getSearchRoot() {
+        return currentSearchRoot;
+    }
 
     public void setMap(final MapModel viewedMap) {
         if(this.viewedMap != null)
@@ -2978,9 +3002,27 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		super.invalidate();
 	}
 
-	boolean isRoot(NodeView nodeView) {
-	    return nodeView == currentRootView;
-	}
+    boolean isRoot(NodeView nodeView) {
+        return nodeView == currentRootView;
+    }
+
+    boolean isSearchRoot(NodeView nodeView) {
+        return nodeView.getNode() == currentSearchRoot;
+    }
+
+    private void setSearchRoot(NodeModel searchRoot) {
+        if(searchRoot == currentSearchRoot)
+            return;
+        NodeView lastSearchRootView = getNodeView(currentSearchRoot);
+        if(lastSearchRootView != null) {
+            currentSearchRoot = null;
+            lastSearchRootView.updateIcons();
+        }
+        currentSearchRoot = searchRoot;
+        NodeView currentSearchRootView = getNodeView(searchRoot);
+        if(currentSearchRootView != null)
+            currentSearchRootView.updateIcons();
+    }
 
 	void setRootNode(NodeModel node) {
 		NodeModel currentRootNode = currentRootView.getNode();

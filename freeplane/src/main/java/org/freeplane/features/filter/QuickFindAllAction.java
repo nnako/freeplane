@@ -35,11 +35,11 @@ import org.freeplane.features.mode.Controller;
  */
 class QuickFindAllAction extends AFreeplaneAction {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 
+	 *
 	 */
 	private final FilterConditionEditor filterEditor;
 	private final FilterController filterController;
@@ -47,7 +47,7 @@ class QuickFindAllAction extends AFreeplaneAction {
 
 	/**
 	 * @param filterController
-	 * @param quickEditor 
+	 * @param quickEditor
 	 */
 	QuickFindAllAction(final FilterController filterController, FilterConditionEditor quickEditor) {
 		super("QuickFindAllAction");
@@ -63,14 +63,19 @@ class QuickFindAllAction extends AFreeplaneAction {
 		final IMapSelection selection = Controller.getCurrentController().getSelection();
 		final MapController mapController = Controller.getCurrentModeController().getMapController();
 		final NodeModel selected = selection.getSelected();
-        final NodeModel rootNode = selection.getSelectionRoot();
-		boolean nodeFound = condition.checkNode(rootNode);
+        final NodeModel searchRoot = selection.getEffectiveSearchRoot();
+        NodeModel searchStart;
+        if (selected == searchRoot || selected.isDescendantOf(searchRoot))
+            searchStart = selected;
+        else
+            searchStart = searchRoot;
+		boolean nodeFound = condition.checkNode(searchStart);
 		if(nodeFound){
-			selection.selectAsTheOnlyOneSelected(rootNode);
+			selection.selectAsTheOnlyOneSelected(searchStart);
 		}
-		NodeModel next = rootNode;
+		NodeModel next = searchRoot;
 		for(;;){
-			next = filterController.findNext(next, rootNode, Direction.FORWARD, condition, selection.getFilter());
+			next = filterController.findNext(next, searchRoot, Direction.FORWARD, condition, selection.getFilter());
 			if(next == null){
 				break;
 			}
@@ -83,7 +88,7 @@ class QuickFindAllAction extends AFreeplaneAction {
 				nodeFound = true;
 			}
 		}
-		if(condition.checkNode(selected))
-		    selection.makeTheSelected(selected);
+		if(condition.checkNode(searchStart))
+		    selection.makeTheSelected(searchStart);
 	}
 }

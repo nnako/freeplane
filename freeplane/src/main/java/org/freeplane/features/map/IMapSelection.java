@@ -48,6 +48,10 @@ public interface IMapSelection {
 
 	public NodeModel getSelectionRoot();
 
+	public NodeModel getSearchRoot();
+
+	public NodeModel getEffectiveSearchRoot();
+
 	public Set<NodeModel> getSelection();
 
 	public List<String> getOrderedSelectionIds();
@@ -68,7 +72,9 @@ public interface IMapSelection {
 
 	public void scrollNodeTreeToVisible(final NodeModel  node);
 
-	public void makeTheSelected(final NodeModel node);
+    public void makeTheSelected(final NodeModel node);
+
+    public void makeTheSearchRoot(final NodeModel node);
 
 	public void scrollNodeToVisible(NodeModel selected);
 

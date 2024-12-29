@@ -1075,9 +1075,12 @@ public class NodeView extends JComponent implements INodeView {
 		return (this == myNodeView.getParentView());
 	}
 
-	public boolean isRoot() {
-		return map.isRoot(this);
-	}
+    public boolean isRoot() {
+        return map.isRoot(this);
+    }
+    public boolean isSearchRoot() {
+        return map.isSearchRoot(this);
+    }
 
 	public boolean isSelected() {
 		return (map.isSelected(this));

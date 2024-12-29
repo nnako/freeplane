@@ -66,15 +66,33 @@ final class QuickFindAction extends AFreeplaneAction {
 		if(selection == null){
 			return;
 		}
+		NodeModel selected = selection.getSelected();
+		NodeModel searchRoot = selection.getEffectiveSearchRoot();
+		NodeModel searchStart;
+		if (searchRoot == selected || selected.isDescendantOf(searchRoot))
+			searchStart = selected;
+		else
+			searchStart = searchRoot;
 		final NodeModel next;
-		try
-		{
-			filterEditor.setSearchingBusyCursor();
-			next = filterController.findNextInSubtree(selection.getSelected(), selection.getSelectionRoot(), direction, condition, selection.getFilter());
+		boolean canSearchInTheSearchSubtree = selected == searchStart
+		        || direction.removesFilter()
+                || selection.isVisible(searchStart)
+                || direction.canUnfold() && searchStart.isVisible(selection.getFilter());
+		if(canSearchInTheSearchSubtree && selected != searchStart && condition.checkNode(searchStart)) {
+		    next = searchStart;
 		}
-		finally
-		{
-			filterEditor.setSearchingDefaultCursor();
+		else if(!canSearchInTheSearchSubtree)
+		    next = null;
+		else {
+			try
+			{
+				filterEditor.setSearchingBusyCursor();
+				next = filterController.findNextInSubtree(searchStart, searchRoot, direction, condition, selection.getFilter());
+			}
+			finally
+			{
+				filterEditor.setSearchingDefaultCursor();
+			}
 		}
 
 		if(next != null){
@@ -90,7 +108,7 @@ final class QuickFindAction extends AFreeplaneAction {
 			filterEditor.showNodeFound();
 		}
 		else
-		    filterEditor.showNodeNotFound();
+			filterEditor.showNodeNotFound();
 	}
 
 	public void actionPerformed(final ActionEvent e) {
