@@ -35,7 +35,7 @@ class RectangleMemorizer extends MouseAdapter {
             return;
         if(mapView != null) {
         	e.consume();
-	        mapView.selectNodeViewBySelectionRectangle();
+	        mapView.selectNodeViewBySelectionRectangle(! e.isShiftDown());
 	        mapView.setSelectionRectangle(null);
 	        mapView = null;
         }
@@ -58,7 +58,7 @@ class RectangleMemorizer extends MouseAdapter {
                 Math.abs(startPoint.x - endPoint.x),
                 Math.abs(startPoint.y - endPoint.y)
         );
-        
+
         mapView.setSelectionRectangle(newRectangle);
     }
 

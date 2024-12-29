@@ -142,7 +142,7 @@ public class DefaultMapMouseListener implements IMouseListener {
             e.consume();
             return;
 		}
-		boolean isCtrlEvent = Compat.isCtrlEvent(e);
+		boolean isCtrlEvent = Compat.isCtrlEvent(e) || Compat.isCtrlShiftEvent(e);
         if(isCtrlEvent && e.getButton() == MouseEvent.BUTTON1
 		     || !isCtrlEvent && e.getButton() == MouseEvent.BUTTON3)
 		    rectangleMemorizer.mousePressed(e);

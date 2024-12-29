@@ -3165,10 +3165,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     	return zoom;
     }
 
-    public void selectNodeViewBySelectionRectangle() {
+    public void selectNodeViewBySelectionRectangle(boolean replace) {
         List<NodeView> intersectingNodes = getIntersectingNodes();
         if(! intersectingNodes.isEmpty())
-            selection.replace(intersectingNodes);
+            if(replace)
+                selection.replace(intersectingNodes);
+            else
+                intersectingNodes.forEach(selection::add);
     }
     private List<NodeView> getIntersectingNodes() {
         List<NodeView> intersectingComponents = new ArrayList<>();
