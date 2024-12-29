@@ -427,30 +427,12 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 			public void run() {
                 if(startupFinished && EventQueue.isDispatchThread()){
                     loadMaps(Controller.getCurrentController(), args);
-                    toFront();
                     return;
                 }
                 EventQueue.invokeLater(this);
             }
         });
 	}
-
-    private void toFront() {
-    	final Component menuComponent = UITools.getMenuComponent();
-    	if(menuComponent instanceof Frame) {
-    		final Frame frame = (Frame) menuComponent;
-    		final int state = frame.getExtendedState();
-    		if ((state & Frame.ICONIFIED) != 0)
-    			frame.setExtendedState(state & ~Frame.ICONIFIED);
-    	}
-    	if(menuComponent instanceof Window) {
-    		Window window = (Window) menuComponent;
-    		if (!window.isVisible())
-    			window.setVisible(true);
-    		window.toFront();
-    		window.requestFocus();
-    	}
-    }
 
     private void loadMaps(final Controller controller, final String[] args) {
 		controller.selectMode(MModeController.MODENAME);
