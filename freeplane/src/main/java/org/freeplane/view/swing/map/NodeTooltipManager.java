@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.lang.ref.WeakReference;
 
+import javax.swing.BorderFactory;
 import javax.swing.FocusManager;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -173,6 +174,7 @@ public class NodeTooltipManager implements IExtension{
 		tip.setTipText(toolTipText);
 		focusOwnerRef = new WeakReference<Component>(focusOwner);
 		tipPopup = new JPopupMenu();
+		tipPopup.setBorder(BorderFactory.createEmptyBorder());
 		tipPopup.setLayout(new GridLayout(1, 1));
 		tipPopup.add(tip);
 		mouseInsideTooltipListener = new MouseInsideListener(tipPopup);

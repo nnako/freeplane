@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JToolTip;
@@ -607,6 +608,7 @@ public class MainView extends ZoomableLabel {
 		FreeplaneTooltip tip = new FreeplaneTooltip(this.getGraphicsConfiguration(), FreeplaneTooltip.TEXT_HTML, false);
         tip.setComponent(this);
         tip.setComponentOrientation(getComponentOrientation());
+        tip.setBorder(BorderFactory.createEmptyBorder());
 		final URL url = getMap().getMap().getURL();
 		if (url != null) {
 			tip.setBase(url);
