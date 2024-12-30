@@ -23,7 +23,9 @@ import java.awt.Component;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +100,8 @@ public class LogicalStyleController implements IExtension {
 		});
 		addStyleGetter(IPropertyHandler.DEFAULT, new IPropertyHandler<Collection<IStyle>, NodeModel>() {
 			public Collection<IStyle> getProperty(NodeModel node, LogicalStyleController.StyleOption option, Collection<IStyle> currentValue) {
-				add(node, currentValue, MapStyleModel.DEFAULT_STYLE);
+			    if(! MapStyleModel.isDefaultStyleNode(node))
+			        add(node, currentValue, MapStyleModel.DEFAULT_STYLE);
 				return currentValue;
 			}
 		});
@@ -106,11 +109,11 @@ public class LogicalStyleController implements IExtension {
 			public String getTooltip(ModeController modeController, NodeModel node, Component view) {
 				if(!ResourceController.getResourceController().getBooleanProperty("show_styles_in_tooltip"))
 					return null;
-				final Collection<IStyle> styles = getStyles(node, StyleOption.FOR_UNSELECTED_NODE);
-				if(styles.size() > 0)
-					styles.remove(styles.iterator().next());
+				final Iterator<IStyle> styles = getStyles(node, StyleOption.FOR_UNSELECTED_NODE).iterator();
+				if(styles.hasNext())
+					styles.next();
 				final String label = TextUtils.getText("node_styles");
-				return HtmlUtils.plainToHTML(label + ": " + getStyleNames(styles, ", "));
+				return HtmlUtils.plainToHTML(label + ": " + getStyleNames(() -> styles, ", "));
 			}
 		});
 	}
@@ -313,11 +316,12 @@ public class LogicalStyleController implements IExtension {
 		if(cachedNode == null || !node.equals(cachedNode.get())) {
 		    cachedStyles = null;
 		    cachedNode = null;
-		    cachedStyles = styleHandlers.getProperty(node, option, new LinkedHashSet<IStyle>());
+		    cachedStyles = Collections.unmodifiableCollection(styleHandlers.getProperty(node, option, new LinkedHashSet<IStyle>()));
 		    cachedNode = new WeakReference<NodeModel>(node);
-		    cachedStylesForSelectedNode = new ArrayList<>(cachedStyles.size() + 1);
-		    cachedStylesForSelectedNode.add(MapStyleModel.SELECTION_STYLE);
-		    cachedStylesForSelectedNode.addAll(cachedStyles);
+		    List<IStyle> withSelectedNode = new ArrayList<>(cachedStyles.size() + 1);
+		    withSelectedNode.add(MapStyleModel.SELECTION_STYLE);
+		    withSelectedNode.addAll(cachedStyles);
+		    cachedStylesForSelectedNode =  Collections.unmodifiableList(withSelectedNode);
 		}
 		return option == StyleOption.FOR_SELECTED_NODE ? cachedStylesForSelectedNode :
 		    option == StyleOption.FOR_UNSELECTED_NODE ? cachedStyles :
@@ -383,7 +387,7 @@ public class LogicalStyleController implements IExtension {
 		return styleHandlers.addGetter(key, getter);
 	}
 
-	public String getStyleNames(final Collection<IStyle> styles, String separator) {
+	public String getStyleNames(final Iterable<IStyle> styles, String separator) {
 	    StringBuilder sb = new StringBuilder();
 	    int i = 0;
 	    for(IStyle style :styles){
