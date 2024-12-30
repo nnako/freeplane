@@ -70,7 +70,7 @@ public class LogicalStyleController implements IExtension {
     private static final int STYLE_TOOLTIP = 0;
 	private WeakReference<NodeModel> cachedNode;
     private Collection<IStyle>  cachedStyles;
-    private List<IStyle>  cachedStylesForSeletedNode;
+    private List<IStyle>  cachedStylesForSelectedNode;
 	final private CombinedPropertyChain<Collection<IStyle>, NodeModel> styleHandlers;
 
 	public LogicalStyleController(ModeController modeController) {
@@ -315,13 +315,13 @@ public class LogicalStyleController implements IExtension {
 		    cachedNode = null;
 		    cachedStyles = styleHandlers.getProperty(node, option, new LinkedHashSet<IStyle>());
 		    cachedNode = new WeakReference<NodeModel>(node);
-		    cachedStylesForSeletedNode = new ArrayList<>(cachedStyles.size() + 1);
-		    cachedStylesForSeletedNode.add(MapStyleModel.SELECTION_STYLE);
-		    cachedStylesForSeletedNode.addAll(cachedStyles);
+		    cachedStylesForSelectedNode = new ArrayList<>(cachedStyles.size() + 1);
+		    cachedStylesForSelectedNode.add(MapStyleModel.SELECTION_STYLE);
+		    cachedStylesForSelectedNode.addAll(cachedStyles);
 		}
-		return option == StyleOption.FOR_SELECTED_NODE ? cachedStylesForSeletedNode :
+		return option == StyleOption.FOR_SELECTED_NODE ? cachedStylesForSelectedNode :
 		    option == StyleOption.FOR_UNSELECTED_NODE ? cachedStyles :
-		        cachedStylesForSeletedNode.subList(2, cachedStylesForSeletedNode.size())    ;
+		        cachedStylesForSelectedNode.subList(2, cachedStylesForSelectedNode.size())    ;
 	}
 
 	public void moveConditionalStyleDown(final ConditionalStyleModel conditionalStyleModel, int index) {
