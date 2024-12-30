@@ -22,6 +22,7 @@ package org.freeplane.features.mode;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,7 +52,10 @@ import org.freeplane.features.map.ITooltipProvider;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.styles.MapStyle;
+import org.freeplane.features.styles.MapStyleModel;
+import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.ui.INodeViewLifeCycleListener;
 
 /**
@@ -68,7 +72,7 @@ public class ModeController extends AController implements FreeplaneActions{
 	private final Collection<IExtensionCopier> copiers;
 	private boolean isBlocked = false;
 	private MapController mapController;
-	final private Map<Integer, ITooltipProvider> toolTip = new TreeMap<Integer, ITooltipProvider>();
+	final private Map<Integer, ITooltipProvider> toolTipProviders = new TreeMap<Integer, ITooltipProvider>();
 	/**
 	 * The model, this controller belongs to. It may be null, if it is the
 	 * default controller that does not show a map.
@@ -424,16 +428,19 @@ public class ModeController extends AController implements FreeplaneActions{
 		final MapModel map = node.getMap();
 		final Color background = getExtension(MapStyle.class).getBackground(map);
 		final Color textColor = UITools.getTextColorForBackground(background);
+        final MapStyleModel model = MapStyleModel.getExtension(map);
+        final NodeModel styleNode = model.getDefaultStyleNode();
+        Font defaultFont = getExtension(NodeStyleController.class).getFont(styleNode, StyleOption.FOR_UNSELECTED_NODE);
 		final StringBuilder style = new StringBuilder( "<style type='text/css'>")
-		        .append(" body { font-size: 10pt;")
-		        .append(new CssRuleBuilder().withColor(textColor).withBackground(background))
+		        .append(" body { ")
+		        .append(new CssRuleBuilder().withColor(textColor).withBackground(background).withCSSFont(defaultFont))
 		        .append("} table {border: 0; border-spacing: 0;}")
 		        .append(" th, td {border: 1px solid;}")
 		        // FIXME: copy from NoteController.setNoteTooltip() ?
 		        .append("</style>");
 		final StringBuilder text = new StringBuilder("<html><head>"+style+"</head><body>");
 		boolean tooltipSet = false;
-		for (final ITooltipProvider provider : toolTip.values()) {
+		for (final ITooltipProvider provider : toolTipProviders.values()) {
 			String value = provider.getTooltip(this, node, view);
 			if (value == null) {
 				continue;
@@ -459,12 +466,12 @@ public class ModeController extends AController implements FreeplaneActions{
 	 */
 	public void addToolTipProvider(final Integer key, final ITooltipProvider tooltip) {
 		if (tooltip == null) {
-			if (toolTip.containsKey(key)) {
-				toolTip.remove(key);
+			if (toolTipProviders.containsKey(key)) {
+				toolTipProviders.remove(key);
 			}
 		}
 		else {
-			toolTip.put(key, tooltip);
+			toolTipProviders.put(key, tooltip);
 		}
 	}
 
