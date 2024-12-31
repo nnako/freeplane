@@ -549,7 +549,7 @@ public class NodeView extends JComponent implements INodeView {
 		return viewedNode;
 	}
 
-	private NodeView getNextSiblingSameParent() {
+	private NodeView getNextSiblingSameParent(boolean loop) {
 		LinkedList<NodeView> v = getSiblingViews();
 		final int index = v.indexOf(this);
 		boolean isOutlineLayoutSet = map.isOutlineLayoutSet();
@@ -573,10 +573,12 @@ public class NodeView extends JComponent implements INodeView {
 				}
 			}
 		}
+		if(loop && v.size() >= 2)
+		    return getParentView().getPreferredVisibleChild(PreferredChild.FIRST, this.isTopOrLeft());
 		return this;
 	}
 
-	NodeView getNextVisibleSibling(LayoutOrientation requiredLayoutOrientation) {
+	NodeView getNextVisibleSibling(LayoutOrientation requiredLayoutOrientation, boolean loop) {
 	    NodeView sibling = this;
 	    NodeView lastSibling = this;
 	    NodeView parentView = getParentView();
@@ -584,7 +586,7 @@ public class NodeView extends JComponent implements INodeView {
 	        lastSibling = sibling;
 	        LayoutOrientation parentLayoutOrientation = parentView.layoutOrientation();
             if (requiredLayoutOrientation == parentLayoutOrientation) {
-	            sibling = sibling.getNextSiblingSameParent();
+	            sibling = sibling.getNextSiblingSameParent(loop);
 	            if (sibling != lastSibling) {
 	                break;
 	            }
@@ -736,7 +738,7 @@ public class NodeView extends JComponent implements INodeView {
         return childPoint;
     }
 
-	private NodeView getPreviousSiblingSameParent() {
+	private NodeView getPreviousSiblingSameParent(boolean loop) {
 		LinkedList<NodeView> v = getSiblingViews();
 		final int index = v.indexOf(this);
 		boolean skipUntilFirstGroupNode = ! map.isOutlineLayoutSet() && isSummary();
@@ -760,6 +762,8 @@ public class NodeView extends JComponent implements INodeView {
 				}
 			}
 		}
+        if(loop && v.size() >= 2)
+            return getParentView().getPreferredVisibleChild(PreferredChild.LAST, this.isTopOrLeft());
 		return this;
 	}
 
@@ -784,7 +788,7 @@ public class NodeView extends JComponent implements INodeView {
 		return v;
 	}
 
-	NodeView getPreviousVisibleSibling(LayoutOrientation requiredLayoutOrientation) {
+	NodeView getPreviousVisibleSibling(LayoutOrientation requiredLayoutOrientation, boolean loop) {
 	    NodeView sibling = this;
 	    NodeView previousSibling = this;
 	    NodeView parentView = getParentView();
@@ -794,7 +798,7 @@ public class NodeView extends JComponent implements INodeView {
 	    while(parentView != null) {
 	        previousSibling = sibling;
 	        if (requiredLayoutOrientation == parentView.layoutOrientation()) {
-	            sibling = sibling.getPreviousSiblingSameParent();
+	            sibling = sibling.getPreviousSiblingSameParent(loop);
 	            if (sibling != previousSibling) {
 	                break;
 	            }
