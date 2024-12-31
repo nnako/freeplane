@@ -101,7 +101,8 @@ public class NodeSelector {
 		            if (nodeV.isDisplayable() && nodeV.getNode().hasVisibleContent(map.getFilter())) {
 		                map.select();
 		                NodeModel node = nodeV.getNode();
-                        controller.getSelection().selectAsTheOnlyOneSelected(node);
+		                MouseEventActor.INSTANCE.withMouseEvent( () ->
+                            controller.getSelection().selectAsTheOnlyOneSelected(node));
 		                modeController.getMapController().scrollNodeTreeAfterSelect(node);
 		            }
 		        }
@@ -190,7 +191,8 @@ public class NodeSelector {
 			if (!selection.isSelected(newlySelectedNode)
 			        || selection.size() != 1
 			        || !(FocusManager.getCurrentManager().getFocusOwner() instanceof MainView)) {
-				selection.selectAsTheOnlyOneSelected(newlySelectedNode);
+				MouseEventActor.INSTANCE.withMouseEvent( () ->
+					selection.selectAsTheOnlyOneSelected(newlySelectedNode));
 				e.consume();
 			}
 			if(! extend && scrollNodeTree && ! newlySelectedNode.isFolded()) {
@@ -204,7 +206,8 @@ public class NodeSelector {
 		final NodeView nodeV = getRelatedNodeView(e);
 		final Controller controller = Controller.getCurrentController();
 		if (!((MapView) controller.getMapViewManager().getMapViewComponent()).isSelected(nodeV)) {
-			controller.getSelection().selectAsTheOnlyOneSelected(nodeV.getNode());
+			MouseEventActor.INSTANCE.withMouseEvent( () ->
+				controller.getSelection().selectAsTheOnlyOneSelected(nodeV.getNode()));
 		}
 	}
 

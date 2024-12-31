@@ -128,6 +128,7 @@ import org.freeplane.view.swing.map.NodeView.PreferredChild;
 import org.freeplane.view.swing.map.link.ConnectorView;
 import org.freeplane.view.swing.map.link.EdgeLinkView;
 import org.freeplane.view.swing.map.link.ILinkView;
+import org.freeplane.view.swing.ui.MouseEventActor;
 
 /**
  * This class represents the view of a whole MindMap (in analogy to class
@@ -2618,12 +2619,15 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			newSelected.requestFocusInWindow();
 		}
 		selection.select(newSelected);
-        if (ResourceController.getResourceController().getBooleanProperty("center_selected_node")) {
-            mapScroller.scrollNodeToCenter(newSelected);
-        }
-        else {
-            mapScroller.scrollNodeToVisible(newSelected);
-        }
+		ResourceController resourceController = ResourceController.getResourceController();
+		if (resourceController.getBooleanProperty("center_selected_node")
+				&& !(MouseEventActor.INSTANCE.isActive()
+					&& resourceController.getBooleanProperty("center_selected_node_disabled_for_mouse"))) {
+			mapScroller.scrollNodeToCenter(newSelected);
+		}
+		else {
+			mapScroller.scrollNodeToVisible(newSelected);
+		}
 		Container selectionParent = newSelected.getParent();
 		if (selectionParent instanceof NodeView) {
 			((NodeView) selectionParent).setLastSelectedChild(newSelected);

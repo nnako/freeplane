@@ -20,6 +20,7 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.ui.MouseEventActor;
 
 /**
  * The NodeDragListener which belongs to every NodeView
@@ -31,7 +32,8 @@ public class MNodeDragListener implements DragGestureListener {
 		final MapView mapView = nodeView.getMap();
 		mapView.select();
 		if(! nodeView.isSelected()){
-			nodeView.getMap().getModeController().getController().getSelection().selectAsTheOnlyOneSelected(nodeView.getNode());
+			MouseEventActor.INSTANCE.withMouseEvent( () ->
+				nodeView.getMap().selectAsTheOnlyOneSelected(nodeView));
 		}
 		Rectangle bounds = new Rectangle(0, 0, mainView.getWidth(), mainView.getHeight());
 		if(!bounds.contains(e.getDragOrigin()))

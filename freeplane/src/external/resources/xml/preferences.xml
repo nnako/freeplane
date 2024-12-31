@@ -295,6 +295,7 @@
 				<boolean name="keyboardNavigationLoopsOverSiblings"/>
 				<number name="time_for_delayed_selection" />
 				<boolean name="center_selected_node" />
+				<boolean name="center_selected_node_disabled_for_mouse" />
 				<boolean name="slow_scroll_selected_node" />
 			</separator>
 			<separator name="scrollbar">

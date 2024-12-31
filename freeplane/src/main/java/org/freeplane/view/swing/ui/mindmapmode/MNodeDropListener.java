@@ -55,6 +55,7 @@ import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MainView.DragOverRelation;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.ui.MouseEventActor;
 
 public class MNodeDropListener implements DropTargetListener {
 private static final int UNFOLD_DELAY_MILLISECONDS = 500;
@@ -273,21 +274,24 @@ private Timer timer;
 			else {
 				final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
 				if (DnDConstants.ACTION_MOVE == dropAction
-				        && t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-				        && isFromSameMap(targetNode, selecteds)) {
-	                final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
+						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
+						&& isFromSameMap(targetNode, selecteds)) {
+					final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
 					moveNodes(mapController, targetNode, t, dropAsSibling, isTopOrLeft);
 
 					if(dropAsSibling || ! targetNodeView.isFolded())
-					    controller.getSelection().replaceSelection(array);
+						MouseEventActor.INSTANCE.withMouseEvent( () ->
+							controller.getSelection().replaceSelection(array));
 					else
-					    controller.getSelection().selectAsTheOnlyOneSelected(targetNode);
+						MouseEventActor.INSTANCE.withMouseEvent( () ->
+							mapView.selectAsTheOnlyOneSelected(targetNodeView));
 				}
 				else if (DnDConstants.ACTION_COPY == dropAction || DnDConstants.ACTION_MOVE == dropAction) {
 					Side side = dropAsSibling ? Side.AS_SIBLING : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
 							dropAsSibling ? Side.AS_SIBLING : side);
-	                controller.getSelection().selectAsTheOnlyOneSelected(targetNode);
+					MouseEventActor.INSTANCE.withMouseEvent( () ->
+						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
 				}
 			}
 		}
@@ -315,19 +319,20 @@ private Timer timer;
 	}
 
 	private void moveNodes(final MMapController mapController, final NodeModel targetNode, Transferable t,
-	                       final boolean dropAsSibling, final boolean isTopOrLeft) throws UnsupportedFlavorException,
-	        IOException {
+			final boolean dropAsSibling, final boolean isTopOrLeft) throws UnsupportedFlavorException, IOException{
 		final List<NodeModel> movedNodes = getNodeObjects(t);
-		if (dropAsSibling) {
-			mapController.moveNodesBefore(movedNodes, targetNode);
-			mapController.setSide(movedNodes, targetNode.getSide());
-		}
-		else {
-			List<NodeModel> nodesChangingParent = movedNodes.stream().filter(node -> targetNode != node.getParentNode()).collect(Collectors.toList());
-			mapController.moveNodesAsChildren(movedNodes, targetNode);
-			Side side = isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-			mapController.setSide(side == Side.DEFAULT ? nodesChangingParent : movedNodes, side);
-		}
+		MouseEventActor.INSTANCE.withMouseEvent( () -> {
+			if (dropAsSibling) {
+				mapController.moveNodesBefore(movedNodes, targetNode);
+				mapController.setSide(movedNodes, targetNode.getSide());
+			}
+			else {
+				List<NodeModel> nodesChangingParent = movedNodes.stream().filter(node -> targetNode != node.getParentNode()).collect(Collectors.toList());
+				mapController.moveNodesAsChildren(movedNodes, targetNode);
+				Side side = isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+				mapController.setSide(side == Side.DEFAULT ? nodesChangingParent : movedNodes, side);
+			}
+		});
 	}
 
 	@Override
