@@ -1801,6 +1801,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             final NodeView newSelectedSummary = suggestNewSelectedSummary(direction, oldSelected);
 
             NodeView newSelected = newSelectedSibling;
+            while(newSelected != null && siblingMaxLevel > newSelected.getNode().getNodeLevel(filter))
+                newSelected = suggestNewSelectedSibling(direction, newSelected);
 
             if (newSelectedSummary != null && (newSelectedSibling == null
                     || newSelectedSummary.getNode().isDescendantOf(newSelectedSibling.getAncestorWithVisibleContent().getNode()))) {

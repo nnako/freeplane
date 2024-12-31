@@ -778,6 +778,8 @@ public class NodeView extends JComponent implements INodeView {
 	    NodeView sibling = this;
 	    NodeView previousSibling = this;
 	    NodeView parentView = getParentView();
+	    if(parentView == null)
+	        return this;
 	    boolean parentUsesHorizontalLayout = parentView.usesHorizontalLayout();
 	    while(parentView != null) {
 	        previousSibling = sibling;
