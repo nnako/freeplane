@@ -1772,7 +1772,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
          || (childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT && direction == SelectionDirection.UP
             || childNodesAlignment == ChildNodesAlignment.AFTER_PARENT && direction == SelectionDirection.DOWN))){
             boolean looksAtTopOrLeft = direction == SelectionDirection.LEFT || direction == SelectionDirection.UP;
-            PreferredChild preferredChild = isOutlineLayoutSet || ! selectedUsesHorizontalLayout && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+            PreferredChild preferredChild = isOutlineLayoutSet || ! selectedUsesHorizontalLayout && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT || continious
                     ? PreferredChild.FIRST
                     : ! selectedUsesHorizontalLayout && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
                     ? PreferredChild.LAST
