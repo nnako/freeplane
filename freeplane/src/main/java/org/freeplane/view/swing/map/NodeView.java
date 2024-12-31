@@ -518,6 +518,16 @@ public class NodeView extends JComponent implements INodeView {
         return relativeLocation;
     }
 
+    public Point getRelativeLocation(NodeView target, double x, double y) {
+        Point relativeLocation = getRelativeLocation(target);
+        if(x != 0)
+            relativeLocation.x += Math.round(target.getMainView().getWidth() * x);
+        if(y != 0)
+            relativeLocation.y += Math.round(target.getMainView().getHeight() * y);
+        return relativeLocation;
+    }
+
+
 	public MapView getMap() {
 		return map;
 	}

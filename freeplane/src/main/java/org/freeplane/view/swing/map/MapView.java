@@ -1695,13 +1695,45 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private boolean selectRelatedNode(SelectionDirection direction, final boolean continious) {
         if(selection.getSelectionEnd() == null)
             return false;
-	    return selectPreferredVisibleChild(direction, continious)
+	    return  selectSingleNode(direction, continious)
+	                || selectPreferredVisibleChild(direction, continious)
 	                || selectSiblingOnTheOtherSide(direction, continious)
 	                || selectPreferredVisibleSiblingOrAncestor(direction, continious)
 	                || unfoldInDirection(direction)
 	                || scroll(direction);
 
 	}
+
+    private boolean selectSingleNode(SelectionDirection direction, boolean continious) {
+        if(continious)
+            return false;
+        NodeView selectionStart = selection.getSelectionStart();
+        NodeView selectionEnd = selection.getSelectionEnd();
+
+        if(selectionStart == selectionEnd)
+            return false;
+        Point startLocation = currentRootView.getRelativeLocation(selectionStart, 0.5, 0.5);
+        Point endLocation = currentRootView.getRelativeLocation(selectionEnd, 0.5, 0.5);
+        NodeView newSelected;
+        switch(direction) {
+        case DOWN:
+            newSelected = startLocation.y > endLocation.y ? selectionStart : selectionEnd;
+            break;
+        case UP:
+            newSelected = startLocation.y < endLocation.y ? selectionStart : selectionEnd;
+            break;
+        case LEFT:
+            newSelected = startLocation.x < endLocation.x ? selectionStart : selectionEnd;
+            break;
+        case RIGHT:
+            newSelected = startLocation.x > endLocation.x ? selectionStart : selectionEnd;
+            break;
+        default:
+            return false;
+        }
+        select(newSelected, false);
+        return true;
+    }
 
     public boolean scroll(SelectionDirection direction) {
         switch(direction) {
