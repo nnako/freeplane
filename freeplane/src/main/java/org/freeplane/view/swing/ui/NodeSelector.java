@@ -102,8 +102,10 @@ public class NodeSelector {
 		                map.select();
 		                NodeModel node = nodeV.getNode();
 		                MouseEventActor.INSTANCE.withMouseEvent( () ->
-                            controller.getSelection().selectAsTheOnlyOneSelected(node));
-		                modeController.getMapController().scrollNodeTreeAfterSelect(node);
+                            {
+								controller.getSelection().selectAsTheOnlyOneSelected(node);
+								modeController.getMapController().scrollNodeTreeAfterSelect(node);
+							});
 		            }
 		        }
 		    }
@@ -196,7 +198,8 @@ public class NodeSelector {
 				e.consume();
 			}
 			if(! extend && scrollNodeTree && ! newlySelectedNode.isFolded()) {
-                controller.getModeController().getMapController().scrollNodeTreeAfterSelect(newlySelectedNode);
+				MouseEventActor.INSTANCE.withMouseEvent( () ->
+					controller.getModeController().getMapController().scrollNodeTreeAfterSelect(newlySelectedNode));
                 e.consume();
             }
 		}

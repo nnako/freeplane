@@ -2622,7 +2622,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		ResourceController resourceController = ResourceController.getResourceController();
 		if (resourceController.getBooleanProperty("center_selected_node")
 				&& !(MouseEventActor.INSTANCE.isActive()
-					&& resourceController.getBooleanProperty("center_selected_node_disabled_for_mouse"))) {
+					&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
 			mapScroller.scrollNodeToCenter(newSelected);
 		}
 		else {

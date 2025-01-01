@@ -75,6 +75,7 @@ import org.freeplane.main.addons.AddOnsController;
 import org.freeplane.n3.nanoxml.XMLException;
 import org.freeplane.n3.nanoxml.XMLParseException;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.ui.MouseEventActor;
 /**
  * @author Dimitry Polivaev
  */
@@ -403,7 +404,10 @@ implements IExtension, NodeChangeAnnouncer{
 	}
 
 	private void scrollNodeTree(final NodeModel node, String propertyName) {
-    if (ResourceController.getResourceController().getBooleanProperty(propertyName)) {
+    ResourceController resourceController = ResourceController.getResourceController();
+	if (resourceController.getBooleanProperty(propertyName)
+			&& !(MouseEventActor.INSTANCE.isActive()
+			&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
     	SwingUtilities.invokeLater(new Runnable() {
     		@Override
     		public void run() {

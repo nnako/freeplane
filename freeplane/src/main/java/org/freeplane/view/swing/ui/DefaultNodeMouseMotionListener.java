@@ -72,7 +72,8 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		        && Compat.isPlainEvent(e)
 		        && isInFoldingRegion(e)) {
 		    doubleClickTimer.cancel();
-		    mapController.toggleFoldedAndScroll(node);
+		    MouseEventActor.INSTANCE.withMouseEvent( () ->
+		        mapController.toggleFoldedAndScroll(node));
 		    return;
 		}
 
@@ -134,7 +135,8 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 						doubleClickTimer.start(new Runnable() {
 							@Override
 							public void run() {
-								mapController.toggleFoldedAndScroll(node);
+								MouseEventActor.INSTANCE.withMouseEvent( () ->
+									mapController.toggleFoldedAndScroll(node));
 							}
 						});
 					}
@@ -151,7 +153,8 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 
 		if (inside && Compat.isCtrlShiftEvent(e) && !nodeSelector.shouldSelectOnClick(e)) {
 			doubleClickTimer.cancel();
-			mapController.toggleFoldedAndScroll(node);
+			MouseEventActor.INSTANCE.withMouseEvent( () ->
+				mapController.toggleFoldedAndScroll(node));
 			e.consume();
 			return;
 		}

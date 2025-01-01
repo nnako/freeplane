@@ -202,9 +202,9 @@
 					<choice value="first" />
 					<choice value="last" />
 				</combo>
-                <boolean name="unfold_on_navigation" />
-                <boolean name="unfold_on_paste" />
 				<boolean name="fold_on_click_inside" />
+				<boolean name="unfold_on_navigation" />
+				<boolean name="unfold_on_paste" />
 				<boolean name="edit_on_double_click" />
 				<boolean name="openLinksOnPlainClicks"/>
 				<length name="grid_size" defaultUnit = "px" min="0" max = "1000" step = "0.01"/>
@@ -212,8 +212,6 @@
 				<number name="map_view_zoom_step" min="1" max="100" />
 				<boolean name="zoomAroundSelectedNode"/>
 				<boolean name="keepSelectedNodeVisible"/>
-				<boolean name="scrollOnSelect"/>
-				<boolean name="scrollOnUnfold"/>
 				<boolean name="goto_note_end_on_edit" />
 				<combo name="key_type_action">
 					<choice value="EDIT_CURRENT" />
@@ -286,7 +284,7 @@
 				<boolean name="cut_nodes_without_question" />
 				<boolean name="remove_notes_without_question" />
 			</separator>
-			<separator name="selection_method">
+			<separator name="selection">
 				<combo name="selection_method">
 					<choice value="selection_method_direct" />
 					<choice value="selection_method_delayed" />
@@ -294,12 +292,14 @@
 				</combo>
 				<boolean name="keyboardNavigationLoopsOverSiblings"/>
 				<number name="time_for_delayed_selection" />
-				<boolean name="center_selected_node" />
-				<boolean name="center_selected_node_disabled_for_mouse" />
-				<boolean name="slow_scroll_selected_node" />
 			</separator>
-			<separator name="scrollbar">
+			<separator name="scrollling">
 				<number name="scrollbar_increment" />
+				<boolean name="slow_scroll_selected_node" />
+				<boolean name="center_selected_node" />
+				<boolean name="scrollOnSelect"/>
+				<boolean name="scrollOnUnfold"/>
+				<boolean name="autoscroll_disabled_for_mouse_interaction" />
 			</separator>
 			<separator name="tooltip">
 				<boolean name="show_node_tooltips" />
