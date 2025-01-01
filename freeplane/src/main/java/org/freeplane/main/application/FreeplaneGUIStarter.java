@@ -334,7 +334,6 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 			    ExternalMapChangeMonitor.install(controller.getMapViewManager());
 				focusCurrentView();
 				contentPane.setVisible(true);
-				frame.toFront();
 				startupFinished = true;
 				try {
 					Thread.sleep(1000);
