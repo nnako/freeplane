@@ -2357,4 +2357,11 @@ public class NodeView extends JComponent implements INodeView {
                         : childrenSides == ChildrenSides.TOP_OR_LEFT ? true
                                 : isTopOrLeft();
     }
+
+	@Override
+	public void revalidate() {
+		 super.revalidate();
+		 map.repaintVisible();
+	}
+
 }
