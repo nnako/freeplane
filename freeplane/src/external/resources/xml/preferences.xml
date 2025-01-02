@@ -290,7 +290,7 @@
 					<choice value="selection_method_delayed" />
 					<choice value="selection_method_by_click" />
 				</combo>
-				<boolean name="keyboardNavigationLoopsOverSiblings"/>
+				<combo name="siblingSelection" enum="org.freeplane.view.swing.map.SiblingSelection"/>
 				<number name="time_for_delayed_selection" />
 			</separator>
 			<separator name="scrollling">
