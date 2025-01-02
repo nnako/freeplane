@@ -2815,8 +2815,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	}
 
 	public void repaintVisible() {
-		final JViewport vp = (JViewport) getParent();
-		repaint(vp.getViewRect());
+		getParent().repaint();
 	}
 
 	@Override
