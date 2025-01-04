@@ -3303,7 +3303,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         }
     }
 
-	boolean showsTagsOnMinimizedNodes() {
+	static public boolean showsTagsOnMinimizedNodes() {
 		return showsTagsOnMinimizedNodes;
 	}
 }

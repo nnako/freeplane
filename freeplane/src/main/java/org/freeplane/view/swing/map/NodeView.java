@@ -2020,7 +2020,7 @@ public class NodeView extends JComponent implements INodeView {
 				component.revalidate();
 			if (component == getMainView()
 					|| component instanceof MapViewIconListComponent
-					&& map.showsTagsOnMinimizedNodes()) {
+					&& MapView.showsTagsOnMinimizedNodes()) {
 				continue;
 			}
 			if (component.isVisible() != componentsVisible) {

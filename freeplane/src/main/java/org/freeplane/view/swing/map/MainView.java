@@ -508,7 +508,7 @@ public class MainView extends ZoomableLabel {
 		    }
 		}
 		if(TagLocation.BESIDE_NODES == map.getTagLocation()
-				&& (map.showsTagsOnMinimizedNodes() || ! nodeView.isShortened())) {
+				&& (MapView.showsTagsOnMinimizedNodes() || ! nodeView.isShortened())) {
 		    for (final TagIcon icon : iconController.getTagIcons(node)) {
 		        iconImages.addTag(icon);
 		    }

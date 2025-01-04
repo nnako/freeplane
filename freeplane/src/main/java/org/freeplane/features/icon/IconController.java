@@ -68,6 +68,7 @@ import org.freeplane.features.text.TextController;
 import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.MapStyleModel;
 import org.freeplane.features.styles.StyleNode;
+import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.map.TagLocation;
 
@@ -110,7 +111,8 @@ public class IconController implements IExtension {
                 }
                 final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
                 TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
-                final boolean showIcon = tagLocation == TagLocation.NEVER || ShortenedTextModel.isShortened(node);
+                final boolean showIcon = tagLocation == TagLocation.NEVER 
+                		|| ! MapView.showsTagsOnMinimizedNodes() && ShortenedTextModel.isShortened(node);
                 if(showIcon) {
                     if (tagsIcon == null) {
                         tagsIcon = IconStoreFactory.ICON_STORE.getUIIcon("tags.svg");
@@ -137,7 +139,8 @@ public class IconController implements IExtension {
                 }
                 final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
                 TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
-                final boolean showTooltip = tagLocation == TagLocation.NEVER || ShortenedTextModel.isShortened(node);
+                final boolean showTooltip = tagLocation == TagLocation.NEVER
+                		|| ! MapView.showsTagsOnMinimizedNodes() && ShortenedTextModel.isShortened(node);
                 if(! showTooltip)
                     return null;
                 final Font font = getTagFont(node);
