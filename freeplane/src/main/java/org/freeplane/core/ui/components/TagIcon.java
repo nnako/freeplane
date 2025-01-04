@@ -51,6 +51,8 @@ public class TagIcon implements Icon {
         g.setColor(backgroundColor);
         int r = (int) (UITools.FONT_SCALE_FACTOR * 10);
 
+        IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
+        mapViewManager.setEdgesRenderingHint(g);
         // Define custom shape with rounded right side
         GeneralPath path = new GeneralPath();
         path.moveTo(x, y); // Top-left corner
@@ -63,13 +65,10 @@ public class TagIcon implements Icon {
 
         g.fill(path);
 
-        // Draw outline of the shape
         g.setColor(textColor);
         g.draw(path);
 
-        // Draw the text
         g.setFont(font);
-        IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
         mapViewManager.setTextRenderingHint(g);
         g.drawString(tag.getContent(), x + height / 4, y + height * 4 / 5);
 
