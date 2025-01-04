@@ -12,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.Icon;
@@ -40,25 +41,40 @@ public class TagIcon implements Icon {
 
     @Override
     public void paintIcon(Component c, Graphics prototypeGraphics, int x, int y) {
-        if(tag.isEmpty())
+        if (tag.isEmpty())
             return;
+
         Graphics2D g = (Graphics2D) prototypeGraphics.create();
         Color backgroundColor = tag.getColor();
         Color textColor = UITools.getTextColorForBackground(backgroundColor);
-         g.setColor(backgroundColor);
+
+        g.setColor(backgroundColor);
         int r = (int) (UITools.FONT_SCALE_FACTOR * 10);
-        IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
-        mapViewManager.setEdgesRenderingHint(g);
-        g.fillRoundRect(x, y, width, height, r, r);
+
+        // Define custom shape with rounded right side
+        GeneralPath path = new GeneralPath();
+        path.moveTo(x, y); // Top-left corner
+        path.lineTo(x + width - r, y); // Top edge to the rounded corner
+        path.quadTo(x + width, y, x + width, y + r); // Top-right rounded corner
+        path.lineTo(x + width, y + height - r); // Right edge
+        path.quadTo(x + width, y + height, x + width - r, y + height); // Bottom-right rounded corner
+        path.lineTo(x, y + height); // Bottom edge to the flat left
+        path.closePath();
+
+        g.fill(path);
+
+        // Draw outline of the shape
         g.setColor(textColor);
-        g.drawRoundRect(x, y, width - 1, height - 1, r, r);
+        g.draw(path);
+
+        // Draw the text
         g.setFont(font);
+        IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
         mapViewManager.setTextRenderingHint(g);
-        g.drawString(tag.getContent(), x + height / 2, y + height * 4 / 5);
+        g.drawString(tag.getContent(), x + height / 4, y + height * 4 / 5);
+
         g.dispose();
-
     }
-
     @Override
     public int getIconWidth() {
         return width;
