@@ -209,15 +209,15 @@ class ScriptEditorPanel extends JDialog {
 					result = mScriptModel.executeScript(mScriptList.getSelectedIndex(), getPrintStream(),
 						getErrorHandler());
                 }
-                catch (Throwable e2) {
+                catch (Throwable e) {
 				// make sure the complete stack trace is logged!
-				LogUtils.warn(e2);
-        			Throwable cause = e2.getCause();
+				LogUtils.warn(e);
+        			Throwable cause = e.getCause();
 					String causeMessage = "";
 					if(cause != null && cause.getMessage()!= null)
 						causeMessage = cause.getMessage();
-        			final String message = e2.getMessage() != null ? e2.getMessage() : "";
-        			UITools.errorMessage(e2.getClass().getName() + ": " + causeMessage
+        			final String message = e.getMessage() != null ? e.getMessage() : "";
+        			UITools.errorMessage(e.getClass().getName() + ": " + causeMessage
         			        + ((causeMessage.length() != 0 && message.length() != 0) ? ", " : "") + message);
         			result = message;
                 }

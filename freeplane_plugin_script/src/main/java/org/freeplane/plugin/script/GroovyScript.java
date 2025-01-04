@@ -23,10 +23,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.security.AccessControlException;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
 import org.codehaus.groovy.ast.ASTNode;
@@ -55,7 +53,7 @@ public class GroovyScript implements IScript {
 
     private CompileTimeStrategy compileTimeStrategy;
 
-	private ScriptClassLoader scriptClassLoader;
+    private ScriptClassLoader scriptClassLoader;
 
     public GroovyScript(String script) {
         this((Object) script);
@@ -94,115 +92,106 @@ public class GroovyScript implements IScript {
 
     @Override
     public Object execute(final NodeModel node, PrintStream outStream, IFreeplaneScriptErrorHandler errorHandler, ScriptContext scriptContext) {
-        try {
-            if (errorsInScript != null && compileTimeStrategy.canUseOldCompiledScript()) {
-                throw new ExecuteScriptException(errorsInScript.getMessage(), errorsInScript);
-            }
-            final PrintStream oldOut = System.out;
-            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                trustedCompileAndCache(outStream);
-                Thread.currentThread().setContextClassLoader(scriptClassLoader);
-                FreeplaneScriptBaseClass scriptWithBinding = AccessController.doPrivileged(new PrivilegedAction<FreeplaneScriptBaseClass>() {
-					@Override
-					public FreeplaneScriptBaseClass run() {
-						return compiledScript.withBinding(node, scriptContext);
-					}
-				});
-                if(oldOut != outStream)
-                	System.setOut(outStream);
-				final Object result = scriptWithBinding.run();
-				return result;
-            } finally {
-                if(oldOut != outStream)
-                	System.setOut(oldOut);
-                Thread.currentThread().setContextClassLoader(contextClassLoader);
-            }
-        } catch (final GroovyRuntimeException e) {
-            handleScriptRuntimeException(e, outStream, errorHandler);
-            // :fixme: This throw is only reached, if
-            // handleScriptRuntimeException
-            // does not raise an exception. Should it be here at all?
-            // And if: Shouldn't it raise an ExecuteScriptException?
-            throw new RuntimeException(e);
-        } catch (final Throwable e) {
-            throw new ExecuteScriptException(e.getMessage(), e);
-        }
+    	if (errorsInScript != null && compileTimeStrategy.canUseOldCompiledScript()) {
+    		throw new ExecuteScriptException(errorsInScript.getMessage(), errorsInScript);
+    	}
+    	final PrintStream oldOut = System.out;
+    	ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    	try {
+    		return AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+
+    			@Override
+    			public Object run() throws Exception {
+    				try {
+    					final ScriptingSecurityManager scriptingSecurityManager = createScriptingSecurityManager(outStream);
+    					compileAndCache(scriptingSecurityManager);
+        				Thread.currentThread().setContextClassLoader(scriptClassLoader);
+        				FreeplaneScriptBaseClass scriptWithBinding = compiledScript.withBinding(node, scriptContext);
+        				if(oldOut != outStream)
+        					System.setOut(outStream);
+        				final Object result = scriptWithBinding.run();
+        				return result;
+    				} catch (Exception e) {
+    					throw e;
+    				} catch (Throwable e) {
+    					throw new RuntimeException(e);
+    				}
+    			}
+    		});
+    	} catch (final PrivilegedActionException e) {
+    		Throwable cause = e.getCause();
+    		if(cause instanceof GroovyRuntimeException) {
+    			outStream.print("message: " + e.getMessage());
+    			int lineNumber = findErrorLine((GroovyRuntimeException) cause);
+    			outStream.print("Line number: " + lineNumber);
+    			errorHandler.gotoLine(lineNumber);
+    			throw new ExecuteScriptException(cause.getMessage() + " at line " + lineNumber, cause);
+    		}
+    		else
+    			throw new ExecuteScriptException(cause.getMessage(), cause);
+
+    	} catch (final ExecuteScriptException e) {
+    		throw e;
+    	} catch (final Throwable e) {
+    		throw new ExecuteScriptException(e.getMessage(), e);
+    	}
+    	finally {
+    		if(oldOut != outStream)
+    			System.setOut(oldOut);
+    		Thread.currentThread().setContextClassLoader(contextClassLoader);
+    	}
     }
 
     private ScriptingSecurityManager createScriptingSecurityManager(PrintStream outStream) {
         return new ScriptSecurity(script, specificPermissions, outStream)
-                .getScriptingSecurityManager();
+        		.getScriptingSecurityManager();
     }
-
-    private void trustedCompileAndCache(PrintStream outStream) throws Throwable {
-		AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-
-			@Override
-			public Void run() throws PrivilegedActionException {
-				try {
-					final ScriptingSecurityManager scriptingSecurityManager = createScriptingSecurityManager(outStream);
-					compileAndCache(scriptingSecurityManager);
-				} catch (Exception e) {
-					throw new PrivilegedActionException(e);
-				} catch (Error e) {
-					throw e;
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				}
-				return null;
-			}
-		});
-	}
 
     private static boolean accessPermissionCheckerChecked = false;
-    private Script compileAndCache(final ScriptingSecurityManager scriptingSecurityManager) throws Throwable {
+
+    private void compileAndCache(final ScriptingSecurityManager scriptingSecurityManager) throws Throwable {
     	checkAccessPermissionCheckerExists();
     	if (compileTimeStrategy.canUseOldCompiledScript()) {
-			scriptClassLoader.setSecurityManager(scriptingSecurityManager);
-            return compiledScript;
-        }
-        removeOldScript();
-        errorsInScript = null;
-        if (script instanceof Script) {
-            return (Script) script;
-        } else {
-            try {
-                final Binding binding = createBindingForCompilation();
-				scriptClassLoader = ScriptClassLoader.createClassLoader();
-				scriptClassLoader.setSecurityManager(scriptingSecurityManager);
-				final GroovyShell shell = new GroovyShell(scriptClassLoader, binding,
-                        createCompilerConfiguration());
-                compileTimeStrategy.scriptCompileStart();
-                if (script instanceof String) {
-                    compiledScript = (FreeplaneScriptBaseClass) shell.parse((String) script);
-                } else if (script instanceof File) {
-                    compiledScript = (FreeplaneScriptBaseClass) shell.parse((File) script);
-                } else {
-                    throw new IllegalArgumentException();
-                }
-                compiledScript.setScript(script);
-                compileTimeStrategy.scriptCompiled();
-                return compiledScript;
-            } catch (Throwable e) {
-                errorsInScript = e;
-                throw e;
-            }
-        }
+    		scriptClassLoader.setSecurityManager(scriptingSecurityManager);
+    	}
+    	else {
+    		removeOldScript();
+    		errorsInScript = null;
+    		try {
+    			final Binding binding = createBindingForCompilation();
+    			scriptClassLoader = ScriptClassLoader.createClassLoader();
+    			scriptClassLoader.setSecurityManager(scriptingSecurityManager);
+    			final GroovyShell shell = new GroovyShell(scriptClassLoader, binding,
+    					createCompilerConfiguration());
+    			compileTimeStrategy.scriptCompileStart();
+    			if (script instanceof String) {
+    				compiledScript = (FreeplaneScriptBaseClass) shell.parse((String) script);
+    			} else if (script instanceof File) {
+    				compiledScript = (FreeplaneScriptBaseClass) shell.parse((File) script);
+    			} else {
+    				throw new IllegalArgumentException();
+    			}
+    			compiledScript.setScript(script);
+    			compileTimeStrategy.scriptCompiled();
+    		} catch (Throwable e) {
+    			errorsInScript = e;
+    			throw e;
+    		}
+    	}
     }
 
-	static void checkAccessPermissionCheckerExists() {
-		if(!accessPermissionCheckerChecked){
-    		if(System.getSecurityManager() != null){
-				try {
-					GroovyScript.class.getClassLoader().loadClass("org.codehaus.groovy.reflection.AccessPermissionChecker");
-				} catch (ClassNotFoundException e) {
-					throw new AccessControlException("class org.codehaus.groovy.reflection.AccessPermissionChecker not found");
-				}
-			}
-    		accessPermissionCheckerChecked = true;
-    	}
-	}
+    static void checkAccessPermissionCheckerExists() {
+    	if(!accessPermissionCheckerChecked){
+            if(System.getSecurityManager() != null){
+                try {
+                    GroovyScript.class.getClassLoader().loadClass("org.codehaus.groovy.reflection.AccessPermissionChecker");
+                } catch (ClassNotFoundException e) {
+                    throw new AccessControlException("class org.codehaus.groovy.reflection.AccessPermissionChecker not found");
+                }
+            }
+            accessPermissionCheckerChecked = true;
+        }
+    }
 
     private void removeOldScript() {
         if (compiledScript != null) {
@@ -217,8 +206,7 @@ public class GroovyScript implements IScript {
         return binding;
     }
 
-    private void handleScriptRuntimeException(final GroovyRuntimeException e, PrintStream outStream, IFreeplaneScriptErrorHandler errorHandler) {
-        outStream.print("message: " + e.getMessage());
+    private int findErrorLine(final GroovyRuntimeException e) {
         final ModuleNode module = e.getModule();
         final ASTNode astNode = e.getNode();
         int lineNumber = -1;
@@ -229,9 +217,7 @@ public class GroovyScript implements IScript {
         } else {
             lineNumber = findLineNumberInString(e.getMessage(), lineNumber);
         }
-        outStream.print("Line number: " + lineNumber);
-        errorHandler.gotoLine(lineNumber);
-        throw new ExecuteScriptException(e.getMessage() + " at line " + lineNumber, e);
+        return lineNumber;
     }
 
     static CompilerConfiguration createCompilerConfiguration() {
@@ -240,10 +226,10 @@ public class GroovyScript implements IScript {
         if (!(ScriptResources.getClasspath() == null || ScriptResources.getClasspath().isEmpty())) {
             config.setClasspathList(ScriptResources.getClasspath());
         }
-		final ImportCustomizer importCustomizer = new ImportCustomizer();
+        final ImportCustomizer importCustomizer = new ImportCustomizer();
         importCustomizer.addStaticImport(ScriptUtils.class.getName(), "ignoreCycles");
         importCustomizer.addStaticStars(GroovyStaticImports.class.getName());
-		config.addCompilationCustomizers(importCustomizer);
+        config.addCompilationCustomizers(importCustomizer);
         return config;
     }
 
