@@ -202,8 +202,7 @@ public class MapLoader{
 		}
 	}
 
-	private MMapModel loadMap()
-			throws PrivilegedActionException {
+	private MMapModel loadMap() {
 		if(newMapLocation != null) {
 			final MMapModel loadedMap = mapController().getMap(newMapLocation);
 			if(loadedMap != null) {
@@ -218,21 +217,25 @@ public class MapLoader{
 		if(actualSourceLocation == null)
 		    return null;
 		final MMapModel map = createMindMap();
-		AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+		try {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 
-			@Override
-			public Void run() throws FileNotFoundException, XMLException, URISyntaxException, IOException {
-				if(inputStream != null) {
-					loadMapContent(map);
-				}
-				else {
-					if(actualSourceLocation != null) {
-						loadMap(map, actualSourceLocation);
+				@Override
+				public Void run() throws FileNotFoundException, XMLException, URISyntaxException, IOException {
+					if(inputStream != null) {
+						loadMapContent(map);
 					}
+					else {
+						if(actualSourceLocation != null) {
+							loadMap(map, actualSourceLocation);
+						}
+					}
+					return null;
 				}
-				return null;
-			}
-		});
+			});
+		} catch (PrivilegedActionException e) {
+			throw new RuntimeException(e.getCause());
+		}
 
 		if (map.getRootNode() == null)
 			map.createNewRoot();
