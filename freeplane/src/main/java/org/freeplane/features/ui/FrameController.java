@@ -941,6 +941,6 @@ abstract public class FrameController implements ViewController {
 
 	@Override
 	public List<? extends Component> getMapViewVector() {
-		return mapViewManager.getMapViewVector();
+		return mapViewManager.getMapViews();
 	}
 }

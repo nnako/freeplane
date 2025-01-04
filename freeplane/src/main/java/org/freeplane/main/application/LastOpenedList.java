@@ -385,7 +385,7 @@ public class LastOpenedList implements IMapViewChangeListener, IMapChangeListene
 
 	private void updateLastVisitedNodeIds() {
 		final List<? extends Component> mapViews = Controller.getCurrentController().getMapViewManager()
-		    .getMapViewVector();
+		    .getMapViews();
 		for (Component component : mapViews) {
 			updateLastVisitedNodeId(component);
 		}

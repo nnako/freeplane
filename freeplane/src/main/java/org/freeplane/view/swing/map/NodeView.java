@@ -1835,15 +1835,6 @@ public class NodeView extends JComponent implements INodeView {
 			final NodeViewFactory nodeViewFactory = NodeViewFactory.getInstance();
 			nodeViewFactory.updateDetails(this, minNodeWidth, maxNodeWidth);
 			nodeViewFactory.updateNoteViewer(this, minNodeWidth, maxNodeWidth);
-			if (contentPane != null) {
-				final int componentCount = contentPane.getComponentCount();
-				for (int i = 1; i < componentCount; i++) {
-					final Component component = contentPane.getComponent(i);
-					if (component instanceof JComponent) {
-						((JComponent) component).revalidate();
-					}
-				}
-			}
 		}
 		updateShortener(textShortened);
 		updateIcons();
@@ -2025,6 +2016,8 @@ public class NodeView extends JComponent implements INodeView {
 		int index;
 		for (index = 0; index < components.length; index++) {
 			final Component component = components[index];
+			if(! component.isValid())
+				component.revalidate();
 			if (component == getMainView()
 					|| component instanceof MapViewIconListComponent
 					&& map.showsTagsOnMinimizedNodes()) {

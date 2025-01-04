@@ -191,7 +191,7 @@ public class HeadlessMapViewController implements IMapViewManager {
 	}
 
 	@Override
-	public List<? extends Component> getMapViewVector() {
+	public List<? extends Component> getMapViews() {
 		return Collections.emptyList();
 	}
 

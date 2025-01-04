@@ -792,6 +792,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	    outlineHGap = resourceController.getLengthProperty(OUTLINE_HGAP_PROPERTY);
 	    draggingAreaWidth = resourceController.getLengthProperty(DRAGGING_AREA_WIDTH_PROPERTY);
 	    outlineViewFitsWindowWidth = resourceController.getBooleanProperty(OUTLINE_VIEW_FITS_WINDOW_WIDTH);
+	    showsTagsOnMinimizedNodes = resourceController.getBooleanProperty(SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY);
 
 	    createPropertyChangeListener();
 	}
@@ -976,84 +977,101 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 	boolean isLayoutCompleted() {
 	    final JViewport viewPort = (JViewport) getParent();
-		final Dimension visibleDimension = viewPort.getExtentSize();
-		return visibleDimension.width > 0;
-    }
+	    final Dimension visibleDimension = viewPort.getExtentSize();
+	    return visibleDimension.width > 0;
+	}
 
 	static private void createPropertyChangeListener() {
 		MapView.propertyChangeListener = new IFreeplanePropertyListener() {
 			@Override
 			public void propertyChanged(final String propertyName, final String newValue, final String oldValue) {
-				final Component c = Controller.getCurrentController().getMapViewManager().getMapViewComponent();
-				if (!(c instanceof MapView)) {
-					return;
-				}
-				final MapView mapView = (MapView) c;
-				if (propertyName.equals(RESOURCES_SELECTED_NODE_COLOR)) {
-					mapView.repaintSelecteds(true);
-					return;
-				}
-				if (propertyName.equals(RESOURCES_SELECTED_NODE_RECTANGLE_COLOR)) {
-					mapView.repaintSelecteds(true);
-					return;
-				}
-				if (propertyName.equals(ResourceController.RESOURCE_DRAW_RECTANGLE_FOR_SELECTION)) {
-					MapView.drawsRectangleForSelection = TreeXmlReader.xmlToBoolean(newValue);
-					mapView.repaintSelecteds(true);
-					return;
-				}
 				if (propertyName.equals("printonwhitebackground")) {
 					MapView.printOnWhiteBackground = TreeXmlReader.xmlToBoolean(newValue);
-					return;
-				}
-				if (propertyName.equals(SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY)) {
-					MapView.showsTagsOnMinimizedNodes = TreeXmlReader.xmlToBoolean(newValue);
-					mapView.repaint();
-					return;
-				}
-				if (propertyName.equals(SPOTLIGHT_BACKGROUND_COLOR)) {
-					MapView.spotlightBackgroundColor = ColorUtils.stringToColor(newValue);
-					mapView.repaint();
-					return;
-				}
-				if (propertyName.equals(HIDE_SINGLE_END_CONNECTORS)) {
-					MapView.hideSingleEndConnectorsPropertyValue = ResourceController.getResourceController().getBooleanProperty(HIDE_SINGLE_END_CONNECTORS);
-					mapView.repaint();
-					return;
-				}
-                if (propertyName.equals(SHOW_CONNECTORS_PROPERTY)) {
-                    MapView.showConnectorsPropertyValue = ResourceController.getResourceController().getProperty(SHOW_CONNECTORS_PROPERTY).intern();
-                    mapView.repaint();
-                    return;
-                }
-                if (propertyName.startsWith(SOME_CONNECTORS_PROPERTY)) {
-                    MapView.showConnectorsPropertyValue = ResourceController.getResourceController().getProperty(SHOW_CONNECTORS_PROPERTY).intern();
-                    mapView.repaint();
-                    return;
-                }
-				if (propertyName.equals(OUTLINE_HGAP_PROPERTY)) {
-					MapView.outlineHGap = ResourceController.getResourceController().getLengthProperty(OUTLINE_HGAP_PROPERTY);
-					if (mapView.isOutlineLayoutSet()) {
-						mapView.getRoot().updateAll();
-						mapView.repaint();
-					}
 					return;
 				}
 				if (propertyName.equals(DRAGGING_AREA_WIDTH_PROPERTY)) {
 					MapView.draggingAreaWidth = ResourceController.getResourceController().getLengthProperty(DRAGGING_AREA_WIDTH_PROPERTY);
 					return;
 				}
-				if(propertyName.equals(OUTLINE_VIEW_FITS_WINDOW_WIDTH)) {
-					outlineViewFitsWindowWidth = ResourceController.getResourceController().getBooleanProperty(OUTLINE_VIEW_FITS_WINDOW_WIDTH);
-					if (mapView.isOutlineLayoutSet()) {
-						mapView.getRoot().updateAll();
-						mapView.repaint();
+				{
+					final Component c = Controller.getCurrentController().getMapViewManager().getMapViewComponent();
+					if (!(c instanceof MapView)) {
+						return;
 					}
-					return;
+					final MapView mapView = (MapView) c;
+					if (propertyName.equals(RESOURCES_SELECTED_NODE_COLOR)) {
+						mapView.repaintSelecteds(true);
+						return;
+					}
+					if (propertyName.equals(RESOURCES_SELECTED_NODE_RECTANGLE_COLOR)) {
+						mapView.repaintSelecteds(true);
+						return;
+					}
+					if (propertyName.equals(ResourceController.RESOURCE_DRAW_RECTANGLE_FOR_SELECTION)) {
+						MapView.drawsRectangleForSelection = TreeXmlReader.xmlToBoolean(newValue);
+						mapView.repaintSelecteds(true);
+						return;
+					}
+					if (propertyName.equals(SPOTLIGHT_BACKGROUND_COLOR)) {
+						MapView.spotlightBackgroundColor = ColorUtils.stringToColor(newValue);
+						mapView.repaint();
+						return;
+					}
+				}
+				for(Component c : Controller.getCurrentController().getMapViewManager().getMapViews()) {
+					if (!(c instanceof MapView)) {
+						continue;
+					}
+					final MapView mapView = (MapView) c;
+					if (propertyName.equals(SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY)) {
+						MapView.showsTagsOnMinimizedNodes = TreeXmlReader.xmlToBoolean(newValue);
+						mapView.updateIconsRecursively();
+						mapView.repaint();
+						continue;
+					}
+					if (propertyName.equals(SHOW_CONNECTORS_PROPERTY)) {
+						MapView.showConnectorsPropertyValue = ResourceController.getResourceController().getProperty(SHOW_CONNECTORS_PROPERTY).intern();
+						mapView.repaint();
+						continue;
+					}
+					if (propertyName.startsWith(SOME_CONNECTORS_PROPERTY)) {
+						MapView.showConnectorsPropertyValue = ResourceController.getResourceController().getProperty(SHOW_CONNECTORS_PROPERTY).intern();
+						mapView.repaint();
+						continue;
+					}
+					if (propertyName.equals(OUTLINE_HGAP_PROPERTY)) {
+						MapView.outlineHGap = ResourceController.getResourceController().getLengthProperty(OUTLINE_HGAP_PROPERTY);
+						if (mapView.isOutlineLayoutSet()) {
+							mapView.getRoot().updateAll();
+							mapView.repaint();
+						}
+						continue;
+					}
+					if (propertyName.equals(HIDE_SINGLE_END_CONNECTORS)) {
+						MapView.hideSingleEndConnectorsPropertyValue = ResourceController.getResourceController().getBooleanProperty(HIDE_SINGLE_END_CONNECTORS);
+						mapView.repaint();
+						continue;
+					}
+					if(propertyName.equals(OUTLINE_VIEW_FITS_WINDOW_WIDTH)) {
+						outlineViewFitsWindowWidth = ResourceController.getResourceController().getBooleanProperty(OUTLINE_VIEW_FITS_WINDOW_WIDTH);
+						if (mapView.isOutlineLayoutSet()) {
+							mapView.getRoot().updateAll();
+							mapView.repaint();
+						}
+						continue;
+					}
+					break;
 				}
 			}
+
 		};
 		ResourceController.getResourceController().addPropertyChangeListener(MapView.propertyChangeListener);
+	}
+
+	private void updateIconsRecursively() {
+		updateIconsRecursively(currentRootView);
+		if(mapRootView != currentRootView)
+			updateIconsRecursively(mapRootView);
 	}
 
 	public void deselect(final NodeView newSelected) {

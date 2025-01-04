@@ -579,7 +579,7 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 	 * @see org.freeplane.core.frame.IMapViewController#getMapViewVector()
 	 */
 	@Override
-	public List<MapView> getMapViewVector() {
+	public List<MapView> getMapViews() {
 		return Collections.unmodifiableList(mapViewVector);
 	}
 

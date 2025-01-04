@@ -347,6 +347,7 @@
 					</Entry>
 					<Entry builder="separator" />
 					<Entry name="SetBooleanMapPropertyAction.showTagCategories" />
+					<Entry name="SetBooleanPropertyAction.showTagsOnMinimizedNodes" />
 				</Entry>
 				<Entry builder="radio_button_group" name="show_connectors" textKey="OptionPanel.show_connectors">
 					<Entry name="SetStringPropertyAction.show_connectors.true" />

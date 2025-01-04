@@ -100,7 +100,7 @@ public interface IMapViewManager {
 
 	public Configurable getMapViewConfiguration();
 
-	public List<? extends Component> getMapViewVector();
+	public List<? extends Component> getMapViews();
 
 	public ModeController getModeController(Component newMap);
 
