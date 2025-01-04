@@ -2015,17 +2015,19 @@ public class NodeView extends JComponent implements INodeView {
 
 	private void updateShortener(boolean textShortened) {
 		final boolean componentsVisible = !textShortened;
-		setContentComponentVisible(componentsVisible);
+		setContentComponentsVisible(componentsVisible);
 	}
 
-	private void setContentComponentVisible(final boolean componentsVisible) {
+	private void setContentComponentsVisible(final boolean componentsVisible) {
 		if(contentPane == null)
 			return;
 		final Component[] components = getContentPane().getComponents();
 		int index;
 		for (index = 0; index < components.length; index++) {
 			final Component component = components[index];
-			if (component == getMainView()) {
+			if (component == getMainView()
+					|| component instanceof MapViewIconListComponent
+					&& map.showsTagsOnMinimizedNodes()) {
 				continue;
 			}
 			if (component.isVisible() != componentsVisible) {

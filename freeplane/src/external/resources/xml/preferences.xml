@@ -184,6 +184,7 @@
 			</separator>
 			<separator name="tags" text="tags">
 				<string name="category_separator" />
+				<boolean name="showTagsOnMinimizedNodes"/>
 			</separator>
 			<separator name="selection_colors">
 				<boolean name="standarddrawrectangleforselection" />

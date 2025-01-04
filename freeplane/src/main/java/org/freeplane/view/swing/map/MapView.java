@@ -162,6 +162,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     private static final int ROOT_NODE_COMPONENT_INDEX = 0;
 	private static final String UNFOLD_ON_NAVIGATION = "unfold_on_navigation";
 	private static final String SYNCHRONIZE_SELECTION_ACROSS_VISIBLE_VIEWS_PROPERTY = "synchronizeSelectionAcrossVisibleViews";
+	private static final String SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY = "showTagsOnMinimizedNodes";
+
     private static final BasicStroke SELECTION_RECTANGLE_STROKE = new BasicStroke(2.0f * UITools.FONT_SCALE_FACTOR, BasicStroke.CAP_BUTT,
             BasicStroke.JOIN_MITER, 10.0f * UITools.FONT_SCALE_FACTOR,
             new float[] {5.0f * UITools.FONT_SCALE_FACTOR, 5.0f * UITools.FONT_SCALE_FACTOR}, 0.0f);
@@ -760,6 +762,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private static int outlineHGap;
 	private static boolean outlineViewFitsWindowWidth;
 	private static int draggingAreaWidth;
+	private static boolean showsTagsOnMinimizedNodes;
 	private Rectangle selectionRectangle = null;
 
 	final private ComponentAdapter viewportSizeChangeListener;
@@ -1001,6 +1004,11 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 				}
 				if (propertyName.equals("printonwhitebackground")) {
 					MapView.printOnWhiteBackground = TreeXmlReader.xmlToBoolean(newValue);
+					return;
+				}
+				if (propertyName.equals(SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY)) {
+					MapView.showsTagsOnMinimizedNodes = TreeXmlReader.xmlToBoolean(newValue);
+					mapView.repaint();
 					return;
 				}
 				if (propertyName.equals(SPOTLIGHT_BACKGROUND_COLOR)) {
@@ -3276,4 +3284,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             }
         }
     }
+
+	boolean showsTagsOnMinimizedNodes() {
+		return showsTagsOnMinimizedNodes;
+	}
 }

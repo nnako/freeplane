@@ -8,6 +8,7 @@ Add nodes inside selection rectangle to selection if shift is pressed
 Subtree search
 Sibling selection by keyboard can change parent, loop over siblings or stay at the end
 Option "Don't scroll after mouse interactions"
+Option to show tags on minimized nodes
 Bug fixes
 
 ==============================
