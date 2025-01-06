@@ -2,7 +2,7 @@ dependencies {
     implementation project(':freeplane')
     implementation project(':freeplane_plugin_jsyntaxpane')
     lib 'io.github.gitbucket:markedj:1.0.20'
-    lib 'net.sourceforge.plantuml:plantuml:1.2024.8'
+    compileOnly 'net.sourceforge.plantuml:plantuml:1.2024.8'
 }
 
 ext.bundleImports = 'de.sciss.syntaxpane.*'

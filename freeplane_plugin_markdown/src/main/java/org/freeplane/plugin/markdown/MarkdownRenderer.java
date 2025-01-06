@@ -29,7 +29,7 @@ import org.freeplane.features.text.mindmapmode.SourceTextEditorUIConfigurator;
 
 import io.github.gitbucket.markedj.Marked;
 import io.github.gitbucket.markedj.Options;
-import org.freeplane.plugin.markdown.markedj.PlantUMLExtension;
+import io.github.gitbucket.markedj.extension.Extension;
 
 public class MarkdownRenderer extends AbstractContentTransformer implements IEditBaseCreator {
 
@@ -43,13 +43,16 @@ public class MarkdownRenderer extends AbstractContentTransformer implements IEdi
     private Options createMarkdownOptions() {
         Options options = new Options();
         options.setSafelist(null);
-		options.addExtension(new PlantUMLExtension());
         return options;
     }
 
 	public MarkdownRenderer() {
 		super(30);
 		options = createMarkdownOptions();
+	}
+
+	public void addExtension(Extension extension) {
+		options.addExtension(extension);
 	}
 
 	@Override

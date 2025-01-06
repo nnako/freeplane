@@ -1,5 +1,15 @@
 package org.freeplane.plugin.markdown.markedj;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
+
+import javax.imageio.ImageIO;
+
 import io.github.gitbucket.markedj.Lexer;
 import io.github.gitbucket.markedj.Parser;
 import io.github.gitbucket.markedj.extension.Extension;
@@ -10,14 +20,6 @@ import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
 import net.sourceforge.plantuml.core.DiagramDescription;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
 
 public class PlantUMLExtension implements Extension {
     public static String[] EXPRESSIONS = new String[]{
@@ -79,10 +81,15 @@ public class PlantUMLExtension implements Extension {
         SourceStringReader reader = new SourceStringReader(plantUmlCode);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DiagramDescription diagramDescription;
+        boolean useCache = ImageIO.getUseCache();
         try {
+        	ImageIO.setUseCache(false);
             diagramDescription = reader.outputImage(outputStream, FILE_FORMAT_OPTION_PNG);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        finally {
+        	ImageIO.setUseCache(useCache);
         }
         if (diagramDescription != null) {
             String base64String = Base64.getEncoder().encodeToString(outputStream.toByteArray());
