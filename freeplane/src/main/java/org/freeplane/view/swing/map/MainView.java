@@ -288,7 +288,7 @@ public class MainView extends ZoomableLabel {
 		final NodeModel model = nodeView.getNode();
 		if (NodeLinks.getValidLink(model) == null)
 			return false;
-		return isInIconRegion(point.getX()) && getTagAt(point) == null;
+		return isInIconRegion(point.getX()) && getTagIconAt(point) == null;
 	}
 
 	public boolean isInIconRegion(final double xCoord)
@@ -841,7 +841,7 @@ public class MainView extends ZoomableLabel {
             return null;
     }
 
-    public Tag getTagAt(Point coordinate){
+    public TagIcon getTagIconAt(Point coordinate){
         Icon icon = getIcon();
         if(icon instanceof MultipleImageIcon){
             Rectangle iconRectangle = getIconRectangle();
@@ -852,7 +852,7 @@ public class MainView extends ZoomableLabel {
                 transformedToIconCoordinate.x /= zoom;
                 transformedToIconCoordinate.y /= zoom;
             }
-            return ((MultipleImageIcon)icon).getTagAt(transformedToIconCoordinate);
+            return ((MultipleImageIcon)icon).getTagIconAt(transformedToIconCoordinate);
 
         }
         else

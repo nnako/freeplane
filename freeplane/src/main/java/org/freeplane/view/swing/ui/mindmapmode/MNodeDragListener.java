@@ -12,6 +12,7 @@ import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.event.InputEvent;
 
+import org.freeplane.core.ui.components.TagIcon;
 import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 import org.freeplane.features.mode.Controller;
@@ -37,6 +38,11 @@ public class MNodeDragListener implements DragGestureListener {
 		Rectangle bounds = new Rectangle(0, 0, mainView.getWidth(), mainView.getHeight());
 		if(!bounds.contains(e.getDragOrigin()))
 			return;
+		TagIcon tag = mainView.getTagIconAt(e.getDragOrigin());
+		if(tag != null) {
+			dragTagRecognized(tag);
+			return;
+		}
 		final int dragActionType = e.getDragAction();
 		if (dragActionType == DnDConstants.ACTION_MOVE) {
 			if (nodeView.isRoot()) {
@@ -59,6 +65,10 @@ public class MNodeDragListener implements DragGestureListener {
 		}
 		catch (final InvalidDnDOperationException ex) {
 		}
+	}
+
+	private void dragTagRecognized(TagIcon tag) {
+
 	}
 
 	private boolean isLinkDragEvent(final DragGestureEvent e) {

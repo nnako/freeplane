@@ -140,7 +140,7 @@ public class MultipleImageIcon implements Icon {
 		}
 		return null;
 	}
-    public Tag getTagAt(Point coordinate) {
+    public TagIcon getTagIconAt(Point coordinate) {
         if(mTags.isEmpty() || coordinate.x < 0 || coordinate.y <= getGraphicalIconHeight() || coordinate.x >= getIconWidth())
             return null;
         int graphicalIconHeight = getGraphicalIconHeight();
@@ -148,7 +148,7 @@ public class MultipleImageIcon implements Icon {
         for (final TagIcon icon : mTags) {
             final int iconHeight = icon.getIconHeight();
             if(myY <= coordinate.y && coordinate.y < myY + iconHeight)
-                return icon.getTag();
+                return icon;
             myY += TAG_GAP + iconHeight;
         }
         return null;

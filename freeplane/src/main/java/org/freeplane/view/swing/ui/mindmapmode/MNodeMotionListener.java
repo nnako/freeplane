@@ -158,7 +158,7 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 			}
 			else {
 			    if (Compat.isPlainEvent(e) && !isInFoldingRegion(e) && ! mainView.isInDragRegion(e.getPoint())) {
-			        if(mainView.getTagAt(e.getPoint()) != null) {
+			        if(mainView.getTagIconAt(e.getPoint()) != null) {
 			            IconController iconController = IconController.getController();
 			            if(iconController instanceof MIconController) {
 			                ((MIconController)iconController).editTags(mainView.getNodeView().getNode());
