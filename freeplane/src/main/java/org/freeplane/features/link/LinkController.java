@@ -36,6 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -620,11 +621,18 @@ public class LinkController extends SelectionController implements IExtension {
 			}
 			else if (LinkController.isSpecialLink(LinkController.EXECUTE_APP_SCHEME, link)) {
 				final String command = LinkController.parseSpecialLink(link);
+				final String[] commandArray = command.split(" +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+				int i = 0;
+				for (String cmd : commandArray) {
+					commandArray[i++] = cmd.replaceAll("(^\"|\"$)", "");
+				}
 				try {
 					Controller.getCurrentController().getViewController().out(command);
-					Runtime.getRuntime().exec(command);
+					Runtime.getRuntime().exec(commandArray);
 				}
 				catch (IOException e1) {
+					final String msg = EXECUTE_APP_SCHEME + ": " + Arrays.toString(commandArray) + " - " + e1.getMessage();
+					Controller.getCurrentController().getViewController().out(msg);
 				}
 			}
 			else {
