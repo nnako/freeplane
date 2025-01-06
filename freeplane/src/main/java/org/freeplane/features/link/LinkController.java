@@ -624,7 +624,9 @@ public class LinkController extends SelectionController implements IExtension {
 				final String[] commandArray = command.split(" +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 				int i = 0;
 				for (String cmd : commandArray) {
-					commandArray[i++] = cmd.replaceAll("(^\"|\"$)", "");
+					if (cmd.startsWith("\"") && cmd.endsWith("\"")) {
+						commandArray[i++] = cmd.replaceAll("(^\"|\"$)", "");
+					}
 				}
 				try {
 					Controller.getCurrentController().getViewController().out(command);
