@@ -54,6 +54,8 @@ import org.freeplane.api.ChildNodesLayout;
 import org.freeplane.api.ChildrenSides;
 import org.freeplane.api.Dash;
 import org.freeplane.api.LayoutOrientation;
+import org.freeplane.api.LengthUnit;
+import org.freeplane.api.Quantity;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.IUserInputListenerFactory;
 import org.freeplane.core.ui.components.IconListComponent;
@@ -110,6 +112,7 @@ import org.freeplane.view.swing.map.edge.EdgeViewFactory;
  * TreeCellRenderer).
  */
 public class NodeView extends JComponent implements INodeView {
+	private static final Quantity<LengthUnit> TAG_INDENT = new Quantity<LengthUnit>(12, LengthUnit.pt);
 	static final String DEBUG_INFO_PROPERTY = "debugInfo";
 	private static final int HIGHLIGHTED_NODE_ARC_MARGIN = 4;
 	final static int ALIGN_BOTTOM = -1;
@@ -1863,6 +1866,8 @@ public class NodeView extends JComponent implements INodeView {
                 return;
             else if (component == null){
                 component = new MapViewIconListComponent(tagIcons);
+                int leftInset = TAG_INDENT.toBaseUnitsRounded();
+				component.setBorder(new ZoomedEmptyBorder(0, leftInset, 0, 0, map::getZoomed));
                 if(iconController instanceof MIconController) {
                     component.addMouseListener(new MouseAdapter() {
 
