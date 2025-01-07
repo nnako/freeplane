@@ -7,10 +7,8 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceAdapter;
 import java.awt.dnd.DragSourceDragEvent;
-import java.awt.dnd.DragSourceDropEvent;
-import java.awt.dnd.DragSourceEvent;
-import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.event.InputEvent;
 
@@ -26,6 +24,7 @@ import org.freeplane.view.swing.ui.MouseEventActor;
  * The NodeDragListener which belongs to every NodeView
  */
 public class MNodeDragListener implements DragGestureListener {
+	@Override
 	public void dragGestureRecognized(final DragGestureEvent e) {
 		final MainView mainView = (MainView) e.getComponent();
 		final NodeView nodeView = mainView.getNodeView();
@@ -56,21 +55,12 @@ public class MNodeDragListener implements DragGestureListener {
 			((MindMapNodesSelection) t).setDropAction(DnDConstants.ACTION_COPY);
 		}
 		try {
-			e.startDrag(cursor, t, new DragSourceListener() {
-				public void dragDropEnd(final DragSourceDropEvent dsde) {
-				}
-
-				public void dragEnter(final DragSourceDragEvent e) {
-				}
-
-				public void dragExit(final DragSourceEvent dse) {
-				}
-
-				public void dragOver(final DragSourceDragEvent dsde) {
-				}
-
+			Cursor cursorCopy = cursor;
+			e.startDrag(cursorCopy, t, new DragSourceAdapter() {
+				@Override
 				public void dropActionChanged(final DragSourceDragEvent dsde) {
-					dsde.getDragSourceContext().setCursor(getCursorByAction(dsde.getUserAction()));
+					if(dsde.getDragSourceContext().getTransferable().isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor))
+						dsde.getDragSourceContext().setCursor(cursorCopy);
 				}
 			});
 		}
