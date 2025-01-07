@@ -50,6 +50,7 @@ import org.freeplane.features.note.NoteStyleAccessor;
 import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.text.TextController;
+import org.freeplane.view.swing.map.MemoizedFunctionValue;
 
 class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMapLifeCycleListener {
     private static final String NOTE_FOLLOWS_SELECTION_PROPERTY = "noteFollowsSelection";
@@ -164,7 +165,9 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 		if (note != null) {
 			try {
 			    TextController textController = TextController.getController();
-				final Object transformedContent = textController.getTransformedObject(node, NoteModel.getNote(node), note);
+
+				final Object transformedContent = MemoizedFunctionValue.memoize(notePanel, note,
+						() -> textController.getTransformedObject(node, NoteModel.getNote(node), note));
 				Icon icon = textController.getIcon(transformedContent);
 				if(icon != null)
 					notePanel.setViewedImage(icon, noteStyleAccessor.getHorizontalAlignment());

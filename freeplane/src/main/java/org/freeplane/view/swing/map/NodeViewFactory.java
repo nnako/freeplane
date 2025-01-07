@@ -204,21 +204,23 @@ class NodeViewFactory {
 		return label;
 	}
 
-
-
 	void updateNoteViewer(NodeView nodeView, int minNodeWidth, int maxNodeWidth) {
+		String text = null;
+		Object transformedContent = null;
 		String newText  = null;
 		Icon newIcon = null;
 		MapView map = nodeView.getMap();
+		ZoomableLabel noteView = (ZoomableLabel) nodeView.getContent(NodeView.NOTE_VIEWER_POSITION);
 		if (map.showNotes()) {
 			final NodeModel model = nodeView.getNode();
 			final NoteModel note = NoteModel.getNote(model);
             if (note != null) {
-    			String text = note.getText();
+    			text = note.getText();
     			if(text != null) {
     			try {
     				TextController textController = map.getModeController().getExtension(TextController.class);
-    				final Object transformedContent = textController.getTransformedObject(model, note, text);
+    				String textCopy = text;
+    				transformedContent = MemoizedFunctionValue.memoize(noteView, text, () -> textController.getTransformedObject(model, note, textCopy));
     				newIcon = textController.getIcon(transformedContent);
     				newText = newIcon == null ? transformedContent.toString() : "";
     			}
@@ -229,7 +231,6 @@ class NodeViewFactory {
     			}
 			}
 		}
-		ZoomableLabel noteView = (ZoomableLabel) nodeView.getContent(NodeView.NOTE_VIEWER_POSITION);
 		if (noteView == null && newText == null && newIcon == null
 				|| noteView != null && newIcon == null
 				&& Objects.equals(newText, noteView.getText())
@@ -242,6 +243,8 @@ class NodeViewFactory {
 		}
 		if (noteView == null && (newText != null || newIcon != null)) {
 			noteView = NodeViewFactory.getInstance().createNoteViewer();
+			Object transformedContentCopy = transformedContent;
+			MemoizedFunctionValue.memoize(noteView, text, () -> transformedContentCopy);
 			nodeView.addContent(noteView, NodeView.NOTE_VIEWER_POSITION);
 		}
 		noteView.setFont(map.getNoteFont());
@@ -262,50 +265,51 @@ class NodeViewFactory {
 
 	void updateDetails(NodeView nodeView, int minNodeWidth, int maxNodeWidth) {
 		NodeModel node = nodeView.getNode();
-		String detailTextText = DetailModel.getDetailText(node);
-		if (detailTextText == null) {
+		String detailText = DetailModel.getDetailText(node);
+		if (detailText == null) {
 			nodeView.removeContent(NodeView.DETAIL_VIEWER_POSITION);
 			return;
 		}
-		final DetailModel detailText = DetailModel.getDetail(node);
-		DetailsView detailContent = (DetailsView) nodeView.getContent(NodeView.DETAIL_VIEWER_POSITION);
-		if (detailContent == null) {
-			detailContent = createDetailView();
-			nodeView.addContent(detailContent, NodeView.DETAIL_VIEWER_POSITION);
+		final DetailModel detail = DetailModel.getDetail(node);
+		DetailsView detailView = (DetailsView) nodeView.getContent(NodeView.DETAIL_VIEWER_POSITION);
+		if (detailView == null) {
+			detailView = createDetailView();
+			nodeView.addContent(detailView, NodeView.DETAIL_VIEWER_POSITION);
 		}
 		final MapView map = nodeView.getMap();
-		if (detailText.isHidden()) {
+		if (detail.isHidden()) {
 			final ArrowIcon icon = new ArrowIcon(nodeView, true);
-			detailContent.setIcon(icon);
-			detailContent.updateText("");
-			detailContent.setTextRenderingIcon(null);
+			detailView.setIcon(icon);
+			detailView.updateText("");
+			detailView.setTextRenderingIcon(null);
 		}
 		else {
-			detailContent.setFont(map.getDetailFont());
-			detailContent.setHorizontalAlignment(map.getDetailHorizontalAlignment());
-			detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
-			detailContent.setIcon(new ArrowIcon(nodeView, false));
+			detailView.setFont(map.getDetailFont());
+			detailView.setHorizontalAlignment(map.getDetailHorizontalAlignment());
+			detailView.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
+			detailView.setIcon(new ArrowIcon(nodeView, false));
 			String text;
 			try {
 				TextController textController = map.getModeController().getExtension(TextController.class);
-				final Object transformedContent = textController.getTransformedObject(node, detailText, detailTextText);
+				final Object transformedContent = MemoizedFunctionValue.memoize(detailView, detailText,
+						() -> textController.getTransformedObject(node, detail, detailText));
 				Icon icon = textController.getIcon(transformedContent);
-				detailContent.setTextRenderingIcon(icon);
+				detailView.setTextRenderingIcon(icon);
 				text = icon == null ? transformedContent.toString() : "";
 			}
 			catch (Throwable e) {
 				LogUtils.warn(e.getMessage());
-				text = TextUtils.format("MainView.errorUpdateText", detailTextText, e.getLocalizedMessage());
+				text = TextUtils.format("MainView.errorUpdateText", detailText, e.getLocalizedMessage());
 			}
-			detailContent.updateText(text);
+			detailView.updateText(text);
 		}
-		detailContent.setForeground(map.getDetailForeground());
-		detailContent.setBackground(map.getDetailBackground());
-		detailContent.setMinimumWidth(minNodeWidth);
-		detailContent.setMaximumWidth(maxNodeWidth);
+		detailView.setForeground(map.getDetailForeground());
+		detailView.setBackground(map.getDetailBackground());
+		detailView.setMinimumWidth(minNodeWidth);
+		detailView.setMaximumWidth(maxNodeWidth);
 		NodeCss detailCss = map.getDetailCss();
-		detailContent.setStyleSheet(detailCss.css, detailCss.getStyleSheet());
-		detailContent.revalidate();
+		detailView.setStyleSheet(detailCss.css, detailCss.getStyleSheet());
+		detailView.revalidate();
 		map.repaint();
 	}
 
