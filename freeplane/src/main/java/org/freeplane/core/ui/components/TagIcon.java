@@ -10,6 +10,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -45,14 +46,15 @@ public class TagIcon implements Icon {
             return;
 
         Graphics2D g = (Graphics2D) prototypeGraphics.create();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         Color backgroundColor = tag.getColor();
         Color textColor = UITools.getTextColorForBackground(backgroundColor);
 
         g.setColor(backgroundColor);
         int r = (int) (UITools.FONT_SCALE_FACTOR * 10);
 
-        IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
-        mapViewManager.setEdgesRenderingHint(g);
         // Define custom shape with rounded right side
         GeneralPath path = new GeneralPath();
         path.moveTo(x, y); // Top-left corner
@@ -69,7 +71,6 @@ public class TagIcon implements Icon {
         g.draw(path);
 
         g.setFont(font);
-        mapViewManager.setTextRenderingHint(g);
         g.drawString(tag.getContent(), x + height / 4, y + height * 4 / 5);
 
         g.dispose();

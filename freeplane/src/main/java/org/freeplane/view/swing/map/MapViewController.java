@@ -140,8 +140,6 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 				}
 			}
 		}) ;
-		final String antialiasProperty = resourceController.getProperty(ViewController.RESOURCE_ANTIALIAS);
-		changeAntialias(antialiasProperty);
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("focusedWindow",this::focusSelectedNode);
 	}
 
@@ -958,81 +956,27 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 			}
 		});
 	}
-
-	private boolean antialiasAll = false;
-	private boolean antialiasEdges = false;
-	private boolean getAntialiasAll() {
-		return antialiasAll;
-	}
-
-	private boolean getAntialiasEdges() {
-		return antialiasEdges;
-	}
-
-	public void setAntialiasAll(final boolean antialiasAll) {
-		this.antialiasAll = antialiasAll;
-	}
-
-	public void setAntialiasEdges(final boolean antialiasEdges) {
-		this.antialiasEdges = antialiasEdges;
-	}
-
-	@Override
-	public Object setEdgesRenderingHint(final Graphics2D g) {
-		final Object renderingHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		if (getAntialiasEdges()) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		}
-		else {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-		}
-		return renderingHint;
-	}
-
-
-	@Override
-	public void setTextRenderingHint(final Graphics2D g) {
-		if (getAntialiasAll()) {
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		}
-		else {
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		}
-	}
-	/**
-	 */
-	private void changeAntialias(final String command) {
-		if (command == null) {
-			return;
-		}
-		if (command.equals("antialias_none")) {
-			setAntialiasEdges(false);
-			setAntialiasAll(false);
-		}
-		if (command.equals("antialias_edges")) {
-			setAntialiasEdges(true);
-			setAntialiasAll(false);
-		}
-		if (command.equals("antialias_all")) {
-			setAntialiasEdges(true);
-			setAntialiasAll(true);
-		}
-		final Component mapView = getMapViewComponent();
-		if (mapView != null) {
-			mapView.repaint();
-		}
-	}
-
+//
+//
+//	@Override
+//	public Object setEdgesRenderingHint(final Graphics2D g) {
+//		final Object renderingHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+//		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//		return renderingHint;
+//	}
+//
+//
+//	@Override
+//	public void setTextRenderingHint(final Graphics2D g) {
+//		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+//	}
+//
 
 	@Override
 	public void propertyChanged(final String propertyName, final String newValue, final String oldValue) {
 		if (propertyName.equals(ModeController.VIEW_MODE_PROPERTY)
 				|| propertyName.equals("workspaceTitle")) {
 			setFrameTitle();
-			return;
-		}
-		if (propertyName.equals(ViewController.RESOURCE_ANTIALIAS)) {
-			changeAntialias(newValue);
 			return;
 		}
 	}
@@ -1090,12 +1034,6 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 		final List<Component> views = getViews(map);
 		for(Component view : views)
 			remove((MapView)view);
-	}
-
-	@Override
-	public void onQuitApplication() {
-		ResourceController.getResourceController().setProperty("antialiasEdges", (antialiasEdges ? "true" : "false"));
-		ResourceController.getResourceController().setProperty("antialiasAll", (antialiasAll ? "true" : "false"));
 	}
 
 	@Override

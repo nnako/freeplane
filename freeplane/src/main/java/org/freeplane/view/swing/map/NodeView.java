@@ -1421,25 +1421,20 @@ public class NodeView extends JComponent implements INodeView {
 		}
 		final Graphics2D g2 = (Graphics2D) g;
 		final ModeController modeController = getModeController();
-		final Object renderingHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 		switch (paintingMode) {
 		case CLOUDS:
 		    if (isSubtreeVisible()) {
-		        modeController.getController().getMapViewManager().setEdgesRenderingHint(g2);
 		        final boolean isRoot = isRoot();
 		        if (isRoot) {
 		            paintCloud(g);
 		        }
 		        paintClouds(g2);
-		        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
 		    }
 		    break;
 		case NODES:
 		    if (isContentVisible()) {
 		        g2.setStroke(MainView.DEF_STROKE);
-		        modeController.getController().getMapViewManager().setEdgesRenderingHint(g2);
 		        paintEdges(g2, this);
-		        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
 		    }
 		    break;
 		default:
@@ -1587,10 +1582,7 @@ public class NodeView extends JComponent implements INodeView {
 				&& isContentVisible()))
 			return;
 		final Graphics2D g2 = g;
-		final ModeController modeController = getModeController();
-		final Object renderingHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 		g2.setStroke(MainView.DEF_STROKE);
-		modeController.getController().getMapViewManager().setEdgesRenderingHint(g2);
 		final Point origin = new Point();
 		UITools.convertPointToAncestor(mainView, origin, this);
 		g.translate(origin.x, origin.y);
@@ -1605,7 +1597,6 @@ public class NodeView extends JComponent implements INodeView {
 				highlightNode(g, highlighter, margin);
 			}
 		}
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
 	}
 
 	public void highlightNode(final Graphics2D g, NodeHighlighter highlighter, final int arcMargin) {

@@ -45,8 +45,6 @@ public interface ViewController {
 	public static final int LEFT = 1;
 	public static final int RIGHT = 2;
 	public static final int TOP = 0;
-	public static final String RESOURCE_ANTIALIAS = "antialias";
-
 	public static final String SLOW_SCROLLING = "slowScrolling";
 	public void changeNoteWindowLocation();
 
@@ -63,7 +61,7 @@ public interface ViewController {
 	public void insertComponentIntoSplitPane(JComponent noteViewerComponent);
 
 	public boolean isMenubarVisible();
-	
+
 	boolean isFullScreenEnabled();
 
 	public void openDocument(Hyperlink link) throws IOException;

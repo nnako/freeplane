@@ -34,7 +34,7 @@ import org.freeplane.features.mode.ModeController;
  */
 class ArrowIcon implements Icon{
 	/**
-     * 
+     *
      */
     private final NodeView nodeView;
 	final private boolean down;
@@ -42,7 +42,7 @@ class ArrowIcon implements Icon{
 	final private static int ARROW_HALF_WIDTH = 4;
 	final private static int ICON_HEIGTH = ARROW_HEIGTH + 2;
 	final private static int ICON_WIDTH = 1 + ARROW_HALF_WIDTH * 2 + 1;
-	
+
 
 	public ArrowIcon(NodeView nodeView, boolean down) {
         super();
@@ -51,17 +51,17 @@ class ArrowIcon implements Icon{
     }
 
 	public int getIconHeight() {
-		return ICON_HEIGTH; 
+		return ICON_HEIGTH;
     }
 
 	public int getIconWidth() {
-		return ICON_WIDTH; 
+		return ICON_WIDTH;
     }
 
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		int[]   xs = new int[3];
 		int[]   ys = new int[3];
-		
+
 		xs[0] = 1 + ARROW_HALF_WIDTH;
 		xs[1] = 1;
 		xs[2] = xs[0] + ARROW_HALF_WIDTH;
@@ -75,10 +75,9 @@ class ArrowIcon implements Icon{
 		}
 		Graphics2D g2= (Graphics2D) g;
 		final Object renderingHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		ModeController modeController = this.nodeView.getMap().getModeController();
-		modeController.getController().getMapViewManager().setEdgesRenderingHint(g2);
-		g.drawPolygon(xs, ys, 3); 
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.drawPolygon(xs, ys, 3);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
     }
-	
+
 }

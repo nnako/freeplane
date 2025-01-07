@@ -365,9 +365,6 @@ public class MainView extends ZoomableLabel {
 		if (! MouseArea.MOTION.equals(mouseArea))
 			return;
 		final Graphics2D g2 = (Graphics2D) g;
-		final Object renderingHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		final MapView parent = (MapView) SwingUtilities.getAncestorOfClass(MapView.class, this);
-		parent.getModeController().getController().getMapViewManager().setEdgesRenderingHint(g2);
 		final Color color = g2.getColor();
 		Stroke stroke = g2.getStroke();
         g2.setColor(Color.WHITE);
@@ -393,7 +390,6 @@ public class MainView extends ZoomableLabel {
 		g.drawOval(r.x, r.y, r.width- 1, r.height- 1);
 		g2.setStroke(stroke);
 		g2.setColor(color);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
 	}
 
 	public Rectangle getDragRectangle() {

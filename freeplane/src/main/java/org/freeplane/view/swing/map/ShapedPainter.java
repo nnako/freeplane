@@ -46,14 +46,11 @@ abstract class ShapedPainter extends MainViewPainter {
 		if (nodeView.getNode() == null) {
 			return;
 		}
-		final ModeController modeController = mainView.getNodeView().getMap().getModeController();
-		final Object renderingHint = modeController.getController().getMapViewManager().setEdgesRenderingHint(g);
 		mainView.paintBackgound(g);
 		mainView.paintDragOver(g);
 		if(mainView.getBorderColor().getAlpha() != 0) {
 			paintNodeShapeConfiguringGraphics(g);
 		}
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, renderingHint);
 		super.paintComponent(g);
 	}
 

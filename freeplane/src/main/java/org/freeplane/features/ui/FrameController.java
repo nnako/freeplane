@@ -904,8 +904,6 @@ abstract public class FrameController implements ViewController {
 	public boolean quit() {
 	    final JComponent mapViewComponent = mapViewManager.getMapViewComponent();
 		final boolean allMapsSaved = mapViewManager.saveAllModifiedMaps();
-		if (allMapsSaved)
-		    mapViewManager.onQuitApplication();
 		mapViewManager.changeToMapView(mapViewComponent);
 		return allMapsSaved;
 	}

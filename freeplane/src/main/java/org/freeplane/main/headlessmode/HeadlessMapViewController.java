@@ -306,16 +306,6 @@ public class HeadlessMapViewController implements IMapViewManager {
 	public void setMapTitles() {
 	}
 
-	@Override
-	public Object setEdgesRenderingHint(Graphics2D g) {
-		throw new RuntimeException("Method not implemented");
-	}
-
-	@Override
-	public void setTextRenderingHint(Graphics2D g) {
-		throw new RuntimeException("Method not implemented");
-	}
-
 	public boolean closeAllMaps() {
 		maps.clear();
 		currentKey = null;
@@ -341,10 +331,6 @@ public class HeadlessMapViewController implements IMapViewManager {
 	@Override
 	public void setFoldedOnCurrentView(NodeModel node, boolean folded) {
 		throw new RuntimeException("Method not implemented");
-	}
-
-	@Override
-	public void onQuitApplication() {
 	}
 
 	@Override

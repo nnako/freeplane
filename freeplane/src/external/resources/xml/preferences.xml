@@ -116,16 +116,6 @@
 			<separator name="root_node_appearance">
 				<boolean name="use_common_out_point_for_root_node" />
 			</separator>
-			<separator name="anti_alias">
-				<combo name="antialias">
-					<choice value="antialias_edges" />
-					<choice value="antialias_all" />
-					<choice value="antialias_none" />
-				</combo>
-			</separator>
-			<separator name="svg_icons">
-				<boolean name="antialias_svg" />
-			</separator>
 			<separator name="size_limits">
 				<number name="max_shortened_text_length" />
 				<number name="max_image_width" />
