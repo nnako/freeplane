@@ -56,7 +56,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
-import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.MatteBorder;
@@ -104,6 +103,7 @@ import org.freeplane.features.text.mindmapmode.EventBuffer;
 import org.freeplane.features.text.mindmapmode.MTextController;
 import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.ui.IMapViewManager;
+import org.freeplane.view.swing.map.IconLocation;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
@@ -794,11 +794,13 @@ public class EditNodeTextField extends EditNodeBase {
 			mapView.validate();
 		final NodeStyleController nsc = NodeStyleController.getController(modeController);
 		maxWidth = Math.max(mapView.getLayoutSpecificMaxNodeWidth(),
-		        Math.max(mapView.getZoomed(nsc.getMaxWidth(node, nodeView.getStyleOption()).toBaseUnitsRounded()), parent.getWidth()));
-		final Icon icon = parent.getIcon();
-		if(icon != null){
-			maxWidth -= mapView.getZoomed(icon.getIconWidth());
-			maxWidth -= mapView.getZoomed(parent.getIconTextGap());
+				Math.max(mapView.getZoomed(nsc.getMaxWidth(node, nodeView.getStyleOption()).toBaseUnitsRounded()), parent.getWidth()));
+		if(parent.getVerticalTextPosition() != SwingConstants.BOTTOM) {
+			final Icon icon = parent.getIcon();
+			if(icon != null){
+				maxWidth -= mapView.getZoomed(icon.getIconWidth());
+				maxWidth -= mapView.getZoomed(parent.getIconTextGap());
+			}
 		}
 		Insets parentInsets = parent.getZoomedInsets();
 		maxWidth -= parentInsets.left + parentInsets.right;

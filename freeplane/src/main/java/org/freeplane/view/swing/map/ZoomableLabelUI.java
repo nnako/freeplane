@@ -119,7 +119,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 				ScaledHTML.Renderer v = (ScaledHTML.Renderer) label.getClientProperty(BasicHTML.propertyKey);
 				if (v != null) {
 					int availableTextWidth = viewR.width;
-					if(icon != null)
+					if(icon != null && label.getVerticalTextPosition() != SwingConstants.BOTTOM)
 						availableTextWidth -= icon.getIconWidth() + label.getIconTextGap();
 					float minimumWidth = v.getMinimumSpan(View.X_AXIS);
 					if(minimumWidth > availableTextWidth){
@@ -132,7 +132,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 
 						if(viewPreferredWidth > availableTextWidth){
 							v.setWidth(availableTextWidth);
-							extracted(text, icon, viewR, iconR, textR, zLabel);
+							layoutCompoundLabel(text, icon, viewR, iconR, textR, zLabel);
 							return text;
 						}
 						else if(currentWidth != viewPreferredWidth)
@@ -145,7 +145,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		if(textRenderingIcon != null){
 			layoutLabelWithTextIcon(textRenderingIcon, icon, viewR, iconR, textR, zLabel);
 		} else
-            extracted(text, icon, viewR, iconR, textR, zLabel);
+            layoutCompoundLabel(text, icon, viewR, iconR, textR, zLabel);
 
 		if(isPainting) {
 			ScaledHTML.Renderer v = (ScaledHTML.Renderer) label.getClientProperty(BasicHTML.propertyKey);
@@ -184,7 +184,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		return text;
 	}
 
-    private void extracted(final String text, final Icon icon, final Rectangle viewR,
+    private void layoutCompoundLabel(final String text, final Icon icon, final Rectangle viewR,
             final Rectangle iconR, final Rectangle textR, final ZoomableLabel zLabel) {
         int verticalTextPosition = zLabel.getVerticalTextPosition();
         int horizontalTextPosition = zLabel.getHorizontalTextPosition();
