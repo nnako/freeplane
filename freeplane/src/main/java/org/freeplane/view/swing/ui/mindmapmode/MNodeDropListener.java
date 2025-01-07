@@ -307,13 +307,7 @@ private Timer timer;
 		int dropAction = dtde.getDropAction();
 		final Transferable t = dtde.getTransferable();
 		if (dtde.isLocalTransfer() && t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
-			final String sourceAction = (String) t.getTransferData(MindMapNodesSelection.dropActionFlavor);
-			if (sourceAction.equals("LINK")) {
-				dropAction = DnDConstants.ACTION_LINK;
-			}
-			if (sourceAction.equals("COPY")) {
-				dropAction = DnDConstants.ACTION_COPY;
-			}
+			dropAction = (Integer) t.getTransferData(MindMapNodesSelection.dropActionFlavor);
 		}
 		return dropAction;
 	}

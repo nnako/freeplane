@@ -43,7 +43,7 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 			MindMapNodesSelection.mindMapNodeSingleObjectsFlavor = new DataFlavor("application/freeplane-single-nodes; class=java.util.Collection");
 			MindMapNodesSelection.htmlFlavor = new DataFlavor("text/html; class=java.lang.String");
 			MindMapNodesSelection.fileListFlavor = new DataFlavor("application/x-java-file-list; class=java.util.List");
-			MindMapNodesSelection.dropActionFlavor = new DataFlavor("text/drop-action; class=java.lang.String");
+			MindMapNodesSelection.dropActionFlavor = new DataFlavor("application/freeplane-drop-action; class=java.lang.Integer");
 		}
 		catch (final Exception e) {
 			LogUtils.severe(e);
@@ -52,7 +52,7 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 	final private String htmlContent;
 	final private String nodesContent;
 	final private String stringContent;
-	private String dropActionContent;
+	private Integer dropActionContent;
 	private Collection<NodeModel> nodes;
 	private boolean selectionContainsSingleNodes;
 
@@ -88,14 +88,14 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 	}
 
 	boolean containsObjectsFor(final DataFlavor flavor) {
-		return nodes != null && (flavor.equals(MindMapNodesSelection.mindMapNodeObjectsFlavor) && ! selectionContainsSingleNodes 
+		return nodes != null && (flavor.equals(MindMapNodesSelection.mindMapNodeObjectsFlavor) && ! selectionContainsSingleNodes
 				|| flavor.equals(MindMapNodesSelection.mindMapNodeSingleObjectsFlavor) && selectionContainsSingleNodes);
 	}
 
 	public DataFlavor[] getTransferDataFlavors() {
 		return new DataFlavor[] { DataFlavor.stringFlavor, MindMapNodesSelection.mindMapNodesFlavor,
 		        MindMapNodesSelection.htmlFlavor,
-		        MindMapNodesSelection.dropActionFlavor, 
+		        MindMapNodesSelection.dropActionFlavor,
 		        MindMapNodesSelection.mindMapNodeObjectsFlavor , MindMapNodesSelection.mindMapNodeSingleObjectsFlavor };
 	}
 
@@ -121,7 +121,7 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 	public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
 	}
 
-	public void setDropAction(final String dropActionContent) {
+	public void setDropAction(final Integer dropActionContent) {
 		this.dropActionContent = dropActionContent;
 	}
 

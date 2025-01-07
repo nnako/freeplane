@@ -45,21 +45,16 @@ public class MNodeDragListener implements DragGestureListener {
 					return;
 			}
 		}
-		final String dragActionName;
 		Cursor cursor = getCursorByAction(dragActionType);
+		final Transferable t = MapClipboardController.getController().copy(Controller.getCurrentController().getSelection());
 		if (isLinkDragEvent(e)) {
 			cursor = DragSource.DefaultLinkDrop;
-			dragActionName = "LINK";
+			((MindMapNodesSelection) t).setDropAction(DnDConstants.ACTION_LINK);
 		}
 		else if ((e.getTriggerEvent().getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
 			cursor = DragSource.DefaultCopyDrop;
-			dragActionName = "COPY";
+			((MindMapNodesSelection) t).setDropAction(DnDConstants.ACTION_COPY);
 		}
-		else {
-			dragActionName = "MOVE";
-		}
-		final Transferable t = MapClipboardController.getController().copy(Controller.getCurrentController().getSelection());
-		((MindMapNodesSelection) t).setDropAction(dragActionName);
 		try {
 			e.startDrag(cursor, t, new DragSourceListener() {
 				public void dragDropEnd(final DragSourceDropEvent dsde) {
