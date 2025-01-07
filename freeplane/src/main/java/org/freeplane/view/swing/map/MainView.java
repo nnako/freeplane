@@ -561,7 +561,7 @@ public class MainView extends ZoomableLabel {
 		final Object userObject = nodeModel.getUserObject();
 		String text;
 		try {
-			final Object transformedContent = MemoizedFunctionValue.memoize(this, userObject, () -> textController.getTransformedObject(nodeModel));
+			final Object transformedContent = textController.getTransformedObject(nodeModel);
 			if(nodeView.isSelected()){
 				nodeView.getMap().getModeController().getController().getViewController().addObjectTypeInfo(transformedContent);
 			}
