@@ -55,14 +55,7 @@ public class MNodeDragListener implements DragGestureListener {
 			((MindMapNodesSelection) t).setDropAction(DnDConstants.ACTION_COPY);
 		}
 		try {
-			Cursor cursorCopy = cursor;
-			e.startDrag(cursorCopy, t, new DragSourceAdapter() {
-				@Override
-				public void dropActionChanged(final DragSourceDragEvent dsde) {
-					if(dsde.getDragSourceContext().getTransferable().isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor))
-						dsde.getDragSourceContext().setCursor(cursorCopy);
-				}
-			});
+			e.startDrag(cursor, t, new DragSourceAdapter() {});
 		}
 		catch (final InvalidDnDOperationException ex) {
 		}
