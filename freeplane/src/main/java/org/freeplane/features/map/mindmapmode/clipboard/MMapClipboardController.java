@@ -644,7 +644,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 		if(t.isDataFlavorSupported(TagSelection.tagFlavor)) {
 	          try {
 	                final String textFromClipboard = t.getTransferData(TagSelection.tagFlavor).toString();
-	                return new TagSelectionHandler(TagSelection.getTransferContent(textFromClipboard));
+	                return new TagSelectionHandler(textFromClipboard);
 	            }
 	            catch (final UnsupportedFlavorException e) {
 	            }

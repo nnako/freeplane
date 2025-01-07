@@ -302,9 +302,10 @@ class TagEditor {
                 DataFlavor flavor = transferable.isDataFlavorSupported(TagSelection.tagFlavor)
                 ? TagSelection.tagFlavor
                 : DataFlavor.stringFlavor;
-                String transferData = (String) transferable.getTransferData(flavor);
-                importId = flavor == TagSelection.tagFlavor ? TagSelection.getTransferId(transferData) : "";
-                data = flavor == TagSelection.tagFlavor ? TagSelection.getTransferContent(transferData) : transferData;
+                data = (String) transferable.getTransferData(flavor);
+                importId = flavor == TagSelection.tagFlavor
+                    && transferable.isDataFlavorSupported(TagSelection.uuidFlavor)
+                    ? (String) transferable.getTransferData(TagSelection.uuidFlavor) : "";
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
@@ -339,7 +340,9 @@ class TagEditor {
             if (action != MOVE || ! data.isDataFlavorSupported(TagSelection.tagFlavor))
                 return;
             try {
-                if (! importId.isEmpty() && ((String)data.getTransferData(TagSelection.tagFlavor)).startsWith(importId))
+                if (! importId.isEmpty()
+                    && data.isDataFlavorSupported(TagSelection.uuidFlavor)
+                    && importId.equals(data.getTransferData(TagSelection.uuidFlavor)))
                     deleteTags();
             } catch (UnsupportedFlavorException | IOException e) {/**/}
         }

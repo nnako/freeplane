@@ -1107,14 +1107,16 @@ class TagCategoryEditor implements IExtension {
         final DataFlavor flavor = flavor(t);
         String data = (String) t.getTransferData(flavor);
         if(flavor.equals(TagCategorySelection.tagCategoryFlavor)) {
-            boolean isMoveInternal = ! lastTransferableId.isEmpty() && data.startsWith(lastTransferableId);
+            boolean isMoveInternal = ! lastTransferableId.isEmpty()
+                && t.isDataFlavorSupported(TagSelection.uuidFlavor)
+                && lastTransferableId.equals(t.getTransferData(TagSelection.uuidFlavor));
             if(isDropped && isMoveInternal) {
                 childIndex -= countSelectedChildrenAbove(parent, childIndex);
                 removeNodes();
             }
             if(! isMoveInternal)
                 lastSelectionParentsNodes = Collections.emptyList();
-            tagCategories.insert(parent, childIndex, TagSelection.getTransferContent(data));
+            tagCategories.insert(parent, childIndex, data);
         } else {
             lastSelectionParentsNodes = Collections.emptyList();
             tagCategories.insert(parent, childIndex, data);

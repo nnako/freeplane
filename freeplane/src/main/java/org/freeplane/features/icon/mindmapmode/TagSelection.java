@@ -14,21 +14,11 @@ import java.util.stream.Stream;
 
 public class TagSelection implements Transferable {
     public static final DataFlavor tagFlavor = new DataFlavor("application/x-freeplane-tag; class=java.lang.String", "Freeplane Tags");
-
-    private static final int UUID_LENGTH = 36;
-
-    private static final int TRANSFERABLE_ID_LENGTH = TagSelection.UUID_LENGTH + System.lineSeparator().length();
-
-    public static String getTransferContent(String transferData) {
-        return transferData.substring(TRANSFERABLE_ID_LENGTH);
-    }
-
-    public static String getTransferId(String transferData) {
-        return transferData.substring(0, TagSelection.TRANSFERABLE_ID_LENGTH);
-    }
+    public static final DataFlavor uuidFlavor = new DataFlavor("application/x-freeplane-uuid; class=java.lang.String", "Freeplane UUID");
 
     private static final DataFlavor[] flavors = {
             tagFlavor,
+            uuidFlavor,
             DataFlavor.stringFlavor
         };
 
@@ -53,8 +43,8 @@ public class TagSelection implements Transferable {
     @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException,
             IOException {
-        if(flavor.equals(tagFlavor))
-            return id + System.lineSeparator() + tagSelection;
+        if(flavor.equals(uuidFlavor))
+            return id;
         else
             return tagSelection;
     }
