@@ -31,7 +31,7 @@ public class FormulaDependencies{
 			EvaluationDependencies.of(node.getMap()).collectChangedDependencies(accessingNodes, node);
 		}
 		dependencies.addAll(accessingNodes);
-		if (includeChanged)
+		if (includeChanged && ! accessingNodes.isEmpty())
 		    dependencies.addAll(changedNodes);
 		return dependencies;
 	}
