@@ -1088,7 +1088,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		if(! node.isShowing())
 			return;
 		if(update)
-		    node.update();
+		    node.update(UpdateCause.SELECTION);
 		if(SHOW_CONNECTORS_FOR_SELECTION_ONLY == showConnectors || SHOW_ARROWS_FOR_SELECTION_ONLY == showConnectors || repaintsViewOnSelectionChange)
 			repaint(getVisibleRect());
 		else
@@ -2506,7 +2506,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 	private void updatePrintedSelectedNodes() {
 		if(! drawsRectangleForSelection){
-			selection.selectedSet.forEach(NodeView::update);
+			selection.selectedSet.forEach(n -> n.update(UpdateCause.SELECTION));
 			synchronized (getTreeLock()) {
 				validateTree();
 			}

@@ -206,61 +206,65 @@ class NodeViewFactory {
 
 
 
-	void updateNoteViewer(NodeView nodeView, int minNodeWidth, int maxNodeWidth) {
-		String newText  = null;
-		Icon newIcon = null;
-		MapView map = nodeView.getMap();
-		if (map.showNotes()) {
-			final NodeModel model = nodeView.getNode();
-			final NoteModel note = NoteModel.getNote(model);
-            if (note != null) {
-    			String text = note.getText();
-    			if(text != null) {
-    			try {
-    				TextController textController = map.getModeController().getExtension(TextController.class);
-    				final Object transformedContent = textController.getTransformedObject(model, note, text);
-    				newIcon = textController.getIcon(transformedContent);
-    				newText = newIcon == null ? transformedContent.toString() : "";
-    			}
-    			catch (Throwable e) {
-    				LogUtils.warn(e.getMessage());
-    				newText = TextUtils.format("MainView.errorUpdateText", text, e.getLocalizedMessage());
-    			}
-    			}
-			}
-		}
+	void updateNoteViewer(NodeView nodeView, int minNodeWidth, int maxNodeWidth, UpdateCause cause) {
 		ZoomableLabel noteView = (ZoomableLabel) nodeView.getContent(NodeView.NOTE_VIEWER_POSITION);
-		if (noteView == null && newText == null && newIcon == null
-				|| noteView != null && newIcon == null
-				&& Objects.equals(newText, noteView.getText())
-				&& noteView.getTextRenderingIcon() == null) {
-			return;
+		MapView map = nodeView.getMap();
+		if(cause != UpdateCause.SELECTION) {
+			String newText  = null;
+			Icon newIcon = null;
+			if (map.showNotes()) {
+				final NodeModel model = nodeView.getNode();
+				final NoteModel note = NoteModel.getNote(model);
+				if (note != null) {
+					String text = note.getText();
+					if(text != null) {
+						try {
+							TextController textController = map.getModeController().getExtension(TextController.class);
+							final Object transformedContent = textController.getTransformedObject(model, note, text);
+							newIcon = textController.getIcon(transformedContent);
+							newText = newIcon == null ? transformedContent.toString() : "";
+						}
+						catch (Throwable e) {
+							LogUtils.warn(e.getMessage());
+							newText = TextUtils.format("MainView.errorUpdateText", text, e.getLocalizedMessage());
+						}
+					}
+				}
+			}
+			if (noteView == null && newText == null && newIcon == null
+					|| noteView != null && newIcon == null
+					&& Objects.equals(newText, noteView.getText())
+					&& noteView.getTextRenderingIcon() == null) {
+				return;
+			}
+			if(noteView != null && newText == null && newIcon == null){
+				nodeView.removeContent(NodeView.NOTE_VIEWER_POSITION);
+				return;
+			}
+			if (noteView == null && (newText != null || newIcon != null)) {
+				noteView = NodeViewFactory.getInstance().createNoteViewer();
+				nodeView.addContent(noteView, NodeView.NOTE_VIEWER_POSITION);
+			}
+			noteView.setFont(map.getNoteFont());
+			noteView.setForeground(map.getNoteForeground());
+			final Color noteBackground = map.getNoteBackground();
+			noteView.setBackground(noteBackground != null ? noteBackground : map.getBackground());
+			noteView.setHorizontalAlignment(map.getNoteHorizontalAlignment());
+			noteView.updateText(newText);
+			noteView.setTextRenderingIcon(newIcon);
+			NodeCss noteCss = map.getNoteCss();
+			noteView.setStyleSheet(noteCss.css, noteCss.getStyleSheet());
 		}
-		if(noteView != null && newText == null && newIcon == null){
-			nodeView.removeContent(NodeView.NOTE_VIEWER_POSITION);
-			return;
+		if(noteView != null) {
+			noteView.setMinimumWidth(minNodeWidth);
+			noteView.setMaximumWidth(maxNodeWidth);
+			noteView.revalidate();
+			map.repaint();
 		}
-		if (noteView == null && (newText != null || newIcon != null)) {
-			noteView = NodeViewFactory.getInstance().createNoteViewer();
-			nodeView.addContent(noteView, NodeView.NOTE_VIEWER_POSITION);
-		}
-		noteView.setFont(map.getNoteFont());
-		noteView.setForeground(map.getNoteForeground());
-		final Color noteBackground = map.getNoteBackground();
-		noteView.setBackground(noteBackground != null ? noteBackground : map.getBackground());
-		noteView.setHorizontalAlignment(map.getNoteHorizontalAlignment());
-		noteView.updateText(newText);
-		noteView.setTextRenderingIcon(newIcon);
-		noteView.setMinimumWidth(minNodeWidth);
-		noteView.setMaximumWidth(maxNodeWidth);
-		NodeCss noteCss = map.getNoteCss();
-		noteView.setStyleSheet(noteCss.css, noteCss.getStyleSheet());
-		noteView.revalidate();
-		map.repaint();
 
 	}
 
-	void updateDetails(NodeView nodeView, int minNodeWidth, int maxNodeWidth) {
+	void updateDetails(NodeView nodeView, int minNodeWidth, int maxNodeWidth, UpdateCause cause) {
 		NodeModel node = nodeView.getNode();
 		String detailTextText = DetailModel.getDetailText(node);
 		if (detailTextText == null) {
@@ -269,44 +273,48 @@ class NodeViewFactory {
 		}
 		final DetailModel detailText = DetailModel.getDetail(node);
 		DetailsView detailContent = (DetailsView) nodeView.getContent(NodeView.DETAIL_VIEWER_POSITION);
-		if (detailContent == null) {
-			detailContent = createDetailView();
-			nodeView.addContent(detailContent, NodeView.DETAIL_VIEWER_POSITION);
-		}
 		final MapView map = nodeView.getMap();
-		if (detailText.isHidden()) {
-			final ArrowIcon icon = new ArrowIcon(nodeView, true);
-			detailContent.setIcon(icon);
-			detailContent.updateText("");
-			detailContent.setTextRenderingIcon(null);
-		}
-		else {
-			detailContent.setFont(map.getDetailFont());
-			detailContent.setHorizontalAlignment(map.getDetailHorizontalAlignment());
-			detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
-			detailContent.setIcon(new ArrowIcon(nodeView, false));
-			String text;
-			try {
-				TextController textController = map.getModeController().getExtension(TextController.class);
-				final Object transformedContent = textController.getTransformedObject(node, detailText, detailTextText);
-				Icon icon = textController.getIcon(transformedContent);
-				detailContent.setTextRenderingIcon(icon);
-				text = icon == null ? transformedContent.toString() : "";
+		if(cause != UpdateCause.SELECTION) {
+			if (detailContent == null) {
+				detailContent = createDetailView();
+				nodeView.addContent(detailContent, NodeView.DETAIL_VIEWER_POSITION);
 			}
-			catch (Throwable e) {
-				LogUtils.warn(e.getMessage());
-				text = TextUtils.format("MainView.errorUpdateText", detailTextText, e.getLocalizedMessage());
+			if (detailText.isHidden()) {
+				final ArrowIcon icon = new ArrowIcon(nodeView, true);
+				detailContent.setIcon(icon);
+				detailContent.updateText("");
+				detailContent.setTextRenderingIcon(null);
 			}
-			detailContent.updateText(text);
+			else {
+				detailContent.setFont(map.getDetailFont());
+				detailContent.setHorizontalAlignment(map.getDetailHorizontalAlignment());
+				detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
+				detailContent.setIcon(new ArrowIcon(nodeView, false));
+				String text;
+				try {
+					TextController textController = map.getModeController().getExtension(TextController.class);
+					final Object transformedContent = textController.getTransformedObject(node, detailText, detailTextText);
+					Icon icon = textController.getIcon(transformedContent);
+					detailContent.setTextRenderingIcon(icon);
+					text = icon == null ? transformedContent.toString() : "";
+				}
+				catch (Throwable e) {
+					LogUtils.warn(e.getMessage());
+					text = TextUtils.format("MainView.errorUpdateText", detailTextText, e.getLocalizedMessage());
+				}
+				detailContent.updateText(text);
+			}
+			detailContent.setForeground(map.getDetailForeground());
+			detailContent.setBackground(map.getDetailBackground());
+			NodeCss detailCss = map.getDetailCss();
+			detailContent.setStyleSheet(detailCss.css, detailCss.getStyleSheet());
 		}
-		detailContent.setForeground(map.getDetailForeground());
-		detailContent.setBackground(map.getDetailBackground());
-		detailContent.setMinimumWidth(minNodeWidth);
-		detailContent.setMaximumWidth(maxNodeWidth);
-		NodeCss detailCss = map.getDetailCss();
-		detailContent.setStyleSheet(detailCss.css, detailCss.getStyleSheet());
-		detailContent.revalidate();
-		map.repaint();
+		if(detailContent != null) {
+			detailContent.setMinimumWidth(minNodeWidth);
+			detailContent.setMaximumWidth(maxNodeWidth);
+			detailContent.revalidate();
+			map.repaint();
+		}
 	}
 
 	private DetailsView createDetailView() {

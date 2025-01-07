@@ -1799,6 +1799,10 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	public void update() {
+		update(UpdateCause.UNKNOWN);
+	}
+
+	void update(UpdateCause cause) {
 		if(! map.isDisplayable())
 			return;
 		invalidate();
@@ -1827,12 +1831,13 @@ public class NodeView extends JComponent implements INodeView {
 
 		if(! textShortened){
 			final NodeViewFactory nodeViewFactory = NodeViewFactory.getInstance();
-			nodeViewFactory.updateDetails(this, minNodeWidth, maxNodeWidth);
-			nodeViewFactory.updateNoteViewer(this, minNodeWidth, maxNodeWidth);
+			nodeViewFactory.updateDetails(this, minNodeWidth, maxNodeWidth, cause);
+			nodeViewFactory.updateNoteViewer(this, minNodeWidth, maxNodeWidth, cause);
 		}
 		updateShortener(textShortened);
 		updateIcons();
-		mainView.updateText(getNode());
+		if(cause != UpdateCause.SELECTION)
+			mainView.updateText(getNode());
 		modelBackgroundColor = styleController().getBackgroundColor(viewedNode, getStyleOption());
 		if (isContentVisible()) {
 		    revalidate();
