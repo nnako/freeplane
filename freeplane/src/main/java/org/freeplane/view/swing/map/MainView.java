@@ -22,6 +22,7 @@ package org.freeplane.view.swing.map;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -1019,6 +1020,15 @@ public class MainView extends ZoomableLabel {
 			revalidate();
 			repaint();
 		}
+	}
+
+	@Override
+	public Point getToolTipLocation(MouseEvent event) {
+		Container parent = getParent();
+		if(parent instanceof NodeView)
+			return new Point(0, getHeight());
+		else
+			return new Point(-getX(), parent.getHeight() - getY());
 	}
 
 }
