@@ -104,6 +104,7 @@ import org.freeplane.view.swing.map.edge.AutomaticEdgeStyle;
 import org.freeplane.view.swing.map.edge.EdgeView;
 import org.freeplane.view.swing.map.edge.EdgeViewFactory;
 import org.freeplane.view.swing.ui.mindmapmode.MNodeDragListener;
+import org.freeplane.view.swing.ui.mindmapmode.MNodeDropListener;
 
 /**
  * This class represents a single Node of a MindMap (in analogy to
@@ -170,14 +171,6 @@ public class NodeView extends JComponent implements INodeView {
 
 	public boolean isFolded(){
 		return isFolded && ! isRoot();
-	}
-
-	void addDropListener(final DropTargetListener dtl) {
-		if (dtl == null) {
-			return;
-		}
-		final DropTarget dropTarget = new DropTarget(getMainView(), dtl);
-		dropTarget.setActive(true);
 	}
 
 	private int calcShiftY(final LocationModel locationModel) {
@@ -1727,7 +1720,9 @@ public class NodeView extends JComponent implements INodeView {
 			DragGestureListener nodeDragListener = userInputListenerFactory.getNodeDragListener();
 			if(nodeDragListener instanceof MNodeDragListener)
 				((MNodeDragListener)nodeDragListener).addDragListener(mainView);
-			addDropListener(userInputListenerFactory.getNodeDropTargetListener());
+			DropTargetListener nodeDropTargetListener = userInputListenerFactory.getNodeDropTargetListener();
+			if(nodeDropTargetListener instanceof MNodeDropListener)
+				((MNodeDropListener)nodeDropTargetListener).addDropListener(mainView);
 		}
 	}
 
@@ -1848,7 +1843,7 @@ public class NodeView extends JComponent implements INodeView {
         if(TagLocation.UNDER_NODES == getMap().getTagLocation()){
             IconController iconController = IconController.getController(modeController);
             final List<TagIcon> tagIcons = iconController.getTagIcons(viewedNode);
-            IconListComponent component = (IconListComponent) getContent(NodeView.TAG_VIEWER_POSITION);
+            MapViewIconListComponent component = (MapViewIconListComponent) getContent(NodeView.TAG_VIEWER_POSITION);
             if(component == null && tagIcons.isEmpty())
                 return;
             else if (component == null){
@@ -1857,6 +1852,10 @@ public class NodeView extends JComponent implements INodeView {
                 DragGestureListener nodeDragListener = userInputListenerFactory.getNodeDragListener();
                 if(nodeDragListener instanceof MNodeDragListener)
                     ((MNodeDragListener)nodeDragListener).addDragListener(component);
+    			DropTargetListener nodeDropTargetListener = userInputListenerFactory.getNodeDropTargetListener();
+    			if(nodeDropTargetListener instanceof MNodeDropListener)
+    				((MNodeDropListener)nodeDropTargetListener).addDropListener(component);
+
 
                 int leftInset = TAG_INDENT.toBaseUnitsRounded();
                 component.setBorder(new ZoomedEmptyBorder(0, leftInset, 0, 0, map::getZoomed));

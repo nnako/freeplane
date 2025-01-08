@@ -24,6 +24,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetContext;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -36,11 +38,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.icon.mindmapmode.TagSelection;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.mindmapmode.MLinkController;
 import org.freeplane.features.map.NodeModel;
@@ -54,6 +58,7 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MainView.DragOverRelation;
 import org.freeplane.view.swing.map.MapView;
+import org.freeplane.view.swing.map.MapViewIconListComponent;
 import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.ui.MouseEventActor;
 
@@ -64,6 +69,20 @@ private Timer timer;
 // 	final private ModeController modeController;
 
 	public MNodeDropListener() {
+	}
+
+
+	public void addDropListener(MainView component) {
+		addDropListener((Component)component);
+	}
+
+	public void addDropListener(MapViewIconListComponent component) {
+		addDropListener((Component)component);
+	}
+
+	private void addDropListener(Component component) {
+		final DropTarget dropTarget = new DropTarget(component, this);
+		dropTarget.setActive(true);
 	}
 
 	/**
@@ -87,7 +106,7 @@ private Timer timer;
 	}
 
 	private void supportFolding(final DropTargetDragEvent dtde) {
-		final MainView node = getNode(dtde);
+		final MainView node = getMainView(dtde);
 		if(isInFoldingRegion(dtde)){
 			startUnfoldTimer(node);
 		}
@@ -97,32 +116,41 @@ private Timer timer;
     }
 
 	private boolean isInFoldingRegion(DropTargetDragEvent dtde) {
-	    final MainView node = getNode(dtde);
+	    final MainView node = getMainView(dtde);
 	    return node.dragOverRelation(dtde.getLocation()).isChild();
 	}
 
 	@Override
 	public void dragExit(final DropTargetEvent e) {
-	    MainView node = getNode(e);
+	    MainView node = getMainView(e);
 	    stopUnfoldTimer();
 	    final MainView mainView = node;
 	    mainView.stopDragOver();
 	    mainView.repaint();
 	}
 
-	private MainView getNode(final DropTargetEvent e) {
-	    final Component draggedNode = e.getDropTargetContext().getComponent();
-		final MainView mainView = (MainView) draggedNode;
-	    return mainView;
+	private MainView getMainView(final DropTargetEvent e) {
+	    DropTargetContext dropTargetContext = e.getDropTargetContext();
+		return getMainView(dropTargetContext);
     }
+
+	private MainView getMainView(DropTargetContext dropTargetContext) {
+		final Component component = dropTargetContext.getComponent();
+		if(component instanceof MainView)
+			return (MainView) component;
+		NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
+		return nodeView.getMainView();
+	}
 
 	@Override
 	public void dragOver(final DropTargetDragEvent dtde) {
 		if(isDragAcceptable(dtde)) {
 			supportFolding(dtde);
 
-			final MainView dropTarget = (MainView) dtde.getDropTargetContext().getComponent();
-			dropTarget.setDragOverDirection(dtde.getLocation());
+			if(! dtde.isDataFlavorSupported(TagSelection.tagFlavor)) {
+				final MainView dropTarget = getMainView(dtde.getDropTargetContext());
+				dropTarget.setDragOverDirection(dtde.getLocation());
+			}
 		}
 	}
 
@@ -161,6 +189,8 @@ private Timer timer;
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event, int dropAction) {
+		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent)
+			return event.isDataFlavorSupported(TagSelection.tagFlavor);
 		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
 			 return dropAction != DnDConstants.ACTION_LINK;
 		final List<NodeModel> droppedNodes;
@@ -171,7 +201,7 @@ private Timer timer;
 		catch (Exception e) {
 			return dropAction != DnDConstants.ACTION_LINK;
 		}
-		final NodeModel node = ((MainView) event.getDropTargetContext().getComponent()).getNodeView().getNode();
+		final NodeModel node = getMainView(event.getDropTargetContext()).getNodeView().getNode();
 		if (dropAction == DnDConstants.ACTION_LINK) {
 			return isFromSameMap(node, droppedNodes);
 		}
@@ -215,7 +245,7 @@ private Timer timer;
 	public void drop(final DropTargetDropEvent dtde) {
 		try {
 		    stopUnfoldTimer();
-			final MainView mainView = (MainView) dtde.getDropTargetContext().getComponent();
+			final MainView mainView = getMainView(dtde.getDropTargetContext());
 			final NodeView targetNodeView = mainView.getNodeView();
 			final MapView mapView = targetNodeView.getMap();
 			mapView.select();
@@ -334,9 +364,11 @@ private Timer timer;
 	}
 
 	private boolean isDragAcceptable(final DropTargetDragEvent ev) {
-		return ev.isDataFlavorSupported(DataFlavor.stringFlavor)
+		if(ev.getDropTargetContext().getComponent() instanceof MainView)
+			return ev.isDataFlavorSupported(DataFlavor.stringFlavor)
 				||ev.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
 				||ev.isDataFlavorSupported(DataFlavor.imageFlavor);
+		else
+			return ev.isDataFlavorSupported(TagSelection.tagFlavor);
 	}
-
 }
