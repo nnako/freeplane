@@ -12,18 +12,23 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.freeplane.features.map.clipboard.MindMapNodesSelection;
+
 public class TagSelection implements Transferable {
     public static final DataFlavor tagFlavor = new DataFlavor("application/x-freeplane-tag; class=java.lang.String", "Freeplane Tags");
     public static final DataFlavor uuidFlavor = new DataFlavor("application/x-freeplane-uuid; class=java.lang.String", "Freeplane UUID");
+    public static final DataFlavor dropActionFlavor = MindMapNodesSelection.dropActionFlavor;
 
     private static final DataFlavor[] flavors = {
             tagFlavor,
             uuidFlavor,
-            DataFlavor.stringFlavor
+            DataFlavor.stringFlavor,
+            dropActionFlavor,
         };
 
     private final String id;
     private final String tagSelection;
+	private Integer dropAction;
 
     public TagSelection(UUID uuid, String tagData) {
         this.id = uuid.toString();
@@ -37,7 +42,10 @@ public class TagSelection implements Transferable {
 
     @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
-        return Stream.of(flavors).anyMatch(flavor::equals);
+        if (flavor.equals(dropActionFlavor))
+            return dropAction != null;
+        else
+            return Stream.of(flavors).anyMatch(flavor::equals);
     }
 
     @Override
@@ -45,7 +53,13 @@ public class TagSelection implements Transferable {
             IOException {
         if(flavor.equals(uuidFlavor))
             return id;
+        else if(flavor.equals(dropActionFlavor))
+            return dropAction;
         else
             return tagSelection;
     }
+
+	public void setDropAction(int dropAction) {
+		this.dropAction = dropAction;
+	}
 }

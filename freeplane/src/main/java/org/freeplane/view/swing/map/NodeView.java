@@ -27,12 +27,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.Window;
-import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseAdapter;
@@ -106,6 +103,7 @@ import org.freeplane.view.swing.map.cloud.CloudViewFactory;
 import org.freeplane.view.swing.map.edge.AutomaticEdgeStyle;
 import org.freeplane.view.swing.map.edge.EdgeView;
 import org.freeplane.view.swing.map.edge.EdgeViewFactory;
+import org.freeplane.view.swing.ui.mindmapmode.MNodeDragListener;
 
 /**
  * This class represents a single Node of a MindMap (in analogy to
@@ -172,15 +170,6 @@ public class NodeView extends JComponent implements INodeView {
 
 	public boolean isFolded(){
 		return isFolded && ! isRoot();
-	}
-
-	void addDragListener(final DragGestureListener dgl) {
-		if (dgl == null) {
-			return;
-		}
-		final DragSource dragSource = DragSource.getDefaultDragSource();
-		dragSource.createDefaultDragGestureRecognizer(getMainView(), DnDConstants.ACTION_COPY
-		        | DnDConstants.ACTION_MOVE | DnDConstants.ACTION_LINK, dgl);
 	}
 
 	void addDropListener(final DropTargetListener dtl) {
@@ -1735,7 +1724,9 @@ public class NodeView extends JComponent implements INodeView {
 			mainView.addMouseMotionListener(userInputListenerFactory.getNodeMouseMotionListener());
 			mainView.addMouseWheelListener(userInputListenerFactory.getNodeMouseWheelListener());
 			mainView.addKeyListener(userInputListenerFactory.getNodeKeyListener());
-			addDragListener(userInputListenerFactory.getNodeDragListener());
+			DragGestureListener nodeDragListener = userInputListenerFactory.getNodeDragListener();
+			if(nodeDragListener instanceof MNodeDragListener)
+				((MNodeDragListener)nodeDragListener).addDragListener(mainView);
 			addDropListener(userInputListenerFactory.getNodeDropTargetListener());
 		}
 	}
@@ -1862,8 +1853,13 @@ public class NodeView extends JComponent implements INodeView {
                 return;
             else if (component == null){
                 component = new MapViewIconListComponent(tagIcons);
+                final IUserInputListenerFactory userInputListenerFactory = modeController.getUserInputListenerFactory();
+                DragGestureListener nodeDragListener = userInputListenerFactory.getNodeDragListener();
+                if(nodeDragListener instanceof MNodeDragListener)
+                    ((MNodeDragListener)nodeDragListener).addDragListener(component);
+
                 int leftInset = TAG_INDENT.toBaseUnitsRounded();
-				component.setBorder(new ZoomedEmptyBorder(0, leftInset, 0, 0, map::getZoomed));
+                component.setBorder(new ZoomedEmptyBorder(0, leftInset, 0, 0, map::getZoomed));
                 if(iconController instanceof MIconController) {
                     component.addMouseListener(new MouseAdapter() {
 

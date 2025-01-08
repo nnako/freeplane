@@ -1,6 +1,9 @@
 package org.freeplane.view.swing.ui.mindmapmode;
 
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -8,11 +11,23 @@ import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceAdapter;
-import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
+import java.util.Collections;
+import java.util.UUID;
 
+import javax.swing.Icon;
+import javax.swing.SwingUtilities;
+
+import org.freeplane.core.ui.components.IconListComponent;
 import org.freeplane.core.ui.components.TagIcon;
+import org.freeplane.core.util.ColorUtils;
+import org.freeplane.features.icon.IconController;
+import org.freeplane.features.icon.Tag;
+import org.freeplane.features.icon.mindmapmode.MIconController;
+import org.freeplane.features.icon.mindmapmode.TagSelection;
+import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 import org.freeplane.features.mode.Controller;
@@ -25,10 +40,23 @@ import org.freeplane.view.swing.ui.MouseEventActor;
  * The NodeDragListener which belongs to every NodeView
  */
 public class MNodeDragListener implements DragGestureListener {
+
+	public void addDragListener(MainView mainView) {
+		addDragListenerToComponent(mainView);
+	}
+	public void addDragListener(IconListComponent iconListComponent) {
+		addDragListenerToComponent(iconListComponent);
+	}
+	private void addDragListenerToComponent(Component component) {
+		final DragSource dragSource = DragSource.getDefaultDragSource();
+		dragSource.createDefaultDragGestureRecognizer(component, DnDConstants.ACTION_COPY
+		        | DnDConstants.ACTION_MOVE | DnDConstants.ACTION_LINK, this);
+	}
+
 	@Override
 	public void dragGestureRecognized(final DragGestureEvent e) {
-		final MainView mainView = (MainView) e.getComponent();
-		final NodeView nodeView = mainView.getNodeView();
+		final Component mainView =  e.getComponent();
+		final NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, mainView);
 		final MapView mapView = nodeView.getMap();
 		mapView.select();
 		if(! nodeView.isSelected()){
@@ -38,17 +66,60 @@ public class MNodeDragListener implements DragGestureListener {
 		Rectangle bounds = new Rectangle(0, 0, mainView.getWidth(), mainView.getHeight());
 		if(!bounds.contains(e.getDragOrigin()))
 			return;
-		TagIcon tag = mainView.getTagIconAt(e.getDragOrigin());
-		if(tag != null) {
-			dragTagRecognized(tag);
+		final TagIcon tag;
+		if(mainView instanceof MainView)
+			tag = ((MainView) mainView).getTagIconAt(e.getDragOrigin());
+		else if(mainView instanceof IconListComponent) {
+			Icon icon = ((IconListComponent) mainView).getIconAt(e.getDragOrigin());
+			if(icon instanceof TagIcon)
+				tag = (TagIcon) icon;
+			else
+				return;
+		}
+		else
+			return;
+		if(tag != null)
+			startTagDrag(e, nodeView, tag);
+		else
+			startNodeDrag(e, nodeView);
+	}
+
+	private void startTagDrag(final DragGestureEvent e, NodeView nodeView, final TagIcon tagIcon) {
+		final int dragActionType = e.getDragAction();
+		if (dragActionType == DnDConstants.ACTION_LINK || isLinkDragEvent(e)) {
 			return;
 		}
+		Cursor cursor = getCursorByAction(dragActionType);
+		Tag tag = tagIcon.getTag();
+		final TagSelection t = new TagSelection(UUID.randomUUID(), tag.getContent() + ColorUtils.colorToRGBAString(tag.getColor()));
+		if ((e.getTriggerEvent().getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
+			cursor = DragSource.DefaultCopyDrop;
+			t.setDropAction(DnDConstants.ACTION_COPY);
+		}
+		try {
+			BufferedImage image = new BufferedImage(tagIcon.getIconWidth(), tagIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+			Graphics2D graphics = image.createGraphics();
+			tagIcon.paintIcon(e.getComponent(), graphics, 0, 0);
+			e.startDrag(cursor, image, new Point(), t, TrashBin.INSTANCE.showTrashBin(e, () -> removeTag(nodeView.getNode(), tag)));
+		}
+		catch (final InvalidDnDOperationException ex) {
+		}
+	}
+
+	private void removeTag(NodeModel node, Tag tag) {
+		((MIconController)IconController.getController()).removeTags(node, Collections.singleton(tag));
+	}
+
+	private void startNodeDrag(final DragGestureEvent e, final NodeView nodeView) {
 		final int dragActionType = e.getDragAction();
 		if (dragActionType == DnDConstants.ACTION_MOVE) {
 			if (nodeView.isRoot()) {
 				if(! isLinkDragEvent(e))
 					return;
 			}
+		}
+		if (dragActionType == DnDConstants.ACTION_LINK) {
+			return;
 		}
 		Cursor cursor = getCursorByAction(dragActionType);
 		final Transferable t = MapClipboardController.getController().copy(Controller.getCurrentController().getSelection());
@@ -67,10 +138,6 @@ public class MNodeDragListener implements DragGestureListener {
 		}
 	}
 
-	private void dragTagRecognized(TagIcon tag) {
-
-	}
-
 	private boolean isLinkDragEvent(final DragGestureEvent e) {
 	    return (e.getTriggerEvent().getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) != 0;
     }
@@ -85,4 +152,5 @@ public class MNodeDragListener implements DragGestureListener {
 				return DragSource.DefaultMoveDrop;
 		}
 	}
+
 }
