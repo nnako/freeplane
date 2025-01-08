@@ -44,6 +44,9 @@ import javax.swing.Timer;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.icon.IconController;
+import org.freeplane.features.icon.Tag;
+import org.freeplane.features.icon.TagCategories;
 import org.freeplane.features.icon.mindmapmode.TagSelection;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.mindmapmode.MLinkController;
@@ -189,8 +192,26 @@ private Timer timer;
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event, int dropAction) {
-		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent)
-			return event.isDataFlavorSupported(TagSelection.tagFlavor);
+		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
+		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && ! containsTags) {
+			return false;
+		}
+		if(containsTags) {
+			try {
+				NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
+				List<Tag> nodeTags = nodeView.getMap().getModeController().getExtension(IconController.class).getTags(nodeView.getNode());
+				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
+				Tag tag = TagCategories.readTag(tagData);
+				if(nodeTags.contains(tag))
+					return false;
+			} catch (IOException | UnsupportedFlavorException e) {
+				return false;
+			}
+		}
+
+		if (!event.isLocalTransfer())
+			return true;
+
 		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
 			 return dropAction != DnDConstants.ACTION_LINK;
 		final List<NodeModel> droppedNodes;
@@ -255,11 +276,13 @@ private Timer timer;
 			final Transferable t = dtde.getTransferable();
 			mainView.stopDragOver();
 			mainView.repaint();
-			if (dtde.isLocalTransfer() && !isDropAcceptable(dtde, dropAction)) {
+			if (!isDropAcceptable(dtde, dropAction)) {
 				dtde.rejectDrop();
 				return;
 			}
-			DragOverRelation dragOverRelation = mainView.dragOverRelation(dtde.getLocation());
+			DragOverRelation dragOverRelation = dtde.isDataFlavorSupported(TagSelection.tagFlavor )
+					? DragOverRelation.CHILD_AFTER
+					: mainView.dragOverRelation(dtde.getLocation());
 			if(dragOverRelation == DragOverRelation.NOT_AVAILABLE || dragOverRelation == DragOverRelation.SIBLING_AFTER) {
 			    dtde.rejectDrop();
 			    return;
@@ -336,7 +359,9 @@ private Timer timer;
 	private int getDropAction(final DropTargetDropEvent dtde) throws UnsupportedFlavorException, IOException {
 		int dropAction = dtde.getDropAction();
 		final Transferable t = dtde.getTransferable();
-		if (dtde.isLocalTransfer() && t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
+		if (! dtde.isLocalTransfer()) {
+			dropAction = DnDConstants.ACTION_COPY;
+		} else if (t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
 			dropAction = (Integer) t.getTransferData(MindMapNodesSelection.dropActionFlavor);
 		}
 		return dropAction;

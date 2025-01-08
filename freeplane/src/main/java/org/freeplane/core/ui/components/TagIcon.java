@@ -88,4 +88,12 @@ public class TagIcon implements Icon {
     public Tag getTag() {
         return tag;
     }
+
+	@Override
+	public String toString() {
+		return "TagIcon [tag=" + tag + ", font=" + font + ", width=" + width + ", height=" + height
+				+ "]";
+	}
+
+
 }

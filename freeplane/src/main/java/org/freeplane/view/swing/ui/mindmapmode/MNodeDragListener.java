@@ -11,6 +11,8 @@ import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceAdapter;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
@@ -55,22 +57,22 @@ public class MNodeDragListener implements DragGestureListener {
 
 	@Override
 	public void dragGestureRecognized(final DragGestureEvent e) {
-		final Component mainView =  e.getComponent();
-		final NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, mainView);
+		final Component component =  e.getComponent();
+		final NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
 		final MapView mapView = nodeView.getMap();
 		mapView.select();
 		if(! nodeView.isSelected()){
 			MouseEventActor.INSTANCE.withMouseEvent( () ->
 				nodeView.getMap().selectAsTheOnlyOneSelected(nodeView));
 		}
-		Rectangle bounds = new Rectangle(0, 0, mainView.getWidth(), mainView.getHeight());
+		Rectangle bounds = new Rectangle(0, 0, component.getWidth(), component.getHeight());
 		if(!bounds.contains(e.getDragOrigin()))
 			return;
 		final TagIcon tag;
-		if(mainView instanceof MainView)
-			tag = ((MainView) mainView).getTagIconAt(e.getDragOrigin());
-		else if(mainView instanceof IconListComponent) {
-			Icon icon = ((IconListComponent) mainView).getIconAt(e.getDragOrigin());
+		if(component instanceof MainView)
+			tag = ((MainView) component).getTagIconAt(e.getDragOrigin());
+		else if(component instanceof IconListComponent) {
+			Icon icon = ((IconListComponent) component).getIconAt(e.getDragOrigin());
 			if(icon instanceof TagIcon)
 				tag = (TagIcon) icon;
 			else
@@ -85,7 +87,7 @@ public class MNodeDragListener implements DragGestureListener {
 	}
 
 	private void startTagDrag(final DragGestureEvent e, NodeView nodeView, final TagIcon tagIcon) {
-		final int dragActionType = e.getDragAction();
+		int dragActionType = e.getDragAction();
 		if (dragActionType == DnDConstants.ACTION_LINK || isLinkDragEvent(e)) {
 			return;
 		}
@@ -94,13 +96,28 @@ public class MNodeDragListener implements DragGestureListener {
 		final TagSelection t = new TagSelection(UUID.randomUUID(), tag.getContent() + ColorUtils.colorToRGBAString(tag.getColor()));
 		if ((e.getTriggerEvent().getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
 			cursor = DragSource.DefaultCopyDrop;
-			t.setDropAction(DnDConstants.ACTION_COPY);
+			dragActionType = DnDConstants.ACTION_COPY;
+			t.setDropAction(dragActionType);
 		}
 		try {
 			BufferedImage image = new BufferedImage(tagIcon.getIconWidth(), tagIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
 			Graphics2D graphics = image.createGraphics();
 			tagIcon.paintIcon(e.getComponent(), graphics, 0, 0);
-			e.startDrag(cursor, image, new Point(), t, TrashBin.INSTANCE.showTrashBin(e, () -> removeTag(nodeView.getNode(), tag)));
+			DragSourceListener trashBinListener =
+					dragActionType == DnDConstants.ACTION_MOVE
+					? TrashBin.INSTANCE.showTrashBin(e, () -> {/**/})
+					: null;
+			int effectiveDragActionType = dragActionType;
+			e.startDrag(cursor, image, new Point(), t, new DragSourceAdapter() {
+				@Override
+				public void dragDropEnd(DragSourceDropEvent dsde) {
+					if(trashBinListener != null)
+						trashBinListener.dragDropEnd(dsde);
+					if(dsde.getDropSuccess() && dsde.getDropAction() == DnDConstants.ACTION_MOVE
+							&& effectiveDragActionType  == DnDConstants.ACTION_MOVE)
+						SwingUtilities.invokeLater(() -> removeTag(nodeView.getNode(), tag));
+				}
+			});
 		}
 		catch (final InvalidDnDOperationException ex) {
 		}

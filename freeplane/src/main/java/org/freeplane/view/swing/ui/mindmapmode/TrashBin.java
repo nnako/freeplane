@@ -57,13 +57,7 @@ public class TrashBin {
         return new DragSourceAdapter() {
             @Override
             public void dragDropEnd(DragSourceDropEvent dsde) {
-                SwingUtilities.invokeLater(() -> {
-                    window.dispose();
-                    Point dropPoint = dsde.getLocation();
-                    if (! window.getBounds().contains(dropPoint)) {
-                        System.out.println("Item dropped outside trash bin.");
-                    }
-                });
+                SwingUtilities.invokeLater(window::dispose);
             }
         };
     }

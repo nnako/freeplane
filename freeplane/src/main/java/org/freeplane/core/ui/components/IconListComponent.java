@@ -488,6 +488,14 @@ public class IconListComponent extends JComponent implements Accessible {
         public int getMaximumRowWidth() {
             return maximumRowWidth;
         }
+
+		@Override
+		public String toString() {
+			return "IconBounds [iconLayouts=" + iconLayouts + ", totalHeight=" + totalHeight
+					+ ", maximumRowWidth=" + maximumRowWidth + "]";
+		}
+
+
     }
 
     /**
@@ -519,6 +527,13 @@ public class IconListComponent extends JComponent implements Accessible {
         public int getY() {
             return y;
         }
+
+		@Override
+		public String toString() {
+			return "IconLayout [icon=" + icon + ", x=" + x + ", y=" + y + "]";
+		}
+
+
     }
 
     /**

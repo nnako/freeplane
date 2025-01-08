@@ -38,17 +38,18 @@ import java.util.regex.Pattern;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.icon.mindmapmode.TagSelection;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 
 public class FileOpener implements DropTargetListener {
-	
+
     private final String fileExtension;
 	private Listener listener;
 
 	public static interface Listener {
          public void filesDropped(Collection<URL> urls ) throws Exception;
     }
-    
+
 
 	public FileOpener(String fileExtension, Listener listener) {
 		this.listener = listener;
@@ -93,7 +94,7 @@ public class FileOpener implements DropTargetListener {
 						continue;
 					}
 					final URL url = Compat.fileToUrl(file);
-					
+
 					droppedUrls.add(url);
 				}
 			}
@@ -124,14 +125,17 @@ public class FileOpener implements DropTargetListener {
 					droppedUrls.add(url);
 				}
 			}
-			listener.filesDropped(droppedUrls);
+			if(droppedUrls.isEmpty())
+				dtde.dropComplete(false);
+			else {
+				listener.filesDropped(droppedUrls);
+				dtde.dropComplete(true);
+			}
 		}
 		catch (final Exception e) {
 			UITools.errorMessage(TextUtils.format("dropped_file_error", e.getMessage()));
 			dtde.dropComplete(false);
-			return;
 		}
-		dtde.dropComplete(true);
 	}
 
 	public void dropActionChanged(final DropTargetDragEvent e) {
@@ -144,7 +148,9 @@ public class FileOpener implements DropTargetListener {
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event) {
-		return event.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-		        || event.isDataFlavorSupported(DataFlavor.stringFlavor);
+		return (event.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+		          || event.isDataFlavorSupported(DataFlavor.stringFlavor))
+				&& !(event.isDataFlavorSupported(TagSelection.tagFlavor)
+		          || event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodesFlavor));
 	}
 }
