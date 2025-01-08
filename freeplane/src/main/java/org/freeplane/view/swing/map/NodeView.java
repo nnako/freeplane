@@ -1820,10 +1820,11 @@ public class NodeView extends JComponent implements INodeView {
 			nodeViewFactory.updateDetails(this, minNodeWidth, maxNodeWidth, cause);
 			nodeViewFactory.updateNoteViewer(this, minNodeWidth, maxNodeWidth, cause);
 		}
-		updateShortener(textShortened);
-		updateIcons();
-		if(cause != UpdateCause.SELECTION)
+		if(cause != UpdateCause.SELECTION) {
+			updateShortener(textShortened);
+			updateIcons();
 			mainView.updateText(getNode());
+		}
 		modelBackgroundColor = styleController().getBackgroundColor(viewedNode, getStyleOption());
 		if (isContentVisible()) {
 		    revalidate();
