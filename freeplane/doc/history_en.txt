@@ -11,6 +11,8 @@ Option "Don't scroll after mouse interactions"
 Option to show tags on minimized nodes
 Copy and remove tags using drag and drop
 Add PlantUML support to Markdown
+  - to activate it, download recent plantuml jar
+  - and save it as <user-directory>/resources/plantuml.jar
 Bug fixes
 
 ==============================
