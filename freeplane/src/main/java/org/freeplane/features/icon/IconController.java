@@ -111,7 +111,7 @@ public class IconController implements IExtension {
                 }
                 final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
                 TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
-                final boolean showIcon = tagLocation == TagLocation.NEVER 
+                final boolean showIcon = tagLocation == TagLocation.NEVER
                 		|| ! MapView.showsTagsOnMinimizedNodes() && ShortenedTextModel.isShortened(node);
                 if(showIcon) {
                     if (tagsIcon == null) {
@@ -288,10 +288,19 @@ public class IconController implements IExtension {
         final TagCategories tagCategories = node.getMap().getIconRegistry().getTagCategories();
         final String tagCategorySeparator = tagCategories.getTagCategorySeparator();
         return getTags(node).stream()
-                .map(tag -> showCategories ? tag : tag.withoutCategories(tagCategorySeparator))
-                .map(tag -> new TagIcon(tag, font))
+                .map(tag -> tagIcon(tag, font, showCategories, tagCategorySeparator))
                 .collect(Collectors.toList());
     }
+	private TagIcon tagIcon(Tag tag, final Font font, boolean showCategories, String tagCategorySeparator) {
+		if (showCategories)
+			return new TagIcon(tag, font);
+		else {
+			Tag tagWithoutCategories = tag.withoutCategories(tagCategorySeparator);
+			tagWithoutCategories.setColorChainTag(tag);
+			TagIcon tagIcon = new TagIcon(tagWithoutCategories, font);
+			return tagIcon;
+		}
+	}
 
     public Font getTagFont(NodeModel node) {
         final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
