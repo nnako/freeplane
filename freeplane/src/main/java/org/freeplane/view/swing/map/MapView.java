@@ -657,6 +657,11 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             return selectedNodeCount > 0 ? selectedList.get(selectedNodeCount - 1) : null;
 		}
 
+		public NodeView getSelectionBeforeEnd() {
+			int selectedNodeCount = selectedList.size();
+            return selectedNodeCount > 1 ? selectedList.get(selectedNodeCount - 2) : null;
+		}
+
 	    void foldingWasSet(NodeView view) {
 	        if(isClientPropertyTrue(FOLDING_FOLLOWS_SELECTION)) {
 	            nodeViewFolder.foldingWasSet(view);
@@ -1700,7 +1705,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private void select(final NodeView newSelected, final boolean continious) {
 	    if(continious) {
             if(newSelected.isSelected()) {
-                if(selection.getSelectionEnd() != newSelected) {
+                if(selection.getSelectionBeforeEnd() == newSelected) {
                     deselect(selection.getSelectionEnd());
                     setSiblingMaxLevel(selection.getSelectionEnd());
                     mapScroller.scrollNodeToVisible(newSelected);
