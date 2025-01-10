@@ -1494,11 +1494,11 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	        repaint();
 		}
         if (property.equals(Filter.class)){
-            setSiblingMaxLevel();
+            setSiblingMaxLevel(getSelected());
         }
         if (property.equals(IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT)){
             currentRootView.updateIcons();
-            setSiblingMaxLevel();
+            setSiblingMaxLevel(getSelected());
         }
 		if (property.equals(MapStyle.MAP_STYLES) && event.getMap().equals(viewedMap)
 		        || property.equals(ModelessAttributeController.ATTRIBUTE_VIEW_TYPE)
@@ -1702,12 +1702,14 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             if(newSelected.isSelected()) {
                 if(selection.getSelectionEnd() != newSelected) {
                     deselect(selection.getSelectionEnd());
+                    setSiblingMaxLevel(selection.getSelectionEnd());
                     mapScroller.scrollNodeToVisible(newSelected);
                 }
             }
             else {
                 addSelected(newSelected, true);
                 mapScroller.scrollNodeToVisible(newSelected);
+                setSiblingMaxLevel(newSelected);
             }
         } else {
             selectAsTheOnlyOneSelected(newSelected);
@@ -2660,7 +2662,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		if (selectionParent instanceof NodeView) {
 			((NodeView) selectionParent).setLastSelectedChild(newSelected);
 		}
-		setSiblingMaxLevel();
+		setSiblingMaxLevel(newSelected);
 	}
 
 	/**
@@ -2728,9 +2730,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 	}
 
-	private void setSiblingMaxLevel() {
+	private void setSiblingMaxLevel(NodeView newSelected) {
 	    if (siblingMaxLevel >= 0)
-	        siblingMaxLevel = getSelected().getNode().getNodeLevel(filter);
+	        siblingMaxLevel = newSelected.getNode().getNodeLevel(filter);
 	}
 
     public void setZoom(final float zoom) {
