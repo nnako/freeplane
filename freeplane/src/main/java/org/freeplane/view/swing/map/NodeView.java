@@ -346,7 +346,7 @@ public class NodeView extends JComponent implements INodeView {
 		}
 	}
 
-	private NodeView getFirst(Component startAfter, final boolean leftOnly, final boolean rightOnly) {
+	private NodeView getFirstVisible(Component startAfter, final boolean leftOnly, final boolean rightOnly) {
 		final Component[] components = getComponents();
 		for (int i = 0; i < components.length; i++) {
 			if (startAfter != null) {
@@ -366,7 +366,7 @@ public class NodeView extends JComponent implements INodeView {
 				return view;
 			}
 			if(! view.isSummary()) {
-				final NodeView child = view.getFirst(null, leftOnly, rightOnly);
+				final NodeView child = view.getFirstVisible(null, leftOnly, rightOnly);
 				if (child != null) {
 					return child;
 				}
@@ -400,7 +400,7 @@ public class NodeView extends JComponent implements INodeView {
 	    return map.getZoomed(unscaledHGap);
 	}
 
-	private NodeView getLast(Component startBefore, final boolean leftOnly, final boolean rightOnly) {
+	private NodeView getLastVisible(Component startBefore, final boolean leftOnly, final boolean rightOnly) {
 		final Component[] components = getComponents();
 		for (int i = components.length - 1; i >= 0; i--) {
 			if (startBefore != null) {
@@ -420,7 +420,7 @@ public class NodeView extends JComponent implements INodeView {
 				return view;
 			}
 			if(! view.isSummary()) {
-				final NodeView child = view.getLast(null, leftOnly, rightOnly);
+				final NodeView child = view.getLastVisible(null, leftOnly, rightOnly);
 				if (child != null) {
 					return child;
 				}
@@ -534,7 +534,7 @@ public class NodeView extends JComponent implements INodeView {
 		return viewedNode;
 	}
 
-	private NodeView getNextSiblingSameParent(SiblingSelection siblingSelection) {
+	private NodeView getNextVisibleSiblingSameParent(SiblingSelection siblingSelection) {
 		LinkedList<NodeView> v = getSiblingViews();
 		final int index = v.indexOf(this);
 		boolean isOutlineLayoutSet = map.isOutlineLayoutSet();
@@ -551,7 +551,7 @@ public class NodeView extends JComponent implements INodeView {
 				return nextView;
 			}
 			else if (isOutlineLayoutSet || ! node.isHiddenSummary()){
-				final NodeView first = nextView.getFirst(null, this.isTopOrLeft(),
+				final NodeView first = nextView.getFirstVisible(null, this.isTopOrLeft(),
 		                !this.isTopOrLeft());
 				if (first != null) {
 					return first;
@@ -578,7 +578,7 @@ public class NodeView extends JComponent implements INodeView {
 	        lastSibling = sibling;
 	        LayoutOrientation parentLayoutOrientation = parentView.layoutOrientation();
             if (requiredLayoutOrientation == parentLayoutOrientation) {
-	            sibling = sibling.getNextSiblingSameParent(siblingSelection);
+	            sibling = sibling.getNextVisibleSiblingSameParent(siblingSelection);
 	            if (sibling != null) {
 	                break;
 	            }
@@ -587,17 +587,23 @@ public class NodeView extends JComponent implements INodeView {
 			parentView = parentView.getParentView();
 		}
 	    if(sibling.getChildNodesAlignment().isStacked() && ! sibling.usesHorizontalLayout())
-            return sibling.isRoot() ? this : sibling;
-		while (sibling.getNode().getNodeLevel(map.getFilter()) < map.getSiblingMaxLevel()
+            return sibling.isRoot() ? null : sibling;
+		Filter filter = map.getFilter();
+		int siblingMaxLevel = map.getSiblingMaxLevel();
+		while (sibling.getNode().getNodeLevel(filter) < siblingMaxLevel
 		        && sibling.layoutOrientation() == requiredLayoutOrientation) {
-			final NodeView first = sibling.getFirst(sibling.isRoot() ? lastSibling : null,
+			final NodeView first = sibling.getFirstVisible(sibling.isRoot() ? lastSibling : null,
 			        this.isTopOrLeft(), !this.isTopOrLeft());
 			if (first == null) {
 				break;
 			}
+		 if (siblingSelection != SiblingSelection.CHANGE_PARENT
+				&& first != sibling.getLastVisible(null, this.isTopOrLeft(),
+					    !this.isTopOrLeft()))
+				return null;
 			sibling = first;
 		}
-		return sibling.isRoot() ? this : sibling;
+		return sibling.isRoot() ? null : sibling;
 	}
 
 	public NodeView getParentView() {
@@ -730,7 +736,7 @@ public class NodeView extends JComponent implements INodeView {
         return childPoint;
     }
 
-	private NodeView getPreviousSiblingSameParent(SiblingSelection siblingSelection) {
+	private NodeView getPreviousVisibleSiblingSameParent(SiblingSelection siblingSelection) {
 		LinkedList<NodeView> v = getSiblingViews();
 		final int index = v.indexOf(this);
 		boolean skipUntilFirstGroupNode = ! map.isOutlineLayoutSet() && isSummary();
@@ -747,7 +753,7 @@ public class NodeView extends JComponent implements INodeView {
 				return nextView;
 			}
 			else if (! node.isHiddenSummary()){
-				final NodeView last = nextView.getLast(null, this.isTopOrLeft(),
+				final NodeView last = nextView.getLastVisible(null, this.isTopOrLeft(),
 		                !this.isTopOrLeft());
 				if (last != null) {
 					return last;
@@ -792,12 +798,12 @@ public class NodeView extends JComponent implements INodeView {
 	    NodeView previousSibling = this;
 	    NodeView parentView = getParentView();
 	    if(parentView == null)
-	        return this;
+	        return null;
 	    boolean parentUsesHorizontalLayout = parentView.usesHorizontalLayout();
 	    while(parentView != null) {
 	        previousSibling = sibling;
 	        if (requiredLayoutOrientation == parentView.layoutOrientation()) {
-	            sibling = sibling.getPreviousSiblingSameParent(siblingSelection);
+	            sibling = sibling.getPreviousVisibleSiblingSameParent(siblingSelection);
 	            if (sibling != null) {
 	                break;
 	            }
@@ -806,21 +812,26 @@ public class NodeView extends JComponent implements INodeView {
 	        parentView = parentView.getParentView();
 		}
 	    if((parentView != null ? parentView : sibling).layoutOrientation() != requiredLayoutOrientation)
-	        return this;
+	        return null;
         if(sibling.getChildNodesAlignment().isStacked() && ! sibling.usesHorizontalLayout())
             return sibling;
-        while (sibling.getNode().getNodeLevel(map.getFilter()) < map.getSiblingMaxLevel()
+        int siblingMaxLevel = map.getSiblingMaxLevel();
+		Filter filter = map.getFilter();
+		while (sibling.getNode().getNodeLevel(filter) < siblingMaxLevel
                 && sibling.usesHorizontalLayout() == parentUsesHorizontalLayout) {
-			final NodeView last = sibling.getLast(sibling.isRoot() ? previousSibling : null, this.isTopOrLeft(),
+			final NodeView last = sibling.getLastVisible(sibling.isRoot() ? previousSibling : null, this.isTopOrLeft(),
 			    !this.isTopOrLeft());
 			if (last == null) {
 				break;
 			}
+			if(siblingSelection != SiblingSelection.CHANGE_PARENT
+					&& last != sibling.getFirstVisible(null, this.isTopOrLeft(),
+						    !this.isTopOrLeft()))
+				return null;
 			sibling = last;
 		}
-		if (sibling.isRoot()) {
-			return this;
-		}
+		if (sibling.isRoot())
+			return null;
 		return sibling;
 	}
 

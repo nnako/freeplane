@@ -1860,8 +1860,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             final NodeView newSelectedSummary = suggestNewSelectedSummary(direction, oldSelected);
 
             NodeView newSelected = newSelectedSibling;
-            while(newSelected != null && siblingMaxLevel > newSelected.getNode().getNodeLevel(filter))
-                newSelected = suggestNewSelectedSibling(direction, newSelected);
 
             if (newSelectedSummary != null && (newSelectedSibling == null
                     || newSelectedSummary.getNode().isDescendantOf(newSelectedSibling.getAncestorWithVisibleContent().getNode()))) {
@@ -1906,23 +1904,48 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
     private NodeView suggestNewSelectedSibling(SelectionDirection direction,
-            final NodeView oldSelected) {
-        NodeView nextSelectedSibling = null;
-        SiblingSelection siblingSelection = ResourceController.getResourceController().getEnumProperty("siblingSelection", SiblingSelection.CHANGE_PARENT);
-        if (direction == SelectionDirection.DOWN) {
-            nextSelectedSibling = getNextVisibleSibling(oldSelected, LayoutOrientation.TOP_TO_BOTTOM, true, siblingSelection);
-        } else if (direction == SelectionDirection.UP) {
-            nextSelectedSibling = getNextVisibleSibling(oldSelected, LayoutOrientation.TOP_TO_BOTTOM, false, siblingSelection);
-        } else if (direction == SelectionDirection.RIGHT) {
-            nextSelectedSibling = getNextVisibleSibling(oldSelected, LayoutOrientation.LEFT_TO_RIGHT, true, siblingSelection);
-        } else if (direction == SelectionDirection.LEFT) {
-            nextSelectedSibling = getNextVisibleSibling(oldSelected, LayoutOrientation.LEFT_TO_RIGHT, false, siblingSelection);
-        }
-        return nextSelectedSibling != oldSelected ? nextSelectedSibling : null;
+    		final NodeView oldSelected) {
+    	SiblingSelection siblingSelection = ResourceController.getResourceController().getEnumProperty("siblingSelection", SiblingSelection.CHANGE_PARENT);
+    	LayoutOrientation orientation;
+    	boolean down;
+    	switch (direction) {
+		case DOWN:
+			orientation = LayoutOrientation.TOP_TO_BOTTOM;
+			down = true;
+			break;
+		case UP:
+			orientation = LayoutOrientation.TOP_TO_BOTTOM;
+			down = false;
+			break;
+		case RIGHT:
+			orientation = LayoutOrientation.LEFT_TO_RIGHT;
+			down = true;
+			break;
+		case LEFT:
+			orientation = LayoutOrientation.LEFT_TO_RIGHT;
+			down = false;
+			break;
+		default:
+		throw new IllegalArgumentException("Unknown direction");
+		}
+
+    	return getNextVisibleSibling(oldSelected, orientation, down, siblingSelection);
+    }
+
+    private NodeView getNextVisibleSibling(final NodeView oldSelected,
+    		LayoutOrientation orientation, boolean down, SiblingSelection siblingSelection) {
+    	NodeView nextSelectedSibling = oldSelected;
+    	do {
+    		NodeView nextVisibleSiblingOrSame = getNextVisibleSiblingAtAnyLevel(nextSelectedSibling, orientation, down, siblingSelection);
+    		if(nextVisibleSiblingOrSame == nextSelectedSibling)
+    			return oldSelected;
+    		nextSelectedSibling = nextVisibleSiblingOrSame;
+    	} while(nextSelectedSibling != null && nextSelectedSibling.getNode().getNodeLevel(filter) < siblingMaxLevel);
+    	return nextSelectedSibling;
     }
 
     private NodeView suggestNewSelectedAncestor(SelectionDirection direction,
-            final NodeView oldSelected) {
+    		final NodeView oldSelected) {
         NodeView newSelectedParent = null;
         {
             NodeView parentView = oldSelected.getParentView();
@@ -2032,44 +2055,28 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if(oldSelectionEnd == null || oldSelectionEnd.isRoot())
             return false;
         LayoutOrientation layoutOrientation = oldSelectionEnd.getParentView().layoutOrientation();
-        NodeView sibling = oldSelectionEnd;
+        SiblingSelection siblingSelection = ResourceController.getResourceController().getEnumProperty("siblingSelection", SiblingSelection.CHANGE_PARENT);
         NodeView nextSelected = oldSelectionEnd;
         for(;;)  {
-        	sibling = getNextVisibleSibling(sibling, layoutOrientation, selectsForward, SiblingSelection.CHANGE_PARENT);
-        	if(sibling == oldSelectionEnd)
-        	    return false;
-        	final boolean noNextNodeFound = sibling == nextSelected;
-        	if(noNextNodeFound
-        			|| sibling.getParentView() != nextSelected.getParentView()
-        			|| sibling.isSelected() && sibling.getParentView() != oldSelectionEnd.getParentView()
-        			)
+        	NodeView sibling = getNextVisibleSibling(nextSelected, layoutOrientation, selectsForward, SiblingSelection.STAY_AT_THE_END);
+        	if(sibling == null || sibling == nextSelected)
         		break;
         	nextSelected = sibling;
+        	if(continious)
+        		selectPreservingSiblingMaxLevel(nextSelected, continious);
         }
-        if(nextSelected.isSelected() && nextSelected.getParentView() == oldSelectionEnd.getParentView())
-        	nextSelected = getNextVisibleSibling(nextSelected, layoutOrientation, selectsForward, SiblingSelection.CHANGE_PARENT);
-        if(continious){
-            final NodeView selectionStart = selection.getSelectionStart();
-            selectAsTheOnlyOneSelected(selectionStart);
-            NodeView node = selectionStart;
-            do{
-                NodeView nextVisibleSibling = getNextVisibleSibling(node, layoutOrientation, selectsForward, SiblingSelection.CHANGE_PARENT);
-                if(node == nextVisibleSibling) {
-                    selectAsTheOnlyOneSelected(nextSelected);
-                    LogUtils.severe("Can not select next visible sibling in continious selection, endless loop");
-                    break;
-                }
-                node = nextVisibleSibling;
-                addSelected(node, false);
-            }while(node != nextSelected);
-            mapScroller.scrollNodeToVisible(nextSelected);
-        }
-        else
-            selectAsTheOnlyOneSelected(nextSelected);
-        return true;
+        if(nextSelected == oldSelectionEnd && siblingSelection != SiblingSelection.STAY_AT_THE_END)
+        	nextSelected = getNextVisibleSibling(nextSelected, layoutOrientation, selectsForward, siblingSelection);
+        if(nextSelected != oldSelectionEnd && nextSelected != null) {
+			if (! continious || siblingSelection != SiblingSelection.STAY_AT_THE_END) {
+				selectPreservingSiblingMaxLevel(nextSelected, continious);
+			}
+			return true;
+		}
+        return false;
     }
 
-	private NodeView getNextVisibleSibling(final NodeView node, LayoutOrientation layoutOrientation, final boolean down, final SiblingSelection siblingSelection) {
+	private NodeView getNextVisibleSiblingAtAnyLevel(final NodeView node, LayoutOrientation layoutOrientation, final boolean down, final SiblingSelection siblingSelection) {
 	    return down ? node.getNextVisibleSibling(layoutOrientation, siblingSelection) : node.getPreviousVisibleSibling(layoutOrientation, siblingSelection);
     }
 
