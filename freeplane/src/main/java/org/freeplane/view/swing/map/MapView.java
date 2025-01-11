@@ -2126,10 +2126,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		final Graphics2D g2 = (Graphics2D) g.create();
 		try {
-			if(isPreparedForPrinting)
-				antiAliasingConfigurator.enableAntialias(g2);
-			else
-				antiAliasingConfigurator.configureRenderingHints(g2);
+			antiAliasingConfigurator.prepareForPaint(g2);
 			if(! isPrinting() && g2.getRenderingHint(GraphicsHints.CACHE_ICONS) == null) {
 				g2.setRenderingHint(GraphicsHints.CACHE_ICONS, Boolean.TRUE);
 			}
@@ -2147,6 +2144,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			super.paint(g2);
 		}
 		finally {
+			antiAliasingConfigurator.endPaint(g2);
 			paintingMode = null;
 			g2.dispose();
 		}
