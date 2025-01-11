@@ -39,6 +39,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 
+import org.freeplane.api.HorizontalTextAlignment;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.AttributeRegistry;
 import org.freeplane.features.attribute.AttributeTableLayoutModel;
@@ -46,7 +47,11 @@ import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.ModeController;
+import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.styles.MapStyle;
+import org.freeplane.features.styles.MapStyleModel;
+import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
 
@@ -65,7 +70,7 @@ public class AttributeView implements ChangeListener, TableModelListener, IMapCh
 	final private ReducedAttributeTableModelDecorator reducedAttributeTableModel;
 	private JTableHeader tableHeader;
 	private ListSelectionListener tableSelectionListener;
-	private boolean belongsToNodeView;
+	private final boolean belongsToNodeView;
 
 	public AttributeView(final NodeView nodeView, final boolean addToNodeView) {
 		super();
@@ -310,10 +315,25 @@ public class AttributeView implements ChangeListener, TableModelListener, IMapCh
 	/**
 	 */
 	public void update() {
-		if (attributeTable != null && attributeTable.isVisible()) {
-			attributeTable.updateAttributeTable();
+		if (attributeTableContainer != null) {
+			if (attributeTableContainer.isVisible()) {
+				attributeTable.updateAttributeTable();
+			}
+			updateComponentAlignment();
 		}
+
 	}
+	private void updateComponentAlignment() {
+		final MapView mapView = nodeView.getMap();
+		final ModeController modeController = mapView.getModeController();
+        final MapStyleModel model = MapStyleModel.getExtension(mapView.getMap());
+        final NodeModel attributeStyleNode = model.getStyleNodeSafe(MapStyleModel.ATTRIBUTE_STYLE);
+        final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
+        HorizontalTextAlignment horizontalTextAlignment = style.getHorizontalTextAlignment(attributeStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+        float alignmentX = horizontalTextAlignment == HorizontalTextAlignment.DEFAULT || horizontalTextAlignment == HorizontalTextAlignment.LEFT ? 0f
+        		: horizontalTextAlignment == HorizontalTextAlignment.RIGHT ? 1f : 0.5f;
+        attributeTableContainer.setAlignmentX(alignmentX);
+    }
 
 	/*
 	 * (non-Javadoc)

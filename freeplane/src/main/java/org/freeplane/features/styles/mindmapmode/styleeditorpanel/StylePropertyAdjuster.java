@@ -44,7 +44,8 @@ class StylePropertyAdjuster {
                         || propertyName.equals(FontItalicControlGroup.NODE_FONT_ITALIC)
                         || propertyName.equals(FontStrikeThroughControlGroup.NODE_FONT_STRIKE_THROUGH)
                         || propertyName.equals(FontNameControlGroup.NODE_FONT_NAME)
-                        || propertyName.equals(FontSizeControlGroup.NODE_FONT_SIZE);
+                        || propertyName.equals(FontSizeControlGroup.NODE_FONT_SIZE)
+                        || propertyName.equals(NodeHorizontalTextAlignmentControlGroup.TEXT_ALIGNMENT);
             }
             else if(style.equals(MapStyleModel.TAG_STYLE)) {
                 enable = propertyName.equals(FontBoldControlGroup.NODE_FONT_BOLD)
