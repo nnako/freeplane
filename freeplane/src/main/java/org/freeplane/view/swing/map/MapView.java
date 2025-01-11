@@ -782,6 +782,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
     public static final int SCROLL_VELOCITY_PX = (int) (UITools.FONT_SCALE_FACTOR  * 10);
     private final NodeViewFolder nodeViewFolder;
+	private final AntiAliasingConfigurator antiAliasingConfigurator;
 
 	static {
 	    final ResourceController resourceController = ResourceController.getResourceController();
@@ -807,6 +808,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	public MapView(final MapModel viewedMap, final ModeController modeController) {
 		super();
 		setOpaque(false);
+		antiAliasingConfigurator = new AntiAliasingConfigurator(this);
 		this.viewedMap = viewedMap;
 		this.modeController = modeController;
         setLayout(new MindMapLayout());
@@ -2124,7 +2126,10 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		final Graphics2D g2 = (Graphics2D) g.create();
 		try {
-			AntiAliasingConfigurator.INSTANCE.configureRenderingHints(this, g2);
+			if(isPreparedForPrinting)
+				antiAliasingConfigurator.enableAntialias(g2);
+			else
+				antiAliasingConfigurator.configureRenderingHints(g2);
 			if(! isPrinting() && g2.getRenderingHint(GraphicsHints.CACHE_ICONS) == null) {
 				g2.setRenderingHint(GraphicsHints.CACHE_ICONS, Boolean.TRUE);
 			}
