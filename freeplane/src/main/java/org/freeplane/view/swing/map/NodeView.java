@@ -50,6 +50,7 @@ import org.freeplane.api.ChildNodesAlignment;
 import org.freeplane.api.ChildNodesLayout;
 import org.freeplane.api.ChildrenSides;
 import org.freeplane.api.Dash;
+import org.freeplane.api.HorizontalTextAlignment;
 import org.freeplane.api.LayoutOrientation;
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
@@ -1869,8 +1870,8 @@ public class NodeView extends JComponent implements INodeView {
     				((MNodeDropListener)nodeDropTargetListener).addDropListener(component);
 
 
-                int leftInset = TAG_INDENT.toBaseUnitsRounded();
-                component.setBorder(new ZoomedEmptyBorder(0, leftInset, 0, 0, map::getZoomed));
+                int margin = TAG_INDENT.toBaseUnitsRounded();
+                component.setBorder(new ZoomedEmptyBorder(0, margin, 0, margin , map::getZoomed));
                 if(iconController instanceof MIconController) {
                     component.addMouseListener(new MouseAdapter() {
 
@@ -1893,7 +1894,11 @@ public class NodeView extends JComponent implements INodeView {
             ComponentOrientation componentOrientation = mainView.getComponentOrientation();
             component.setComponentOrientation(componentOrientation);
             component.setHorizontalAlignment(mainView.getHorizontalAlignment());
-            component.setAlignmentX(componentOrientation.isLeftToRight() ? 0f : componentOrientation.isHorizontal() ? 1f:0.5f);
+            HorizontalTextAlignment tagComponentAlignment = iconController.getTagComponentAlignment(viewedNode);
+            component.setAlignmentX(tagComponentAlignment == HorizontalTextAlignment.LEFT ? 0f :
+                tagComponentAlignment == HorizontalTextAlignment.CENTER ? 0.5f :
+                tagComponentAlignment == HorizontalTextAlignment.RIGHT ? 1f :
+                componentOrientation.isLeftToRight() ? 0f : componentOrientation.isHorizontal() ? 1f:0.5f);
         }
         else
             removeContent(NodeView.TAG_VIEWER_POSITION);

@@ -19,22 +19,26 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
 
 import org.freeplane.features.icon.Tag;
-import org.freeplane.features.mode.Controller;
-import org.freeplane.features.ui.IMapViewManager;
 
 public class TagIcon implements Icon {
     private final Tag tag;
     private final Font font;
     private final int width;
     private final int height;
+    private final Color tagTextColor;
+    private final Color tagBackgroundColor;
     public TagIcon(Tag tag, Font font) {
+        this(tag, font, null, null);
+    }
+    public TagIcon(Tag tag, Font font, Color tagTextColor, Color tagBackgroundColor) {
         super();
         this.tag = tag;
         this.font = font;
+        this.tagTextColor = tagTextColor;
+        this.tagBackgroundColor = tagBackgroundColor;
         String content = tag.isEmpty() ? "*" : tag.getContent();
         Rectangle2D rect = font.getStringBounds(content , 0, content.length(),
-        		new FontRenderContext(new AffineTransform(),
-        				true, true));
+            new FontRenderContext(new AffineTransform(), true, true));
         double textHeight = rect.getHeight();
         width = tag.isEmpty() ? 0 : (int) Math.ceil(rect.getWidth() + textHeight);
         height = (int)  Math.ceil(textHeight * 1.2);
@@ -49,8 +53,8 @@ public class TagIcon implements Icon {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        Color backgroundColor = tag.getColor();
-        Color textColor = UITools.getTextColorForBackground(backgroundColor);
+        Color backgroundColor = tagBackgroundColor != null ? tagBackgroundColor : tag.getColor();
+        Color textColor = tagTextColor != null ? tagTextColor : UITools.getTextColorForBackground(backgroundColor);
 
         g.setColor(backgroundColor);
         int r = (int) (UITools.FONT_SCALE_FACTOR * 10);

@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
+import org.freeplane.api.HorizontalTextAlignment;
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
 import org.freeplane.core.extension.IExtension;
@@ -60,6 +61,7 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.IPropertyHandler;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.nodestyle.NodeStyleController;
+import org.freeplane.features.nodestyle.NodeStyleModel;
 import org.freeplane.features.styles.IStyle;
 import org.freeplane.features.styles.LogicalStyleController;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;
@@ -285,31 +287,53 @@ public class IconController implements IExtension {
     }
     public List<TagIcon> getTagIcons(NodeModel node, boolean showCategories) {
         final Font font = getTagFont(node);
+        Color tagBackgroundColor = getTagBackgroundColor(node);
+        Color tagTextColor = getTagTextColor(node);
         final TagCategories tagCategories = node.getMap().getIconRegistry().getTagCategories();
         final String tagCategorySeparator = tagCategories.getTagCategorySeparator();
         return getTags(node).stream()
-                .map(tag -> tagIcon(tag, font, showCategories, tagCategorySeparator))
+                .map(tag -> tagIcon(tag, font, tagTextColor, tagBackgroundColor, showCategories, tagCategorySeparator))
                 .collect(Collectors.toList());
     }
-	private TagIcon tagIcon(Tag tag, final Font font, boolean showCategories, String tagCategorySeparator) {
+	private TagIcon tagIcon(Tag tag, final Font font, Color tagTextColor, Color tagBackgroundColor, boolean showCategories, String tagCategorySeparator) {
 		if (showCategories)
 			return new TagIcon(tag, font);
 		else {
 			Tag tagWithoutCategories = tag.withoutCategories(tagCategorySeparator);
 			tagWithoutCategories.setColorChainTag(tag);
-			TagIcon tagIcon = new TagIcon(tagWithoutCategories, font);
+			TagIcon tagIcon = new TagIcon(tagWithoutCategories, font, tagTextColor, tagBackgroundColor);
 			return tagIcon;
 		}
 	}
 
     public Font getTagFont(NodeModel node) {
         final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
-        final NodeModel attributeStyleNode = model.getStyleNodeSafe(MapStyleModel.TAG_STYLE);
+        final NodeModel tagStyleNode = model.getStyleNodeSafe(MapStyleModel.TAG_STYLE);
         final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
-        Font nodeFont = style.getFont(attributeStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+        Font nodeFont = style.getFont(tagStyleNode, StyleOption.FOR_UNSELECTED_NODE);
         final Font font = nodeFont.deriveFont(UITools.FONT_SCALE_FACTOR * nodeFont.getSize2D());
         return font;
     }
+
+    public Color getTagBackgroundColor(NodeModel node) {
+        final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
+        final NodeModel tagStyleNode = model.getStyleNodeSafe(MapStyleModel.TAG_STYLE);
+        return NodeStyleModel.getBackgroundColor(tagStyleNode);
+     }
+
+    public Color getTagTextColor(NodeModel node) {
+        final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
+        final NodeModel tagStyleNode = model.getStyleNodeSafe(MapStyleModel.TAG_STYLE);
+        return NodeStyleModel.getColor(tagStyleNode);
+     }
+
+    public HorizontalTextAlignment getTagComponentAlignment(NodeModel node) {
+        final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
+        final NodeModel tagStyleNode = model.getStyleNodeSafe(MapStyleModel.TAG_STYLE);
+        final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
+        return style.getHorizontalTextAlignment(tagStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+     }
+
     public List<TagReference> getTagReferences(NodeModel node) {
         return Tags.getTagReferences(node);
     }
