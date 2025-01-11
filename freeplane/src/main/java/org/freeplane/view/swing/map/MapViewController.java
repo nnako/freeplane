@@ -29,7 +29,6 @@ import java.awt.Graphics2D;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
@@ -77,7 +76,6 @@ import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.MapViewLayout;
 import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.ui.IMapViewManager;
-import org.freeplane.features.ui.ViewController;
 
 /**
  * Manages the list of MapViews. As this task is very complex, I exported it
@@ -956,21 +954,6 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 			}
 		});
 	}
-//
-//
-//	@Override
-//	public Object setEdgesRenderingHint(final Graphics2D g) {
-//		final Object renderingHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-//		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//		return renderingHint;
-//	}
-//
-//
-//	@Override
-//	public void setTextRenderingHint(final Graphics2D g) {
-//		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-//	}
-//
 
 	@Override
 	public void propertyChanged(final String propertyName, final String newValue, final String oldValue) {
