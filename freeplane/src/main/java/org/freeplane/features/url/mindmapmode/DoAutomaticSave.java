@@ -29,7 +29,6 @@ import javax.swing.Timer;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.MapModel;
-import org.freeplane.features.map.mindmapmode.MMapModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.mode.mindmapmode.MModeController;
@@ -58,7 +57,7 @@ public class DoAutomaticSave implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Map is dirty enough? */
-        if (model.getNumberOfChangesSinceLastSave() == changeState) {
+        if (model.isReadOnly() || model.getNumberOfChangesSinceLastSave() == changeState) {
             return;
         }
         changeState = model.getNumberOfChangesSinceLastSave();
