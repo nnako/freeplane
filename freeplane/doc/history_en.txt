@@ -13,6 +13,8 @@ Copy and remove tags using drag and drop
 Add PlantUML support to Markdown
   - to activate it, download recent plantuml jar
   - and save it as <user-directory>/resources/plantuml.jar
+Tag background, text color and placement configurable via the tag style
+Attribute table placement configurable via the attribute style
 Bug fixes
 
 ==============================
