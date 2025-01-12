@@ -3,7 +3,7 @@
  *
  * author dimitry
  */
-package org.freeplane.view.swing.map;
+package org.freeplane.core.ui;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -16,6 +16,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.freeplane.core.resources.IFreeplanePropertyListener;
+import org.freeplane.core.resources.ResourceController;
+
 public class AntiAliasingConfigurator {
     private static final int MILLISECONDS_PER_SECOND = 1000;
     private long lastRenderTime;
@@ -27,6 +30,22 @@ public class AntiAliasingConfigurator {
     private Rectangle repaintedClipBounds;
     private Rectangle lastPaintedClipBounds;
     private Dimension lastPaintedComponentSize;
+    private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+    private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+    private static void disableAntialias(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    }
+
+    private static void enableAntialias(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+
+    public static void setAntialias(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, hintAntialiasCurves);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, hintAntialiasText);
+    }
 
     public AntiAliasingConfigurator(JComponent component) {
         this(component, MILLISECONDS_PER_SECOND/25);
@@ -38,11 +57,17 @@ public class AntiAliasingConfigurator {
         lastRenderTime = 0;
     }
 
-    public void prepareForPaint(Graphics2D g2) {
+    public void withAntialias(Graphics2D g2, Runnable painter) {
         if(! managesPaint(g2)) {
             enableAntialias(g2);
+            painter.run();
         }
         else {
+            if(! isAntialiasEnabled()) {
+                disableAntialias(g2);
+                painter.run();
+                return;
+            }
             Rectangle newClipBounds = g2.getClipBounds();
             Dimension newComponentSize = component.getSize();
             if ((timeSinceLastRendering() < repaintDelay || ! isRepaintInProgress)
@@ -55,29 +80,40 @@ public class AntiAliasingConfigurator {
                 lastPaintedClipBounds = null;
                 lastPaintedComponentSize = null;
                 SwingUtilities.invokeLater(this::restartRepaintTimer);
-                disableAntialias(g2);
+                Object hintAntialiasCurvesBackup = hintAntialiasCurves;
+                Object hintAntialiasTextBackup = hintAntialiasText;
+                try {
+                    setAntialias(g2);
+                    painter.run();
+                }
+                finally {
+                    hintAntialiasCurves = hintAntialiasCurvesBackup;
+                    hintAntialiasText = hintAntialiasTextBackup;
+                    lastRenderTime = System.currentTimeMillis();
+                }
             } else {
                 repaintedClipBounds = null;
                 isRepaintScheduled = isRepaintInProgress = false;
                 lastPaintedClipBounds = newClipBounds;
                 lastPaintedComponentSize = newComponentSize;
                 stopRepaintTimer();
-                enableAntialias(g2);
+                try {
+                    setAntialias(g2);
+                    painter.run();
+                }
+                finally {
+                    lastRenderTime = System.currentTimeMillis();
+                }
             }
 
-            lastRenderTime = System.currentTimeMillis();
         }
     }
+    private boolean isAntialiasEnabled() {
+        return hintAntialiasCurves == RenderingHints.VALUE_ANTIALIAS_OFF;
+    }
+
     private long timeSinceLastRendering() {
         return System.currentTimeMillis() - lastRenderTime;
-    }
-    public void disableAntialias(Graphics2D g2) {
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-    }
-    public void enableAntialias(Graphics2D g2) {
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
 
     private void restartRepaintTimer() {
@@ -106,10 +142,6 @@ public class AntiAliasingConfigurator {
         if (repaintTimer != null && repaintTimer.isRunning()) {
             repaintTimer.stop();
         }
-    }
-    public void endPaint(Graphics2D g2) {
-        if(managesPaint(g2))
-            lastRenderTime = System.currentTimeMillis();
     }
     private boolean managesPaint(Graphics2D g2) {
         if(component.isPaintingForPrint() || ! EventQueue.isDispatchThread()) {

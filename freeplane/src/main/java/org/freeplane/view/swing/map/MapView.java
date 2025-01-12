@@ -80,6 +80,7 @@ import org.freeplane.core.extension.HighlightedElements;
 import org.freeplane.core.io.xml.TreeXmlReader;
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.AntiAliasingConfigurator;
 import org.freeplane.core.ui.IUserInputListenerFactory;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.ColorUtils;
@@ -2126,25 +2127,25 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		final Graphics2D g2 = (Graphics2D) g.create();
 		try {
-			antiAliasingConfigurator.prepareForPaint(g2);
-			if(! isPrinting() && g2.getRenderingHint(GraphicsHints.CACHE_ICONS) == null) {
-				g2.setRenderingHint(GraphicsHints.CACHE_ICONS, Boolean.TRUE);
-			}
-			if (containsExtension(Connectors.class)){
-				hideSingleEndConnectors = false;
-				showConnectors = SHOW_CONNECTOR_LINES;
-				paintConnectorsBehind = false;
-			}
-			else {
-				hideSingleEndConnectors = hideSingleEndConnectorsPropertyValue;
-				showConnectors = showConnectorsPropertyValue;
-				paintConnectorsBehind = ResourceController.getResourceController().getBooleanProperty(
-						"paint_connectors_behind");
-			}
-			super.paint(g2);
+			antiAliasingConfigurator.withAntialias(g2, () -> {
+    			if(! isPrinting() && g2.getRenderingHint(GraphicsHints.CACHE_ICONS) == null) {
+    				g2.setRenderingHint(GraphicsHints.CACHE_ICONS, Boolean.TRUE);
+    			}
+    			if (containsExtension(Connectors.class)){
+    				hideSingleEndConnectors = false;
+    				showConnectors = SHOW_CONNECTOR_LINES;
+    				paintConnectorsBehind = false;
+    			}
+    			else {
+    				hideSingleEndConnectors = hideSingleEndConnectorsPropertyValue;
+    				showConnectors = showConnectorsPropertyValue;
+    				paintConnectorsBehind = ResourceController.getResourceController().getBooleanProperty(
+    						"paint_connectors_behind");
+    			}
+    			super.paint(g2);
+			});
 		}
 		finally {
-			antiAliasingConfigurator.endPaint(g2);
 			paintingMode = null;
 			g2.dispose();
 		}

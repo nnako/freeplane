@@ -10,7 +10,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -18,6 +17,7 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.Icon;
 
+import org.freeplane.core.ui.AntiAliasingConfigurator;
 import org.freeplane.features.icon.Tag;
 
 public class TagIcon implements Icon {
@@ -50,8 +50,7 @@ public class TagIcon implements Icon {
             return;
 
         Graphics2D g = (Graphics2D) prototypeGraphics.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        AntiAliasingConfigurator.setAntialias(g);
 
         Color backgroundColor = tagBackgroundColor != null ? tagBackgroundColor : tag.getColor();
         Color textColor = tagTextColor != null ? tagTextColor : UITools.getTextColorForBackground(backgroundColor);
