@@ -511,20 +511,25 @@ public class MMapController extends MapController {
         insertNode(node, parent, findNewNodePosition(parent));
     }
 
-    public void insertNode(final NodeModel node, final NodeModel target, final boolean asSibling) {
+    public void insertNode(final NodeModel node, final NodeModel target, final INSERTION_RELATION insertionRelation) {
         NodeModel parent;
-        if (asSibling) {
+        if (insertionRelation != INSERTION_RELATION.AS_CHILD) {
             parent = target.getParentNode();
         }
         else {
             parent = target;
         }
-        if (asSibling) {
-            insertNode(node, parent, parent.getIndex(target));
-        }
-        else {
-            insertNode(node, parent, findNewNodePosition(target));
-        }
+        switch (insertionRelation) {
+		case AS_SIBLING_BEFORE:
+			insertNode(node, parent, parent.getIndex(target));
+			break;
+		case AS_SIBLING_AFTER:
+			insertNode(node, parent, parent.getIndex(target) + 1);
+			break;
+		case AS_CHILD:
+			insertNode(node, parent, findNewNodePosition(target));
+			break;
+		}
     }
 
     public void insertNode(final NodeModel node, final NodeModel parentNode, final int index) {

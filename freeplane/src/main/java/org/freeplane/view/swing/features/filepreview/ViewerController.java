@@ -778,12 +778,12 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 	}
 
 	public static enum PasteMode{
-		AS_SIBLING, AS_CHILD, INSIDE;
+		AS_SIBLING_BEFORE, AS_SIBLING_AFTER, AS_CHILD, INSIDE;
 		public static PasteMode valueOf(boolean asSibling){
-			return asSibling ? AS_SIBLING : AS_CHILD;
+			return asSibling ? AS_SIBLING_BEFORE : AS_CHILD;
 		}
 		public static PasteMode valueOf(Side side){
-			return side == Side.AS_SIBLING ? AS_SIBLING : AS_CHILD;
+			return side == Side.AS_SIBLING_BEFORE ? AS_SIBLING_BEFORE : AS_CHILD;
 		}
 	}
 
@@ -819,8 +819,8 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 		}
 		else {
 			node = mapController.newNode(file.getName(), targetNode.getMap());
-			boolean asSibling = mode.equals(PasteMode.AS_SIBLING);
-			node.setSide(MapController.suggestNewChildSide(targetNode, asSibling ? Side.AS_SIBLING : Side.DEFAULT));
+			boolean asSibling = mode.equals(PasteMode.AS_SIBLING_BEFORE);
+			node.setSide(MapController.suggestNewChildSide(targetNode, asSibling ? Side.AS_SIBLING_BEFORE : Side.DEFAULT));
 			mapController.insertNode(node, targetNode, asSibling);
 		}
 		final ExternalResource preview = new ExternalResource(uri);

@@ -1271,7 +1271,7 @@ implements IExtension, NodeChangeAnnouncer{
 
 	public static Side suggestNewChildSide(NodeModel target, final Side sideArgument) {
 		final Side side;
-		if (sideArgument == Side.AS_SIBLING) {
+		if (sideArgument == Side.AS_SIBLING_BEFORE) {
 			side = target.getSide();
 		}
 		else{

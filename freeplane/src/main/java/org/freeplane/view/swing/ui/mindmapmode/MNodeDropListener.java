@@ -320,9 +320,9 @@ private Timer timer;
 			final boolean isTopOrLeft = dragOverRelation == DragOverRelation.CHILD_BEFORE;
 			if (!dtde.isLocalTransfer()) {
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
-				Side side = dropAsSibling ? Side.AS_SIBLING : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
+				Side side = dropAsSibling ? Side.AS_SIBLING_BEFORE : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
-						dropAsSibling ? Side.AS_SIBLING : side, dropAction);
+						dropAsSibling ? Side.AS_SIBLING_BEFORE : side, dropAction);
 				dtde.dropComplete(true);
 				return;
 			}
@@ -358,9 +358,9 @@ private Timer timer;
 							mapView.selectAsTheOnlyOneSelected(targetNodeView));
 				}
 				else if (DnDConstants.ACTION_COPY == dropAction || DnDConstants.ACTION_MOVE == dropAction) {
-					Side side = dropAsSibling ? Side.AS_SIBLING : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
+					Side side = dropAsSibling ? Side.AS_SIBLING_BEFORE : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
-							dropAsSibling ? Side.AS_SIBLING : side);
+							dropAsSibling ? Side.AS_SIBLING_BEFORE : side);
 					MouseEventActor.INSTANCE.withMouseEvent( () ->
 						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
 				}
