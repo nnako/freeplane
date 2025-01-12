@@ -32,6 +32,31 @@ public class AntiAliasingConfigurator {
     private Dimension lastPaintedComponentSize;
     private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
     private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+    static {
+        ResourceController.getResourceController().addPropertyChangeListenerAndPropagate(new IFreeplanePropertyListener() {
+
+            @Override
+            public void propertyChanged(String propertyName, String newValue, String oldValue) {
+                if (propertyName.equals("antialias")) {
+                    changeAntialias(newValue);
+                }
+            }
+        });
+    }
+    private static void changeAntialias(String antialiasOption) {
+        if (antialiasOption.equals("antialias_none")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_OFF;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
+        }
+        if (antialiasOption.equals("antialias_edges")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
+        }
+        if (antialiasOption.equals("antialias_all")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+        }
+    }
     private static void disableAntialias(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);

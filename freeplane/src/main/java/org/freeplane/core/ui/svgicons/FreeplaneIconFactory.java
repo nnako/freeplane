@@ -13,6 +13,8 @@ import org.freeplane.core.resources.ResourceController;
 
 /** utility methods to access Freeplane's (builtin and user) icons. */
 public class FreeplaneIconFactory {
+	private static final String ANTIALIAS_SVG = "antialias_svg";
+
 	public static Icon createIcon(final String resourcePath) {
 		final URL resourceUrl = ResourceController.getResourceController().getResource(resourcePath);
 		return createIcon(resourceUrl);
@@ -29,6 +31,10 @@ public class FreeplaneIconFactory {
 
 	private static Icon createIcon(final URL resourceUrl) {
 		return new ImageIcon(resourceUrl);
+	}
+
+	static boolean isSvgAntialiasEnabled() {
+		return ResourceController.getResourceController().getBooleanProperty(ANTIALIAS_SVG);
 	}
 
 	public static Icon createSVGIcon(final URL url, final int heightPixels) {
