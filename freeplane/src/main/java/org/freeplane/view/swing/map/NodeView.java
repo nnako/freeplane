@@ -1888,6 +1888,7 @@ public class NodeView extends JComponent implements INodeView {
             }
             else if (tagIcons.isEmpty()){
                 removeContent(NodeView.TAG_VIEWER_POSITION);
+                return;
             }
             else
                 component.setIcons(tagIcons);
@@ -1899,6 +1900,7 @@ public class NodeView extends JComponent implements INodeView {
                 tagComponentAlignment == HorizontalTextAlignment.CENTER ? 0.5f :
                 tagComponentAlignment == HorizontalTextAlignment.RIGHT ? 1f :
                 componentOrientation.isLeftToRight() ? 0f : componentOrientation.isHorizontal() ? 1f:0.5f);
+            component.setSize(getContentPane().getWidth(), 0);
         }
         else
             removeContent(NodeView.TAG_VIEWER_POSITION);
