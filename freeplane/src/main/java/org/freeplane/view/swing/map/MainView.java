@@ -31,8 +31,9 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
@@ -72,9 +73,9 @@ import org.freeplane.features.filter.Filter;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.NamedIcon;
-import org.freeplane.features.icon.Tag;
 import org.freeplane.features.icon.UIIcon;
 import org.freeplane.features.icon.factory.IconStoreFactory;
+import org.freeplane.features.icon.mindmapmode.TagSelection;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.NodeLinks;
 import org.freeplane.features.map.MapController;
@@ -100,14 +101,14 @@ public class MainView extends ZoomableLabel {
     private static MainView lastMouseEventTarget = null;
 
     public enum DragOverRelation {
-        NOT_AVAILABLE, CHILD_BEFORE, CHILD_AFTER, SIBLING_BEFORE, SIBLING_AFTER;
+        NOT_AVAILABLE, CHILD_BEFORE, CHILD_AFTER, SIBLING_BEFORE, SIBLING_AFTER, TAG;
         public boolean isChild() {
             return this == CHILD_BEFORE || this == CHILD_AFTER;
         }
     }
 
     public enum DragOverDirection {
-        OFF(false) {
+        OFF {
             @Override
             void paint(MainView view, final Graphics2D graphics) {/**/}
 
@@ -116,7 +117,7 @@ public class MainView extends ZoomableLabel {
                 return DragOverRelation.NOT_AVAILABLE;
             }
         },
-        DROP_UP(false) {
+        DROP_UP {
             @Override
             void paint(MainView view, final Graphics2D graphics) {
                 graphics.setPaint(new GradientPaint(0, view.getHeight() * 3 / 5, view.getMap().getBackground(), 0, view.getHeight() / 5,
@@ -130,7 +131,7 @@ public class MainView extends ZoomableLabel {
                         : DragOverRelation.SIBLING_BEFORE;
             }
        },
-        DROP_DOWN(false) {
+        DROP_DOWN {
             @Override
             void paint(MainView view, final Graphics2D graphics) {
                 graphics.setPaint(new GradientPaint(0, view.getHeight() * 2 / 5, view.getMap().getBackground(), 0, view.getHeight() * 4 / 5,
@@ -144,7 +145,7 @@ public class MainView extends ZoomableLabel {
                         : DragOverRelation.SIBLING_AFTER;
             }
         },
-        DROP_LEFT(true) {
+        DROP_LEFT {
             @Override
             void paint(MainView view, final Graphics2D graphics) {
                 graphics.setPaint(new GradientPaint(view.getWidth() * 3 / 4, 0, view.getMap().getBackground(), view.getWidth() / 4, 0,
@@ -160,7 +161,7 @@ public class MainView extends ZoomableLabel {
                         : DragOverRelation.CHILD_BEFORE;
             }
         },
-        DROP_RIGHT(true) {
+        DROP_RIGHT {
             @Override
             void paint(MainView view, final Graphics2D graphics) {
                 graphics.setPaint(new GradientPaint(view.getWidth() / 4, 0, view.getMap().getBackground(), view.getWidth() * 3 / 4, 0,
@@ -177,12 +178,21 @@ public class MainView extends ZoomableLabel {
                         : DragOverRelation.CHILD_AFTER;
             }
         },
+        DROP_TAG {
+            @Override
+            void paint(MainView view, final Graphics2D graphics) {
+            	Stroke stroke = graphics.getStroke();
+            	graphics.setStroke(THICK_STROKE);
+            	graphics.setColor(NodeView.dragColor);
+            	graphics.draw(TagIcon.createTagIconShape(view.getWidth()* 1 / 3, view.getHeight() / 6, view.getWidth() / 3, view.getHeight()  * 4 / 6));
+            	graphics.setStroke(stroke);
+             }
+            @Override
+            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+                return DragOverRelation.TAG;
+            }
+        },
         ;
-
-        public final boolean isHorizontal;
-        private DragOverDirection(boolean isHorizontal) {
-            this.isHorizontal = isHorizontal;
-        }
 
         abstract void paint(MainView view, final Graphics2D graphics);
 
@@ -258,10 +268,18 @@ public class MainView extends ZoomableLabel {
         return dragOverDirection;
     }
 
-	public DragOverRelation dragOverRelation(final Point p) {
-	    final DragOverDirection dragOverDirection = dragOverDirection(p);
-	    NodeView nodeView = getNodeView();
-        return dragOverDirection.relation(nodeView.layoutOrientation(), nodeView.side());
+	public DragOverRelation dragOverRelation(final DropTargetDropEvent dtde) {
+	    return dtde.isDataFlavorSupported(TagSelection.tagFlavor ) ? DragOverRelation.TAG : dragOverRelation(dtde.getLocation());
+	}
+
+	public DragOverRelation dragOverRelation(final DropTargetDragEvent dtde) {
+	    return dtde.isDataFlavorSupported(TagSelection.tagFlavor ) ? DragOverRelation.TAG : dragOverRelation(dtde.getLocation());
+	}
+
+	private DragOverRelation dragOverRelation(Point location) {
+		NodeView nodeView = getNodeView();
+		final DragOverDirection dragOverDirection = dragOverDirection(location);
+		return dragOverDirection.relation(nodeView.layoutOrientation(), nodeView.side());
 	}
 
 	@Override
@@ -461,8 +479,9 @@ public class MainView extends ZoomableLabel {
         }
     }
 
-    public void setDragOverDirection(final Point p) {
-        final DragOverDirection dragOverDirection = dragOverDirection(p);
+    public void setDragOverDirection(final DropTargetDragEvent dtde) {
+        final DragOverDirection dragOverDirection = dtde.isDataFlavorSupported(TagSelection.tagFlavor)
+            ? DragOverDirection.DROP_TAG : dragOverDirection(dtde.getLocation());
         setDraggedOver(dragOverDirection);
     }
 

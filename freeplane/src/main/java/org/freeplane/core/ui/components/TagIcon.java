@@ -57,17 +57,7 @@ public class TagIcon implements Icon {
         Color textColor = tagTextColor != null ? tagTextColor : UITools.getTextColorForBackground(backgroundColor);
 
         g.setColor(backgroundColor);
-        int r = (int) (UITools.FONT_SCALE_FACTOR * 10);
-
-        // Define custom shape with rounded right side
-        GeneralPath path = new GeneralPath();
-        path.moveTo(x, y); // Top-left corner
-        path.lineTo(x + width - r, y); // Top edge to the rounded corner
-        path.quadTo(x + width, y, x + width, y + r); // Top-right rounded corner
-        path.lineTo(x + width, y + height - r); // Right edge
-        path.quadTo(x + width, y + height, x + width - r, y + height); // Bottom-right rounded corner
-        path.lineTo(x, y + height); // Bottom edge to the flat left
-        path.closePath();
+        GeneralPath path = createTagIconShape(x, y, width, height);
 
         g.fill(path);
 
@@ -79,6 +69,20 @@ public class TagIcon implements Icon {
 
         g.dispose();
     }
+	public static GeneralPath createTagIconShape(int x, int y, int width, int height) {
+	    int r = (int) (UITools.FONT_SCALE_FACTOR * 10);
+
+        // Define custom shape with rounded right side
+        GeneralPath path = new GeneralPath();
+        path.moveTo(x, y); // Top-left corner
+        path.lineTo(x + width - r, y); // Top edge to the rounded corner
+        path.quadTo(x + width, y, x + width, y + r); // Top-right rounded corner
+        path.lineTo(x + width, y + height - r); // Right edge
+        path.quadTo(x + width, y + height, x + width - r, y + height); // Bottom-right rounded corner
+        path.lineTo(x, y + height); // Bottom edge to the flat left
+        path.closePath();
+		return path;
+	}
     @Override
     public int getIconWidth() {
         return width;

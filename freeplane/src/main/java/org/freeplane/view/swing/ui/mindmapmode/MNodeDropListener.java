@@ -120,7 +120,7 @@ private Timer timer;
 
 	private boolean isInFoldingRegion(DropTargetDragEvent dtde) {
 	    final MainView node = getMainView(dtde);
-	    return node.dragOverRelation(dtde.getLocation()).isChild();
+	    return node.dragOverRelation(dtde).isChild();
 	}
 
 	@Override
@@ -150,10 +150,8 @@ private Timer timer;
 		if(isDragAcceptable(dtde)) {
 			supportFolding(dtde);
 
-			if(! dtde.isDataFlavorSupported(TagSelection.tagFlavor)) {
-				final MainView dropTarget = getMainView(dtde.getDropTargetContext());
-				dropTarget.setDragOverDirection(dtde.getLocation());
-			}
+			final MainView dropTarget = getMainView(dtde.getDropTargetContext());
+			dropTarget.setDragOverDirection(dtde);
 		}
 	}
 
@@ -189,6 +187,28 @@ private Timer timer;
     }
 
 	public void dragScroll(final DropTargetDragEvent e) {
+	}
+
+	private boolean isDragAcceptable(final DropTargetDragEvent event) {
+		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
+		if(containsTags) {
+			try {
+				NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
+				List<Tag> nodeTags = nodeView.getMap().getModeController().getExtension(IconController.class).getTags(nodeView.getNode());
+				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
+				Tag tag = TagCategories.readTag(tagData);
+				if(nodeTags.contains(tag))
+					return false;
+			} catch (IOException | UnsupportedFlavorException e) {
+				return false;
+			}
+		}
+		if(event.getDropTargetContext().getComponent() instanceof MainView)
+			return event.isDataFlavorSupported(DataFlavor.stringFlavor)
+				||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
+				||event.isDataFlavorSupported(DataFlavor.imageFlavor);
+		else
+			return containsTags;
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event, int dropAction) {
@@ -280,9 +300,7 @@ private Timer timer;
 				dtde.rejectDrop();
 				return;
 			}
-			DragOverRelation dragOverRelation = dtde.isDataFlavorSupported(TagSelection.tagFlavor )
-					? DragOverRelation.CHILD_AFTER
-					: mainView.dragOverRelation(dtde.getLocation());
+			DragOverRelation dragOverRelation = mainView.dragOverRelation(dtde);
 			if(dragOverRelation == DragOverRelation.NOT_AVAILABLE || dragOverRelation == DragOverRelation.SIBLING_AFTER) {
 			    dtde.rejectDrop();
 			    return;
@@ -388,12 +406,4 @@ private Timer timer;
 	public void dropActionChanged(final DropTargetDragEvent e) {
 	}
 
-	private boolean isDragAcceptable(final DropTargetDragEvent ev) {
-		if(ev.getDropTargetContext().getComponent() instanceof MainView)
-			return ev.isDataFlavorSupported(DataFlavor.stringFlavor)
-				||ev.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
-				||ev.isDataFlavorSupported(DataFlavor.imageFlavor);
-		else
-			return ev.isDataFlavorSupported(TagSelection.tagFlavor);
-	}
 }
