@@ -30,6 +30,7 @@ public class AntiAliasingConfigurator {
     private Rectangle repaintedClipBounds;
     private Rectangle lastPaintedClipBounds;
     private Dimension lastPaintedComponentSize;
+    private static boolean isAntialiasingEnabled = true;
     private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
     private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
     private static void disableAntialias(Graphics2D g2) {
@@ -63,7 +64,7 @@ public class AntiAliasingConfigurator {
             painter.run();
         }
         else {
-            if(! isAntialiasEnabled()) {
+            if(! isAntialiasingEnabled) {
                 disableAntialias(g2);
                 painter.run();
                 return;
@@ -108,10 +109,6 @@ public class AntiAliasingConfigurator {
 
         }
     }
-    private boolean isAntialiasEnabled() {
-        return hintAntialiasCurves == RenderingHints.VALUE_ANTIALIAS_OFF;
-    }
-
     private long timeSinceLastRendering() {
         return System.currentTimeMillis() - lastRenderTime;
     }
