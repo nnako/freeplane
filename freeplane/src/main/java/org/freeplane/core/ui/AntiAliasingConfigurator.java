@@ -48,16 +48,19 @@ public class AntiAliasingConfigurator {
     }
     private static void changeAntialias(String antialiasOption) {
         if (antialiasOption.equals("antialias_none")) {
+            isAntialiasingEnabled = false;
             hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_OFF;
             hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
-        }
-        if (antialiasOption.equals("antialias_edges")) {
-            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
-            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
-        }
-        if (antialiasOption.equals("antialias_all")) {
-            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
-            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+        } else {
+            isAntialiasingEnabled = true;
+            if (antialiasOption.equals("antialias_edges")) {
+                hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+                hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
+            }
+            else if (antialiasOption.equals("antialias_all")) {
+                hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+                hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+            }
         }
     }
     private static void disableAntialiasing(Graphics2D g2) {
