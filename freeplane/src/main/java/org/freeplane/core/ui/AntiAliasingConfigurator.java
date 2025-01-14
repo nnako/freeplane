@@ -16,9 +16,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.freeplane.core.resources.IFreeplanePropertyListener;
-import org.freeplane.core.resources.ResourceController;
-
 public class AntiAliasingConfigurator {
     private static final int MILLISECONDS_PER_SECOND = 1000;
     private long lastRenderTime;
@@ -33,19 +30,26 @@ public class AntiAliasingConfigurator {
     private static boolean isAntialiasingEnabled = true;
     private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
     private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
-    private static void disableAntialias(Graphics2D g2) {
+    private static Thread currentPaintingThread;
+    private static void disableAntialiasing(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
     }
 
-    private static void enableAntialias(Graphics2D g2) {
+    private static void enableAntialiasing(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
 
-    public static void setAntialias(Graphics2D g2) {
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, hintAntialiasCurves);
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, hintAntialiasText);
+    public static void setAntialiasing(Graphics2D g2) {
+        if(! isManagedPaintingInProgress()) {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, hintAntialiasCurves);
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, hintAntialiasText);
+        }
+    }
+
+    private static boolean isManagedPaintingInProgress() {
+        return currentPaintingThread != null && currentPaintingThread == Thread.currentThread();
     }
 
     public AntiAliasingConfigurator(JComponent component) {
@@ -59,56 +63,59 @@ public class AntiAliasingConfigurator {
     }
 
     public void withAntialias(Graphics2D g2, Runnable painter) {
+        if(isManagedPaintingInProgress()) {
+            painter.run();
+            return;
+        }
         if(! managesPaint(g2)) {
-            enableAntialias(g2);
+            enableAntialiasing(g2);
+            painter.run();
+            return;
+        }
+        if(!isAntialiasingEnabled) {
+            disableAntialiasing(g2);
+            painter.run();
+            return;
+        }
+        Rectangle newClipBounds = g2.getClipBounds();
+        Dimension newComponentSize = component.getSize();
+        if ((timeSinceLastRendering() < repaintDelay || ! isRepaintInProgress)
+                && ! newClipBounds.equals(lastPaintedClipBounds)
+                && newComponentSize.equals(lastPaintedComponentSize)
+                ) {
+            repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
+            isRepaintScheduled = true;
+            isRepaintInProgress = false;
+            lastPaintedClipBounds = null;
+            lastPaintedComponentSize = null;
+            SwingUtilities.invokeLater(this::restartRepaintTimer);
+            disableAntialiasing(g2);
+        } else {
+            repaintedClipBounds = null;
+            isRepaintScheduled = isRepaintInProgress = false;
+            lastPaintedClipBounds = newClipBounds;
+            lastPaintedComponentSize = newComponentSize;
+            stopRepaintTimer();
+            setAntialiasing(g2);
+        }
+        try {
+            startManagedPainting();
             painter.run();
         }
-        else {
-            if(! isAntialiasingEnabled) {
-                disableAntialias(g2);
-                painter.run();
-                return;
-            }
-            Rectangle newClipBounds = g2.getClipBounds();
-            Dimension newComponentSize = component.getSize();
-            if ((timeSinceLastRendering() < repaintDelay || ! isRepaintInProgress)
-                    && ! newClipBounds.equals(lastPaintedClipBounds)
-                    && newComponentSize.equals(lastPaintedComponentSize)
-                    ) {
-                repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
-                isRepaintScheduled = true;
-                isRepaintInProgress = false;
-                lastPaintedClipBounds = null;
-                lastPaintedComponentSize = null;
-                SwingUtilities.invokeLater(this::restartRepaintTimer);
-                Object hintAntialiasCurvesBackup = hintAntialiasCurves;
-                Object hintAntialiasTextBackup = hintAntialiasText;
-                try {
-                    setAntialias(g2);
-                    painter.run();
-                }
-                finally {
-                    hintAntialiasCurves = hintAntialiasCurvesBackup;
-                    hintAntialiasText = hintAntialiasTextBackup;
-                    lastRenderTime = System.currentTimeMillis();
-                }
-            } else {
-                repaintedClipBounds = null;
-                isRepaintScheduled = isRepaintInProgress = false;
-                lastPaintedClipBounds = newClipBounds;
-                lastPaintedComponentSize = newComponentSize;
-                stopRepaintTimer();
-                try {
-                    setAntialias(g2);
-                    painter.run();
-                }
-                finally {
-                    lastRenderTime = System.currentTimeMillis();
-                }
-            }
-
+        finally {
+            endManagedPainting();
+            lastRenderTime = System.currentTimeMillis();
         }
+
     }
+
+    private void startManagedPainting() {
+        currentPaintingThread = Thread.currentThread();
+    }
+    private void endManagedPainting() {
+        currentPaintingThread = null;
+    }
+
     private long timeSinceLastRendering() {
         return System.currentTimeMillis() - lastRenderTime;
     }
