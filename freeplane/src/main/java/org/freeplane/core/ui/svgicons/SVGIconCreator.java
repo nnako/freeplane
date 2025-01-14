@@ -157,7 +157,7 @@ class SVGIconCreator {
                     icon.setPreferredSize(new Dimension(widthPixels, (int) (widthPixels * aspectRatio)));
             }
             icon.setAutosize(SVGIcon.AUTOSIZE_STRETCH);
-            icon.setAntiAlias(true);
+            icon.setAntiAlias(FreeplaneIconFactory.isSvgAntialiasEnabled());
             icon.setSvgURI(svgUri);
         }
         catch (Exception e) {

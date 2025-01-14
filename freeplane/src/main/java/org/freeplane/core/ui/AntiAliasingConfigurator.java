@@ -16,6 +16,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.freeplane.core.resources.IFreeplanePropertyListener;
+import org.freeplane.core.resources.ResourceController;
+
 public class AntiAliasingConfigurator {
     private static final int MILLISECONDS_PER_SECOND = 1000;
     private long lastRenderTime;
@@ -30,7 +33,33 @@ public class AntiAliasingConfigurator {
     private static boolean isAntialiasingEnabled = true;
     private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
     private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
-    private static Thread currentPaintingThread;
+    private static Thread currentPaintingThread = null;
+
+    static {
+        ResourceController.getResourceController().addPropertyChangeListenerAndPropagate(new IFreeplanePropertyListener() {
+
+            @Override
+            public void propertyChanged(String propertyName, String newValue, String oldValue) {
+                if (propertyName.equals("antialias")) {
+                    changeAntialias(newValue);
+                }
+            }
+        });
+    }
+    private static void changeAntialias(String antialiasOption) {
+        if (antialiasOption.equals("antialias_none")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_OFF;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
+        }
+        if (antialiasOption.equals("antialias_edges")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
+        }
+        if (antialiasOption.equals("antialias_all")) {
+            hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
+            hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+        }
+    }
     private static void disableAntialiasing(Graphics2D g2) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
