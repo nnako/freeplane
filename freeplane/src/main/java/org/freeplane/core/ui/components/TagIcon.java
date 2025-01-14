@@ -21,6 +21,8 @@ import org.freeplane.core.ui.AntiAliasingConfigurator;
 import org.freeplane.features.icon.Tag;
 
 public class TagIcon implements Icon {
+    private static final int MARGIN = 2;
+    private static final int DOUBLE_MARGIN = MARGIN *2;
     private final Tag tag;
     private final Font font;
     private final int width;
@@ -40,8 +42,8 @@ public class TagIcon implements Icon {
         Rectangle2D rect = font.getStringBounds(content , 0, content.length(),
             new FontRenderContext(new AffineTransform(), true, true));
         double textHeight = rect.getHeight();
-        width = tag.isEmpty() ? 0 : (int) Math.ceil(rect.getWidth() + textHeight);
-        height = (int)  Math.ceil(textHeight * 1.2);
+        width = tag.isEmpty() ? 0 : (int) Math.ceil(rect.getWidth() + textHeight) + DOUBLE_MARGIN;
+        height = (int)  Math.ceil(textHeight * 1.2) + DOUBLE_MARGIN;
     }
 
     @Override
@@ -50,13 +52,13 @@ public class TagIcon implements Icon {
             return;
 
         Graphics2D g = (Graphics2D) prototypeGraphics.create();
-        AntiAliasingConfigurator.setAntialias(g);
+        AntiAliasingConfigurator.setAntialiasing(g);
 
         Color backgroundColor = tagBackgroundColor != null ? tagBackgroundColor : tag.getColor();
         Color textColor = tagTextColor != null ? tagTextColor : UITools.getTextColorForBackground(backgroundColor);
 
         g.setColor(backgroundColor);
-        GeneralPath path = createTagIconShape(x, y, width, height);
+        GeneralPath path = createTagIconShape(x + MARGIN, y + MARGIN, width - DOUBLE_MARGIN, height - DOUBLE_MARGIN);
 
         g.fill(path);
 
@@ -64,7 +66,7 @@ public class TagIcon implements Icon {
         g.draw(path);
 
         g.setFont(font);
-        g.drawString(tag.getContent(), x + height / 4, y + height * 4 / 5);
+        g.drawString(tag.getContent(), x + MARGIN + (height - DOUBLE_MARGIN) / 4, y + MARGIN + (height - DOUBLE_MARGIN) * 4 / 5);
 
         g.dispose();
     }
@@ -75,8 +77,7 @@ public class TagIcon implements Icon {
         GeneralPath path = new GeneralPath();
         path.moveTo(x, y); // Top-left corner
         path.lineTo(x + width - r, y); // Top edge to the rounded corner
-        path.quadTo(x + width, y, x + width, y + r); // Top-right rounded corner
-        path.lineTo(x + width, y + height - r); // Right edge
+        path.quadTo(x + width, y, x + width, y + height / 2); // Top-right rounded corner
         path.quadTo(x + width, y + height, x + width - r, y + height); // Bottom-right rounded corner
         path.lineTo(x, y + height); // Bottom edge to the flat left
         path.closePath();
