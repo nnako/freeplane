@@ -377,9 +377,7 @@ private Timer timer;
 	private int getDropAction(final DropTargetDropEvent dtde) throws UnsupportedFlavorException, IOException {
 		int dropAction = dtde.getDropAction();
 		final Transferable t = dtde.getTransferable();
-		if (! dtde.isLocalTransfer()) {
-			dropAction = DnDConstants.ACTION_COPY;
-		} else if (t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
+		if (t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
 			dropAction = (Integer) t.getTransferData(MindMapNodesSelection.dropActionFlavor);
 		}
 		return dropAction;
