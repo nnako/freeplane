@@ -136,4 +136,11 @@ public class Tag implements Comparable<Tag>{
             return new Tag(content.replace(initialSeparator, currentSeparator), color);
         }
     }
+
+	public Tag qualifiedTag() {
+		return colorChainTag != null
+				&& colorChainTag.getContent().length() > getContent().length()
+				? colorChainTag
+				: this;
+	}
 }

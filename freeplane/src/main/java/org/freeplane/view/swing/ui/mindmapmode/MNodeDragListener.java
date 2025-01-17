@@ -92,10 +92,9 @@ public class MNodeDragListener implements DragGestureListener {
 			return;
 		}
 		Cursor cursor = getCursorByAction(dragActionType);
-		Tag tag = tagIcon.getTag();
-		Tag colorChainTag = tag.getColorChainTag();
-		Tag qualifiedTag = colorChainTag != null ? colorChainTag : tag;
-		final TagSelection t = new TagSelection(UUID.randomUUID(), qualifiedTag.getContent() + ColorUtils.colorToRGBAString(tag.getColor()));
+		Tag tag = tagIcon.getTag().qualifiedTag();
+		final TagSelection t = new TagSelection(UUID.randomUUID(),
+				tag.getContent() + ColorUtils.colorToRGBAString(tag.getColor()));
 		if ((e.getTriggerEvent().getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
 			cursor = DragSource.DefaultCopyDrop;
 			dragActionType = DnDConstants.ACTION_COPY;
@@ -126,9 +125,7 @@ public class MNodeDragListener implements DragGestureListener {
 	}
 
 	private void removeTag(NodeModel node, Tag tag) {
-		Tag colorChainTag = tag.getColorChainTag();
-		Tag qualifiedTag = colorChainTag != null ? colorChainTag : tag;
-		((MIconController)IconController.getController()).removeTags(node, Collections.singleton(qualifiedTag));
+		((MIconController)IconController.getController()).removeTags(node, Collections.singleton(tag));
 	}
 
 	private void startNodeDrag(final DragGestureEvent e, final NodeView nodeView) {
