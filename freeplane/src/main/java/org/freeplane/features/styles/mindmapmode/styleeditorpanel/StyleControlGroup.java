@@ -16,6 +16,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
@@ -76,20 +77,20 @@ class StyleControlGroup implements ControlGroup{
 	private JRadioButton redefinesStyleForCurrentMapOnly;
     private JRadioButton redefinesStyleForCurrentMapAndTemplate;
     private JTextArea redefinedTemplate;
-    private JButton associateTemplateButton;
+    private JButton chooseTemplateButton;
 	private final boolean addStyleBox;
 	private JComboBox mAutomaticLayoutComboBox;
 	private JComboBox mAutomaticEdgeColorComboBox;
 	private JButton mEditEdgeColorsBtn;
 	private Container mStyleBox;
-	
+
 	private final MUIFactory uiFactory;
 	private final ModeController modeController;
 	private final float fontSize;
-	
+
 	private static final TranslatedObject AUTOMATIC_LAYOUT_DISABLED = new TranslatedObject("automatic_layout_disabled");
 
-	
+
 	private class StyleChangeListener implements PropertyChangeListener{
 
 
@@ -109,10 +110,10 @@ class StyleControlGroup implements ControlGroup{
 				styleController.setStyle(null);
 			}
         }
-		
+
 	}
 
-	
+
 	public StyleControlGroup(boolean addStyleBox, MUIFactory uiFactory, ModeController modeController, float fontSize) {
 		super();
 		this.addStyleBox = addStyleBox;
@@ -139,7 +140,6 @@ class StyleControlGroup implements ControlGroup{
 			}
 			setStyleList(mNodeStyleButton, logicalStyleController.getNodeStyleNames(node, "\n"));
 			if(mAutomaticLayoutComboBox != null){
-				final ModeController modeController = Controller.getCurrentModeController();
 				AutomaticLayoutController al = modeController.getExtension(AutomaticLayoutController.class);
 				IExtension extension = al.getExtension(node);
 				if(extension == null)
@@ -148,7 +148,6 @@ class StyleControlGroup implements ControlGroup{
 					mAutomaticLayoutComboBox.setSelectedIndex(((AutomaticLayout)extension).ordinal());
 			}
 			if(mAutomaticEdgeColorComboBox != null){
-				final ModeController modeController = Controller.getCurrentModeController();
 				AutomaticEdgeColorHook al = modeController.getExtension(AutomaticEdgeColorHook.class);
 				final AutomaticEdgeColor extension = (AutomaticEdgeColor) al.getExtension(node);
 				if(extension == null) {
@@ -176,7 +175,7 @@ class StyleControlGroup implements ControlGroup{
 		btn.setText(text);
     }
 
-	
+
     @Override
 	public void addControlGroup(DefaultFormBuilder formBuilder) {
         if (addStyleBox) {
@@ -189,29 +188,54 @@ class StyleControlGroup implements ControlGroup{
             addAutomaticLayout(formBuilder);
 
             styleNameLabel = new JLabel();
-            styleNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            
+            styleNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
             redefinesStyleForCurrentMapOnly = new JRadioButton();
             redefinesStyleForCurrentMapOnly.setSelected(true);
             redefinesStyleForCurrentMapOnly.setText(TextUtils.getRawText(FOR_THIS_MAP));
             redefinesStyleForCurrentMapOnly.setAlignmentX(Component.LEFT_ALIGNMENT);
-            
-            redefinesStyleForCurrentMapAndTemplate = new JRadioButton(); 
+
+            redefinesStyleForCurrentMapAndTemplate = new JRadioButton();
             redefinesStyleForCurrentMapAndTemplate.setText(TextUtils.getText(FOR_TEMPLATE));
             redefinesStyleForCurrentMapAndTemplate.setAlignmentX(Component.LEFT_ALIGNMENT);
-            
+
+            ButtonGroup redefineStyleButtonGroup = new ButtonGroup();
+            redefineStyleButtonGroup.add(redefinesStyleForCurrentMapOnly);
+            redefineStyleButtonGroup.add(redefinesStyleForCurrentMapAndTemplate);
+
+            Box styleAndButtonBox = Box.createVerticalBox();
+            Box radioButtonBox = Box.createVerticalBox();
+            radioButtonBox.setBorder(BorderFactory.createEmptyBorder(0, LEFT_MARGIN * 2, 0, 0));
+            radioButtonBox.add(redefinesStyleForCurrentMapOnly);
+            radioButtonBox.add(redefinesStyleForCurrentMapAndTemplate);
+            radioButtonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+            radioButtonBox.setBorder(BorderFactory.createEmptyBorder(0, 0, GAP, 0));
+
+            JButton redefineStyleBtn = TranslatedElementFactory.createButton("ApplyAction.text");
+            redefineStyleBtn.addActionListener(e -> {
+                 final NodeModel node = Controller.getCurrentController().getSelection().getSelected();
+                    MapStyle.getController().redefineStyle(node, redefinesStyleForCurrentMapAndTemplate.isSelected());
+
+            });
+            radioButtonBox.setBorder(BorderFactory.createEmptyBorder(0, LEFT_MARGIN * 2, 0, 0));
+
+            styleAndButtonBox.add(padded(styleNameLabel));
+            styleAndButtonBox.add(padded(redefineStyleBtn));
+            styleAndButtonBox.add(radioButtonBox);
+
             redefinedTemplate= new InfoArea();
             redefinedTemplate.setColumns(80);
             redefinedTemplate.setLineWrap(true);
             redefinedTemplate.setWrapStyleWord(false);
-            redefinedTemplate.setBorder(BorderFactory.createEmptyBorder(0, LEFT_MARGIN, GAP, 0));
+            redefinedTemplate.setBorder(BorderFactory.createEmptyBorder());
             redefinedTemplate.setFont(redefinedTemplate.getFont().deriveFont(Font.ITALIC));
             redefinedTemplate.setAlignmentX(Component.LEFT_ALIGNMENT);
-            
-            associateTemplateButton = new JButton(TextUtils.getRawText(CHOOSE_TEMPLATE));
-            associateTemplateButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-            associateTemplateButton.addActionListener(new ActionListener() {
-                
+            styleAndButtonBox.add(padded(redefinedTemplate));
+
+            chooseTemplateButton = new JButton(TextUtils.getRawText(CHOOSE_TEMPLATE));
+            chooseTemplateButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+            chooseTemplateButton.addActionListener(new ActionListener() {
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     MapModel map = Controller.getCurrentController().getMap();
@@ -229,7 +253,7 @@ class StyleControlGroup implements ControlGroup{
                     try {
                         if(file == null || ! file.exists()){
                             return;
-                        } else if (map.getFile() != null && 
+                        } else if (map.getFile() != null &&
                                 file.getCanonicalFile().equals(map.getFile().getCanonicalFile())) {
                             MapStyle.getController().setProperty(map, MapStyleModel.ASSOCIATED_TEMPLATE_LOCATION_PROPERTY,
                                     null);
@@ -245,35 +269,7 @@ class StyleControlGroup implements ControlGroup{
                 }
             });
 
-            
-            ButtonGroup redefineStyleButtonGroup = new ButtonGroup();
-            redefineStyleButtonGroup.add(redefinesStyleForCurrentMapOnly);
-            redefineStyleButtonGroup.add(redefinesStyleForCurrentMapAndTemplate);
-            
-            Box styleAndButtonBox = Box.createVerticalBox();
-            Box radioButtonBox = Box.createVerticalBox();
-            radioButtonBox.add(redefinesStyleForCurrentMapOnly);
-            radioButtonBox.add(redefinesStyleForCurrentMapAndTemplate);
-            radioButtonBox.add(redefinedTemplate);
-            Box associateTemplateButtonBox = Box.createHorizontalBox();
-            associateTemplateButtonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            associateTemplateButtonBox.add(Box.createHorizontalStrut(LEFT_MARGIN));
-            associateTemplateButtonBox.add(associateTemplateButton);
-            radioButtonBox.add(associateTemplateButtonBox);
-            radioButtonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            radioButtonBox.setBorder(BorderFactory.createEmptyBorder(0, 0, GAP, 0));
-            
-            JButton redefineStyleBtn = TranslatedElementFactory.createButton("ApplyAction.text");
-            redefineStyleBtn.addActionListener(e -> {
-                 final NodeModel node = Controller.getCurrentController().getSelection().getSelected();
-                    MapStyle.getController().redefineStyle(node, redefinesStyleForCurrentMapAndTemplate.isSelected());
-
-            });
-            redefineStyleBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            styleAndButtonBox.add(styleNameLabel);
-            styleAndButtonBox.add(redefineStyleBtn);
-            styleAndButtonBox.add(radioButtonBox);
+            styleAndButtonBox.add(padded(chooseTemplateButton));
             UITools.addTitledBorder(styleAndButtonBox, TextUtils.getRawText(MAKE_FORMATTING_DEFAULT), fontSize);
             formBuilder.append(styleAndButtonBox, formBuilder.getColumnCount());
             formBuilder.nextLine();
@@ -287,9 +283,17 @@ class StyleControlGroup implements ControlGroup{
                         updateTemplateName(event.getMap());
                     }
                  }
-                
+
             });
 		}
+	}
+
+	private JComponent padded(Component component) {
+		Box box = Box.createHorizontalBox();
+		box.setAlignmentX(Component.LEFT_ALIGNMENT);
+		box.add(Box.createHorizontalStrut(LEFT_MARGIN));
+		box.add(component);
+		return box;
 	}
 
     private void updateTemplateName(MapModel map) {
@@ -387,10 +391,10 @@ class StyleControlGroup implements ControlGroup{
 			}
 		});
 		appendLabeledComponent(formBuilder, "AutomaticEdgeColorHookAction.text", mAutomaticEdgeColorComboBox);
-		
+
 			mEditEdgeColorsBtn= TranslatedElementFactory.createButton("editEdgeColors");
 			mEditEdgeColorsBtn.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					final MEdgeController edgeController = (MEdgeController) modeController.getExtension(EdgeController.class);
@@ -403,9 +407,9 @@ class StyleControlGroup implements ControlGroup{
 			formBuilder.setColumn(1);
 			formBuilder.append(mEditEdgeColorsBtn, formBuilder.getColumnCount());
 			formBuilder.nextLine();
-			
+
 	}
-	
+
 	private void appendLabeledComponent(final DefaultFormBuilder formBuilder, String labelKey, Component component) {
 		final String text = TextUtils.getText(labelKey);
 	    final JLabel label = new JLabel(text);
