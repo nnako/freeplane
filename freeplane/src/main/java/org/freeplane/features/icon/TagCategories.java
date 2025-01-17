@@ -275,7 +275,7 @@ public class TagCategories {
                     String categorizedTagContent = categorizedContent.getLast()
                             + tag.getContent();
                     Tag categorizedTag = new Tag(categorizedTagContent, Color.BLACK);
-                    categorizedTag.setColorChainTag(tag);
+                    categorizedTag.setAlternativeTag(tag);
                     Tag savedTag =  mapTags.addAndReturn(categorizedTag);
                     if(! lineTag.equals(tag.getContent()))
                         savedTag.setColor(tag.getColor());
@@ -285,7 +285,7 @@ public class TagCategories {
                     if(savedTag == categorizedTag) {
                         addNewTagReference(categorizedTag);
                     }
-                    savedTag.setColorChainTag(tag);
+                    savedTag.setAlternativeTag(tag);
                     DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(tag);
                     parent.insert(newNode, target == parent ? index++ : parent.getChildCount());
                     lastNode = newNode;
@@ -554,7 +554,7 @@ public class TagCategories {
                 }
                 if(currentNode != uncategorizedTagsNode) {
                     Tag tagWithoutCategories = qualifiedTag.withoutCategories(categorySeparator);
-                    qualifiedTag.setColorChainTag(tagWithoutCategories);
+                    qualifiedTag.setAlternativeTag(tagWithoutCategories);
                     DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(tagWithoutCategories);
                     insertNode(currentNode, currentNode.isRoot() ? currentNode.getChildCount() - 1 : currentNode.getChildCount(), newNode);
                     currentNode = newNode;
@@ -635,7 +635,7 @@ public class TagCategories {
             Tag copy = tagWithoutCategories(node).copy();
             String categorizedContent = categorizedContent(node);
             Tag categorizedTag  = new Tag(categorizedContent, copy.getColor());
-            categorizedTag.setColorChainTag(copy);
+            categorizedTag.setAlternativeTag(copy);
             mapTags.add(categorizedTag);
             return copy;
         }
@@ -723,7 +723,7 @@ public class TagCategories {
             Tag tagWithoutCategories = tagWithoutCategories(node);
             String categorizedContent = categorizedContent(node);
             Tag categorizedTag = new Tag(categorizedContent, tagWithoutCategories.getColor());
-            categorizedTag.setColorChainTag(tagWithoutCategories);
+            categorizedTag.setAlternativeTag(tagWithoutCategories);
             Tag savedTag = mapTags.addAndReturn(categorizedTag);
             tagReferences.getOrDefault(categorizedContent, Collections.emptyList())
                 .forEach(tagReference -> tagReference.setTag(savedTag));
@@ -751,7 +751,7 @@ public class TagCategories {
         if(! containsTag(parent))
             return tagWithoutCategories;
         Tag tag = createTag(categorizedContent(parent) + categorySeparator + tagWithoutCategories.getContent());
-        tag.setColorChainTag(tagWithoutCategories);
+        tag.setAlternativeTag(tagWithoutCategories);
         return tag;
     }
 

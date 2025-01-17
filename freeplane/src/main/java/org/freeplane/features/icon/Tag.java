@@ -23,7 +23,7 @@ public class Tag implements Comparable<Tag>{
     public final static Tag REMOVED_TAG = new Tag(" removed tag ", Color.BLACK);
     private final String content;
     private Color color;
-    private Tag colorChainTag;
+    private Tag alternativeTag;
 
     public static Color getDefaultColor(String content) {
         if(content.isEmpty())
@@ -41,12 +41,12 @@ public class Tag implements Comparable<Tag>{
         this.color = color;
     }
 
-    public Tag getColorChainTag() {
-        return colorChainTag;
+    public Tag getAlternativeTag() {
+        return alternativeTag;
     }
 
-    public void setColorChainTag(Tag colorChainTag) {
-        this.colorChainTag = colorChainTag;
+    public void setAlternativeTag(Tag colorChainTag) {
+        this.alternativeTag = colorChainTag;
     }
 
     public String getContent() {
@@ -64,8 +64,8 @@ public class Tag implements Comparable<Tag>{
 
     public void setColor(Color color) {
         this.color = color;
-        if(colorChainTag != null && colorChainTag.getColor() != color)
-            colorChainTag.setColor(color);
+        if(alternativeTag != null && alternativeTag.getColor() != color)
+            alternativeTag.setColor(color);
     }
 
     public Color getColor() {
@@ -138,9 +138,9 @@ public class Tag implements Comparable<Tag>{
     }
 
 	public Tag qualifiedTag() {
-		return colorChainTag != null
-				&& colorChainTag.getContent().length() > getContent().length()
-				? colorChainTag
+		return alternativeTag != null
+				&& alternativeTag.getContent().length() > getContent().length()
+				? alternativeTag
 				: this;
 	}
 }

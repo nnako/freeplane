@@ -300,7 +300,7 @@ public class IconController implements IExtension {
 			return new TagIcon(tag, font, tagTextColor, tagBackgroundColor);
 		else {
 			Tag tagWithoutCategories = tag.withoutCategories(tagCategorySeparator);
-			tagWithoutCategories.setColorChainTag(tag);
+			tagWithoutCategories.setAlternativeTag(tag);
 			TagIcon tagIcon = new TagIcon(tagWithoutCategories, font, tagTextColor, tagBackgroundColor);
 			return tagIcon;
 		}
