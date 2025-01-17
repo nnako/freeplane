@@ -7,6 +7,7 @@ package org.freeplane.core.ui;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
@@ -30,6 +31,7 @@ public class AntiAliasingConfigurator {
     private Rectangle repaintedClipBounds;
     private Rectangle lastPaintedClipBounds;
     private Dimension lastPaintedComponentSize;
+    private Point lastComponentLocation;
     private static boolean isAntialiasingEnabled = true;
     private static Object hintAntialiasCurves = RenderingHints.VALUE_ANTIALIAS_ON;
     private static Object hintAntialiasText = RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
@@ -111,15 +113,18 @@ public class AntiAliasingConfigurator {
         }
         Rectangle newClipBounds = g2.getClipBounds();
         Dimension newComponentSize = component.getSize();
+        Point newComponentLocation = component.getLocation();
         if ((timeSinceLastRendering() < repaintDelay || ! isRepaintInProgress)
                 && ! newClipBounds.equals(lastPaintedClipBounds)
                 && newComponentSize.equals(lastPaintedComponentSize)
+                && ! newComponentLocation.equals(lastComponentLocation)
                 ) {
             repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
             isRepaintScheduled = true;
             isRepaintInProgress = false;
             lastPaintedClipBounds = null;
             lastPaintedComponentSize = null;
+            lastComponentLocation = null;
             SwingUtilities.invokeLater(this::restartRepaintTimer);
             disableAntialiasing(g2);
         } else {
@@ -127,6 +132,7 @@ public class AntiAliasingConfigurator {
             isRepaintScheduled = isRepaintInProgress = false;
             lastPaintedClipBounds = newClipBounds;
             lastPaintedComponentSize = newComponentSize;
+            lastComponentLocation = newComponentLocation;
             stopRepaintTimer();
             setAntialiasing(g2);
         }
