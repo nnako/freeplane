@@ -4,7 +4,6 @@
  * author dimitry
  */
 package org.freeplane.core.ui;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -115,21 +114,20 @@ public class AntiAliasingConfigurator {
         Dimension newComponentSize = component.getSize();
         Point newComponentLocation = component.getLocation();
 
-        if (! isRepaintInProgress
-        		&& timeSinceLastRendering() < repaintDelay
-                && newComponentSize.equals(lastPaintedComponentSize)
-                && ! newComponentLocation.equals(lastComponentLocation)
-                ) {
+		if (! isRepaintInProgress && (isRepaintScheduled ||
+                newComponentSize.equals(lastPaintedComponentSize)
+                && ! newComponentLocation.equals(lastComponentLocation))) {
             repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
             isRepaintScheduled = true;
-            isRepaintInProgress = false;
             SwingUtilities.invokeLater(this::restartRepaintTimer);
             disableAntialiasing(g2);
+//            System.out.println("OFF: " + timeSinceLastRendering + ", " +newClipBounds);
         } else {
             repaintedClipBounds = null;
             isRepaintScheduled = isRepaintInProgress = false;
             stopRepaintTimer();
             setAntialiasing(g2);
+//            System.out.println("ON: " + timeSinceLastRendering + ", " +newClipBounds);
         }
         lastPaintedComponentSize = newComponentSize;
         lastComponentLocation = newComponentLocation;
@@ -168,7 +166,7 @@ public class AntiAliasingConfigurator {
                 public void actionPerformed(ActionEvent e) {
                     if(isRepaintScheduled && timeSinceLastRendering() >= repaintDelay) {
                         isRepaintInProgress = true;
-                        component.repaint(repaintedClipBounds);
+                        component.paintImmediately(repaintedClipBounds);
                     }
                 }
             });
@@ -186,14 +184,6 @@ public class AntiAliasingConfigurator {
         if(component.isPaintingForPrint() || ! EventQueue.isDispatchThread()) {
             return false;
         }
-        if(isRepaintScheduled)
-        	return true;
-        Rectangle clipBounds = g2.getClipBounds();
-        Container parent = component.getParent();
-        if (clipBounds.width < parent.getWidth()
-        		&& clipBounds.height < parent.getHeight()) {
-        	return false;
-		}
         return true;
     }
 }
