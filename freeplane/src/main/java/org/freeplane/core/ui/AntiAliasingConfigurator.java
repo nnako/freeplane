@@ -4,6 +4,7 @@
  * author dimitry
  */
 package org.freeplane.core.ui;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -29,7 +30,6 @@ public class AntiAliasingConfigurator {
     private boolean isRepaintInProgress;
     private final JComponent component;
     private Rectangle repaintedClipBounds;
-    private Rectangle lastPaintedClipBounds;
     private Dimension lastPaintedComponentSize;
     private Point lastComponentLocation;
     private static boolean isAntialiasingEnabled = true;
@@ -114,28 +114,25 @@ public class AntiAliasingConfigurator {
         Rectangle newClipBounds = g2.getClipBounds();
         Dimension newComponentSize = component.getSize();
         Point newComponentLocation = component.getLocation();
-        if ((timeSinceLastRendering() < repaintDelay || ! isRepaintInProgress)
-                && ! newClipBounds.equals(lastPaintedClipBounds)
+
+        if (! isRepaintInProgress
+        		&& timeSinceLastRendering() < repaintDelay
                 && newComponentSize.equals(lastPaintedComponentSize)
                 && ! newComponentLocation.equals(lastComponentLocation)
                 ) {
             repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
             isRepaintScheduled = true;
             isRepaintInProgress = false;
-            lastPaintedClipBounds = null;
-            lastPaintedComponentSize = null;
-            lastComponentLocation = null;
             SwingUtilities.invokeLater(this::restartRepaintTimer);
             disableAntialiasing(g2);
         } else {
             repaintedClipBounds = null;
             isRepaintScheduled = isRepaintInProgress = false;
-            lastPaintedClipBounds = newClipBounds;
-            lastPaintedComponentSize = newComponentSize;
-            lastComponentLocation = newComponentLocation;
             stopRepaintTimer();
             setAntialiasing(g2);
         }
+        lastPaintedComponentSize = newComponentSize;
+        lastComponentLocation = newComponentLocation;
         try {
             startManagedPainting();
             painter.run();
@@ -189,6 +186,14 @@ public class AntiAliasingConfigurator {
         if(component.isPaintingForPrint() || ! EventQueue.isDispatchThread()) {
             return false;
         }
+        if(isRepaintScheduled)
+        	return true;
+        Rectangle clipBounds = g2.getClipBounds();
+        Container parent = component.getParent();
+        if (clipBounds.width < parent.getWidth()
+        		&& clipBounds.height < parent.getHeight()) {
+        	return false;
+		}
         return true;
     }
 }
