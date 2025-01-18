@@ -43,7 +43,7 @@ public class BezierEdgeView extends EdgeView {
 	@Override
 	protected void draw(final Graphics2D g) {
 		final CubicCurve2D.Float graph = update();
-		final Color color = getColor();
+		final Color color = getColor(g);
 		g.setColor(color);
 		final Stroke stroke = getStroke();
 		g.setStroke(stroke);

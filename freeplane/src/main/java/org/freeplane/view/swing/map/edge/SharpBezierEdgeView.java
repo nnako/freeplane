@@ -48,8 +48,8 @@ public class SharpBezierEdgeView extends SharpEdgeView {
 	@Override
 	protected void draw(final Graphics2D g) {
 		final GeneralPath graph = update();
-		g.setColor(getColor());
-		g.setPaint(getColor());
+		g.setColor(getColor(g));
+		g.setPaint(getColor(g));
 		g.setStroke(getStroke());
 		g.fill(graph);
 		g.draw(graph);

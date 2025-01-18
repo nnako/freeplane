@@ -43,8 +43,8 @@ public class SharpLinearEdgeView extends SharpEdgeView {
 
 	@Override
 	protected void draw(final Graphics2D g) {
-		g.setColor(getColor());
-		g.setPaint(getColor());
+		g.setColor(getColor(g));
+		g.setPaint(getColor(g));
 		g.setStroke(getStroke());
         final int deltaX = getDeltaX();
         final int deltaY = getDeltaY();

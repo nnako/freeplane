@@ -24,6 +24,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
 
 import org.freeplane.api.ChildNodesAlignment;
@@ -172,12 +173,23 @@ public abstract class EdgeView {
         }
     }
 
-    public Color getColor() {
-        if (color == null) {
+    public Color getColor(Graphics2D g) {
+    	Color color = getColor();
+    	if (getWidth() <= 0
+    			&& g.getRenderingHint(RenderingHints.KEY_ANTIALIASING).equals(RenderingHints.VALUE_ANTIALIAS_OFF)) {
+    		int newAlpha = (color.getAlpha() & 0xFF) / 8;
+    		int newColor = (color.getRGB() & 0x00FFFFFF) | (newAlpha << 24); // Combine new alpha with RGB
+    		return new Color(newColor, true);
+    	}
+    	return color;
+    }
+
+	public Color getColor() {
+		if (color == null) {
             color = target.getEdgeColor();
         }
         return color;
-    }
+	}
 
     public void setColor(final Color color) {
         this.color = color;
