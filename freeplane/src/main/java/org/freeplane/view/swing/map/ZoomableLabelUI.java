@@ -183,7 +183,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 				iconR.x = viewR.x;
 				if (horizontalAlignment == SwingConstants.CENTER)
 					iconR.x += (viewR.width - iconR.width)/2;
-				if (horizontalAlignment == SwingConstants.RIGHT)
+				else if (horizontalAlignment == SwingConstants.RIGHT)
 					iconR.x += viewR.width - iconR.width;
 			}
 		}

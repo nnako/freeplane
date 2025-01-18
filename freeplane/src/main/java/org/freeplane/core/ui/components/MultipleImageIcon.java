@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.swing.Icon;
+import javax.swing.SwingConstants;
 
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
@@ -39,12 +40,22 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 
 public class MultipleImageIcon implements Icon {
-    final private int TAG_GAP = new Quantity(2, LengthUnit.pt).toBaseUnitsRounded();
+    private static final int UNKNOWN = -1;
+	final private int TAG_GAP = new Quantity(2, LengthUnit.pt).toBaseUnitsRounded();
     final private IconRow iconRow = new IconRow();
 	final private List<NamedIcon> mUIIcons = new ArrayList<>();
 	final private List<TagIcon> mTags = new ArrayList<>();
+	private int horizontalAlignment = SwingConstants.LEFT;
 
 	public MultipleImageIcon() {
+	}
+
+	public int getHorizontalAlignment() {
+		return horizontalAlignment;
+	}
+
+	public void setHorizontalAlignment(int alignment) {
+		this.horizontalAlignment = alignment;
 	}
 
 	public void addIcon(final NamedIcon uiIcon) {
@@ -111,17 +122,25 @@ public class MultipleImageIcon implements Icon {
 
 	@Override
 	public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
-	    boolean isLeftToRight = c.getComponentOrientation().isLeftToRight();
-	    final int graphicalIconWidth = isLeftToRight ? getGraphicalIconWidth() : 0;
-	    final int iconWidth = isLeftToRight ? getIconWidth() : 0;
+		boolean isLeftToRight = horizontalAlignment == SwingConstants.LEFT;
+	    final int graphicalIconWidth = getGraphicalIconWidth();
+	    final int iconWidth = isLeftToRight ? 0 : getIconWidth();
 	    {
-	        int myX = isLeftToRight ? x + iconWidth - graphicalIconWidth : x;
+	        int myX = x;
+	        if (horizontalAlignment == SwingConstants.CENTER)
+	        	myX += (iconWidth - graphicalIconWidth)/2;
+	        else if (horizontalAlignment == SwingConstants.RIGHT)
+	        	myX +=iconWidth - graphicalIconWidth;
 	        iconRow.paintIcon(c, g, myX, y);
 	    }
 	    int graphicalIconHeight = getGraphicalIconHeight();
 	    int myY = graphicalIconHeight == 0 ? y : y + TAG_GAP + graphicalIconHeight;
 	    for (final Icon icon : mTags) {
-	        final int myX = isLeftToRight ? x + iconWidth - icon.getIconWidth() : x;
+	        int myX = x;
+	        if (horizontalAlignment == SwingConstants.CENTER)
+	        	myX += (iconWidth - icon.getIconWidth())/2;
+	        else if (horizontalAlignment == SwingConstants.RIGHT)
+	        	myX +=iconWidth - icon.getIconWidth();
 	        icon.paintIcon(c, g, myX, myY);
 	        myY += TAG_GAP + icon.getIconHeight();
 	    }
