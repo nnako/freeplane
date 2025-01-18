@@ -122,6 +122,7 @@
 					<choice value="antialias_all" />
 					<choice value="antialias_none" />
 				</combo>
+				<boolean name="antialias_during_scrolling" />
 			</separator>
 			<separator name="svg_icons">
 				<boolean name="antialias_svg" />

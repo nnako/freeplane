@@ -85,6 +85,10 @@ public class AntiAliasingConfigurator {
         return currentPaintingThread != null && currentPaintingThread == Thread.currentThread();
     }
 
+	private static boolean antialliasDuringScrolling() {
+		return ResourceController.getResourceController().getBooleanProperty("antialias_during_scrolling");
+	}
+
     public AntiAliasingConfigurator(JComponent component) {
         this(component, MILLISECONDS_PER_SECOND/25);
     }
@@ -115,8 +119,9 @@ public class AntiAliasingConfigurator {
         Point newComponentLocation = component.getLocation();
 
 		if (! isRepaintInProgress && (isRepaintScheduled ||
-                newComponentSize.equals(lastPaintedComponentSize)
-                && ! newComponentLocation.equals(lastComponentLocation))) {
+				newComponentSize.equals(lastPaintedComponentSize)
+				&& ! newComponentLocation.equals(lastComponentLocation)
+				&& ! antialliasDuringScrolling())) {
             repaintedClipBounds = repaintedClipBounds == null ? newClipBounds : repaintedClipBounds.union(newClipBounds);
             isRepaintScheduled = true;
             SwingUtilities.invokeLater(this::restartRepaintTimer);
@@ -126,7 +131,7 @@ public class AntiAliasingConfigurator {
             repaintedClipBounds = null;
             isRepaintScheduled = isRepaintInProgress = false;
             stopRepaintTimer();
-            setAntialiasing(g2);
+            enableAntialiasing(g2);
 //            System.out.println("ON: " + timeSinceLastRendering + ", " +newClipBounds);
         }
         lastPaintedComponentSize = newComponentSize;
@@ -186,4 +191,5 @@ public class AntiAliasingConfigurator {
         }
         return true;
     }
+
 }
