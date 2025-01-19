@@ -15,6 +15,7 @@ import java.security.AccessControlException;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
@@ -316,5 +317,23 @@ public class ZoomableLabel extends JLabel {
 
 	public void setTextRenderingIcon(Icon icon) {
 		putClientProperty(TEXT_RENDERING_ICON, icon);
+	}
+
+	public int getEffectiveHorizontalTextPosition() {
+		return effectiveHorizontalPosition(getHorizontalTextPosition());
+	}
+
+	public int getEffectiveHorizontalAlignment() {
+		return effectiveHorizontalPosition(getHorizontalAlignment());
+	}
+
+	private int effectiveHorizontalPosition(int position) {
+		switch (position) {
+		case SwingConstants.LEADING:
+			return getComponentOrientation().isLeftToRight() ? SwingConstants.LEFT : SwingConstants.RIGHT;
+		case SwingConstants.TRAILING:
+			return getComponentOrientation().isLeftToRight() ? SwingConstants.RIGHT : SwingConstants.LEFT;
+		}
+		return position;
 	}
 }

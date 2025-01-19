@@ -795,11 +795,13 @@ public class EditNodeTextField extends EditNodeBase {
 		final NodeStyleController nsc = NodeStyleController.getController(modeController);
 		maxWidth = Math.max(mapView.getLayoutSpecificMaxNodeWidth(),
 				Math.max(mapView.getZoomed(nsc.getMaxWidth(node, nodeView.getStyleOption()).toBaseUnitsRounded()), parent.getWidth()));
-		if(parent.getVerticalTextPosition() != SwingConstants.BOTTOM) {
+		boolean isTextPlacedUnderIcon = parent.getVerticalTextPosition() == SwingConstants.BOTTOM;
+		int reservedIconSpace = 0;
+		if(! isTextPlacedUnderIcon) {
 			final Icon icon = parent.getIcon();
 			if(icon != null){
-				maxWidth -= mapView.getZoomed(icon.getIconWidth());
-				maxWidth -= mapView.getZoomed(parent.getIconTextGap());
+				reservedIconSpace = mapView.getZoomed(icon.getIconWidth() + parent.getIconTextGap());
+				maxWidth -= reservedIconSpace;
 			}
 		}
 		Insets parentInsets = parent.getZoomedInsets();
@@ -816,7 +818,6 @@ public class EditNodeTextField extends EditNodeBase {
 		SpellCheckerController.getController().enableAutoSpell(textfield, true);
 		mapView.scrollNodeToVisible(nodeView);
 		assert( parent.isValid());
-		final int nodeWidth = parent.getWidth();
 		final int textFieldBorderWidth = 2;
 		textfield.setBorder(new MatteBorder(textFieldBorderWidth, textFieldBorderWidth, textFieldBorderWidth, textFieldBorderWidth,
 				MapView.drawsRectangleForSelection() ? MapView.getSelectionRectangleColor() : nodeView.getTextBackground()));
@@ -833,16 +834,14 @@ public class EditNodeTextField extends EditNodeBase {
 			setLineWrap();
 			textFieldMinimumSize.height = textfield.getPreferredSize().height;
 		}
-		final ZoomableLabelUI parentUI = (ZoomableLabelUI)parent.getUI();
-		final LayoutData layoutData = parentUI.getLayoutData(parent);
-		Rectangle iconR = layoutData.iconR;
-		final Rectangle textR = layoutData.textR;
-		int textFieldX = parentInsets.left - textFieldBorderWidth + (iconR.width > 0 ? textR.x - iconR.x : 0);
-
 
 		final EventBuffer eventQueue = MTextController.getController().getEventQueue();
 		KeyEvent firstEvent = eventQueue.getFirstEvent();
 
+		final ZoomableLabelUI parentUI = (ZoomableLabelUI)parent.getUI();
+		final LayoutData layoutData = parentUI.getLayoutData(parent);
+		final Rectangle textR = layoutData.textR;
+		final Rectangle viewR = layoutData.viewR;
 		Point mouseEventPoint = null;
 		if (firstEvent == null) {
 			MouseEvent currentEvent = eventQueue.getMouseEvent();
@@ -857,27 +856,29 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
 
-		textFieldMinimumSize.width = Math.max(textFieldMinimumSize.width, nodeWidth - textFieldX - (parentInsets.right - textFieldBorderWidth));
-		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, textR.height);
-		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, iconR.height);
+		int textFieldX = parentInsets.left  - textFieldBorderWidth;
+		if (parent.getEffectiveHorizontalTextPosition() == SwingConstants.RIGHT)
+			textFieldX += reservedIconSpace;
+		int textFieldY = (isTextPlacedUnderIcon ? textR.y : viewR.y) - textFieldBorderWidth;
+		textFieldMinimumSize.width = Math.max(textFieldMinimumSize.width, isTextPlacedUnderIcon ? viewR.width : viewR.width - reservedIconSpace);
+		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, isTextPlacedUnderIcon ? textR.height : viewR.height);
 		textfield.setSize(textFieldMinimumSize.width, textFieldMinimumSize.height);
         verticalSpace = Math.max(0, parent.getHeight() - textFieldMinimumSize.height);
-        int textY = verticalSpace / 2;
 		final Dimension newParentSize = new Dimension(textFieldX + textFieldMinimumSize.width + parentInsets.right,  verticalSpace + textFieldMinimumSize.height);
+		if (parent.getEffectiveHorizontalTextPosition() == SwingConstants.LEFT)
+			newParentSize.width += reservedIconSpace;
 		horizontalSpace = newParentSize.width - textFieldMinimumSize.width;
 		final int widthAddedToParent = newParentSize.width - parent.getWidth();
-		final Point location = new Point(textR.x - textFieldBorderWidth, textY);
+		final Point location = new Point(textFieldX, textFieldY);
 
 		final int widthAddedToTextField = textFieldMinimumSize.width - (textR.width + 2 * textFieldBorderWidth);
 		if(widthAddedToTextField > 0){
 			switch(labelHorizontalAlignment){
 			case SwingConstants.CENTER:
-				location.x -= (widthAddedToTextField - widthAddedToParent) / 2;
 				if(mouseEventPoint != null)
 					mouseEventPoint.x += widthAddedToTextField / 2;
 				break;
 			case SwingConstants.RIGHT:
-				location.x -= widthAddedToTextField - widthAddedToParent;
 				if(mouseEventPoint != null)
 					mouseEventPoint.x += widthAddedToTextField;
 				break;
@@ -887,7 +888,6 @@ public class EditNodeTextField extends EditNodeBase {
         preserveRootNodeLocationOnScreen();
 		parent.setPreferredSize(newParentSize);
 		parent.setText("");
-        parent.setHorizontalAlignment(JLabel.LEFT);
         mapView.onEditingStarted(parent);
         if(getEditControl().getEditType() == EditedComponent.TEXT)
         	nodeView.setTextBackground(getBackground());
