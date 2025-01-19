@@ -868,7 +868,6 @@ public class EditNodeTextField extends EditNodeBase {
 		if (parent.getEffectiveHorizontalTextPosition() == SwingConstants.LEFT)
 			newParentSize.width += reservedIconSpace;
 		horizontalSpace = newParentSize.width - textFieldMinimumSize.width;
-		final int widthAddedToParent = newParentSize.width - parent.getWidth();
 		final Point location = new Point(textFieldX, textFieldY);
 
 		final int widthAddedToTextField = textFieldMinimumSize.width - (textR.width + 2 * textFieldBorderWidth);
