@@ -916,7 +916,10 @@ public class FilterController implements IExtension, IMapViewChangeListener {
                 int selectedItemIndex = getIndexOf(anObject);
                 if(selectedItemIndex > 3)
                     removeElementAt(selectedItemIndex);
-                if(selectedItemIndex == -1 || selectedItemIndex > 3)
+                if(selectedItemIndex > 3
+                        || selectedItemIndex == -1
+                            && (anObject instanceof ASelectableCondition)
+                            && ((ASelectableCondition)anObject).canBePersisted())
                     insertElementAt(anObject, 3);
                 super.setSelectedItem(anObject);
             }
