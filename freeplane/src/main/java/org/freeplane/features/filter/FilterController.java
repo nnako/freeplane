@@ -1001,15 +1001,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 	void setFilterConditions(final DefaultComboBoxModel newConditionModel) {
 		filterConditions.removeAllElements();
 		Object selectedItem = newConditionModel.getSelectedItem();
-        filterConditions.addElement(selectedItem);
+		if(selectedItem != null)
+			filterConditions.addElement(selectedItem);
 		for (int i = 0; i < newConditionModel.getSize(); i++) {
 			Object element = newConditionModel.getElementAt(i);
 			if(element != selectedItem)
 			    filterConditions.addElement(element);
 		}
+		filterMenuBuilder.updateMenus();
 		addStandardConditions();
 		applyFilter(false);
-		filterMenuBuilder.updateMenus();
 	}
 
 	private void updateSettingsFromFilter(final Filter filter) {
