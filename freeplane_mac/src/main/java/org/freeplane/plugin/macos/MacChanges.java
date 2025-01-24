@@ -19,6 +19,7 @@
  */
 package org.freeplane.plugin.macos;
 
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Window;
@@ -40,9 +41,11 @@ import java.net.URL;
 import java.util.function.Predicate;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.AFreeplaneAction;
+import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.LogUtils;
@@ -162,13 +165,20 @@ public class MacChanges implements  AboutHandler, OpenFilesHandler, PreferencesH
 
 	@Override
 	public void handlePreferences(PreferencesEvent event) {
+		SwingUtilities.invokeLater(this::showPreferences);
+	}
+
+	private void showPreferences() {
 		final MModeController modeController = getModeController();
 		if(modeController != null) {
 			AFreeplaneAction action = modeController.getAction("ShowPreferencesAction");
-			if(action != null)
-				action.actionPerformed(null);
+			if(action == null)
+				return;
+			Component menuComponent = UITools.getMenuComponent();
+			if(menuComponent == null || ! menuComponent.isShowing())
+				return;
+			action.actionPerformed(null);
 		}
-
 	}
 
 
