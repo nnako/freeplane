@@ -1584,7 +1584,7 @@ public class NodeView extends JComponent implements INodeView {
 		g.translate(-origin.x, -origin.y);
 		if (map.isSelected()) {
 			final HighlightController highlightController = getModeController().getController().getExtension(HighlightController.class);
-			final List<NodeHighlighter> highlighters = highlightController.getHighlighters(viewedNode, map.isPrinting());
+			final List<NodeHighlighter> highlighters = highlightController.getHighlighters(viewedNode, map.getMapSelection(), map.isPrinting());
 			int margin = HIGHLIGHTED_NODE_ARC_MARGIN;
 			for(NodeHighlighter highlighter : highlighters){
 				margin += HIGHLIGHTED_NODE_ARC_MARGIN;

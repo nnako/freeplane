@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.freeplane.core.extension.IExtension;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.NodeModel;
 
 public class HighlightController implements IExtension{
@@ -14,10 +15,10 @@ public class HighlightController implements IExtension{
 		this.nodeHighlighters = new ArrayList<>();
 	} 
 	
-	public List<NodeHighlighter> getHighlighters(NodeModel node, boolean isPrinting){
+	public List<NodeHighlighter> getHighlighters(NodeModel node, IMapSelection selection, boolean isPrinting){
 		final ArrayList<NodeHighlighter> highlighters = new ArrayList<>();
 		for(NodeHighlighter highlighter : nodeHighlighters)
-			if(highlighter.isNodeHighlighted(node, isPrinting))
+			if(highlighter.isNodeHighlighted(node, selection, isPrinting))
 				highlighters.add(highlighter);
 		return highlighters;
 	}

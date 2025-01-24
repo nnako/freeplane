@@ -21,6 +21,7 @@ import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.highlight.HighlightController;
 import org.freeplane.features.highlight.NodeHighlighter;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.IMapSelectionListener;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
@@ -56,7 +57,7 @@ public class PresentationController implements IExtension{
 		highlightController.addNodeHighlighter(new NodeHighlighter() {
 
 			@Override
-			public boolean isNodeHighlighted(NodeModel node, boolean isPrinting) {
+			public boolean isNodeHighlighted(NodeModel node, IMapSelection selection, boolean isPrinting) {
 				return !isPrinting && presentationState.shouldHighlightNodeContainedOnSlide(node);
 			}
 
@@ -71,7 +72,7 @@ public class PresentationController implements IExtension{
 		highlightController.addNodeHighlighter(new NodeHighlighter() {
 
 			@Override
-			public boolean isNodeHighlighted(NodeModel node, boolean isPrinting) {
+			public boolean isNodeHighlighted(NodeModel node, IMapSelection selection, boolean isPrinting) {
 				return !isPrinting && presentationState.shouldHighlightNodeFoldedOnSlide(node);
 			}
 

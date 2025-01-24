@@ -253,8 +253,13 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		controller.addExtension(FilterController.class, extension);
 		controller.getExtension(HighlightController.class).addNodeHighlighter(new NodeHighlighter() {
 			@Override
-			public boolean isNodeHighlighted(NodeModel node, boolean isPrinting) {
-				return !isPrinting && FilterController.getController(controller).isNodeHighlighted(node);
+			public boolean isNodeHighlighted(NodeModel node, IMapSelection selection, boolean isPrinting) {
+				if (isPrinting)
+					return false;
+			NodeModel searchRoot = selection.getSearchRoot();
+			if(searchRoot != null && node != searchRoot && ! node.isDescendantOf(searchRoot))
+				return false;
+			return FilterController.getController(controller).isNodeHighlighted(node);
 			}
 
 			@Override
@@ -1087,14 +1092,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
     }
 
 	private boolean isNodeHighlighted(NodeModel node) {
+		if(highlightCondition == null)
+			return false;
+		if(highlightedConditionContext == null)
+			return highlightCondition.checkNode(node);
 		try {
-			if(highlightedConditionContext != null)
-				highlightedConditionContext.setDisabled(true);
+			highlightedConditionContext.setDisabled(true);
 			return highlightCondition != null && highlightCondition.checkNode(node);
 		}
 		finally {
-			if(highlightedConditionContext != null)
-				highlightedConditionContext.setDisabled(false);
+			highlightedConditionContext.setDisabled(false);
 		}
     }
 
