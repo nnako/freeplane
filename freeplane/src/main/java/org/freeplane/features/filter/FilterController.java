@@ -914,13 +914,10 @@ public class FilterController implements IExtension, IMapViewChangeListener {
             @Override
             public void setSelectedItem(Object anObject) {
                 int selectedItemIndex = getIndexOf(anObject);
-                if(selectedItemIndex > USER_DEFINED_CONDITION_START_INDEX)
-                    removeElementAt(selectedItemIndex);
-                if(selectedItemIndex > USER_DEFINED_CONDITION_START_INDEX
-                        || selectedItemIndex == -1
+                if(selectedItemIndex == -1
                             && (anObject instanceof ASelectableCondition)
                             && ((ASelectableCondition)anObject).canBePersisted())
-                    insertElementAt(anObject, USER_DEFINED_CONDITION_START_INDEX);
+                    addElement(anObject);
                 super.setSelectedItem(anObject);
             }
 
