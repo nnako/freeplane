@@ -43,7 +43,7 @@ public class NodeAbsolutePath{
 	public NodeModel next() {
 	    return iterator.next();
     }
-	public int lastIndex() {
+	public int previousLevel() {
 	    return iterator.previousIndex();
     }
 	public NodeModel previous() {
