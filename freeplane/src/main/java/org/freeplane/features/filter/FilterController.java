@@ -913,11 +913,13 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
             @Override
             public void setSelectedItem(Object anObject) {
-                int selectedItemIndex = getIndexOf(anObject);
-                if(selectedItemIndex == -1
-                            && (anObject instanceof ASelectableCondition)
-                            && ((ASelectableCondition)anObject).canBePersisted())
-                    addElement(anObject);
+                if(ResourceController.getResourceController().getBooleanProperty("saveQuickFilters")) {
+                	int selectedItemIndex = getIndexOf(anObject);
+                	if(selectedItemIndex == -1
+                			&& (anObject instanceof ASelectableCondition)
+                			&& ((ASelectableCondition)anObject).canBePersisted())
+                		insertElementAt(anObject, USER_DEFINED_CONDITION_START_INDEX);
+                }
                 super.setSelectedItem(anObject);
             }
 
@@ -939,8 +941,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
     }
 
 	void loadConditions(final DefaultComboBoxModel filterConditionModel, final String pathToFilterFile,
-			final boolean showPopupOnError)
-	        throws IOException {
+			final boolean showPopupOnError) throws IOException {
 		try {
 			final IXMLParser parser = XMLLocalParserFactory.createLocalXMLParser();
 			File filterFile = new File(pathToFilterFile);
@@ -970,7 +971,8 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
 	public void saveConditions() {
 		try {
-	        int savedConditionLimit = ResourceController.getResourceController().getIntProperty("savedConditionLimit");
+			ResourceController resourceController = ResourceController.getResourceController();
+			int savedConditionLimit = resourceController.getBooleanProperty("saveQuickFilters") ? resourceController.getIntProperty("savedConditionLimit") : Integer.MAX_VALUE;
 			saveConditions(getFilterConditions(), pathToFilterFile, savedConditionLimit);
 		}
 		catch (final Exception e) {
