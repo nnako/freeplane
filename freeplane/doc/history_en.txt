@@ -16,7 +16,7 @@ Add PlantUML support to Markdown
 Tag background, text color and placement configurable via the tag style
 Attribute table placement configurable via the attribute style
 Option "Antialias during scrolling"
-Option "Save quick filters"
+Option "Save ad-hoc filters"
 Bug fixes
 
 ==============================
