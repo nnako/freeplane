@@ -26,16 +26,17 @@ import java.net.URL;
 
 import javax.swing.Timer;
 
+import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.MapModel;
+import org.freeplane.features.map.mindmapmode.MMapModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.mode.mindmapmode.MModeController;
 import org.freeplane.features.url.UrlManager;
 
 public class DoAutomaticSave implements ActionListener {
-    static final String AUTOSAVE_EXTENSION = "autosave";
     /**
      * This value is compared with the result of
      * getNumberOfChangesSinceLastSave(). If the values coincide, no further
@@ -80,21 +81,29 @@ public class DoAutomaticSave implements ActionListener {
                     : model.getTitle() + UrlManager.FREEPLANE_FILE_EXTENSION);
             final File pathToStore = MFileManager.backupDir(url != null ? file : null);
             pathToStore.mkdirs();
-            final File tempFile = MFileManager.renameBackupFiles(pathToStore, file, numberOfFiles,
-                    AUTOSAVE_EXTENSION);
+            final File tempFile = MFileManager.renameAutosaveFiles(pathToStore, file, numberOfFiles, filesShouldBeDeletedAfterShutdown);
             if (tempFile == null) {
                 return;
             }
             if (filesShouldBeDeletedAfterShutdown) {
                 tempFile.deleteOnExit();
             }
-            if(tempFile.isFile() && tempFile.canWrite()) {
-                tempFile.delete();
+            if(ResourceController.getResourceController().getBooleanProperty("automatically_overwrite_mindmap_files")) {
+                if(tempFile.isFile() && tempFile.canWrite()) {
+                    tempFile.delete();
+                }
+                if (file.renameTo(tempFile)) {
+                    ((MFileManager) fileManager).save(model);
+                    modeController.getController().getViewController()
+                    .out(TextUtils.format("automatically_save_message", model.getFile()));
+                }
             }
-            if (file.renameTo(tempFile)) {
-                ((MFileManager) fileManager).save(model);
+            else if(tempFile.isFile() && tempFile.canWrite()
+                    || ! tempFile.exists() && tempFile.getParentFile().canWrite()) {
+                ((MFileManager) fileManager)
+                .saveInternal((MMapModel) model, tempFile, true /*=internal call*/);
                 modeController.getController().getViewController()
-                .out(TextUtils.format("automatically_save_message", model.getFile()));
+                .out(TextUtils.format("automatically_save_message", tempFile));
             }
         }
         catch (final Exception ex) {
