@@ -24,6 +24,8 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 
+import org.freeplane.core.ui.AntiAliasingConfigurator;
+
 /**
  * IconListComponent is a custom JComponent that displays a list of icons with support for
  * wrapping, alignment, preferred size calculation, zooming, hit detection, and highlighting removed icons.
@@ -302,6 +304,8 @@ public class IconListComponent extends JComponent implements Accessible {
      */
     @Override
     protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        AntiAliasingConfigurator.setAntialiasing(g2);
         // Paint background if opaque
         if (isOpaque()) {
             g.setColor(getBackground());
@@ -323,13 +327,6 @@ public class IconListComponent extends JComponent implements Accessible {
             return;
         }
 
-        Graphics2D g2 = (Graphics2D) g;
-        Object oldRenderingHintFM = g2.getRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS);
-        Object newRenderingHintFM = RenderingHints.VALUE_FRACTIONALMETRICS_ON;
-        if (!newRenderingHintFM.equals(oldRenderingHintFM)) {
-            g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, newRenderingHintFM);
-        }
-
         AffineTransform originalTransform = g2.getTransform();
         float factor = 0.97f;
         float zoom = getZoom() * factor;
@@ -338,10 +335,6 @@ public class IconListComponent extends JComponent implements Accessible {
         renderIcons(g2, iconBounds.getIconLayouts());
 
         g2.setTransform(originalTransform);
-        if (!newRenderingHintFM.equals(oldRenderingHintFM)) {
-            g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-                    oldRenderingHintFM != null ? oldRenderingHintFM : RenderingHints.VALUE_FRACTIONALMETRICS_DEFAULT);
-        }
     }
 
     /**
