@@ -57,7 +57,11 @@ public class NodeModel{
 	}
 
 	public enum Side {
-		DEFAULT, TOP_OR_LEFT, BOTTOM_OR_RIGHT, AS_SIBLING_BEFORE, AS_SIBLING_AFTER
+		DEFAULT, TOP_OR_LEFT, BOTTOM_OR_RIGHT, AS_SIBLING_BEFORE, AS_SIBLING_AFTER;
+
+		public boolean isSibling() {
+			return ordinal() >= AS_SIBLING_BEFORE.ordinal();
+		}
 	}
 
 	public enum NodeProperty{UNKNOWN_PROPERTY}

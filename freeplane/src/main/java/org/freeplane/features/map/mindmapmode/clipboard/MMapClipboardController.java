@@ -86,6 +86,7 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeModel.Side;
 import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
+import org.freeplane.features.map.mindmapmode.InsertionRelation;
 import org.freeplane.features.map.mindmapmode.MMapController;
 import org.freeplane.features.map.mindmapmode.SummaryGroupEdgeListAdder;
 import org.freeplane.features.mode.Controller;
@@ -149,9 +150,9 @@ public class MMapClipboardController extends MapClipboardController implements M
 	        }
 			ViewerController viewerController = (Controller.getCurrentModeController().getExtension(ViewerController.class));
 			boolean pasteImagesFromFiles = ResourceController.getResourceController().getBooleanProperty("pasteImagesFromFiles");
-			Side newChildSide = side == Side.AS_SIBLING_BEFORE ? target.getSide() : side;
+			Side newChildSide = side.isSibling() ? target.getSide() : side;
 			final MMapController mapController = (MMapController) Controller.getCurrentModeController().getMapController();
-			if(side != Side.AS_SIBLING_BEFORE  && mapController.placesNewChildFirst(target))
+			if(! side.isSibling()  && mapController.placesNewChildFirst(target))
 			    Collections.reverse(fileList);
 			for (final File sourceFile : fileList) {
 				final File file;
@@ -167,11 +168,11 @@ public class MMapClipboardController extends MapClipboardController implements M
 				}
 				else
 					file = sourceFile;
-				if(! pasteImagesFromFiles || dropAction == DnDConstants.ACTION_LINK || !viewerController.paste(file, target, PasteMode.valueOf(side))) {
+				if(! pasteImagesFromFiles || dropAction == DnDConstants.ACTION_LINK || !viewerController.paste(file, target, PasteMode.bySide(side))) {
 					final NodeModel node = mapController.newNode(file.getName(), target.getMap());
 					((MLinkController) LinkController.getController()).setLinkTypeDependantLink(node, file);
                     node.setSide(newChildSide);
-					mapController.insertNode(node, target, side == Side.AS_SIBLING_BEFORE);
+					mapController.insertNode(node, target, InsertionRelation.bySide(side));
 				}
 			}
 		}
@@ -199,7 +200,7 @@ public class MMapClipboardController extends MapClipboardController implements M
             final ArrayList<String> textLines = new ArrayList<>(Arrays.asList(textFromClipboard.split(MapClipboardController.NODESEPARATOR)));
             final MMapController mapController = (MMapController) Controller.getCurrentModeController().getMapController();
             final MapReader mapReader = mapController.getMapReader();
-            if(side != Side.AS_SIBLING_BEFORE  && mapController.placesNewChildFirst(target))
+            if(! side.isSibling()  && mapController.placesNewChildFirst(target))
                 Collections.reverse(textLines);
             synchronized(mapReader) {
                 final NodeTreeCreator nodeTreeCreator = mapReader.nodeTreeCreator(target.getMap());
@@ -208,8 +209,8 @@ public class MMapClipboardController extends MapClipboardController implements M
                     try {
                         final NodeModel newModel = nodeTreeCreator.create(new StringReader(textLines.get(i)));
                         newModel.removeExtension(FreeNode.class);
-                        newModel.setSide(side == Side.AS_SIBLING_BEFORE ? target.getSide() : side);
-                        mapController.insertNode(newModel, target, side == Side.AS_SIBLING_BEFORE);
+                        newModel.setSide(side.isSibling() ? target.getSide() : side);
+                        mapController.insertNode(newModel, target, InsertionRelation.bySide(side));
                     }
                     catch (final XMLException e) {
                         LogUtils.severe("error on paste", e);
@@ -539,8 +540,8 @@ public class MMapClipboardController extends MapClipboardController implements M
             	if(! FileUtils.getExtension(imageFile.getName()).equals(ImageAdder.IMAGE_FORMAT))
             		imageFile = new File(imageFile.getPath() + '.' + ImageAdder.IMAGE_FORMAT);
             	final NodeModel node = mapController.newNode(imageFile.getName(), target.getMap());
-				node.setSide(side == Side.AS_SIBLING_BEFORE ? target.getSide() : side);
-            	mapController.insertNode(node, target, side == Side.AS_SIBLING_BEFORE);
+				node.setSide(side.isSibling() ? target.getSide() : side);
+            	mapController.insertNode(node, target, InsertionRelation.bySide(side));
             	new ImageAdder(image, mapController, mindmapFile, imageFile).attachImageToNode(node);
             }
             catch (IOException e) {
@@ -836,8 +837,8 @@ public class MMapClipboardController extends MapClipboardController implements M
 			return;
 		}
 		final MMapController mapController = (MMapController) Controller.getCurrentModeController().getMapController();
-		if (side == Side.AS_SIBLING_BEFORE && !mapController.isWriteable(target.getParentNode())
-				|| side != Side.AS_SIBLING_BEFORE && !mapController.isWriteable(target)) {
+		if (side.isSibling() && !mapController.isWriteable(target.getParentNode())
+				|| ! side.isSibling() && !mapController.isWriteable(target)) {
 			final String message = TextUtils.getText("node_is_write_protected");
 			UITools.errorMessage(message);
 			return;
@@ -851,7 +852,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 			boolean hadChildren = target.hasChildren();
 			newNodes.clear();
 			handler.paste(t, target, side, dropAction);
-			if ( side != Side.AS_SIBLING_BEFORE) {
+			if ( ! side.isSibling()) {
 			    if (mapController.isFolded(target)) {
                     if (ResourceController.getResourceController().getBooleanProperty(RESOURCE_UNFOLD_ON_PASTE)) {
                         mapController.unfoldAndScroll(target, controller.getSelection().getFilter());
@@ -876,7 +877,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 	                                              final Side side) {
 		NodeModel parent;
 		int insertionIndex;
-		if (side == Side.AS_SIBLING_BEFORE) {
+		if (side.isSibling()) {
 			final NodeModel childNode = target;
 			parent = target.getParentNode();
 			insertionIndex = parent.getIndex(childNode);
@@ -900,7 +901,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 				addAttribute(node, textFragment, parent==node);
 			}
 		}
-		insertNewNodes(parent, insertionIndex, side == Side.AS_SIBLING_BEFORE ? target.getSide() : side, parentNodes);
+		insertNewNodes(parent, insertionIndex, side.isSibling() ? target.getSide() : side, parentNodes);
 	}
 
 	private void addAttribute(NodeModel node, final TextFragment textFragment, boolean toExistingNode) {
@@ -1054,7 +1055,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 			}
 			switch(operation){
 			case MOVE:
-				mapController.moveNodesAsChildren(movedNodes, target);
+				mapController.moveNodes(movedNodes, target, InsertionRelation.AS_CHILD);
 					break;
 			default:
 				break;

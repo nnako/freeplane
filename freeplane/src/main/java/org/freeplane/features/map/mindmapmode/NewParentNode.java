@@ -49,7 +49,7 @@ import org.freeplane.features.text.mindmapmode.MTextController;
  */
 public class NewParentNode extends AFreeplaneAction {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -111,14 +111,14 @@ public class NewParentNode extends AFreeplaneAction {
         	final Collection<NodeModel> summarizedNodes = summaryLevels.summarizedNodes(summaryNode);
         	if(selectedNodes.containsAll(summarizedNodes))
         		childPosition = summaryLevels.findGroupBeginNodeIndex(childPosition);
-        	
+
         }
         final int index = childPosition;
 		final NodeModel newParent = mapController.addNewNode(oldParent, index, node -> {
             node.setSide(selectedNode.getSide());
             NewNodeStyle.assignStyleToNewNode(node);
         });
-        mapController.moveNodesAsChildren(selectedNodes, newParent);
+        mapController.moveNodes(selectedNodes, newParent, InsertionRelation.AS_CHILD);
         return newParent;
 	}
 }

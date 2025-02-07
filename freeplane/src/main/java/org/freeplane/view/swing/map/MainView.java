@@ -105,6 +105,10 @@ public class MainView extends ZoomableLabel {
         public boolean isChild() {
             return this == CHILD_BEFORE || this == CHILD_AFTER;
         }
+
+        public boolean isSibling() {
+        	return this == SIBLING_BEFORE || this == SIBLING_AFTER;
+        }
     }
 
     public enum DragOverDirection {
@@ -257,10 +261,8 @@ public class MainView extends ZoomableLabel {
         NodeView nodeView = getNodeView();
         DragOverRelation relation = dragOverDirection.relation(nodeView.layoutOrientation(),
                 nodeView.side());
-        if(relation == DragOverRelation.SIBLING_AFTER)
-            return DragOverDirection.OFF;
         boolean isRoot = nodeView.isRoot();
-        if(isRoot && relation == DragOverRelation.SIBLING_BEFORE)
+        if(isRoot && relation.isSibling())
             return DragOverDirection.OFF;
         ChildrenSides childrenSides = nodeView.childrenSides();
         if(relation.isChild() && ! childrenSides.matches(relation == DragOverRelation.CHILD_BEFORE))

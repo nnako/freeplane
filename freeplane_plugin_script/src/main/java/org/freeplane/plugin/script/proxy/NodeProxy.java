@@ -61,6 +61,7 @@ import org.freeplane.features.map.MapNavigationUtils;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MapClipboardController.CopiedNodeSet;
 import org.freeplane.features.map.clipboard.MindMapPlainTextWriter;
+import org.freeplane.features.map.mindmapmode.InsertionRelation;
 import org.freeplane.features.map.mindmapmode.MMapController;
 import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
@@ -634,7 +635,7 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 	public void moveTo(final Node parentNodeProxy) {
 		final NodeModel parentNode = ((NodeProxy) parentNodeProxy).getDelegate();
         final NodeModel movedNode = getDelegate();
-        getMapController().moveNodesAsChildren(Arrays.asList(movedNode), parentNode);
+        getMapController().moveNodes(Arrays.asList(movedNode), parentNode, InsertionRelation.AS_CHILD);
 	}
 
 	// Node: R/W

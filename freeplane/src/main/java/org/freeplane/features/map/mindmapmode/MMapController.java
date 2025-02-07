@@ -511,9 +511,9 @@ public class MMapController extends MapController {
         insertNode(node, parent, findNewNodePosition(parent));
     }
 
-    public void insertNode(final NodeModel node, final NodeModel target, final INSERTION_RELATION insertionRelation) {
+    public void insertNode(final NodeModel node, final NodeModel target, final InsertionRelation insertionRelation) {
         NodeModel parent;
-        if (insertionRelation != INSERTION_RELATION.AS_CHILD) {
+        if (insertionRelation != InsertionRelation.AS_CHILD) {
             parent = target.getParentNode();
         }
         else {
@@ -702,7 +702,8 @@ public class MMapController extends MapController {
         Controller.getCurrentModeController().execute(actor, newParent.getMap());
     }
 
-    public void moveNodesAsChildren(final List<NodeModel> children, final NodeModel target) {
+    public void moveNodes(final List<NodeModel> children, final NodeModel target, InsertionRelation insertionRelation) {
+    	if(insertionRelation == InsertionRelation.AS_CHILD) {
         FreeNode r = Controller.getCurrentModeController().getExtension(FreeNode.class);
         for(NodeModel node : children){
             final IExtension extension = node.getExtension(FreeNode.class);
@@ -714,15 +715,15 @@ public class MMapController extends MapController {
         }
         int position = target.getChildCount();
         moveNodes(children, target, position);
-    }
-
-    public void moveNodesBefore(final List<NodeModel> children, final NodeModel target) {
-        final NodeModel newParent = target.getParentNode();
-        int newIndex = newParent.getIndex(target);
-        for(NodeModel node : children){
-            Controller.getCurrentModeController().getExtension(FreeNode.class).undoableDeactivateHook(node);
-        }
-        moveNodes(children, newParent, newIndex);
+    	}
+    	else {
+    		final NodeModel newParent = target.getParentNode();
+    		int newIndex = newParent.getIndex(target) + (insertionRelation == InsertionRelation.AS_SIBLING_AFTER ? 1 : 0);
+    		for(NodeModel node : children){
+    			Controller.getCurrentModeController().getExtension(FreeNode.class).undoableDeactivateHook(node);
+    		}
+    		moveNodes(children, newParent, newIndex);
+    	}
     }
 
     public void moveNodesInGivenDirection(NodeModel selectionRoot, NodeModel selected, Collection<NodeModel> movedNodes, final int direction) {
