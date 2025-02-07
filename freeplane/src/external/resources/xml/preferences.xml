@@ -42,6 +42,7 @@
 				<path name="default_save_dir" dir="true"/>
 			</separator>
 			<separator name="automatic_save">
+				<boolean name="automatically_overwrite_mindmap_files" />
 				<time_period name="time_for_automatic_save" />
 				<boolean name="single_backup_directory" />
 				<path name="single_backup_directory_path" dir="true" />
@@ -49,6 +50,7 @@
 				<number name="number_of_different_files_for_automatic_save"
 					min="0" max="25" />
 				<number name="backup_file_number" min="0" max="25" />
+				<boolean name="saveQuickFilters"/>
 				<number name="savedConditionLimit" min="0" max="1000"/>
 			</separator>
 			<separator name="export">

@@ -282,7 +282,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
         @Override
         public NodeModel getSearchRoot() {
-            return MapView.this.getSearchRoot();
+            if(currentRootView == null)
+                return null;
+            NodeModel searchRoot = MapView.this.getSearchRoot();
+            if(searchRoot == null)
+                return null;
+            NodeModel currentRoot = currentRootView.getNode();
+            return searchRoot == currentRoot || searchRoot.isDescendantOf(currentRoot) ? searchRoot : null;
         }
 
         @Override
@@ -290,9 +296,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             if(currentRootView == null)
                 return null;
             final NodeModel searchRoot = getSearchRoot();
-            NodeModel currentRoot = currentRootView.getNode();
-            return searchRoot == null || searchRoot == currentRoot
-                    || ! searchRoot.isDescendantOf(currentRoot) ? currentRoot : searchRoot;
+            return searchRoot == null ? currentRootView.getNode() : searchRoot;
         }
 		@Override
 		public Set<NodeModel> getSelection() {
@@ -2855,7 +2859,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	}
 
 	public void repaintVisible() {
-		getParent().repaint();
+		Container parent = getParent();
+		if(parent != null)
+			parent.repaint();
 	}
 
 	@Override
@@ -3204,7 +3210,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	}
 
     private void fireRootChanged() {
-        modeController.getMapController().fireMapChanged(
+        MapController mapController = modeController.getMapController();
+		mapController.fireMapChanged(
                 new MapChangeEvent(this, getMap(), IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT, null, null, false));
     }
 

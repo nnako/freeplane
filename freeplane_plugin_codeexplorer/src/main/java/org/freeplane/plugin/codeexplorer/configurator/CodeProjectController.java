@@ -75,7 +75,7 @@ public class CodeProjectController implements IExtension {
         Controller controller = modeController.getController();
         controller.getExtension(HighlightController.class).addNodeHighlighter(new NodeHighlighter() {
             @Override
-            public boolean isNodeHighlighted(NodeModel node, boolean isPrinting) {
+            public boolean isNodeHighlighted(NodeModel node, IMapSelection selection, boolean isPrinting) {
                 return !isPrinting
                         && modeController == Controller.getCurrentModeController()
                         && isDependencySelectedForNode(node);

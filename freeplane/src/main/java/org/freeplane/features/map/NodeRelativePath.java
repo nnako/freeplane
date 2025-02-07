@@ -82,13 +82,13 @@ public class NodeRelativePath {
 			 }
 		}
 		this.commonAncestor = commonAncestor;
-		int commonAncestorIndex = absoluteBeginPath.lastIndex();
-		beginPath = path(absoluteBeginPath, commonAncestorIndex);
-		endPath = path(absoluteEndPath, commonAncestorIndex);
+		int commonAncestorLevel = absoluteBeginPath.previousLevel();
+		beginPath = path(absoluteBeginPath, commonAncestorLevel);
+		endPath = path(absoluteEndPath, commonAncestorLevel);
     }
 
-	private int [] path(final NodeAbsolutePath absolutePath, int startingIndex) {
-	    int [] path = new int[absolutePath.size() - startingIndex - 1];
+	private int [] path(final NodeAbsolutePath absolutePath, int startingLevel) {
+	    int [] path = new int[absolutePath.size() - startingLevel - 1];
 	    if(path.length > 0){
 	    	for(int i = 0; i < path.length; i++){
 	    		NodeModel nodeOnPath = absolutePath.next();

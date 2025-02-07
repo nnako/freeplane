@@ -123,7 +123,7 @@ public class MultipleImageIcon implements Icon {
 	@Override
 	public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
 		boolean isLeftToRight = horizontalAlignment == SwingConstants.LEFT;
-	    final int graphicalIconWidth = getGraphicalIconWidth();
+	    final int graphicalIconWidth = isLeftToRight ? 0 : getGraphicalIconWidth();
 	    final int iconWidth = isLeftToRight ? 0 : getIconWidth();
 	    {
 	        int myX = x;
@@ -149,7 +149,14 @@ public class MultipleImageIcon implements Icon {
 	public NamedIcon getUIIconAt(Point coordinate){
 		if(! iconRow.containsIcons() || coordinate.x < 0 || coordinate.y < 0 || coordinate.y >= getGraphicalIconHeight())
 			return null;
+		boolean isLeftToRight = horizontalAlignment == SwingConstants.LEFT;
+		final int graphicalIconWidth = isLeftToRight ? 0 : getGraphicalIconWidth();
+		final int iconWidth = isLeftToRight ? 0 : getIconWidth();
 		int iconX = 0;
+		if (horizontalAlignment == SwingConstants.CENTER)
+			iconX += (iconWidth - graphicalIconWidth)/2;
+		else if (horizontalAlignment == SwingConstants.RIGHT)
+			iconX +=iconWidth - graphicalIconWidth;
 		for (int iconIndex = 0; iconIndex < iconRow.getImageCount(); iconIndex++)
 		{
 			iconX += iconRow.getIcon(iconIndex).getIconWidth();

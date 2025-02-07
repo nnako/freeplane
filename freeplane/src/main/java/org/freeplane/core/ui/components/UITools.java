@@ -430,13 +430,19 @@ public class UITools {
 		final IMapViewManager viewController = Controller.getCurrentController().getMapViewManager();
 		viewController.scrollNodeToVisible(node);
 		final Component c = viewController.getComponent(node);
+		if(c == null)
+			return;
 		UITools.setDialogLocationRelativeTo(dialog, c);
 	}
 
 	public static void setDialogLocationUnder(final JDialog dialog, final NodeModel node) {
+		if(node == null)
+			return;
 		final Controller controller = Controller.getCurrentController();
 		final IMapViewManager viewController = controller.getMapViewManager();
 		final JComponent c = (JComponent) viewController.getComponent(node);
+		if(c == null)
+			return;
 		final int x = 0;
 		final int y = c.getHeight();
 		final Point location = new Point(x, y);
@@ -476,7 +482,8 @@ public class UITools {
 		}
 		else {
 			viewController.scrollNodeToVisible(node);
-			parentComponent = viewController.getComponent(node);
+			Component c = viewController.getComponent(node);
+			parentComponent =  c != null ? c : getCurrentRootComponent();
 		}
 		return JOptionPane.showConfirmDialog(parentComponent, message, title, optionType, messageType);
 	}
@@ -494,8 +501,8 @@ public class UITools {
 		final Controller controller = Controller.getCurrentController();
 		final IMapViewManager viewController = controller.getMapViewManager();
 		viewController.scrollNodeToVisible(node);
-		final Component parentComponent = viewController.getComponent(node);
-		return JOptionPane.showInputDialog(parentComponent, message, initialValue);
+		final Component c = viewController.getComponent(node);
+		return JOptionPane.showInputDialog(c != null ? c : getCurrentRootComponent(), message, initialValue);
 	}
 
 	public static String showInputDialog( final NodeModel node, final String text,
@@ -506,8 +513,8 @@ public class UITools {
 		final Controller controller = Controller.getCurrentController();
 		final IMapViewManager viewController = controller.getMapViewManager();
 		viewController.scrollNodeToVisible(node);
-		final Component parentComponent = viewController.getComponent(node);
-		return JOptionPane.showInputDialog(parentComponent, text, title, type);
+		final Component c = viewController.getComponent(node);
+		return JOptionPane.showInputDialog(c != null ? c : getCurrentRootComponent(), text, title, type);
 	}
 
 	public static final String SCROLLBAR_INCREMENT = "scrollbar_increment";

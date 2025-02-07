@@ -7,13 +7,12 @@ public class MapNavigationUtils {
 
     public static NodeModel findNext(final Direction direction, NodeModel current, final NodeModel end) {
     	if (hasChildren(current, direction)) {
-    		final NodeModel next = current.getChildAt(0);
-    		if (atEnd(next, end)) {
-    			return null;
-    		}
-    		return next;
+    		return current.getChildAt(0);
     	}
     	for (;;) {
+    		if (atEnd(current, end)) {
+    			return null;
+    		}
     		final NodeModel parentNode = current.getParentNode();
     		if (parentNode == null) {
     			return current;
@@ -31,9 +30,6 @@ public class MapNavigationUtils {
     			return next;
     		}
     		current = parentNode;
-    		if (atEnd(current, end)) {
-    			return null;
-    		}
     	}
     }
 

@@ -170,7 +170,9 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 					notePanel.setViewedImage(icon, noteStyleAccessor.getHorizontalAlignment());
 				else if (transformedContent == note) {
 					notePanel.removeDocumentListener();
-					notePanel.setEditedContent(note, bodyCssRule, noteStyleSheet, noteForeground, noteBackground);
+					String noteContentType = noteController.getNoteContentType(node);
+					String editedContent = TextController.isHtmlContentType(noteContentType) ? HtmlUtils.textToHTML(note) : note;
+					notePanel.setEditedContent(editedContent, bodyCssRule, noteStyleSheet, noteForeground, noteBackground);
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {

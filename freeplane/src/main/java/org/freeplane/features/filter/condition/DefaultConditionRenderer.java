@@ -109,8 +109,8 @@ public class DefaultConditionRenderer implements ListCellRenderer, TableCellRend
 				component = cond.getListCellRendererComponent(fontMetrics);
             else {
 	            component = new JLabel(userName);
-	            component.setOpaque(true);
             }
+			component.setOpaque(true);
 			component.setToolTipText(cond.toString());
 		} else {
             component = new JLabel(value.toString());

@@ -253,8 +253,13 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		controller.addExtension(FilterController.class, extension);
 		controller.getExtension(HighlightController.class).addNodeHighlighter(new NodeHighlighter() {
 			@Override
-			public boolean isNodeHighlighted(NodeModel node, boolean isPrinting) {
-				return !isPrinting && FilterController.getController(controller).isNodeHighlighted(node);
+			public boolean isNodeHighlighted(NodeModel node, IMapSelection selection, boolean isPrinting) {
+				if (isPrinting)
+					return false;
+			NodeModel searchRoot = selection.getSearchRoot();
+			if(searchRoot != null && node != searchRoot && ! node.isDescendantOf(searchRoot))
+				return false;
+			return FilterController.getController(controller).isNodeHighlighted(node);
 			}
 
 			@Override
@@ -908,11 +913,13 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
             @Override
             public void setSelectedItem(Object anObject) {
-                int selectedItemIndex = getIndexOf(anObject);
-                if(selectedItemIndex > 3)
-                    removeElementAt(selectedItemIndex);
-                if(selectedItemIndex == -1 || selectedItemIndex > 3)
-                    insertElementAt(anObject, 3);
+                if(ResourceController.getResourceController().getBooleanProperty("saveQuickFilters")) {
+                	int selectedItemIndex = getIndexOf(anObject);
+                	if(selectedItemIndex == -1
+                			&& (anObject instanceof ASelectableCondition)
+                			&& ((ASelectableCondition)anObject).canBePersisted())
+                		insertElementAt(anObject, USER_DEFINED_CONDITION_START_INDEX);
+                }
                 super.setSelectedItem(anObject);
             }
 
@@ -934,8 +941,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
     }
 
 	void loadConditions(final DefaultComboBoxModel filterConditionModel, final String pathToFilterFile,
-			final boolean showPopupOnError)
-	        throws IOException {
+			final boolean showPopupOnError) throws IOException {
 		try {
 			final IXMLParser parser = XMLLocalParserFactory.createLocalXMLParser();
 			File filterFile = new File(pathToFilterFile);
@@ -965,7 +971,8 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
 	public void saveConditions() {
 		try {
-	        int savedConditionLimit = ResourceController.getResourceController().getIntProperty("savedConditionLimit");
+			ResourceController resourceController = ResourceController.getResourceController();
+			int savedConditionLimit = resourceController.getBooleanProperty("saveQuickFilters") ? resourceController.getIntProperty("savedConditionLimit") : Integer.MAX_VALUE;
 			saveConditions(getFilterConditions(), pathToFilterFile, savedConditionLimit);
 		}
 		catch (final Exception e) {
@@ -993,15 +1000,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 	void setFilterConditions(final DefaultComboBoxModel newConditionModel) {
 		filterConditions.removeAllElements();
 		Object selectedItem = newConditionModel.getSelectedItem();
-        filterConditions.addElement(selectedItem);
+		if(selectedItem != null)
+			filterConditions.addElement(selectedItem);
 		for (int i = 0; i < newConditionModel.getSize(); i++) {
 			Object element = newConditionModel.getElementAt(i);
 			if(element != selectedItem)
 			    filterConditions.addElement(element);
 		}
+		filterMenuBuilder.updateMenus();
 		addStandardConditions();
 		applyFilter(false);
-		filterMenuBuilder.updateMenus();
 	}
 
 	private void updateSettingsFromFilter(final Filter filter) {
@@ -1087,14 +1095,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
     }
 
 	private boolean isNodeHighlighted(NodeModel node) {
+		if(highlightCondition == null)
+			return false;
+		if(highlightedConditionContext == null)
+			return highlightCondition.checkNode(node);
 		try {
-			if(highlightedConditionContext != null)
-				highlightedConditionContext.setDisabled(true);
+			highlightedConditionContext.setDisabled(true);
 			return highlightCondition != null && highlightCondition.checkNode(node);
 		}
 		finally {
-			if(highlightedConditionContext != null)
-				highlightedConditionContext.setDisabled(false);
+			highlightedConditionContext.setDisabled(false);
 		}
     }
 

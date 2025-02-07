@@ -15,7 +15,9 @@ Add PlantUML support to Markdown
   - and save it as <user-directory>/resources/plantuml.jar
 Tag background, text color and placement configurable via the tag style
 Attribute table placement configurable via the attribute style
-Option "antialias_during_scrolling"
+Option "Antialias during scrolling"
+Option "Save ad-hoc filters"
+Auto-save option "Overwrite mind map files automatically", disabled by default
 Bug fixes
 
 ==============================
