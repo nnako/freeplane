@@ -55,8 +55,8 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
         @Override
         public void actionPerformed(final ActionEvent e, final NodeModel node) {
             Filter filter = FilterController.getFilter(node.getMap());
-            NodeModel selectionRoot = Controller.getCurrentController().getSelection().getSelectionRoot();
-            new FoldLevelChanger(selectionRoot, filter).foldAll(node);
+            IMapSelection selection = Controller.getCurrentController().getSelection();
+            new FoldLevelChanger(selection, filter).foldAll(node);
         }
     }
 
@@ -70,9 +70,9 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
 
         @Override
         public void actionPerformed(final ActionEvent e, final NodeModel node) {
-            NodeModel selectionRoot = Controller.getCurrentController().getSelection().getSelectionRoot();
+            IMapSelection selection = Controller.getCurrentController().getSelection();
             Filter filter = FilterController.getFilter(node.getMap());
-            new FoldLevelChanger(selectionRoot, filter).foldOneStage(node);
+            new FoldLevelChanger(selection, filter).foldOneStage(node);
         }
     }
 
@@ -87,9 +87,8 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
         @Override
         public void actionPerformed(final ActionEvent e, final NodeModel node) {
             IMapSelection selection = Controller.getCurrentController().getSelection();
-            NodeModel selectionRoot = selection.getSelectionRoot();
             Filter filter = FilterController.getFilter(node.getMap());
-            new FoldLevelChanger(selectionRoot, filter).unfoldAll(node);
+            new FoldLevelChanger(selection, filter).unfoldAll(node);
             if(selection.size() == 1 ) {
                 final MapController mapController = Controller.getCurrentModeController().getMapController();
                 mapController.scrollNodeTreeAfterUnfold(node);
@@ -107,9 +106,8 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
         @Override
         public void actionPerformed(final ActionEvent e, final NodeModel node) {
             IMapSelection selection = Controller.getCurrentController().getSelection();
-            NodeModel selectionRoot = selection.getSelectionRoot();
             Filter filter = FilterController.getFilter(node.getMap());
-            new FoldLevelChanger(selectionRoot, filter).unfoldOneStage(node);
+            new FoldLevelChanger(selection, filter).unfoldOneStage(node);
             if(selection.size() == 1 ) {
                 final MapController mapController = Controller.getCurrentModeController().getMapController();
                 mapController.scrollNodeTreeAfterUnfold(node);
@@ -212,13 +210,12 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
             Controller controller = Controller.getCurrentController();
             final IMapSelection selection = controller.getSelection();
             final NodeModel node = selection.getSelected();
-            NodeModel selectionRoot = selection.getSelectionRoot();
             Filter filter = FilterController.getFilter(node.getMap());
             if (e.getWheelRotation() > 0) {
-                new FoldLevelChanger(selectionRoot, filter).unfoldOneStage(node);
+                new FoldLevelChanger(selection, filter).unfoldOneStage(node);
             }
             else {
-                new FoldLevelChanger(selectionRoot, filter).foldOneStage(node);
+                new FoldLevelChanger(selection, filter).foldOneStage(node);
             }
             return true;
         }
@@ -228,10 +225,12 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
     static class FoldLevelChanger {
         final private Filter filter;
         final private NodeModel selectionRoot;
+        final private IMapSelection selection;
 
-        public FoldLevelChanger(NodeModel selectionRoot, Filter filter) {
+        public FoldLevelChanger(IMapSelection selection, Filter filter) {
             super();
-            this.selectionRoot = selectionRoot;
+            this.selection = selection;
+            this.selectionRoot = selection.getSelectionRoot();
             this.filter = filter;
         }
 
@@ -273,8 +272,7 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
         }
 
         private int getMaxDepth(final NodeModel node) {
-            final MapController mapController = Controller.getCurrentModeController().getMapController();
-            if (mapController.isFolded(node)
+            if (selection.isFolded(node)
                     || !node.hasChildren()
                     || ! filter.isFoldable(node)) {
                 return depth(node);
@@ -294,13 +292,12 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
             if (encryptionModel != null && !encryptionModel.isAccessible() ) {
                 return Integer.MAX_VALUE;
             }
-            final MapController mapController = Controller.getCurrentModeController().getMapController();
             Filter filter = Controller.getCurrentController().getSelection().getFilter();
             if (!node.hasChildren()) {
                 return Integer.MAX_VALUE;
             }
             if(node.hasVisibleContent(filter)) {
-                if (mapController.isFolded(node)) {
+                if (selection.isFolded(node)) {
                     return depth(node);
                 }
                 if (AlwaysUnfoldedNode.isAlwaysUnfolded(node)) {
