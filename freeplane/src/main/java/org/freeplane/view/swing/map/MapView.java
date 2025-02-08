@@ -372,7 +372,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		@Override
 		public void selectAsTheOnlyOneSelected(final NodeModel node) {
 			if(node.isVisible(filter) || currentRootView.getNode() == node)
-				display(node);
+				display(node, true);
 			final NodeView nodeView = getNodeView(node);
 			if (nodeView != null) {
 				MapView.this.selectAsTheOnlyOneSelected(nodeView);
@@ -405,8 +405,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		@Override
 		public void toggleSelected(final NodeModel node) {
-			display(node);
-			MapView.this.toggleSelected(getNodeView(node));
+			display(node, true);
+			NodeView nodeView = getNodeView(node);
+			MapView.this.toggleSelected(nodeView);
 		}
 
         @Override
@@ -416,7 +417,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             final ArrayList<NodeView> views = new ArrayList<NodeView>(nodes.length);
             for(final NodeModel node : nodes) {
             	if(node != null && (node.isVisible(filter) || currentRootView.getNode() == node)){
-            		display(node);
+            		display(node, true);
             		final NodeView nodeView = getNodeView(node);
             		if (nodeView != null) {
             			views.add(nodeView);
@@ -2994,6 +2995,10 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 
 	public void display(final NodeModel node) {
+		display(node, false);
+	}
+
+	private void display(final NodeModel node, boolean unfoldParentNodes) {
 		NodeModel currentRoot = currentRootView.getNode();
 		if(currentRoot != node && ! node.isDescendantOf(currentRoot))
 			restoreRootNode();
@@ -3003,11 +3008,14 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		final NodeModel parentNode = node.getParentNode();
 		if(parentNode == null)
 		    return;
-		display(parentNode);
+		display(parentNode, unfoldParentNodes);
 		final NodeView parentView = getNodeView(parentNode);
 		if(parentView == null)
 		    return;
-		parentView.setFolded(false);
+		if(unfoldParentNodes && parentNode.isFolded() && isSelected())
+			parentNode.setFolded(false);
+		else if(parentView.isFolded())
+			parentView.setFolded(false);
 	}
 
 
