@@ -54,6 +54,7 @@ import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.mindmapmode.MLinkController;
 import org.freeplane.features.map.EncryptionModel;
 import org.freeplane.features.map.FreeNode;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapController.Direction;
 import org.freeplane.features.map.MapModel;
@@ -569,7 +570,9 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 	// NodeRO: R
 	@Override
 	public boolean isFolded() {
-		return getDelegate().isFolded();
+		IMapSelection selection = Controller.getCurrentController().getSelection();
+		NodeModel node = getDelegate();
+		return selection != null ? selection.isFolded(node) : node.isFolded();
 	}
 
     // NodeRO: R
