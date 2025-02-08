@@ -3007,7 +3007,10 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		final NodeView parentView = getNodeView(parentNode);
 		if(parentView == null)
 		    return;
-		parentView.setFolded(false);
+		if(parentNode.isFolded() && isSelected())
+			parentNode.setFolded(false);
+		else if(parentView.isFolded())
+			parentView.setFolded(false);
 	}
 
 
