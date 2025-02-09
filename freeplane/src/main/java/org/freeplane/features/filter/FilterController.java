@@ -918,18 +918,17 @@ public class FilterController implements IExtension, IMapViewChangeListener {
             @Override
             public void setSelectedItem(Object anObject) {
             	if(getSize() > USER_DEFINED_CONDITION_START_INDEX) {
-            		if(ResourceController.getResourceController().getBooleanProperty("saveQuickFilters")) {
-            			int selectedItemIndex = getIndexOf(anObject);
-            			int pinnedConditionsCount = USER_DEFINED_CONDITION_START_INDEX + filterConditions.getPinnedConditionsCount();
-            			boolean isPinned = selectedItemIndex <= pinnedConditionsCount;
-            			if(! isPinned)
-            				removeElementAt(selectedItemIndex);
-            			if(! isPinned
-            					|| selectedItemIndex == -1
-            					&& (anObject instanceof ASelectableCondition)
-            					&& ((ASelectableCondition)anObject).canBePersisted())
-            				insertElementAt((ASelectableCondition) anObject, pinnedConditionsCount);
-            		}
+            		int selectedItemIndex = getIndexOf(anObject);
+        			int pinnedConditionsCount = USER_DEFINED_CONDITION_START_INDEX + filterConditions.getPinnedConditionsCount();
+        			boolean shouldReorder = selectedItemIndex > pinnedConditionsCount;
+        			if(shouldReorder)
+        				removeElementAt(selectedItemIndex);
+        			if(shouldReorder
+        					|| selectedItemIndex == -1
+        						&&(anObject instanceof ASelectableCondition)
+                				&& ((ASelectableCondition)anObject).canBePersisted()
+                				&& ResourceController.getResourceController().getBooleanProperty("saveQuickFilters"))
+        				insertElementAt((ASelectableCondition) anObject, pinnedConditionsCount);
             	}
                 super.setSelectedItem(anObject);
             }
