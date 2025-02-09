@@ -45,6 +45,7 @@ import org.freeplane.core.ui.menubuilders.generic.PhaseProcessor.Phase;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.FilterController;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
@@ -286,10 +287,12 @@ class ScriptingRegistration {
 					new ApplicationLifecycleListener() {
 						@Override
 						public void onStartupFinished() {
+							IMapSelection selection = Controller.getCurrentController().getSelection();
+							NodeModel selectedNode = selection != null ? selection.getSelected() : null;
 							for (File scriptFile : initScriptFiles) {
 								LogUtils.info("running init script " + scriptFile);
 								try {
-									ScriptingEngine.executeScript(null, scriptFile, null);
+									ScriptingEngine.executeScript(selectedNode, scriptFile, null);
 								} catch (Exception e) {
 									LogUtils.warn(e);
 								}
@@ -297,7 +300,7 @@ class ScriptingRegistration {
 							for (String scriptFile : scripts) {
 								LogUtils.info("running init script " + scriptFile);
 								try {
-									ScriptingEngine.executeScript(null, new File(scriptFile), ScriptingPermissions.getPermissiveScriptingPermissions());
+									ScriptingEngine.executeScript(selectedNode, new File(scriptFile), ScriptingPermissions.getPermissiveScriptingPermissions());
 								} catch (Exception e) {
 									LogUtils.warn(e);
 								}
