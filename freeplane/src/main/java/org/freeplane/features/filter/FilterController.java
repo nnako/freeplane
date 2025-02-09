@@ -996,8 +996,9 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 	        throws IOException {
 		final XMLElement saver = new XMLElement();
 		saver.setName("filter_conditions");
-		saver.setAttribute("pinnedConditionsCount", Integer.toString(filterConditionModel.getPinnedConditionsCount()));
-        int savedConditionNumber = Math.min(savedConditionLimit, filterConditionModel.getSize());
+		int pinnedConditionsCount = filterConditionModel.getPinnedConditionsCount();
+		saver.setAttribute("pinnedConditionsCount", Integer.toString(pinnedConditionsCount));
+        int savedConditionNumber = Math.min(Math.max(savedConditionLimit, pinnedConditionsCount), filterConditionModel.getSize());
         for (int i = 0; i < savedConditionNumber; i++) {
             final ASelectableCondition cond = (ASelectableCondition) filterConditionModel.getElementAt(i);
             if (cond != null && cond.canBePersisted()) {
