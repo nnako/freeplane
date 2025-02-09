@@ -3,6 +3,7 @@
 ==============================
 Drag and drop as sibling before or after
 Pin conditions in filter composer
+Bug fixes
 
 ==============================
 1.12.9
