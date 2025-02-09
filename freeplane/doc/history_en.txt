@@ -2,6 +2,7 @@
 1.12.10
 ==============================
 Drag and drop as sibling before or after
+Pin conditions in filter composer
 
 ==============================
 1.12.9

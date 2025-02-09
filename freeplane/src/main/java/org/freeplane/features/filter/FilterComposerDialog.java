@@ -14,8 +14,8 @@ import org.freeplane.features.styles.ConditionalStyleModel;
 public class FilterComposerDialog extends AFilterComposerDialog{
 
 	final private List<ASelectableCondition> conditions ;
-	private DefaultComboBoxModel model;
-	
+	private FilterConditions model;
+
 	public FilterComposerDialog(Variant variant) {
 		this(variant, null);
     }
@@ -26,7 +26,7 @@ public class FilterComposerDialog extends AFilterComposerDialog{
         conditions = new LinkedList<ASelectableCondition>();
 	}
 
-	protected DefaultComboBoxModel createModel() {
+	protected FilterConditions createModel() {
 		conditions.clear();
 		initializeModel();
 		return model;
@@ -34,17 +34,17 @@ public class FilterComposerDialog extends AFilterComposerDialog{
 
 	protected void initializeModel() {
 	    if(model == null){
-			model = new DefaultComboBoxModel();
+			model = new FilterConditions(new DefaultComboBoxModel(), 0);
 		}
     }
-	
+
     @Override
     protected boolean isSelectionValid(int[] selectedIndices) {
         return selectedIndices.length == 1;
     }
-    
+
     @Override
-	protected void applyModel(DefaultComboBoxModel model, int[] selectedIndices) {
+	protected void applyModel(FilterConditions model, int[] selectedIndices) {
 		if(this.model != model || selectedIndices.length != 1)
 			throw new IllegalArgumentException();
 		conditions.clear();
@@ -52,7 +52,7 @@ public class FilterComposerDialog extends AFilterComposerDialog{
 			conditions.add((ASelectableCondition) model.getElementAt(i));
 		}
     }
-			
+
 	public List<ASelectableCondition> getConditions() {
     	return conditions;
     }

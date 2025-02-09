@@ -33,7 +33,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
 import org.freeplane.core.ui.components.TagIcon;
-import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.svgicons.FixedSizeUIIcon;
 import org.freeplane.features.icon.Tag;
 import org.freeplane.features.icon.UIIcon;
@@ -56,9 +55,10 @@ public class DefaultConditionRenderer implements ListCellRenderer, TableCellRend
 	 * javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing
 	 * .JList, java.lang.Object, int, boolean, boolean)
 	 */
-	public Component getListCellRendererComponent(final JList list, final Object value, final int index,
+	@Override
+	public JComponent getListCellRendererComponent(final JList list, final Object value, final int index,
 	                                              final boolean isSelected, final boolean cellHasFocus) {
-		JComponent cellRendererComponent = (JComponent) getCellRendererComponent(
+		JComponent cellRendererComponent = getCellRendererComponent(
 		        list.getFontMetrics(list.getFont()),
 		        value, isSelected);
 		cellRendererComponent.setOpaque(true);
@@ -120,6 +120,7 @@ public class DefaultConditionRenderer implements ListCellRenderer, TableCellRend
 		return component;
 	}
 
+	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
                                                    int row, int column) {
 		Component cellRendererComponent = getCellRendererComponent(

@@ -279,7 +279,7 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 	private DefaultConditionRenderer conditionRenderer = null;
 // // 	private final Controller controller;
 	final private FilterChangeListener filterChangeListener;
-	private DefaultComboBoxModel filterConditions;
+	private FilterConditions filterConditions;
 	private final FilterMenuBuilder filterMenuBuilder;
 	private JComponent filterToolbar;
 	private final FilterHistory history;
@@ -854,6 +854,10 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 	}
 
 	public DefaultComboBoxModel getFilterConditions() {
+		return getFilterConditionsModel().getConditions();
+	}
+
+	public FilterConditions getFilterConditionsModel() {
 		if (filterConditions == null) {
 			initConditions();
 		}
@@ -909,21 +913,28 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
 	@SuppressWarnings("serial")
     private void initConditions() {
-		filterConditions = new DefaultComboBoxModel() {
+		filterConditions = new FilterConditions(new DefaultComboBoxModel<ASelectableCondition>() {
 
             @Override
             public void setSelectedItem(Object anObject) {
-                if(ResourceController.getResourceController().getBooleanProperty("saveQuickFilters")) {
-                	int selectedItemIndex = getIndexOf(anObject);
-                	if(selectedItemIndex == -1
-                			&& (anObject instanceof ASelectableCondition)
-                			&& ((ASelectableCondition)anObject).canBePersisted())
-                		insertElementAt(anObject, USER_DEFINED_CONDITION_START_INDEX);
-                }
+            	if(getSize() > USER_DEFINED_CONDITION_START_INDEX) {
+            		if(ResourceController.getResourceController().getBooleanProperty("saveQuickFilters")) {
+            			int selectedItemIndex = getIndexOf(anObject);
+            			int pinnedConditionsCount = USER_DEFINED_CONDITION_START_INDEX + filterConditions.getPinnedConditionsCount();
+            			boolean isPinned = selectedItemIndex <= pinnedConditionsCount;
+            			if(! isPinned)
+            				removeElementAt(selectedItemIndex);
+            			if(! isPinned
+            					|| selectedItemIndex == -1
+            					&& (anObject instanceof ASelectableCondition)
+            					&& ((ASelectableCondition)anObject).canBePersisted())
+            				insertElementAt((ASelectableCondition) anObject, pinnedConditionsCount);
+            		}
+            	}
                 super.setSelectedItem(anObject);
             }
 
-		};
+		}, 0);
 		addStandardConditions();
 		filterConditions.setSelectedItem(filterConditions.getElementAt(0));
 		if(activeFilterConditionComboBox == null)
@@ -933,14 +944,14 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 
 	public void loadDefaultConditions() {
 	    try {
-			loadConditions(getFilterConditions(), pathToFilterFile, false);
+			loadConditions(getFilterConditionsModel(), pathToFilterFile, false);
 		}
 		catch (final Exception e) {
 			LogUtils.severe(e);
 		}
     }
 
-	void loadConditions(final DefaultComboBoxModel filterConditionModel, final String pathToFilterFile,
+	void loadConditions(final FilterConditions internalConditionsModel, final String pathToFilterFile,
 			final boolean showPopupOnError) throws IOException {
 		try {
 			final IXMLParser parser = XMLLocalParserFactory.createLocalXMLParser();
@@ -949,11 +960,13 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 			parser.setReader(reader);
 			reader.setSystemID(filterFile.toURL().toString());
 			final XMLElement loader = (XMLElement) parser.parse();
+			int pinnedConditionsCount = loader.getAttribute("pinnedConditionsCount", 0);
+			internalConditionsModel.setPinnedConditionsCount(pinnedConditionsCount);
 			final Vector<XMLElement> conditions = loader.getChildren();
 			for (int i = 0; i < conditions.size(); i++) {
 				final ASelectableCondition condition = getConditionFactory().loadCondition(conditions.get(i));
 				if(condition != null){
-					filterConditionModel.addElement(condition);
+					internalConditionsModel.addElement(condition);
 				}
 			}
 		}
@@ -973,17 +986,18 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		try {
 			ResourceController resourceController = ResourceController.getResourceController();
 			int savedConditionLimit = resourceController.getBooleanProperty("saveQuickFilters") ? resourceController.getIntProperty("savedConditionLimit") : Integer.MAX_VALUE;
-			saveConditions(getFilterConditions(), pathToFilterFile, savedConditionLimit);
+			saveConditions(getFilterConditionsModel(), pathToFilterFile, savedConditionLimit);
 		}
 		catch (final Exception e) {
 			LogUtils.warn(e);
 		}
 	}
 
-	void saveConditions(final DefaultComboBoxModel filterConditionModel, final String pathToFilterFile, int savedConditionLimit)
+	void saveConditions(final FilterConditions filterConditionModel, final String pathToFilterFile, int savedConditionLimit)
 	        throws IOException {
 		final XMLElement saver = new XMLElement();
 		saver.setName("filter_conditions");
+		saver.setAttribute("pinnedConditionsCount", Integer.toString(filterConditionModel.getPinnedConditionsCount()));
         int savedConditionNumber = Math.min(savedConditionLimit, filterConditionModel.getSize());
         for (int i = 0; i < savedConditionNumber; i++) {
             final ASelectableCondition cond = (ASelectableCondition) filterConditionModel.getElementAt(i);
@@ -997,18 +1011,18 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		}
 	}
 
-	void setFilterConditions(final DefaultComboBoxModel newConditionModel) {
+	void setFilterConditions(final FilterConditions newConditionModel) {
 		filterConditions.removeAllElements();
-		Object selectedItem = newConditionModel.getSelectedItem();
-		if(selectedItem != null)
-			filterConditions.addElement(selectedItem);
 		for (int i = 0; i < newConditionModel.getSize(); i++) {
-			Object element = newConditionModel.getElementAt(i);
-			if(element != selectedItem)
-			    filterConditions.addElement(element);
+			ASelectableCondition element = newConditionModel.getElementAt(i);
+			filterConditions.addElement(element);
 		}
+		filterConditions.setPinnedConditionsCount(newConditionModel.getPinnedConditionsCount());
 		filterMenuBuilder.updateMenus();
 		addStandardConditions();
+		ASelectableCondition selectedItem = newConditionModel.getSelectedItem();
+		if(selectedItem != null)
+			filterConditions.setSelectedItem(selectedItem);
 		applyFilter(false);
 	}
 

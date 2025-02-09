@@ -27,6 +27,7 @@ import javax.swing.DefaultComboBoxModel;
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.FilterConditionEditor.Variant;
+import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.mode.Controller;
 
 /**
@@ -35,11 +36,11 @@ import org.freeplane.features.mode.Controller;
  */
 class EditFilterAction extends AFreeplaneAction {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 
+	 *
 	 */
 	private final FilterController filterController;
 	private AFilterComposerDialog filterDialog = null;
@@ -50,13 +51,9 @@ class EditFilterAction extends AFreeplaneAction {
 	}
 
 	public void actionPerformed(final ActionEvent arg0) {
-		final Object selectedItem = filterController.getFilterConditions().getSelectedItem();
-		if (selectedItem != null) {
-			getFilterDialog().setSelectedItem(selectedItem);
-		}
 		getFilterDialog().show();
 	}
-	
+
 	private class FilterComposerDialog extends AFilterComposerDialog{
 	    private static final long serialVersionUID = 1L;
 
@@ -64,24 +61,25 @@ class EditFilterAction extends AFreeplaneAction {
 	        super(TextUtils.getText("filter_dialog"), false, Variant.FILTER_COMPOSER, null);
         }
 
-		protected DefaultComboBoxModel createModel() {
-			DefaultComboBoxModel model = new DefaultComboBoxModel();
-			ComboBoxModel externalConditionsModel = filterController.getFilterConditions();
-			for (int i = FilterController.USER_DEFINED_CONDITION_START_INDEX; i < externalConditionsModel.getSize(); i++) {
-				final Object element = externalConditionsModel.getElementAt(i);
-				model.addElement(element);
+		protected FilterConditions createModel() {
+			DefaultComboBoxModel conditions = new DefaultComboBoxModel();
+			FilterConditions externalConditionsModel = filterController.getFilterConditionsModel();
+			ComboBoxModel<ASelectableCondition> externalConditions = externalConditionsModel.getConditions();
+			for (int i = FilterController.USER_DEFINED_CONDITION_START_INDEX; i < externalConditions.getSize(); i++) {
+				final Object element = externalConditions.getElementAt(i);
+				conditions.addElement(element);
 			}
-			Object selectedItem = externalConditionsModel.getSelectedItem(); 
-			if(model.getIndexOf(selectedItem) != -1){
-				model.setSelectedItem(selectedItem);
+			Object selectedItem = externalConditions.getSelectedItem();
+			if(conditions.getIndexOf(selectedItem) != -1){
+				conditions.setSelectedItem(selectedItem);
 			}
 			else{
-				model.setSelectedItem(null);
+				conditions.setSelectedItem(null);
 			}
-			return model;
+			return new FilterConditions(conditions, externalConditionsModel.getPinnedConditionsCount());
 	    }
-		
-		protected void applyModel(DefaultComboBoxModel model, int[] selectedIndices) {
+
+		protected void applyModel(FilterConditions model, int[] selectedIndices) {
 		    filterController.setFilterConditions(model);
 	    }
 
@@ -89,7 +87,7 @@ class EditFilterAction extends AFreeplaneAction {
         protected boolean isSelectionValid(int[] selectedIndices) {
             return true;
         }
-		
+
 	}
 
 	/*
