@@ -342,6 +342,7 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 					e.printStackTrace();
 				}
 
+				SwingUtilities.invokeLater( () ->
 				UITools.executeWhenNodeHasFocus(new Runnable() {
 					@Override
 					public void run() {
@@ -350,7 +351,7 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 						if(options.shouldStopAfterLaunch())
 							System.exit(0);
 					}
-				});
+				}));
 			}
 
 			private void focusCurrentView() {
