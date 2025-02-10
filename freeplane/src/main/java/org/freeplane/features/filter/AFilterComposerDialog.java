@@ -23,6 +23,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -56,6 +58,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import org.freeplane.core.ui.AFreeplaneAction;
+import org.freeplane.core.ui.AntiAliasingConfigurator;
 import org.freeplane.core.ui.LabelAndMnemonicSetter;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
@@ -682,12 +685,20 @@ public abstract class AFilterComposerDialog extends JDialog implements IMapViewC
 		pack();
 	}
 
-	private final static Border bevelBorder = BorderFactory.createEtchedBorder();
-	private final static Border emptyBorder;
-	static {
-		Insets insets = bevelBorder.getBorderInsets(null);
-		emptyBorder = BorderFactory.createEmptyBorder(insets.top, insets.left, insets.bottom, insets.right);
-	}
+	@SuppressWarnings("serial")
+	private final static Border pinnedBorder = new EmptyBorder(0, 12, 0, 0) {
+
+		@Override
+		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+			AntiAliasingConfigurator.setAntialiasing((Graphics2D) g);
+			g.setColor(c.getForeground());
+			int pinRadius = 2;
+			int pinDiameter = pinRadius * 2 + 1;
+			g.drawOval(x + pinRadius, y + pinRadius, pinDiameter, pinDiameter);
+			g.drawLine(x + pinDiameter, y + pinRadius + pinDiameter, x + pinDiameter, y + height*3/4);
+		}
+
+	};
 	private ListCellRenderer<ASelectableCondition> conditionRenderer() {
 		return new ListCellRenderer<ASelectableCondition>() {
 			@Override
@@ -695,7 +706,8 @@ public abstract class AFilterComposerDialog extends JDialog implements IMapViewC
 					ASelectableCondition value, int index, boolean isSelected, boolean cellHasFocus) {
 				DefaultConditionRenderer conditionRenderer = filterController.getConditionRenderer();
 				JComponent component = conditionRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-				component.setBorder(index >= 0 && index < internalConditionsModel.getPinnedConditionsCount() ? bevelBorder : emptyBorder);
+				if(index >= 0 && index < internalConditionsModel.getPinnedConditionsCount())
+					component.setBorder(pinnedBorder);
 				return component;
 			}
 		};
