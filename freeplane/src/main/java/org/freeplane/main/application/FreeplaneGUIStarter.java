@@ -332,35 +332,24 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 
 			private void finishStartup() {
 			    ExternalMapChangeMonitor.install(controller.getMapViewManager());
-				focusCurrentView();
 				contentPane.setVisible(true);
 				startupFinished = true;
-				try {
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				SwingUtilities.invokeLater( () ->
-				UITools.executeWhenNodeHasFocus(new Runnable() {
-					@Override
-					public void run() {
-						fireStartupFinished();
-						MenuUtils.executeMenuItems(options.getMenuItemsToExecute());
-						if(options.shouldStopAfterLaunch())
-							System.exit(0);
-					}
-				}));
+				focusCurrentView(() -> {
+					fireStartupFinished();
+					MenuUtils.executeMenuItems(options.getMenuItemsToExecute());
+					if(options.shouldStopAfterLaunch())
+						System.exit(0);
+				});
 			}
 
-			private void focusCurrentView() {
+			private void focusCurrentView(Runnable onFocus) {
 				final MapView currentMapView = (MapView) Controller.getCurrentController().getMapViewManager().getMapViewComponent();
 				if(currentMapView != null){
-					viewController.focusTo(currentMapView);
+					viewController.focusTo(currentMapView, onFocus);
 				}
+				else
+					onFocus.run();
 			}
-
 		});
 	}
 

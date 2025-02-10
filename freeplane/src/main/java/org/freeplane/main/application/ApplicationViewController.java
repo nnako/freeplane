@@ -391,9 +391,8 @@ class ApplicationViewController extends FrameController {
 	    mapViewWindows.loadLayout();
     }
 
-	public void focusTo(MapView currentMapView) {
-	    mapViewWindows.focusMapViewLater(currentMapView);
-
+	public void focusTo(MapView currentMapView, Runnable onFocus) {
+	    mapViewWindows.focusMapViewLater(currentMapView, onFocus);
     }
 
 	@Override

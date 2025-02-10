@@ -391,7 +391,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 						dockedView.restore();
 					else
 						dockedView.restoreFocus();
-					focusMapViewLater((MapView) pNewMap);
+					focusMapViewLater((MapView) pNewMap, () -> {/**/});
 					return;
 				}
 			}
@@ -581,7 +581,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		initialTabNameLoadingWasDone = true;
 	}
 
-	public void focusMapViewLater(final MapView mapView) {
+	public void focusMapViewLater(final MapView mapView, Runnable onFocus) {
 		Timer timer = new Timer(40, new ActionListener() {
 			int retryCount = 5;
 		    @Override
@@ -612,6 +612,8 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 					retryCount--;
 					eventTimer.start();
 				}
+				else
+					onFocus.run();
             }
 		  });
 		timer.setRepeats(false);
