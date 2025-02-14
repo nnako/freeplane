@@ -21,10 +21,12 @@ package org.freeplane.main.mindmapmode;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Box;
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -78,6 +80,7 @@ import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.hierarchicalicons.HierarchicalIcons;
 import org.freeplane.features.icon.mindmapmode.IconSelectionPlugin;
 import org.freeplane.features.icon.mindmapmode.MIconController;
+import org.freeplane.features.icon.mindmapmode.TagPanelManager;
 import org.freeplane.features.layout.LayoutController;
 import org.freeplane.features.layout.mindmapmode.MLayoutController;
 import org.freeplane.features.link.LinkController;
@@ -85,7 +88,6 @@ import org.freeplane.features.link.mindmapmode.MLinkController;
 import org.freeplane.features.map.AlwaysUnfoldedNode;
 import org.freeplane.features.map.FoldingController;
 import org.freeplane.features.map.FreeNode;
-import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.SummaryNode;
 import org.freeplane.features.map.mindmapmode.ChangeNodeLevelController;
 import org.freeplane.features.map.mindmapmode.MMapController;
@@ -174,7 +176,7 @@ public class MModeControllerFactory {
 		tabs.addTab("", ResourceController.getResourceController().getIcon("/images/panelTabs/formatTab.svg?useAccentColor=true"),
 		        styleScrollPane, TextUtils.getText("format_panel"));
 		tabs.addTab("", ResourceController.getResourceController().getIcon("/images/panelTabs/attributeTab.svg?useAccentColor=true"),
-		        createAttributesPanel(), TextUtils.getText("attributes_attribute"));
+		        createAttributesPanel(), "Tags and attributes" /*TextUtils.getText("attributes_attribute")*/);
         HierarchicalIcons.install(modeController);
 		new AutomaticLayoutController();
 		new BlinkingNodeHook();
@@ -213,11 +215,36 @@ public class MModeControllerFactory {
 
 	private JComponent createAttributesPanel() {
 		final JPanel tablePanel = new AttributePanelManager(modeController).getTablePanel();
-		final JScrollPane attributeScrollPane = new JScrollPane(tablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+		JPanel tagPanel = new TagPanelManager(modeController).getTagPanel();
+
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.insets = new Insets(5, 5, 5, 5);
+		gbc.anchor = GridBagConstraints.NORTH;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 1.0;
+
+		// Component 1
+		gbc.gridy = 0;
+		panel.add(tablePanel, gbc);
+
+		// Component 2
+		gbc.gridy = 1;
+		panel.add(tagPanel, gbc);
+
+		// Filler to push components to the top
+		gbc.gridy = 2;
+		gbc.weighty = 1.0;
+		JPanel filler = new JPanel();
+		filler.setOpaque(false);
+		panel.add(filler, gbc);
+
+		final JScrollPane attributeScrollPane = new JScrollPane(panel,
+		    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 		    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		UITools.setScrollbarIncrement(attributeScrollPane);
-		return attributeScrollPane;
-	}
+		return attributeScrollPane;	}
 	private MModeController createModeControllerImpl() {
 //		this.controller = controller;
 		createStandardControllers();

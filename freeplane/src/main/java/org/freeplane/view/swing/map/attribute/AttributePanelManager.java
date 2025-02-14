@@ -102,7 +102,7 @@ public class AttributePanelManager{
             }
 			attributeView = new AttributeView(nodeView, false);
             Box buttonBox = new Box(axis);
-            buttonBox.setAlignmentX(0.5f);
+            buttonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
             tablePanel.add(buttonBox);
             Dimension btnSize = new Dimension();
             {
@@ -204,7 +204,7 @@ public class AttributePanelManager{
             tablePanel.add(Box.createVerticalStrut(5));
             JComponent c = attributeView.getContainer();
             attributeView.update();
-            c.setAlignmentX(0.5f);
+            c.setAlignmentX(Component.LEFT_ALIGNMENT);
             tablePanel.add(c);
             tablePanel.add(Box.createGlue());
             tablePanel.revalidate();
@@ -269,7 +269,6 @@ public class AttributePanelManager{
         tablePanel = new JPanel();
         tablePanel.setMinimumSize(new Dimension(0, 0));
         tablePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablePanel.setAlignmentX(JComponent.CENTER_ALIGNMENT);
         tablePanel.setLayout(new BoxLayout(tablePanel, axis));
         final TableCreator tableCreator = new TableCreator();
 		final MapController mapController = modeController.getMapController();

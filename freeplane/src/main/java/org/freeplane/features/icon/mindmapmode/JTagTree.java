@@ -5,6 +5,7 @@
  */
 package org.freeplane.features.icon.mindmapmode;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.font.FontRenderContext;
@@ -152,5 +153,27 @@ class JTagTree extends JTree {
             }
         }
     }
+
+	@Override
+	public Dimension getMinimumSize() {
+		 return super.getMinimumSize();
+
+	}
+	@Override
+	public Dimension getMaximumSize() {
+		 return super.getMaximumSize();
+
+	}
+	@Override
+	public Dimension getPreferredSize() {
+		 return super.getPreferredSize();
+	}
+
+	@Override
+	public void setBounds(int x, int y, int width, int height) {
+		 super.setBounds(x, y, width, height);
+	}
+
+
 
 }

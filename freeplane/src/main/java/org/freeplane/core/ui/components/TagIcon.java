@@ -30,9 +30,15 @@ public class TagIcon implements Icon {
     private final Color tagTextColor;
     private final Color tagBackgroundColor;
     public TagIcon(Tag tag, Font font) {
-        this(tag, font, null, null);
+        this(tag, font, null, null, new FontRenderContext(new AffineTransform(), true, true));
+    }
+    public TagIcon(Tag tag, Font font, FontRenderContext fontRenderContext) {
+        this(tag, font, null, null, fontRenderContext);
     }
     public TagIcon(Tag tag, Font font, Color tagTextColor, Color tagBackgroundColor) {
+        this(tag, font, tagTextColor, tagBackgroundColor, new FontRenderContext(new AffineTransform(), true, true));
+    }
+    public TagIcon(Tag tag, Font font, Color tagTextColor, Color tagBackgroundColor, FontRenderContext fontRenderContext) {
         super();
         this.tag = tag;
         this.font = font;
@@ -40,7 +46,7 @@ public class TagIcon implements Icon {
         this.tagBackgroundColor = tagBackgroundColor;
         String content = tag.isEmpty() ? "*" : tag.getContent();
         Rectangle2D rect = font.getStringBounds(content , 0, content.length(),
-            new FontRenderContext(new AffineTransform(), true, true));
+            fontRenderContext);
         double textHeight = rect.getHeight();
         width = tag.isEmpty() ? 0 : (int) Math.ceil(rect.getWidth() + textHeight) + DOUBLE_MARGIN;
         height = (int)  Math.ceil(textHeight * 1.2) + DOUBLE_MARGIN;

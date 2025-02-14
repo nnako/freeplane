@@ -6,6 +6,7 @@
 package org.freeplane.features.icon.mindmapmode;
 
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -33,7 +34,8 @@ import org.freeplane.features.icon.TagCategories;
             Tag tag = tagCategories.tagWithoutCategories(node);
             if (! tag.isEmpty()) {
                 setText(null);
-                setIcon(new TagIcon(tag, getFont()));
+                Font font = getFont();
+                setIcon(new TagIcon(tag, font, getFontMetrics(font).getFontRenderContext()));
             } else if (node.getUserObject() != null) {
                 setText(node.getUserObject().toString());
             }
