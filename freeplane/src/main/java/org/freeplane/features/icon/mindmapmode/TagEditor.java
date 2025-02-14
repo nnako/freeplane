@@ -729,14 +729,14 @@ class TagEditor {
 
     protected void submit() {
         final MapModel map = node.getMap();
-        final TagCategories tagCategories = getCurrentMapTagCategories().copy();
-        final boolean isSeparatorUpdated = ! tagCategorySeparatorField.getText().equals(tagCategories.getTagCategorySeparator());
+        final TagCategories newTagCategories = getCurrentMapTagCategories().copy();
+        final boolean isSeparatorUpdated = ! tagCategorySeparatorField.getText().equals(newTagCategories.getTagCategorySeparator());
         if(isSeparatorUpdated) {
-            tagCategories.updateTagCategorySeparator(tagCategorySeparatorField.getText());
-            iconController.setTagCategories(map, tagCategories);
+            newTagCategories.updateTagCategorySeparator(tagCategorySeparatorField.getText());
+            iconController.setTagCategories(map, newTagCategories);
         }
-        else if(tagCategories.areCategoriesChanged())
-            iconController.setTagCategories(map, tagCategories);
+        else if(newTagCategories.areCategoriesChanged())
+            iconController.setTagCategories(map, newTagCategories);
 
         List<Tag> tags = getCurrentTags();
         iconController.setTags(node, tags, true);
