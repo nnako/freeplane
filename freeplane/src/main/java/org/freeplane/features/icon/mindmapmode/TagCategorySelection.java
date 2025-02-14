@@ -54,4 +54,8 @@ public class TagCategorySelection implements Transferable {
             return tagCategorySelection;
     }
 
+	public String getId() {
+		return id;
+	}
+
 }
