@@ -229,12 +229,18 @@ public class MModeControllerFactory {
 		gbc.gridy = 0;
 		panel.add(tablePanel, gbc);
 
-		// Component 2
+		// Separator
 		gbc.gridy = 1;
+		gbc.insets = new Insets(0, 5, 0, 5);
+		panel.add(new javax.swing.JSeparator(), gbc);
+
+		// Component 2
+		gbc.gridy = 2;
+		gbc.insets = new Insets(5, 5, 5, 5);
 		panel.add(tagPanel, gbc);
 
 		// Filler to push components to the top
-		gbc.gridy = 2;
+		gbc.gridy = 3;
 		gbc.weighty = 1.0;
 		JPanel filler = new JPanel();
 		filler.setOpaque(false);
@@ -244,7 +250,8 @@ public class MModeControllerFactory {
 		    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 		    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		UITools.setScrollbarIncrement(attributeScrollPane);
-		return attributeScrollPane;	}
+		return attributeScrollPane;
+	}
 	private MModeController createModeControllerImpl() {
 //		this.controller = controller;
 		createStandardControllers();
