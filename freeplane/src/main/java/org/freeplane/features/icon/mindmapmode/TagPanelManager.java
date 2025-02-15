@@ -70,6 +70,7 @@ public class TagPanelManager {
                 treeFont = newFont;
                 tagTree = new TagTreeViewerFactory(newCategories, newFont).getTree();
                 tagTree.setFont(newFont);
+                applyFilter();
                 tagTree.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -224,13 +225,17 @@ public class TagPanelManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 filterTimer.stop();
-                String text = filterField.getText().trim();
                 // Build predicate: if empty, no filtering; else, filter nodes whose user object toString() contains the text.
                 if (tagTree != null) {
-                    tagTree.setFilter(text.isEmpty() ? null : node -> node.toString().toLowerCase().contains(text.toLowerCase()));
+                    applyFilter();
                 }
             }
         });
         filterTimer.setRepeats(false);
     }
+
+	private void applyFilter() {
+		String text = filterField.getText().trim();
+		tagTree.setFilter(text.isEmpty() ? null : node -> node.toString().toLowerCase().contains(text.toLowerCase()));
+	}
 }
