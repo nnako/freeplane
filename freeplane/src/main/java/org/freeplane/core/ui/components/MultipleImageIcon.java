@@ -41,7 +41,6 @@ import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 
 public class MultipleImageIcon implements Icon {
     private static final int UNKNOWN = -1;
-	final private int TAG_GAP = new Quantity(2, LengthUnit.pt).toBaseUnitsRounded();
     final private IconRow iconRow = new IconRow();
 	final private List<NamedIcon> mUIIcons = new ArrayList<>();
 	final private List<TagIcon> mTags = new ArrayList<>();
@@ -96,7 +95,7 @@ public class MultipleImageIcon implements Icon {
     public int getIconHeight() {
 		int height = getGraphicalIconHeight();
 		for(Icon tag : mTags)
-		    height += TAG_GAP + tag.getIconHeight();
+		    height += tag.getIconHeight();
         return height;
 	}
 
@@ -134,7 +133,7 @@ public class MultipleImageIcon implements Icon {
 	        iconRow.paintIcon(c, g, myX, y);
 	    }
 	    int graphicalIconHeight = getGraphicalIconHeight();
-	    int myY = graphicalIconHeight == 0 ? y : y + TAG_GAP + graphicalIconHeight;
+	    int myY = graphicalIconHeight == 0 ? y : y + graphicalIconHeight;
 	    for (final Icon icon : mTags) {
 	        int myX = x;
 	        if (horizontalAlignment == SwingConstants.CENTER)
@@ -142,7 +141,7 @@ public class MultipleImageIcon implements Icon {
 	        else if (horizontalAlignment == SwingConstants.RIGHT)
 	        	myX +=iconWidth - icon.getIconWidth();
 	        icon.paintIcon(c, g, myX, myY);
-	        myY += TAG_GAP + icon.getIconHeight();
+	        myY += icon.getIconHeight();
 	    }
 	}
 
@@ -170,12 +169,12 @@ public class MultipleImageIcon implements Icon {
         if(mTags.isEmpty() || coordinate.x < 0 || coordinate.y <= getGraphicalIconHeight() || coordinate.x >= getIconWidth())
             return null;
         int graphicalIconHeight = getGraphicalIconHeight();
-        int myY = graphicalIconHeight == 0 ? 0 : TAG_GAP + graphicalIconHeight;
+        int myY = graphicalIconHeight == 0 ? 0 : graphicalIconHeight;
         for (final TagIcon icon : mTags) {
             final int iconHeight = icon.getIconHeight();
             if(myY <= coordinate.y && coordinate.y < myY + iconHeight)
                 return icon;
-            myY += TAG_GAP + iconHeight;
+            myY += iconHeight;
         }
         return null;
     }
