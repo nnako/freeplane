@@ -176,7 +176,7 @@ public class MModeControllerFactory {
 		tabs.addTab("", ResourceController.getResourceController().getIcon("/images/panelTabs/formatTab.svg?useAccentColor=true"),
 		        styleScrollPane, TextUtils.getText("format_panel"));
 		tabs.addTab("", ResourceController.getResourceController().getIcon("/images/panelTabs/attributeTab.svg?useAccentColor=true"),
-		        createAttributesPanel(), "Tags and attributes" /*TextUtils.getText("attributes_attribute")*/);
+		        createAttributesPanel(), TextUtils.getText("attributes_and_tags"));
         HierarchicalIcons.install(modeController);
 		new AutomaticLayoutController();
 		new BlinkingNodeHook();
