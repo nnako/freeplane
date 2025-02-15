@@ -27,7 +27,7 @@ import javax.swing.tree.TreeSelectionModel;
 import org.freeplane.features.icon.Tag;
 import org.freeplane.features.icon.TagCategories;
 
-class JTagTree extends JTree {
+class JTagTree extends FilterableJTree {
 	private static final long serialVersionUID = 1L;
 	private final TagCategories tagCategories;
 	private final Font tagFont;

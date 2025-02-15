@@ -1,5 +1,7 @@
 package org.freeplane.features.icon.factory;
 
+import java.awt.Component;
+import java.awt.Font;
 import java.net.URL;
 import java.util.WeakHashMap;
 
@@ -69,13 +71,13 @@ class GraphicIconFactory implements IconFactory {
 		}
 		return result;
 	}
-	
-	
+
+
 
 	@Override
 	public void registerIcon(Icon icon, URL url) {
 		ICON_URLS.put(icon, url);
-		
+
 	}
 
 	@Override
@@ -93,5 +95,17 @@ class GraphicIconFactory implements IconFactory {
 		else
 			throw new IllegalArgumentException("unknown icon");
 	}
+
+	@Override
+	public  Icon getScaledIcon(final Icon icon, final Component component) {
+		if(!canScaleIcon(icon))
+			return icon;
+		final Font font = component.getFont();
+		final int fontHeight = component.getFontMetrics(font).getHeight();
+		final Quantity<LengthUnit> iconHeight = new Quantity<LengthUnit>(fontHeight, LengthUnit.px);
+		Icon scaledIcon = getScaledIcon(icon, iconHeight);
+		return scaledIcon;
+	}
+
 
 }

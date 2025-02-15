@@ -1,5 +1,6 @@
 package org.freeplane.core.ui.menubuilders.menu;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 
@@ -19,10 +20,8 @@ class IconReplacer {
 		final IconFactory imageIconFactory = IconFactory.getInstance();
 		if (icon != null && imageIconFactory.canScaleIcon(icon)) {
 			if(actionComponent.getText() != null) {
-				final Font font = actionComponent.getFont();
-				final int fontHeight = actionComponent.getFontMetrics(font).getHeight();
-				final Quantity<LengthUnit> iconHeight = new Quantity<LengthUnit>(fontHeight, LengthUnit.px);
-				actionComponent.setIcon(FreeplaneIconFactory.toImageIcon(imageIconFactory.getScaledIcon(icon, iconHeight)));
+				Icon scaledIcon = imageIconFactory.getScaledIcon(icon, actionComponent);
+				actionComponent.setIcon(FreeplaneIconFactory.toImageIcon(scaledIcon));
 			}
 			else {
 				Dimension preferredSize = actionComponent.getPreferredSize();

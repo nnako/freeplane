@@ -1,5 +1,6 @@
 package org.freeplane.features.icon.factory;
 
+import java.awt.Component;
 import java.net.URL;
 
 import javax.swing.Icon;
@@ -23,6 +24,12 @@ class HeadlessIconFactory implements IconFactory {
 	@Override
 	public Icon getScaledIcon(Icon icon, Quantity<LengthUnit> quantity) {
 		return EMPTY_ICON;
+	}
+
+	@Override
+	public Icon getScaledIcon(Icon icon, Component component) {
+		return EMPTY_ICON;
+
 	}
 
 	@Override

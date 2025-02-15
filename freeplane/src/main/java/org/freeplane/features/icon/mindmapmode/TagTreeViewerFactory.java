@@ -84,7 +84,7 @@ class TagTreeViewerFactory implements IExtension {
         return false;
     }
 
-    JTree getTree() {
+    JTagTree getTree() {
         return tree;
     }
 }
