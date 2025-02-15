@@ -24,12 +24,19 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import org.freeplane.features.icon.IconController;
+import org.freeplane.features.icon.Tag;
 import org.freeplane.features.icon.TagCategories;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.INodeSelectionListener;
@@ -70,6 +77,24 @@ public class TagPanelManager {
                 treeCategories = newCategories;
                 treeFont = newFont;
                 tagTree = new TagTreeViewerFactory(newCategories, newFont).getTree();
+                tagTree.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if(e.getClickCount() != 2)
+                            return;
+                        JTagTree tree = (JTagTree) e.getSource();
+                        int x = e.getX();
+                        int y = e.getY();
+                        TreePath path = tree.getPathForLocation(x, y);
+                        if (path == null) return; // Clicked outside any node
+                        Rectangle nodeBounds = tree.getUI().getPathBounds(tree, path);
+                        if (nodeBounds == null) return;
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                        Tag tag = treeCategories.categorizedTag(node);
+                        iconController.insertTagsIntoSelectedNodes(Collections.singletonList(tag));
+                    }
+                });
             }
             TagPanelManager.this.updateTreeAndButton(tagTree);
         }
