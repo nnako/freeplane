@@ -108,55 +108,131 @@ public class AttributePanelManager{
                 return;
             }
             removeOldView();
-            final MainView mainView = (MainView) Controller.getCurrentController()
-                    .getMapViewManager().getSelectedComponent();
-            if (mainView == null)
-                return;
-            AttributeController.getController(modeController).createAttributeTableModel(node);
-            final NodeView nodeView = mainView.getNodeView();
-            // it is actually impossible but it happens
-            if(nodeView == null)  {
-                LogUtils.severe(new RuntimeException("Node view null for mainView" + String.valueOf(mainView) + " and node " + String.valueOf(node)));
+            
+            final MainView mainView = getSelectedMainView();
+            if (mainView == null) {
                 return;
             }
+            
+            final NodeView nodeView = getNodeViewSafely(mainView, node);
+            if (nodeView == null) {
+                return;
+            }
+            
+            createNewAttributeView(nodeView);
+            createButtonPanel();
+            finalizeTablePanelLayout();
+        }
+
+        private MainView getSelectedMainView() {
+            return (MainView) Controller.getCurrentController()
+                    .getMapViewManager().getSelectedComponent();
+        }
+
+        private NodeView getNodeViewSafely(MainView mainView, NodeModel node) {
+            AttributeController.getController(modeController).createAttributeTableModel(node);
+            final NodeView nodeView = mainView.getNodeView();
+            if (nodeView == null) {
+                LogUtils.severe(new RuntimeException("Node view null for mainView" + String.valueOf(mainView) + " and node " + String.valueOf(node)));
+                return null;
+            }
+            return nodeView;
+        }
+
+        private void createNewAttributeView(NodeView nodeView) {
             attributeView = new AttributeView(nodeView, false);
+        }
+
+        private void createButtonPanel() {
             Box buttonBox = new Box(axis);
             buttonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
             tablePanel.add(buttonBox);
+            
             Dimension btnSize = new Dimension();
-            {
-                final JButton newAttributeButton = new JButton(TextUtils.getText("attributes_popup_new"));
-                newAttributeButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent arg0) {
-                        if(! modeController.isEditingLocked())
-                            attributeView.addRow();
-                    }
-                });
-                increaseSize(btnSize, newAttributeButton);
-                buttonBox.add(newAttributeButton);
-            }
-            {
-                final JButton optimalWidthButton = new JButton(TextUtils.getText("attributes_popup_optimal_width"));
-                optimalWidthButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent arg0) {
-                        if(! modeController.isEditingLocked())
-                            attributeView.setOptimalColumnWidths();
-                    }
-                });
-                increaseSize(btnSize, optimalWidthButton);
-                buttonBox.add(optimalWidthButton);
-            }
-            {
-                formatChooser = createFormatChooser();
-                formatChooser.setEnabled(false);
-                increaseSize(btnSize, formatChooser);
-                buttonBox.add(formatChooser);
-            }
+            addNewAttributeButton(buttonBox, btnSize);
+            addOptimalWidthButton(buttonBox, btnSize);
+            addFormatChooser(buttonBox, btnSize);
+            
+            normalizeButtonSizes(buttonBox, btnSize);
+            setupFormatChooserListeners();
+        }
+
+        private void addNewAttributeButton(Box buttonBox, Dimension btnSize) {
+            final JButton newAttributeButton = new JButton(TextUtils.getText("attributes_popup_new"));
+            newAttributeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(final ActionEvent arg0) {
+                    if (!modeController.isEditingLocked())
+                        attributeView.addRow();
+                }
+            });
+            increaseSize(btnSize, newAttributeButton);
+            buttonBox.add(newAttributeButton);
+        }
+
+        private void addOptimalWidthButton(Box buttonBox, Dimension btnSize) {
+            final JButton optimalWidthButton = new JButton(TextUtils.getText("attributes_popup_optimal_width"));
+            optimalWidthButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(final ActionEvent arg0) {
+                    if (!modeController.isEditingLocked())
+                        attributeView.setOptimalColumnWidths();
+                }
+            });
+            increaseSize(btnSize, optimalWidthButton);
+            buttonBox.add(optimalWidthButton);
+        }
+
+        private void normalizeButtonSizes(Box buttonBox, Dimension btnSize) {
             for (int i = 0; i < buttonBox.getComponentCount(); i++) {
                 buttonBox.getComponent(i).setMaximumSize(btnSize);
             }
+        }
+
+        private void finalizeTablePanelLayout() {
+            tablePanel.add(Box.createVerticalStrut(5));
+            JComponent c = attributeView.getContainer();
+            attributeView.update();
+            c.setAlignmentX(Component.LEFT_ALIGNMENT);
+            tablePanel.add(c);
+            tablePanel.add(Box.createGlue());
+            tablePanel.revalidate();
+            tablePanel.repaint();
+        }
+
+        private void addFormatChooser(Box buttonBox, Dimension btnSize) {
+            formatChooser = createFormatChooser();
+            formatChooser.setEnabled(false);
+            increaseSize(btnSize, formatChooser);
+            buttonBox.add(formatChooser);
+        }
+
+        private JComboBox createFormatChooser() {
+            final List<PatternFormat> formats = FormatController.getController().getAllFormats();
+            Vector<PatternFormat> items = new Vector<PatternFormat>(formats);
+            for(int i = items.size()-1; i >= 0; i--){
+                PatternFormat item = items.get(i);
+                if(item.getType().equals(PatternFormat.TYPE_IDENTITY) &&
+                        ! item.getType().endsWith(PatternFormat.IDENTITY_PATTERN))
+                    items.remove(i);
+            }
+            final JComboBox formatChooser = JComboBoxFactory.create(items);
+            formatChooser.setEditable(true);
+            formatChooser.setSelectedItem(null);
+            final String NODE_FORMAT = "OptionPanel.nodeformat"; // duplicated from StyleEditorPanel
+            formatChooser.setToolTipText(TextUtils.getRawText(NODE_FORMAT + ".tooltip"));
+            formatChooser.setAlignmentX(Component.LEFT_ALIGNMENT);
+            formatChooser.setBorder(new TitledBorder(TextUtils.getText("value_format")));
+            return formatChooser;
+        }
+
+        private void increaseSize(final Dimension btnSize, final JComponent comp) {
+            final Dimension preferredSize = comp.getPreferredSize();
+            btnSize.width =  Math.max(btnSize.width, preferredSize.width);
+            btnSize.height =  Math.max(btnSize.height, preferredSize.height);
+        }
+
+        private void setupFormatChooserListeners() {
             formatChooser.addItemListener(new ItemListener() {
                 boolean handlingEvent = false;
 
@@ -220,14 +296,6 @@ public class AttributePanelManager{
                     }
                 }
             });
-            tablePanel.add(Box.createVerticalStrut(5));
-            JComponent c = attributeView.getContainer();
-            attributeView.update();
-            c.setAlignmentX(Component.LEFT_ALIGNMENT);
-            tablePanel.add(c);
-            tablePanel.add(Box.createGlue());
-            tablePanel.revalidate();
-            tablePanel.repaint();
         }
 
         private void setSelectedFormatItem() {
@@ -248,31 +316,6 @@ public class AttributePanelManager{
             else {
                 formatChooser.setEnabled(false);
             }
-        }
-
-        private JComboBox createFormatChooser() {
-            final List<PatternFormat> formats = FormatController.getController().getAllFormats();
-            Vector<PatternFormat> items = new Vector<PatternFormat>(formats);
-            for(int i = items.size()-1; i >= 0; i--){
-                PatternFormat item = items.get(i);
-                if(item.getType().equals(PatternFormat.TYPE_IDENTITY) &&
-                        ! item.getType().endsWith(PatternFormat.IDENTITY_PATTERN))
-                    items.remove(i);
-            }
-            final JComboBox formatChooser = JComboBoxFactory.create(items);
-            formatChooser.setEditable(true);
-            formatChooser.setSelectedItem(null);
-            final String NODE_FORMAT = "OptionPanel.nodeformat"; // duplicated from StyleEditorPanel
-            formatChooser.setToolTipText(TextUtils.getRawText(NODE_FORMAT + ".tooltip"));
-            formatChooser.setAlignmentX(Component.LEFT_ALIGNMENT);
-            formatChooser.setBorder(new TitledBorder(TextUtils.getText("value_format")));
-            return formatChooser;
-        }
-
-        private void increaseSize(final Dimension btnSize, final JComponent comp) {
-            final Dimension preferredSize = comp.getPreferredSize();
-            btnSize.width =  Math.max(btnSize.width, preferredSize.width);
-            btnSize.height =  Math.max(btnSize.height, preferredSize.height);
         }
 
         @Override
