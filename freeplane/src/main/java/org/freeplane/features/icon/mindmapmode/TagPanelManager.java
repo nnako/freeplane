@@ -13,6 +13,8 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -53,6 +55,21 @@ public class TagPanelManager {
     private final JTextField filterField = new JTextField();
     private Timer filterTimer;
 
+    // Add new cache-related fields
+    private static class TreeCache {
+        final JTagTree tree;
+        final TagCategories categories;
+        final Font font;
+        
+        TreeCache(JTagTree tree, TagCategories categories, Font font) {
+            this.tree = tree;
+            this.categories = categories;
+            this.font = font;
+        }
+    }
+    
+    private final WeakHashMap<MapModel, TreeCache> treeCache = new WeakHashMap<>();
+
     private class TableCreator implements INodeSelectionListener, IMapChangeListener, HierarchyListener {
         @Override
         public void hierarchyChanged(HierarchyEvent e) {
@@ -84,7 +101,13 @@ public class TagPanelManager {
 
             TagCategories newCategories = map.getIconRegistry().getTagCategories();
             Font newFont = iconController.getTagFont(map.getRootNode());
-            if (tagTree == null || treeCategories != newCategories || !treeFont.equals(newFont)) {
+            
+            TreeCache cached = treeCache.get(map);
+            if (cached != null && cached.categories == newCategories && cached.font.equals(newFont)) {
+                tagTree = cached.tree;
+                treeCategories = cached.categories;
+                treeFont = cached.font;
+            } else {
                 treeCategories = newCategories;
                 treeFont = newFont;
                 tagTree = new TagTreeViewerFactory(newCategories, newFont).getTree();
@@ -107,9 +130,12 @@ public class TagPanelManager {
                         iconController.insertTagsIntoSelectedNodes(Collections.singletonList(tag));
                     }
                 });
-                // (Re)hook our filter field listener to update the tree filter.
                 setupFilterField();
+                
+                // Store in cache
+                treeCache.put(map, new TreeCache(tagTree, treeCategories, treeFont));
             }
+            
             TagPanelManager.this.updateTreeAndButton(tagTree);
         }
 
