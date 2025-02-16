@@ -8,12 +8,15 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTree;
@@ -22,7 +25,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.JLabel;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.svgicons.FreeplaneIconFactory;
@@ -36,6 +38,7 @@ import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 
 public class TagPanelManager {
@@ -50,7 +53,15 @@ public class TagPanelManager {
     private final JTextField filterField = new JTextField();
     private Timer filterTimer;
 
-    private class TableCreator implements INodeSelectionListener, IMapChangeListener {
+    private class TableCreator implements INodeSelectionListener, IMapChangeListener, HierarchyListener {
+        @Override
+        public void hierarchyChanged(HierarchyEvent e) {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
+                if (tagPanel.isShowing()) {
+                    onChange(Controller.getCurrentController().getMap());
+                }
+            }
+        }
 
         @Override
         public void onDeselect(NodeModel node) {
@@ -63,6 +74,14 @@ public class TagPanelManager {
         }
 
         private void onChange(MapModel map) {
+            if (!tagPanel.isShowing()) {
+                return;
+            }
+            if (map == null) {
+                TagPanelManager.this.updateTreeAndButton(null);
+                return;
+            }
+
             TagCategories newCategories = map.getIconRegistry().getTagCategories();
             Font newFont = iconController.getTagFont(map.getRootNode());
             if (tagTree == null || treeCategories != newCategories || !treeFont.equals(newFont)) {
@@ -112,6 +131,7 @@ public class TagPanelManager {
         final MapController mapController = modeController.getMapController();
         mapController.addNodeSelectionListener(tableCreator);
         mapController.addMapChangeListener(tableCreator);
+        tagPanel.addHierarchyListener(tableCreator);
         iconController = (MIconController) modeController.getExtension(IconController.class);
 
         updateTreeAndButton(null);
