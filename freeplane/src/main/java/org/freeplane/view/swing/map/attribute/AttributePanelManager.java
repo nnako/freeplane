@@ -23,6 +23,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
@@ -66,14 +68,28 @@ public class AttributePanelManager{
     final private JPanel tablePanel;
     private ModeController modeController;
     private int axis = BoxLayout.Y_AXIS;
-    private class TableCreator implements INodeSelectionListener, INodeChangeListener{
-
+    private class TableCreator implements INodeSelectionListener, INodeChangeListener, HierarchyListener {
         private AttributeView attributeView;
         private JComboBox formatChooser;
 
+        public TableCreator() {
+            tablePanel.addHierarchyListener(this);
+        }
+
         @Override
-		public void onDeselect(NodeModel node) {
-            removeOldView();
+        public void hierarchyChanged(HierarchyEvent e) {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
+                if (tablePanel.isShowing()) {
+                    onSelect(Controller.getCurrentController().getSelection().getSelected());
+                } else
+                    removeOldView();
+            }
+        }
+
+        @Override
+        public void onDeselect(NodeModel node) {
+            if (tablePanel.isShowing())
+                removeOldView();
         }
 
         private void removeOldView() {
@@ -87,20 +103,23 @@ public class AttributePanelManager{
         }
 
         @Override
-		public void onSelect(NodeModel node) {
+        public void onSelect(NodeModel node) {
+            if (!tablePanel.isShowing()) {
+                return;
+            }
             removeOldView();
             final MainView mainView = (MainView) Controller.getCurrentController()
-            		.getMapViewManager().getSelectedComponent();
+                    .getMapViewManager().getSelectedComponent();
             if (mainView == null)
                 return;
             AttributeController.getController(modeController).createAttributeTableModel(node);
             final NodeView nodeView = mainView.getNodeView();
             // it is actually impossible but it happens
             if(nodeView == null)  {
-            	LogUtils.severe(new RuntimeException("Node view null for mainView" + String.valueOf(mainView) + " and node " + String.valueOf(node)));
-            	return;
+                LogUtils.severe(new RuntimeException("Node view null for mainView" + String.valueOf(mainView) + " and node " + String.valueOf(node)));
+                return;
             }
-			attributeView = new AttributeView(nodeView, false);
+            attributeView = new AttributeView(nodeView, false);
             Box buttonBox = new Box(axis);
             buttonBox.setAlignmentX(Component.LEFT_ALIGNMENT);
             tablePanel.add(buttonBox);
@@ -109,7 +128,7 @@ public class AttributePanelManager{
                 final JButton newAttributeButton = new JButton(TextUtils.getText("attributes_popup_new"));
                 newAttributeButton.addActionListener(new ActionListener() {
                     @Override
-					public void actionPerformed(final ActionEvent arg0) {
+                    public void actionPerformed(final ActionEvent arg0) {
                         if(! modeController.isEditingLocked())
                             attributeView.addRow();
                     }
@@ -121,7 +140,7 @@ public class AttributePanelManager{
                 final JButton optimalWidthButton = new JButton(TextUtils.getText("attributes_popup_optimal_width"));
                 optimalWidthButton.addActionListener(new ActionListener() {
                     @Override
-					public void actionPerformed(final ActionEvent arg0) {
+                    public void actionPerformed(final ActionEvent arg0) {
                         if(! modeController.isEditingLocked())
                             attributeView.setOptimalColumnWidths();
                     }
@@ -142,7 +161,7 @@ public class AttributePanelManager{
                 boolean handlingEvent = false;
 
                 @Override
-				public void itemStateChanged(final ItemEvent e) {
+                public void itemStateChanged(final ItemEvent e) {
                     if (handlingEvent || !formatChooser.isEnabled() || e.getStateChange() != ItemEvent.SELECTED)
                         return;
                     handlingEvent = true;
@@ -153,7 +172,7 @@ public class AttributePanelManager{
                         try {
                             final Object newValue = formatValue(newFormat, table, value);
                             if (newValue != null)
-                            	table.setValueAt(newValue, table.getSelectedRow(), table.getSelectedColumn());
+                                table.setValueAt(newValue, table.getSelectedRow(), table.getSelectedColumn());
                         }
                         catch (Exception e2) {
                             Controller.getCurrentController().getViewController()
@@ -173,12 +192,12 @@ public class AttributePanelManager{
 
                 private Object formatValue(final PatternFormat newFormat, final AttributeTable table,
                                            final Object objectToBeFormatted) {
-                	if (formatChooser.getSelectedItem() == null)
-                		return null;
-                	if (objectToBeFormatted instanceof IFormattedObject) {
-	                    final Object actualObject = ((IFormattedObject) objectToBeFormatted).getObject();
-	                    if(actualObject != objectToBeFormatted)
-	                    	return formatValue(newFormat, table, actualObject);
+                    if (formatChooser.getSelectedItem() == null)
+                        return null;
+                    if (objectToBeFormatted instanceof IFormattedObject) {
+                        final Object actualObject = ((IFormattedObject) objectToBeFormatted).getObject();
+                        if(actualObject != objectToBeFormatted)
+                            return formatValue(newFormat, table, actualObject);
                     }
                     if (newFormat == PatternFormat.getIdentityPatternFormat())
                         return makeFormattedObjectForIdentityFormat(objectToBeFormatted);
@@ -194,9 +213,9 @@ public class AttributePanelManager{
 
             attributeView.addTableSelectionListener(new ListSelectionListener() {
                 @Override
-				public void valueChanged(final ListSelectionEvent event) {
+                public void valueChanged(final ListSelectionEvent event) {
                     // update format chooser
-                    if (attributeView != null && !event.getValueIsAdjusting()) {
+                    if (tablePanel.isShowing() && attributeView != null && !event.getValueIsAdjusting()) {
                         setSelectedFormatItem();
                     }
                 }
@@ -211,36 +230,36 @@ public class AttributePanelManager{
             tablePanel.repaint();
         }
 
-    	private void setSelectedFormatItem() {
-    	    final AttributeTable table = attributeView.getAttributeTable();
-    	    final int selectedColumn = table.getSelectedColumn();
-			final int selectedRow = table.getSelectedRow();
-			if (selectedColumn == 1 && selectedRow >= 0 && selectedRow < table.getRowCount()) {
-    	        formatChooser.setEnabled(true);
-    	        final Object value = table.getValueAt(selectedRow, selectedColumn);
-    	        if (value instanceof IFormattedObject) {
-    	            final String format = ((IFormattedObject) value).getPattern();
-    	            formatChooser.setSelectedItem(PatternFormat.guessPatternFormat(format));
-    	        }
-    	        else {
-    	            formatChooser.setSelectedItem(null);
-    	        }
-    	    }
-    	    else {
-    	        formatChooser.setEnabled(false);
-    	    }
+        private void setSelectedFormatItem() {
+            final AttributeTable table = attributeView.getAttributeTable();
+            final int selectedColumn = table.getSelectedColumn();
+            final int selectedRow = table.getSelectedRow();
+            if (selectedColumn == 1 && selectedRow >= 0 && selectedRow < table.getRowCount()) {
+                formatChooser.setEnabled(true);
+                final Object value = table.getValueAt(selectedRow, selectedColumn);
+                if (value instanceof IFormattedObject) {
+                    final String format = ((IFormattedObject) value).getPattern();
+                    formatChooser.setSelectedItem(PatternFormat.guessPatternFormat(format));
+                }
+                else {
+                    formatChooser.setSelectedItem(null);
+                }
+            }
+            else {
+                formatChooser.setEnabled(false);
+            }
         }
 
         private JComboBox createFormatChooser() {
             final List<PatternFormat> formats = FormatController.getController().getAllFormats();
             Vector<PatternFormat> items = new Vector<PatternFormat>(formats);
             for(int i = items.size()-1; i >= 0; i--){
-            	PatternFormat item = items.get(i);
-				if(item.getType().equals(PatternFormat.TYPE_IDENTITY) &&
-						! item.getType().endsWith(PatternFormat.IDENTITY_PATTERN))
-            		items.remove(i);
+                PatternFormat item = items.get(i);
+                if(item.getType().equals(PatternFormat.TYPE_IDENTITY) &&
+                        ! item.getType().endsWith(PatternFormat.IDENTITY_PATTERN))
+                    items.remove(i);
             }
-			final JComboBox formatChooser = JComboBoxFactory.create(items);
+            final JComboBox formatChooser = JComboBoxFactory.create(items);
             formatChooser.setEditable(true);
             formatChooser.setSelectedItem(null);
             final String NODE_FORMAT = "OptionPanel.nodeformat"; // duplicated from StyleEditorPanel
@@ -256,11 +275,14 @@ public class AttributePanelManager{
             btnSize.height =  Math.max(btnSize.height, preferredSize.height);
         }
 
-		@Override
-		public void nodeChanged(NodeChangeEvent event) {
-			if(attributeView != null && event.getProperty().equals(NodeAttributeTableModel.class)){
-				setSelectedFormatItem();
-			}
+        @Override
+        public void nodeChanged(NodeChangeEvent event) {
+            if (!tablePanel.isShowing()) {
+                return;
+            }
+            if(attributeView != null && event.getProperty().equals(NodeAttributeTableModel.class)){
+                setSelectedFormatItem();
+            }
         }
     }
 
@@ -271,9 +293,9 @@ public class AttributePanelManager{
         tablePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         tablePanel.setLayout(new BoxLayout(tablePanel, axis));
         final TableCreator tableCreator = new TableCreator();
-		final MapController mapController = modeController.getMapController();
-		mapController.addNodeSelectionListener(tableCreator);
-		mapController.addUINodeChangeListener(tableCreator);
+        final MapController mapController = modeController.getMapController();
+        mapController.addNodeSelectionListener(tableCreator);
+        mapController.addUINodeChangeListener(tableCreator);
     }
     public JPanel getTablePanel() {
         return tablePanel;
