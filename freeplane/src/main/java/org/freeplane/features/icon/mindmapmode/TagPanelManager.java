@@ -60,14 +60,14 @@ public class TagPanelManager {
         final JTagTree tree;
         final TagCategories categories;
         final Font font;
-        
+
         TreeCache(JTagTree tree, TagCategories categories, Font font) {
             this.tree = tree;
             this.categories = categories;
             this.font = font;
         }
     }
-    
+
     private final WeakHashMap<MapModel, TreeCache> treeCache = new WeakHashMap<>();
 
     private class TableCreator implements INodeSelectionListener, IMapChangeListener, HierarchyListener {
@@ -101,7 +101,7 @@ public class TagPanelManager {
 
             TagCategories newCategories = map.getIconRegistry().getTagCategories();
             Font newFont = iconController.getTagFont(map.getRootNode());
-            
+
             TreeCache cached = treeCache.get(map);
             if (cached != null && cached.categories == newCategories && cached.font.equals(newFont)) {
                 tagTree = cached.tree;
@@ -118,30 +118,34 @@ public class TagPanelManager {
                     public void mouseClicked(MouseEvent e) {
                         if(e.getClickCount() != 2)
                             return;
-                        JTagTree tree = (JTagTree) e.getSource();
-                        int x = e.getX();
-                        int y = e.getY();
-                        TreePath path = tree.getPathForLocation(x, y);
-                        if (path == null) return; // Clicked outside any node
-                        Rectangle nodeBounds = tree.getUI().getPathBounds(tree, path);
-                        if (nodeBounds == null) return;
-                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-                        Tag tag = treeCategories.categorizedTag(node);
-                        iconController.insertTagsIntoSelectedNodes(Collections.singletonList(tag));
+                        insertTagIntoSelectedNodes(e);
                     }
                 });
                 setupFilterField();
-                
+
                 // Store in cache
                 treeCache.put(map, new TreeCache(tagTree, treeCategories, treeFont));
             }
-            
+
             TagPanelManager.this.updateTreeAndButton(tagTree);
         }
 
         @Override
         public void mapChanged(MapChangeEvent event) {
             onChange(event.getMap());
+        }
+
+        private void insertTagIntoSelectedNodes(MouseEvent e) {
+            JTagTree tree = (JTagTree) e.getSource();
+            int x = e.getX();
+            int y = e.getY();
+            TreePath path = tree.getPathForLocation(x, y);
+            if (path == null) return; // Clicked outside any node
+            Rectangle nodeBounds = tree.getUI().getPathBounds(tree, path);
+            if (nodeBounds == null) return;
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            Tag tag = treeCategories.categorizedTag(node);
+            iconController.insertTagsIntoSelectedNodes(Collections.singletonList(tag));
         }
     }
 
@@ -280,8 +284,8 @@ public class TagPanelManager {
         filterTimer.setRepeats(false);
     }
 
-	private void applyFilter() {
-		String text = filterField.getText().trim();
-		tagTree.setFilter(text.isEmpty() ? null : node -> node.toString().toLowerCase().contains(text.toLowerCase()));
-	}
+    private void applyFilter() {
+        String text = filterField.getText().trim();
+        tagTree.setFilter(text.isEmpty() ? null : node -> node.toString().toLowerCase().contains(text.toLowerCase()));
+    }
 }
