@@ -859,9 +859,9 @@ public class EditNodeTextField extends EditNodeBase {
 		int textFieldX = parentInsets.left  - textFieldBorderWidth;
 		if (parent.getEffectiveHorizontalTextPosition() == SwingConstants.RIGHT)
 			textFieldX += reservedIconSpace;
-		int textFieldY = (isTextPlacedUnderIcon ? textR.y : viewR.y) - textFieldBorderWidth;
+		int textFieldY = textR.y - textFieldBorderWidth;
 		textFieldMinimumSize.width = Math.max(textFieldMinimumSize.width, isTextPlacedUnderIcon ? viewR.width : viewR.width - reservedIconSpace);
-		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, isTextPlacedUnderIcon ? textR.height : viewR.height);
+		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, textR.height);
 		textfield.setSize(textFieldMinimumSize.width, textFieldMinimumSize.height);
         verticalSpace = Math.max(textFieldY, parent.getHeight() - textFieldMinimumSize.height);
 		final Dimension newParentSize = new Dimension(textFieldX + textFieldMinimumSize.width + parentInsets.right,

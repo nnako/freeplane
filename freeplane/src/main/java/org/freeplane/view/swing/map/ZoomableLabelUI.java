@@ -170,6 +170,9 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			iconR.y = viewR.y;
 			textR.x = viewR.x;
 			textR.y = iconR.height == 0 ? viewR.y : viewR.y + iconR.height + label.getIconTextGap();
+			int extraTopMargin = (viewR.height - (textR.y + textR.height - viewR.y))/2;
+			iconR.y += extraTopMargin;
+			textR.y += extraTopMargin;
 			int horizontalAlignment = zLabel.getEffectiveHorizontalAlignment();
 			switch (horizontalAlignment) {
 			case SwingConstants.CENTER:
@@ -186,7 +189,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		default: {
 			switch(label.getVerticalTextPosition()) {
 			case SwingConstants.TOP:
-				iconR.y = textR.y = viewR.y;
+				iconR.y = textR.y = viewR.y + (viewR.height - Math.max(textR.height, iconR.height))/2;
 				break;
 			case SwingConstants.CENTER:
 				iconR.y = viewR.y + (viewR.height - iconR.height) / 2;
@@ -425,6 +428,10 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			layoutCL(label, label.getFontMetrics(), text, icon, viewR, iconR,textR);
 			final float zoom = label.getZoom();
 			if(zoom != 1f) {
+				viewR.x = (int)(iconR.x * zoom);
+				viewR.y = (int)(iconR.y * zoom);
+				viewR.width = (int)(iconR.width * zoom);
+				viewR.height = (int)(iconR.height * zoom);
 				iconR.x = (int)(iconR.x * zoom);
 				iconR.y = (int)(iconR.y * zoom);
 				iconR.width = (int)(iconR.width * zoom);
