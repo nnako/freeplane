@@ -69,11 +69,11 @@ abstract class VariableInsetsPainter extends ShapedPainter {
 	abstract double getHorizontalMarginFactor();
 
 	double getMinimumHorizontalInset(){
-		return getShapeConfiguration().getHorizontalMargin().toBaseUnits() * mainView.getZoom() + mainView.getPaintedBorderWidth() - 1;
+		return ((int)getShapeConfiguration().getHorizontalMargin().toBaseUnits()-1) * mainView.getZoom() + mainView.getPaintedBorderWidth();
 	}
 
 	double getMinimumVerticalInset(){
-		return getShapeConfiguration().getVerticalMargin().toBaseUnits() * mainView.getZoom()+ mainView.getPaintedBorderWidth() - 1;
+		return ((int)getShapeConfiguration().getVerticalMargin().toBaseUnits()-1) * mainView.getZoom()+ mainView.getPaintedBorderWidth() - 1;
 	}
 
 	Dimension getPreferredRectangleSizeWithoutMargin(int maximumWidth) {

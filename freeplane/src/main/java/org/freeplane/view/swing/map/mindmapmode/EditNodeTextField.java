@@ -605,6 +605,7 @@ public class EditNodeTextField extends EditNodeBase {
 		mapViewManager.removeMapViewChangeListener(mapViewChangeListener);
 		mapViewChangeListener = null;
 		parent.setPreferredSize(null);
+		parent.putClientProperty("iconR", null);
 		if(nodeView.isShowing()) {
 			nodeView.update();
 			preserveRootNodeLocationOnScreen();
@@ -887,6 +888,7 @@ public class EditNodeTextField extends EditNodeBase {
 
         preserveRootNodeLocationOnScreen();
 		parent.setPreferredSize(newParentSize);
+		parent.putClientProperty("iconR", layoutData.iconR);
 		parent.setText("");
         mapView.onEditingStarted(parent);
         if(getEditControl().getEditType() == EditedComponent.TEXT)

@@ -160,9 +160,18 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		ScaledHTML.Renderer v = (ScaledHTML.Renderer) label.getClientProperty(BasicHTML.propertyKey);
 		if (v != null) {
 			if (textR.width < availableTextWidth) {
-				textR.width = viewR.width;
+				textR.width = availableTextWidth;
 				v.setWidth(availableTextWidth);
 			}
+		}
+		Rectangle clientIconR = (Rectangle) label.getClientProperty("iconR");
+		if(clientIconR != null && text.isEmpty()) {
+			iconR.x  = (int) (clientIconR.x / zoom);
+			iconR.y = (int) (clientIconR.y / zoom);
+			iconR.width = (int) (clientIconR.width / zoom);
+			iconR.height = (int) (clientIconR.height / zoom);
+			textR.x = textR.y = textR.width = textR.height = 0;
+			return text;
 		}
 		switch(label.getVerticalTextPosition()) {
 		case SwingConstants.BOTTOM: {
