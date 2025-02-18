@@ -25,7 +25,7 @@ public class ExternalResource implements IExtension {
 
 	void removeViewers() {
 		for (final NodeView nodeView : viewers) {
-			nodeView.removeContent(ViewerController.VIEWER_POSITION);
+			nodeView.removeContent(NodeView.IMAGE_VIEWER_POSITION);
 		}
 		viewers.clear();
 	}
@@ -59,7 +59,7 @@ public class ExternalResource implements IExtension {
 	public void setZoom(final float r) {
 		zoom = r;
 		for (final NodeView nodeView : viewers) {
-			final JComponent viewer = nodeView.getContent(ViewerController.VIEWER_POSITION);
+			final JComponent viewer = nodeView.getContent(NodeView.IMAGE_VIEWER_POSITION);
 			final ViewerLayoutManager layoutManager = (ViewerLayoutManager)viewer.getLayout();
 			if(layoutManager != null) {
 				final Dimension preferredSize = layoutManager.calculatePreferredSize();

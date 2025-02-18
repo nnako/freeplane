@@ -157,6 +157,7 @@ public class NodeView extends JComponent implements INodeView {
     private LayoutOrientation layoutOrientation;
     private ChildrenSides childrenSides;
     private boolean isNodeNumberingEnabled;
+	public static final int IMAGE_VIEWER_POSITION = DETAIL_VIEWER_POSITION + 3;
 
 	protected NodeView(final NodeModel viewedNode, final MapView map) {
 		setFocusCycleRoot(true);
@@ -1807,6 +1808,7 @@ public class NodeView extends JComponent implements INodeView {
 		updateShape();
 		updateEdge();
 		updateCloud();
+
 		mainView.updateTextColor(this);
 		mainView.updateCss(this);
 		mainView.updateFont(this);
@@ -1836,6 +1838,11 @@ public class NodeView extends JComponent implements INodeView {
 			updateShortener(textShortened);
 			updateIcons();
 			mainView.updateText(getNode());
+		}
+		if(cause == UpdateCause.ZOOM) {
+			final JComponent viewer = getContent(NodeView.IMAGE_VIEWER_POSITION);
+			if(viewer != null)
+				viewer.invalidate();
 		}
 		modelBackgroundColor = styleController().getBackgroundColor(viewedNode, getStyleOption());
 		if (isContentVisible()) {
@@ -2044,10 +2051,13 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	public void updateAll() {
-		update();
+		updateAll(UpdateCause.UNKNOWN);
+	}
+	public void updateAll(UpdateCause cause) {
+		update(cause);
 		invalidate();
 		for (final NodeView child : getChildrenViews()) {
-			child.updateAll();
+			child.updateAll(cause);
 		}
 	}
 	void resetLayoutPropertiesRecursively() {

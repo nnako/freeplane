@@ -468,7 +468,6 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 	}
 
 	static private ExternalImagePopupMenu imagePopupMenu;
-	static final int VIEWER_POSITION = NodeView.DETAIL_VIEWER_POSITION + 3;
 	private final MyMouseListener mouseListener = new MyMouseListener();
 	final private Set<IViewerFactory> factories;
     private final CombiFactory combiFactory;
@@ -642,7 +641,7 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 		final Set<NodeView> viewers = resource.getViewers();
 		viewers.add(view);
 		viewer.setBounds(viewer.getX() - 5, viewer.getY() - 5, viewer.getWidth() + 15, viewer.getHeight() + 15);
-		view.addContent(viewer, VIEWER_POSITION);
+		view.addContent(viewer, NodeView.IMAGE_VIEWER_POSITION);
 		if(map.getModeController().canEdit()){
 			final DropTarget dropTarget = new DropTarget(viewer, DTL);
 			dropTarget.setActive(true);
@@ -660,7 +659,7 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 		if (!viewers.contains(nodeView)) {
 			return;
 		}
-		nodeView.removeContent(VIEWER_POSITION);
+		nodeView.removeContent(NodeView.IMAGE_VIEWER_POSITION);
 		viewers.remove(nodeView);
 	}
 
