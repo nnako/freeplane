@@ -55,8 +55,11 @@ class VerticalNodeViewLayoutStrategy {
 
 	private final int defaultVGap;
 
+	private final Dimension contentSize;
+
 	public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout) {
 		this.view = view.getLayoutHelper();
+		this.contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
 		childViewCount = view.getComponentCount() - 1;
 		layoutChildViews(view);
 		this.top = 0;
@@ -114,7 +117,6 @@ class VerticalNodeViewLayoutStrategy {
 	private void calculateLayoutY(final boolean laysOutLeftSide) {
 		final int minimalDistanceBetweenChildren = view.getMinimalDistanceBetweenChildren();
 		ChildNodesAlignment childNodesAlignment = view.getChildNodesAlignment();
-		final Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
 		int childContentHeightSum = 0;
 		int top = 0;
 		int level = viewLevels.highestSummaryLevel + 1;
@@ -364,7 +366,6 @@ class VerticalNodeViewLayoutStrategy {
 	}
 
 	private void calculateLayoutX(final boolean laysOutLeftSide) {
-		final Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
 		final int baseDistanceToChildren = view.getBaseDistanceToChildren();
 		int level = viewLevels.highestSummaryLevel + 1;
 		final int summaryBaseX[] = new int[level];
@@ -472,8 +473,6 @@ class VerticalNodeViewLayoutStrategy {
 			contentY -= minY;
 			baseY -= minY;
 		}
-		final Dimension contentSize = ContentSizeCalculator.INSTANCE
-				.calculateContentSize(view);
 		int width = contentX + contentSize.width + spaceAround;
 		int height = contentY + contentSize.height + cloudHeight / 2
 				+ spaceAround;
