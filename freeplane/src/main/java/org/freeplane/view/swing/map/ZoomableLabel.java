@@ -17,6 +17,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.LabelUI;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 import javax.swing.text.html.HTMLDocument;
@@ -45,7 +46,6 @@ public class ZoomableLabel extends JLabel {
 	private int maximumWidth;
 	private String css = "";
 
-
 	public int getZoomedIconWidth() {
 		final Icon icon = getIcon();
 		if (icon == null) {
@@ -64,17 +64,17 @@ public class ZoomableLabel extends JLabel {
 
 
 	@Override
-    public Dimension getPreferredSize() {
+	public Dimension getPreferredSize() {
 		return getZoomableLabelPreferredZize();
 	}
 
-    private Dimension getZoomableLabelPreferredZize() {
-        if (isPreferredSizeSet()) {
+	private Dimension getZoomableLabelPreferredZize() {
+		if (isPreferredSizeSet()) {
 			Dimension preferredSize = super.getPreferredSize();
 			return preferredSize;
 		}
 		return ((ZoomableLabelUI)getUI()).getPreferredSize(this);
-    }
+	}
 
 	protected float getZoom() {
 		final float zoom = getMap().getZoom();
@@ -100,24 +100,24 @@ public class ZoomableLabel extends JLabel {
 		try{
 			updateTextUnsafe(text);
 		}
-        catch (Exception e1) {
-        	if(e1 instanceof AccessControlException)
-        		LogUtils.warn(e1.getMessage());
-        	else
-        		LogUtils.severe(e1);
-	        final String localizedMessage = e1.getLocalizedMessage();
-	        if(text.length() > 603)
-	        	text = text.substring(0, 600) + "...";
+		catch (Exception e1) {
+			if(e1 instanceof AccessControlException)
+				LogUtils.warn(e1.getMessage());
+			else
+				LogUtils.severe(e1);
+			final String localizedMessage = e1.getLocalizedMessage();
+			if(text.length() > 603)
+				text = text.substring(0, 600) + "...";
 			try{
 				updateTextUnsafe(localizedMessage + '\n' + text);
 			}
 			catch (Exception e2){
 			}
-        }
+		}
 	}
 
 	private void updateTextUnsafe(String nodeText) throws Exception{
-	    final NodeView node = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, this);
+		final NodeView node = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, this);
 		final MapView map = node.getMap();
 		if (map == null || nodeText == null) {
 			return;
@@ -150,7 +150,7 @@ public class ZoomableLabel extends JLabel {
 				nodeText = "<html><base href=\"" + map.getMap().getURL() + "\">" + nodeText.substring(6);
 			}
 			final String htmlLongNodeHead = ResourceController.getResourceController().getProperty(
-			    "html_long_node_head");
+				"html_long_node_head");
 			if (htmlLongNodeHead != null && !htmlLongNodeHead.equals("")) {
 				if (nodeText.matches("(?ims).*<head>.*")) {
 					nodeText = nodeText.replaceFirst("(?ims).*<head>.*", "<head>" + htmlLongNodeHead);
@@ -168,8 +168,8 @@ public class ZoomableLabel extends JLabel {
 			String text = "<html><table border=1 style=\"border-color: white\">";
 			for (int line = startingLine; line < lines.length; line++) {
 				text += "<tr><td style=\"border-color: white;\">"
-				        + HtmlUtils.toXMLEscapedText(lines[line])
-				            .replaceAll("\t", "<td style=\"border-color: white\">");
+						+ HtmlUtils.toXMLEscapedText(lines[line])
+							.replaceAll("\t", "<td style=\"border-color: white\">");
 			}
 			setText(text);
 		}
@@ -180,7 +180,7 @@ public class ZoomableLabel extends JLabel {
 		else {
 			setText(nodeText);
 		}
-    }
+	}
 
 	public void setStyleSheet(String css, StyleSheet styleSheet) {
 		if(! this.css.equals(css)) {
@@ -207,8 +207,14 @@ public class ZoomableLabel extends JLabel {
 	}
 
 	@Override
-    public void updateUI() {
-    }
+	public void updateUI() {
+	}
+
+	@Override
+	public ZoomableLabelUI getUI() {
+		return (ZoomableLabelUI)ui;
+	}
+
 
 	@Override
 	public FontMetrics getFontMetrics(final Font font) {
@@ -307,9 +313,9 @@ public class ZoomableLabel extends JLabel {
 			return width;
 	}
 
-    public Color getUnselectedForeground() {
-        return super.getForeground();
-    }
+	public Color getUnselectedForeground() {
+		return super.getForeground();
+	}
 
 	public Icon getTextRenderingIcon() {
 		return (Icon) getClientProperty(ZoomableLabel.TEXT_RENDERING_ICON);
@@ -335,5 +341,15 @@ public class ZoomableLabel extends JLabel {
 			return getComponentOrientation().isLeftToRight() ? SwingConstants.RIGHT : SwingConstants.LEFT;
 		}
 		return position;
+	}
+
+	public void preserveLayout(Dimension size) {
+		setPreferredSize(size);
+		ZoomableLabelUI ui = getUI();
+		if(size != null) {
+			setSize(size);
+			ui.preserveLayout(this);
+		} else
+			ui.releaseLayout(this);
 	}
 }

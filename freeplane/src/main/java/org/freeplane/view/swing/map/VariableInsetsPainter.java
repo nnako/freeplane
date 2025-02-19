@@ -126,8 +126,8 @@ abstract class VariableInsetsPainter extends ShapedPainter {
 		final Dimension preferredSize = getPreferredSize();
 		mainView.setMinimumWidth(oldMinimumWidth);
 		super.setBounds(x, y, width, height);
-		zoomedHorizontalInset = (Math.min(preferredSize.width, width) - preferredRectangleSize.width) / 2;
-		zoomedVerticalInset = (Math.min(preferredSize.height, height) - preferredRectangleSize.height) / 2;
+		zoomedHorizontalInset = (Math.min(preferredSize.width, width) - preferredRectangleSize.width) / 2 - 1;
+		zoomedVerticalInset = (Math.min(preferredSize.height, height) - preferredRectangleSize.height) / 2 - 1;
 	}
 
 	@Override

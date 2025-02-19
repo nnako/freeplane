@@ -98,6 +98,22 @@ public class ZoomableLabelUI extends BasicLabelUI {
 	@Override
 	protected String layoutCL(final JLabel label, final FontMetrics fontMetrics, final String text, final Icon icon,
 			final Rectangle viewR, final Rectangle iconR, final Rectangle textR) {
+		LayoutData preferredLayoutData = (LayoutData) label.getClientProperty("preferredLayoutData");
+		if(preferredLayoutData != null) {
+			viewR.x = preferredLayoutData.viewR.x;
+			viewR.y = preferredLayoutData.viewR.y;
+			viewR.width = preferredLayoutData.viewR.width;
+			viewR.height = preferredLayoutData.viewR.height;
+			textR.x = preferredLayoutData.textR.x;
+			textR.y = preferredLayoutData.textR.y;
+			textR.width = preferredLayoutData.textR.width;
+			textR.height = preferredLayoutData.textR.height;
+			iconR.x = preferredLayoutData.iconR.x;
+			iconR.y = preferredLayoutData.iconR.y;
+			iconR.width = preferredLayoutData.iconR.width;
+			iconR.height = preferredLayoutData.iconR.height;
+			return text;
+		}
 		final ZoomableLabel zLabel = (ZoomableLabel) label;
 		final float zoom = zLabel.getZoom();
 		if (isPainting) {
@@ -164,15 +180,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 				v.setWidth(availableTextWidth);
 			}
 		}
-		Rectangle clientIconR = (Rectangle) label.getClientProperty("iconR");
-		if(clientIconR != null && text.isEmpty()) {
-			iconR.x  = (int) (clientIconR.x / zoom);
-			iconR.y = (int) (clientIconR.y / zoom);
-			iconR.width = (int) (clientIconR.width / zoom);
-			iconR.height = (int) (clientIconR.height / zoom);
-			textR.x = textR.y = textR.width = textR.height = 0;
-			return text;
-		}
+
 		switch(label.getVerticalTextPosition()) {
 		case SwingConstants.BOTTOM: {
 			iconR.x = viewR.x;
@@ -411,50 +419,59 @@ public class ZoomableLabelUI extends BasicLabelUI {
 	}
 
 	public Rectangle getIconR(ZoomableLabel label) {
-		layout(label);
+		layoutZoomed(label);
 		return iconR;
 	}
 
 	public Rectangle getTextR(ZoomableLabel label) {
-		layout(label);
+		layoutZoomed(label);
 		return textR;
 	}
 
-	public LayoutData getLayoutData(ZoomableLabel label) {
-		layout(label);
-		return layoutData;
+	private void layoutZoomed(ZoomableLabel label) {
+		layoutIgnoringZoom(label);
+		final float zoom = label.getZoom();
+		if(zoom != 1f) {
+			viewR.x = (int)(iconR.x * zoom);
+			viewR.y = (int)(iconR.y * zoom);
+			viewR.width = (int)(iconR.width * zoom);
+			viewR.height = (int)(iconR.height * zoom);
+			iconR.x = (int)(iconR.x * zoom);
+			iconR.y = (int)(iconR.y * zoom);
+			iconR.width = (int)(iconR.width * zoom);
+			iconR.height = (int)(iconR.height * zoom);
+			textR.x = (int)(textR.x * zoom);
+			textR.y = (int)(textR.y * zoom);
+			textR.width = (int)(textR.width * zoom);
+			textR.height = (int)(textR.height * zoom);
+		}
 	}
 
-	private void layout(ZoomableLabel label) {
-		String text = label.getText();
-		Icon icon = (label.isEnabled()) ? label.getIcon() :
-			label.getDisabledIcon();
+	void layoutIgnoringZoom(ZoomableLabel label) {
 		boolean wasPainting = isPainting;
 		try{
 			isPainting = true;
 			iconR.x = iconR.y = iconR.width = iconR.height = 0;
 			textR.x = textR.y = textR.width = textR.height = 0;
+			String text = label.getText();
+			Icon icon = (label.isEnabled()) ? label.getIcon() :
+				label.getDisabledIcon();
 			layoutCL(label, label.getFontMetrics(), text, icon, viewR, iconR,textR);
-			final float zoom = label.getZoom();
-			if(zoom != 1f) {
-				viewR.x = (int)(iconR.x * zoom);
-				viewR.y = (int)(iconR.y * zoom);
-				viewR.width = (int)(iconR.width * zoom);
-				viewR.height = (int)(iconR.height * zoom);
-				iconR.x = (int)(iconR.x * zoom);
-				iconR.y = (int)(iconR.y * zoom);
-				iconR.width = (int)(iconR.width * zoom);
-				iconR.height = (int)(iconR.height * zoom);
-				textR.x = (int)(textR.x * zoom);
-				textR.y = (int)(textR.y * zoom);
-				textR.width = (int)(textR.width * zoom);
-				textR.height = (int)(textR.height * zoom);
-			}
 		}
 		finally{
 			isPainting = wasPainting;
 		}
 	}
 
+	public void preserveLayout(ZoomableLabel zoomableLabel) {
+		layoutIgnoringZoom(zoomableLabel);
+		zoomableLabel.putClientProperty("preferredLayoutData", new LayoutData(new Rectangle(viewR),
+				new Rectangle(textR),
+				new Rectangle(iconR)));
+	}
+
+	public void releaseLayout(ZoomableLabel zoomableLabel) {
+		zoomableLabel.putClientProperty("preferredLayoutData", null);
+	}
 
 }

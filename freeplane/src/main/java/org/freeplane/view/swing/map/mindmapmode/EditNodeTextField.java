@@ -52,7 +52,6 @@ import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
@@ -103,7 +102,6 @@ import org.freeplane.features.text.mindmapmode.EventBuffer;
 import org.freeplane.features.text.mindmapmode.MTextController;
 import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.ui.IMapViewManager;
-import org.freeplane.view.swing.map.IconLocation;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
@@ -604,8 +602,7 @@ public class EditNodeTextField extends EditNodeBase {
 		final IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
 		mapViewManager.removeMapViewChangeListener(mapViewChangeListener);
 		mapViewChangeListener = null;
-		parent.setPreferredSize(null);
-		parent.putClientProperty("iconR", null);
+		parent.preserveLayout(null);
 		if(nodeView.isShowing()) {
 			nodeView.update();
 			preserveRootNodeLocationOnScreen();
@@ -839,10 +836,8 @@ public class EditNodeTextField extends EditNodeBase {
 		final EventBuffer eventQueue = MTextController.getController().getEventQueue();
 		KeyEvent firstEvent = eventQueue.getFirstEvent();
 
-		final ZoomableLabelUI parentUI = (ZoomableLabelUI)parent.getUI();
-		final LayoutData layoutData = parentUI.getLayoutData(parent);
-		final Rectangle textR = layoutData.textR;
-		final Rectangle viewR = layoutData.viewR;
+		final ZoomableLabelUI parentUI = parent.getUI();
+		final Rectangle textR = parentUI.getTextR(parent);
 		Point mouseEventPoint = null;
 		if (firstEvent == null) {
 			MouseEvent currentEvent = eventQueue.getMouseEvent();
@@ -857,12 +852,10 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
 
-		int textFieldX = parentInsets.left  - textFieldBorderWidth;
-		if (parent.getEffectiveHorizontalTextPosition() == SwingConstants.RIGHT)
-			textFieldX += reservedIconSpace;
-		int textFieldY = textR.y - textFieldBorderWidth;
-		textFieldMinimumSize.width = Math.max(textFieldMinimumSize.width, isTextPlacedUnderIcon ? viewR.width : viewR.width - reservedIconSpace);
-		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, textR.height);
+		textFieldMinimumSize.width = Math.max(textFieldMinimumSize.width, textR.width + 2 * textFieldBorderWidth);
+		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, textR.height + 2 * textFieldBorderWidth);
+		int textFieldX = Math.max(0, textR.x  - textFieldBorderWidth);
+		int textFieldY = Math.max(0, textR.y  - textFieldBorderWidth);
 		textfield.setSize(textFieldMinimumSize.width, textFieldMinimumSize.height);
         verticalSpace = Math.max(textFieldY, parent.getHeight() - textFieldMinimumSize.height);
 		final Dimension newParentSize = new Dimension(textFieldX + textFieldMinimumSize.width + parentInsets.right,
@@ -887,8 +880,7 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
         preserveRootNodeLocationOnScreen();
-		parent.setPreferredSize(newParentSize);
-		parent.putClientProperty("iconR", layoutData.iconR);
+		parent.preserveLayout(newParentSize);
 		parent.setText("");
         mapView.onEditingStarted(parent);
         if(getEditControl().getEditType() == EditedComponent.TEXT)
