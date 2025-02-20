@@ -3,6 +3,9 @@ package org.freeplane.main.application;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 
 import org.freeplane.core.resources.ResourceController;
@@ -28,12 +31,17 @@ public class Browser {
 			}
 			else
 				uri = link.getUri();
-			desktop.browse(uri);
+			desktop.browse(normalizeUri(uri));
 		} catch (Exception e) {
 			openDocumentNotSupportedByDesktop(link);
 		}
 	}
-
+	private URI normalizeUri(URI uri) throws Exception {
+        String decodedPath = URLDecoder.decode(uri.getRawPath(), StandardCharsets.UTF_8.name());
+        String encodedPath = URLEncoder.encode(decodedPath, StandardCharsets.UTF_8.name())
+                                       .replace("+", "%20");
+        return new URI(uri.getScheme(), uri.getAuthority(), encodedPath, uri.getQuery(), uri.getFragment());
+    }
 	private void openDocumentNotSupportedByDesktop(final Hyperlink link) {
 		String uriString = link.toString();
 		final String UNC_PREFIX = "file:////";
