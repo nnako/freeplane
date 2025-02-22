@@ -201,15 +201,18 @@ begin
   end;
 end;
 
+function IsAdmin: Boolean;
+begin
+  Result := IsAdminLoggedOn or IsPowerUserLoggedOn;
+end;
+
 function IsExistingInstallation: Boolean;
 var
   InstallMode: string;
 begin
   Result := False;
-  // Check HKCU first (non-admin installation)
   if RegQueryStringValue(HKEY_CURRENT_USER, 'Software\Freeplane', 'InstallMode', InstallMode) then
     Result := True
-  // Then check HKLM (admin installation)
   else if RegQueryStringValue(HKEY_LOCAL_MACHINE, 'Software\Freeplane', 'InstallMode', InstallMode) then
     Result := True;
 end;
@@ -223,30 +226,20 @@ begin
     Result := CompareText(InstallMode, 'user') = 0;
 end;
 
-function IsAdmin: Boolean;
-begin
-  Result := IsAdminLoggedOn or IsPowerUserLoggedOn;
-end;
-
 function ShouldShowInstallModeTask: Boolean;
 begin
-  // Only show the task if:
-  // 1. It's a new installation (not an upgrade)
-  // 2. The user is an admin (otherwise force non-admin install)
   Result := (not IsExistingInstallation) and IsAdmin;
 end;
 
 function GetDefaultInstallDir(Param: string): string;
 begin
   if IsExistingInstallation then begin
-    // For existing installation, use the same mode as before
     if IsNonAdminInstallation then begin
       Result := ExpandConstant('{localappdata}\Programs\{#MyAppName}');
       WizardSelectTasks('nonadmininstall');
     end else
       Result := ExpandConstant('{pf}\{#MyAppName}');
   end else if (not IsAdmin) or WizardIsTaskSelected('nonadmininstall') then begin
-    // Force non-admin install if user doesn't have admin rights
     Result := ExpandConstant('{localappdata}\Programs\{#MyAppName}');
     if not IsAdmin then
       WizardSelectTasks('nonadmininstall');
