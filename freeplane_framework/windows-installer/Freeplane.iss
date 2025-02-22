@@ -100,7 +100,7 @@ Portuguese.NonAdminInstallGroupDescription=Modo de instalação:
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}
 Name: associate; Description: {cm:AssocFileExtension,Freeplane,.mm}; GroupDescription: {cm:AssocingFileExtension,Freeplane,.mm}
-Name: nonadmininstall; Description: {cm:NonAdminInstallDescription}; GroupDescription: {cm:NonAdminInstallGroupDescription}
+Name: nonadmininstall; Description: {cm:NonAdminInstallDescription}; GroupDescription: {cm:NonAdminInstallGroupDescription}; Check: ShouldShowInstallModeTask
 
 [Files]
 Source: "{#AppImage}\freeplane\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs; Excludes: "\app\*.cfg"
@@ -141,6 +141,10 @@ Root: "HKCR"; Subkey: "freeplane\DefaultIcon"; ValueType: string; ValueData: "{a
 Root: "HKCR"; Subkey: "FreeplaneApplication"; ValueType: string; ValueData: "Freeplane mind map"; Flags: uninsdeletekey; Tasks: associate not nonadmininstall
 Root: "HKCR"; Subkey: "FreeplaneApplication\Shell\Open\Command"; ValueType: string; ValueData: """{app}\freeplane.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: associate not nonadmininstall
 Root: "HKCR"; Subkey: "FreeplaneApplication\DefaultIcon"; ValueType: string; ValueData: "{app}\freeplaneIcons.dll,0"; Flags: uninsdeletevalue; Tasks: associate not nonadmininstall
+
+; Store installation mode flag
+Root: HKCU; Subkey: "Software\Freeplane"; ValueType: string; ValueName: "InstallMode"; ValueData: "user"; Flags: uninsdeletevalue; Tasks: nonadmininstall
+Root: HKLM; Subkey: "Software\Freeplane"; ValueType: string; ValueName: "InstallMode"; ValueData: "admin"; Flags: uninsdeletevalue; Tasks: not nonadmininstall
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\core"
@@ -197,9 +201,39 @@ begin
   end;
 end;
 
+function IsExistingInstallation: Boolean;
+var
+  InstallMode: string;
+begin
+  Result := False;
+  // Check HKCU first (non-admin installation)
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Software\Freeplane', 'InstallMode', InstallMode) then
+    Result := True
+  // Then check HKLM (admin installation)
+  else if RegQueryStringValue(HKEY_LOCAL_MACHINE, 'Software\Freeplane', 'InstallMode', InstallMode) then
+    Result := True;
+end;
+
+function IsNonAdminInstallation: Boolean;
+var
+  InstallMode: string;
+begin
+  Result := False;
+  if RegQueryStringValue(HKEY_CURRENT_USER, 'Software\Freeplane', 'InstallMode', InstallMode) then
+    Result := CompareText(InstallMode, 'user') = 0;
+end;
+
+function ShouldShowInstallModeTask: Boolean;
+begin
+  Result := not IsExistingInstallation;
+end;
+
 function GetDefaultInstallDir(Param: string): string;
 begin
-  if WizardIsTaskSelected('nonadmininstall') then
+  if IsNonAdminInstallation then begin
+    Result := ExpandConstant('{localappdata}\Programs\{#MyAppName}');
+    WizardSelectTasks('nonadmininstall');
+  end else if not IsExistingInstallation and WizardIsTaskSelected('nonadmininstall') then
     Result := ExpandConstant('{localappdata}\Programs\{#MyAppName}')
   else
     Result := ExpandConstant('{pf}\{#MyAppName}');
