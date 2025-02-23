@@ -66,6 +66,7 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 		private boolean layoutInProgress = false;
 
 		void addHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
+			removeHiddenAreaSupplier(hiddenAreaSupplier);
 			this.hiddenAreaSuppliers.add(hiddenAreaSupplier);
 		}
 		void removeHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
