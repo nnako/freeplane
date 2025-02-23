@@ -77,6 +77,9 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLWriter;
 import javax.swing.text.html.StyleSheet;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
@@ -118,6 +121,28 @@ import com.lightdev.app.shtm.bugfix.MapElementRemovingWorkaround;
  * @author foltin
  */
 public class EditNodeTextField extends EditNodeBase {
+    private static class StrikeThroughAction extends StyledEditorKit.StyledTextAction {
+        private static final String STRIKE_THROUGH = "text-decoration";
+        private static final String STRIKE_VAL = "line-through";
+
+        public StrikeThroughAction() {
+            super("font-strikethrough");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JEditorPane editor = getEditor(e);
+            if (editor != null) {
+                StyledEditorKit kit = getStyledEditorKit(editor);
+                MutableAttributeSet attr = kit.getInputAttributes();
+                boolean strikethrough = (StyleConstants.isStrikeThrough(attr));
+                SimpleAttributeSet sas = new SimpleAttributeSet();
+                StyleConstants.setStrikeThrough(sas, !strikethrough);
+                setCharacterAttributes(editor, sas, false);
+            }
+        }
+    }
+
     private class MyNavigationFilter extends NavigationFilter {
     	private final JEditorPane textfield;
         public MyNavigationFilter(JEditorPane textfield) {
@@ -535,6 +560,10 @@ public class EditNodeTextField extends EditNodeBase {
 		underlineAction.putValue(Action.NAME, TextUtils.getText("UnderlineAction.text"));
 		underlineAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control U"));
 
+		strikeThroughAction = new StrikeThroughAction();
+		strikeThroughAction.putValue(Action.NAME, TextUtils.getText("StrikeThroughAction.text"));
+		strikeThroughAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift U"));
+
 		redAction = new CharacterColorAction(TextUtils.getText("simplyhtml.redFontColorLabel"), CSS.Attribute.COLOR, SHTMLPanel.DARK_RED, SHTMLPanel.LIGHT_RED);
 		redAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control R"));
 
@@ -628,6 +657,7 @@ public class EditNodeTextField extends EditNodeBase {
 	private final BoldAction boldAction;
 	private final ItalicAction italicAction;
 	private final UnderlineAction underlineAction;
+	private final StrikeThroughAction strikeThroughAction;
 
 	private final CharacterColorAction redAction;
 	private final CharacterColorAction greenAction;
@@ -645,6 +675,7 @@ public class EditNodeTextField extends EditNodeBase {
 	private int verticalSpace;
 	private int horizontalSpace;
 	private MapViewChangeListener mapViewChangeListener;
+
 
     @Override
     protected JPopupMenu createPopupMenu(JComponent component) {
@@ -670,6 +701,8 @@ public class EditNodeTextField extends EditNodeBase {
 	    formatMenu.add(boldAction);
 	    formatMenu.add(italicAction);
 	    formatMenu.add(underlineAction);
+	    formatMenu.add(strikeThroughAction);
+
 	    formatMenu.add(redAction);
 	    formatMenu.add(greenAction);
 	    formatMenu.add(blueAction);
@@ -732,6 +765,9 @@ public class EditNodeTextField extends EditNodeBase {
 
 		inputMap.put((KeyStroke) underlineAction.getValue(Action.ACCELERATOR_KEY), "underlineAction");
 		actionMap.put("underlineAction", underlineAction);
+
+		inputMap.put((KeyStroke) strikeThroughAction.getValue(Action.ACCELERATOR_KEY), "strikethroughAction");
+		actionMap.put("strikethroughAction", strikeThroughAction);
 
 		inputMap.put((KeyStroke) redAction.getValue(Action.ACCELERATOR_KEY), "redAction");
 		actionMap.put("redAction", redAction);
