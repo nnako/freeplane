@@ -108,60 +108,95 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 
         @Override
         public void scrollRectToVisible(final Rectangle newContentRectangle) {
-        	Rectangle newContentRectangleWithHiddenArea = null;
-        	for(ViewportHiddenAreaSupplier hiddenAreaSupplier : hiddenAreaSuppliers) {
-        		final Rectangle hiddenArea = hiddenAreaSupplier.getHiddenArea();
-        		if(hiddenArea.width != 0 && hiddenArea.height != 0) {
-        			Point viewportLocation = new Point(0, 0);
-        			UITools.convertPointToAncestor(this, viewportLocation, JScrollPane.class);
-        			hiddenArea.x -= viewportLocation.x;
-        			hiddenArea.y -= viewportLocation.y;
-        			final boolean isHiddenAreaAtTheLeft = hiddenArea.x == 0;
-        			final boolean isHiddenAreaAtTheTop = hiddenArea.y == 0;
-        			final boolean isHiddenAreaAtTheRight = hiddenArea.x + hiddenArea.width == getWidth();
-        			final boolean isHiddenAreaAtTheBottom = hiddenArea.y + hiddenArea.height == getHeight();
-        			if(isHiddenAreaAtTheLeft || isHiddenAreaAtTheRight
-        					|| isHiddenAreaAtTheTop || isHiddenAreaAtTheBottom) {
-        				if(newContentRectangleWithHiddenArea == null)
-        					newContentRectangleWithHiddenArea = new Rectangle(newContentRectangle);
-        				int dx = positionAdjustment(getWidth(), newContentRectangle.width, newContentRectangle.x);
-        				int dy = positionAdjustment(getHeight(), newContentRectangle.height, newContentRectangle.y);
-        				final boolean overlapsOnXAxis = newContentRectangle.x + dx < hiddenArea.x + hiddenArea.width
-        						&& newContentRectangle.x + dx + newContentRectangle.width > hiddenArea.x;
-        						final boolean overlapsOnYAxis = newContentRectangle.y + dy < hiddenArea.y + hiddenArea.height
-        								&& newContentRectangle.y + dy + newContentRectangle.height > hiddenArea.y;
-        								if (overlapsOnYAxis && overlapsOnXAxis) {
-        									final boolean isWidthSufficient = hiddenArea.width + newContentRectangle.width < getWidth();
-        									if(isWidthSufficient
-        											&& (isHiddenAreaAtTheLeft || isHiddenAreaAtTheRight)) {
-        										if(isHiddenAreaAtTheLeft) {
-        											newContentRectangleWithHiddenArea.x -= hiddenArea.width;
-        											newContentRectangleWithHiddenArea.width += hiddenArea.width;
-        										}
-        										else if (isHiddenAreaAtTheRight){
-        											newContentRectangleWithHiddenArea.width += hiddenArea.width;
-        										}
-        									} else {
-        										final boolean isHeightSufficient = hiddenArea.height  + newContentRectangle.height < getHeight();
-        										if(isHeightSufficient) {
-        											if(isHiddenAreaAtTheTop) {
-        												newContentRectangleWithHiddenArea.y -= hiddenArea.height;
-        												newContentRectangleWithHiddenArea.height += hiddenArea.height;
-        											}
-        											else if (isHiddenAreaAtTheBottom){
-        												newContentRectangleWithHiddenArea.height += hiddenArea.height;
-        											}
-        										}
-        									}
-        								}
-
-        			}
-        		}
-        		if(newContentRectangleWithHiddenArea != null)
-        			super.scrollRectToVisible(newContentRectangleWithHiddenArea);
-				return;
-        	}
-        	super.scrollRectToVisible(newContentRectangle);
+            // Start with a copy of the original rectangle.
+            Rectangle candidateRect = new Rectangle(newContentRectangle);
+            
+            // Compute the maximum insets from all hidden area suppliers.
+            // These insets represent the area obscured by overlays on each side.
+            int leftInset = 0, rightInset = 0, topInset = 0, bottomInset = 0;
+            for(ViewportHiddenAreaSupplier supplier : hiddenAreaSuppliers) {
+                Rectangle hidden = supplier.getHiddenArea();
+                if(hidden.width == 0 || hidden.height == 0)
+                    continue;
+                // Translate hidden area to viewport coordinates.
+                Rectangle h = new Rectangle(hidden);
+                h.x -= getX();
+                if(h.x < 0) {
+                    h.width += h.x; // reduce width by the negative offset
+                    h.x = 0;
+                }
+                h.y -= getY();
+                if(h.y < 0) {
+                    h.height += h.y;
+                    h.y = 0;
+                }
+                if(h.x + h.width > getWidth())
+                    h.width = getWidth() - h.x;
+                if(h.y + h.height > getHeight())
+                    h.height = getHeight() - h.y;
+                
+                // Determine which side the hidden area is drawn on.
+                // (We assume a hidden area is "small" relative to the full viewport.)
+                if(h.x == 0 && h.width < getWidth() / 2) {
+                    leftInset = Math.max(leftInset, h.width);
+                }
+                if(h.x + h.width == getWidth() && h.x >= getWidth() / 2) {
+                    rightInset = Math.max(rightInset, h.width);
+                }
+                if(h.y == 0 && h.height < getHeight() / 2) {
+                    topInset = Math.max(topInset, h.height);
+                }
+                if(h.y + h.height == getHeight() && h.y >= getHeight() / 2) {
+                    bottomInset = Math.max(bottomInset, h.height);
+                }
+            }
+            
+            // --- Horizontal adjustment ---
+            // The idea is that the "safe" (visible) horizontal area is
+            // [candidateRect.x + leftInset, candidateRect.x + candidateRect.width - rightInset]
+            // and that area should contain newContentRectangle's x-range.
+            boolean adjustLeft = leftInset > 0 && newContentRectangle.x < leftInset;
+            boolean adjustRight = rightInset > 0 &&
+                    (newContentRectangle.x + newContentRectangle.width) > (getWidth() - rightInset);
+            
+            if(adjustLeft && !adjustRight && leftInset >= rightInset) {
+                // One-sided left adjustment is sufficient.
+                candidateRect.x = newContentRectangle.x - leftInset;
+                candidateRect.width = newContentRectangle.width + leftInset;
+            }
+            else if(adjustRight && !adjustLeft && rightInset >= leftInset) {
+                // One-sided right adjustment is sufficient.
+                candidateRect.width = newContentRectangle.width + rightInset;
+            }
+            else if(adjustLeft && adjustRight) {
+                // Both sides intrude, so expand candidateRect on both sides.
+                candidateRect.x = newContentRectangle.x - leftInset;
+                candidateRect.width = newContentRectangle.width + leftInset + rightInset;
+            }
+            
+            // --- Vertical adjustment ---
+            // Similarly, the vertical safe area is
+            // [candidateRect.y + topInset, candidateRect.y + candidateRect.height - bottomInset].
+            boolean adjustTop = topInset > 0 && newContentRectangle.y < topInset;
+            boolean adjustBottom = bottomInset > 0 &&
+                    (newContentRectangle.y + newContentRectangle.height) > (getHeight() - bottomInset);
+            
+            if(adjustTop && !adjustBottom && topInset >= bottomInset) {
+                candidateRect.y = newContentRectangle.y - topInset;
+                candidateRect.height = newContentRectangle.height + topInset;
+            }
+            else if(adjustBottom && !adjustTop && bottomInset >= topInset) {
+                candidateRect.height = newContentRectangle.height + bottomInset;
+            }
+            else if(adjustTop && adjustBottom) {
+                candidateRect.y = newContentRectangle.y - topInset;
+                candidateRect.height = newContentRectangle.height + topInset + bottomInset;
+            }
+            
+            // Finally, scroll so that the expanded candidateRect (which now
+            // accounts for the hidden areas using one-sided adjustments whenever possible)
+            // is visible.
+            super.scrollRectToVisible(candidateRect);
         }
         private int positionAdjustment(int parentWidth, int childWidth, int childAt)    {
 
