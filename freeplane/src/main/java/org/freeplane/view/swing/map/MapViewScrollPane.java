@@ -57,20 +57,20 @@ import org.freeplane.view.swing.features.filepreview.ScalableComponent;
 public class MapViewScrollPane extends JScrollPane implements IFreeplanePropertyListener {
 	private static final Dimension INVISIBLE = new Dimension(0,  0);
 	public static final Rectangle EMPTY_RECTANGLE = new Rectangle();
-	public interface ViewportHiddenAreaSupplier {
-		Rectangle getHiddenArea();
+	public interface ViewportReservedAreaSupplier {
+		Rectangle getReservedArea();
 	}
 	@SuppressWarnings("serial")
     static class MapViewPort extends JViewport{
-		private List<ViewportHiddenAreaSupplier> hiddenAreaSuppliers = new ArrayList<>();
+		private List<ViewportReservedAreaSupplier> reservedAreaSuppliers = new ArrayList<>();
 		private boolean layoutInProgress = false;
 
-		void addHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
-			removeHiddenAreaSupplier(hiddenAreaSupplier);
-			this.hiddenAreaSuppliers.add(hiddenAreaSupplier);
+		void addReservedAreaSupplier(ViewportReservedAreaSupplier supplier) {
+			removeReservedAreaSupplier(supplier);
+			this.reservedAreaSuppliers.add(supplier);
 		}
-		void removeHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
-			this.hiddenAreaSuppliers.remove(hiddenAreaSupplier);
+		void removeReservedAreaSupplier(ViewportReservedAreaSupplier supplier) {
+			this.reservedAreaSuppliers.remove(supplier);
 		}
 
 
@@ -111,72 +111,63 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
             // Start with a copy of the original rectangle.
             Rectangle candidateRect = new Rectangle(newContentRectangle);
             
-            // Compute the maximum insets from all hidden area suppliers.
-            // These insets represent the area obscured by overlays on each side.
+            // Compute the maximum insets from all reserved area suppliers.
+            // These insets represent the area reserved (i.e. the overlays) on each side.
             int leftInset = 0, rightInset = 0, topInset = 0, bottomInset = 0;
-            for(ViewportHiddenAreaSupplier supplier : hiddenAreaSuppliers) {
-                Rectangle hidden = supplier.getHiddenArea();
-                if(hidden.width == 0 || hidden.height == 0)
+            for(ViewportReservedAreaSupplier supplier : reservedAreaSuppliers) {
+                Rectangle reservedArea = supplier.getReservedArea();
+                if(reservedArea.width == 0 || reservedArea.height == 0)
                     continue;
-                // Translate hidden area to viewport coordinates.
-                Rectangle h = new Rectangle(hidden);
-                h.x -= getX();
-                if(h.x < 0) {
-                    h.width += h.x; // reduce width by the negative offset
-                    h.x = 0;
+                // Translate reservedArea to viewport coordinates.
+                Rectangle r = new Rectangle(reservedArea);
+                r.x -= getX();
+                if(r.x < 0) {
+                    r.width += r.x; // reduce width by the negative offset
+                    r.x = 0;
                 }
-                h.y -= getY();
-                if(h.y < 0) {
-                    h.height += h.y;
-                    h.y = 0;
+                r.y -= getY();
+                if(r.y < 0) {
+                    r.height += r.y;
+                    r.y = 0;
                 }
-                if(h.x + h.width > getWidth())
-                    h.width = getWidth() - h.x;
-                if(h.y + h.height > getHeight())
-                    h.height = getHeight() - h.y;
+                if(r.x + r.width > getWidth())
+                    r.width = getWidth() - r.x;
+                if(r.y + r.height > getHeight())
+                    r.height = getHeight() - r.y;
                 
-                // Determine which side the hidden area is drawn on.
-                // (We assume a hidden area is "small" relative to the full viewport.)
-                if(h.x == 0 && h.width < getWidth() / 2) {
-                    leftInset = Math.max(leftInset, h.width);
+                // Determine which side the reserved area is drawn on.
+                if(r.x == 0 && r.width < getWidth() / 2) {
+                    leftInset = Math.max(leftInset, r.width);
                 }
-                if(h.x + h.width == getWidth() && h.x >= getWidth() / 2) {
-                    rightInset = Math.max(rightInset, h.width);
+                if(r.x + r.width == getWidth() && r.x >= getWidth() / 2) {
+                    rightInset = Math.max(rightInset, r.width);
                 }
-                if(h.y == 0 && h.height < getHeight() / 2) {
-                    topInset = Math.max(topInset, h.height);
+                if(r.y == 0 && r.height < getHeight() / 2) {
+                    topInset = Math.max(topInset, r.height);
                 }
-                if(h.y + h.height == getHeight() && h.y >= getHeight() / 2) {
-                    bottomInset = Math.max(bottomInset, h.height);
+                if(r.y + r.height == getHeight() && r.y >= getHeight()/2) {
+                    bottomInset = Math.max(bottomInset, r.height);
                 }
             }
             
             // --- Horizontal adjustment ---
-            // The idea is that the "safe" (visible) horizontal area is
-            // [candidateRect.x + leftInset, candidateRect.x + candidateRect.width - rightInset]
-            // and that area should contain newContentRectangle's x-range.
             boolean adjustLeft = leftInset > 0 && newContentRectangle.x < leftInset;
             boolean adjustRight = rightInset > 0 &&
                     (newContentRectangle.x + newContentRectangle.width) > (getWidth() - rightInset);
             
             if(adjustLeft && !adjustRight && leftInset >= rightInset) {
-                // One-sided left adjustment is sufficient.
                 candidateRect.x = newContentRectangle.x - leftInset;
                 candidateRect.width = newContentRectangle.width + leftInset;
             }
             else if(adjustRight && !adjustLeft && rightInset >= leftInset) {
-                // One-sided right adjustment is sufficient.
                 candidateRect.width = newContentRectangle.width + rightInset;
             }
             else if(adjustLeft && adjustRight) {
-                // Both sides intrude, so expand candidateRect on both sides.
                 candidateRect.x = newContentRectangle.x - leftInset;
                 candidateRect.width = newContentRectangle.width + leftInset + rightInset;
             }
             
             // --- Vertical adjustment ---
-            // Similarly, the vertical safe area is
-            // [candidateRect.y + topInset, candidateRect.y + candidateRect.height - bottomInset].
             boolean adjustTop = topInset > 0 && newContentRectangle.y < topInset;
             boolean adjustBottom = bottomInset > 0 &&
                     (newContentRectangle.y + newContentRectangle.height) > (getHeight() - bottomInset);
@@ -193,9 +184,6 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 candidateRect.height = newContentRectangle.height + topInset + bottomInset;
             }
             
-            // Finally, scroll so that the expanded candidateRect (which now
-            // accounts for the hidden areas using one-sided adjustments whenever possible)
-            // is visible.
             super.scrollRectToVisible(candidateRect);
         }
         private int positionAdjustment(int parentWidth, int childWidth, int childAt)    {
@@ -414,12 +402,12 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 		repaint();
     }
 
-	public void addViewportHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
-		((MapViewPort)getViewport()).addHiddenAreaSupplier(hiddenAreaSupplier);
+	public void addViewportReservedAreaSupplier(ViewportReservedAreaSupplier supplier) {
+		((MapViewPort)getViewport()).addReservedAreaSupplier(supplier);
 	}
 
-	public void removeHiddenAreaSupplier(ViewportHiddenAreaSupplier hiddenAreaSupplier) {
-		((MapViewPort)getViewport()).removeHiddenAreaSupplier(hiddenAreaSupplier);
+	public void removeReservedAreaSupplier(ViewportReservedAreaSupplier supplier) {
+		((MapViewPort)getViewport()).removeReservedAreaSupplier(supplier);
 	}
 
 

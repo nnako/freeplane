@@ -26,11 +26,11 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.ui.ViewController;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewScrollPane;
-import org.freeplane.view.swing.map.MapViewScrollPane.ViewportHiddenAreaSupplier;
+import org.freeplane.view.swing.map.MapViewScrollPane.ViewportReservedAreaSupplier;
 import org.freeplane.view.swing.map.overview.resizable.ResizablePanelBorder;
 import org.freeplane.view.swing.map.overview.resizable.ResizePanelMouseHandler;
 
-public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener, ViewportHiddenAreaSupplier {
+public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener, ViewportReservedAreaSupplier {
     private static final long serialVersionUID = 8664710783654626093L;
 
     private final static String MAP_OVERVIEW_VISIBLE_PROPERTY = "mapOverviewVisible";
@@ -268,7 +268,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
     }
 
 	@Override
-	public Rectangle getHiddenArea() {
+	public Rectangle getReservedArea() {
 		if (isMapOverviewVisible) {
 			return mapOverviewPanel.getBounds();
 		} else
