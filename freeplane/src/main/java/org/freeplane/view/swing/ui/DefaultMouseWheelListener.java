@@ -67,7 +67,7 @@ public class DefaultMouseWheelListener implements MouseWheelListener {
 			final MouseWheelEvent mapWheelEvent = new MouseWheelEvent(scrollPane, e.getID(), e.getWhen(), e.getModifiers() | e.getModifiersEx(),
 					location.x, location.y, e.getXOnScreen(), e.getYOnScreen(),
 					e.getClickCount(), Compat.isPopupTrigger(e), e.getScrollType(),
-					e.getScrollAmount(), e.getWheelRotation());
+					e.getScrollAmount(), e.getWheelRotation(), e.getPreciseWheelRotation());
 			if(scrollPane != null) {
 				for (MouseWheelListener l : scrollPane.getMouseWheelListeners())
 					l.mouseWheelMoved(mapWheelEvent);
