@@ -160,16 +160,16 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 if(! (overlapsOnXAxis && overlapsOnYAxis))
                 	continue;
 
-				if(isOnTheLeft && ! isOnTheRight && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
+				if(isOnTheLeft && ! isOnTheRight && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height || isTooHigh)) {
                     leftInset = Math.max(leftInset, r.width);
                 }
-				else if(isOnTheRight && ! isOnTheLeft && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
+				else if(isOnTheRight && ! isOnTheLeft && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height || isTooHigh)) {
                     rightInset = Math.max(rightInset, r.width);
                 }
-				else if(isAtTheTop && ! isAtTheBottom && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
+				else if(isAtTheTop && ! isAtTheBottom && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width || isTooWide)) {
                     topInset = Math.max(topInset, r.height);
                 }
-				else if(isAtTheBottom && ! isAtTheTop && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
+				else if(isAtTheBottom && ! isAtTheTop && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width || isTooWide)) {
                     bottomInset = Math.max(bottomInset, r.height);
                 }
             }
