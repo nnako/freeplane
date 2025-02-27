@@ -107,17 +107,23 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 
 
         @Override
-        public void scrollRectToVisible(final Rectangle newContentRectangle) {
+        public void scrollRectToVisible(final Rectangle contentRectangle) {
+            int width = getWidth();
+			int height = getHeight();
+        	boolean isTooWide = contentRectangle.width >= width;
+			boolean isTooHigh = contentRectangle.height >= height;
+			if(isTooWide && isTooHigh) {
+        		super.scrollRectToVisible(contentRectangle);
+        		return;
+        	}
             // Start with a copy of the original rectangle.
-            Rectangle candidateRect = new Rectangle(newContentRectangle);
-			int dx = positionAdjustment(getWidth(), newContentRectangle.width, newContentRectangle.x);
-			int dy = positionAdjustment(getHeight(), newContentRectangle.height, newContentRectangle.y);
+            Rectangle candidateRect = new Rectangle(contentRectangle);
+			int dx = positionAdjustment(getWidth(), contentRectangle.width, contentRectangle.x);
+			int dy = positionAdjustment(getHeight(), contentRectangle.height, contentRectangle.y);
 
             // Compute the maximum insets from all reserved area suppliers.
             // These insets represent the area reserved (i.e. the overlays) on each side.
             int leftInset = 0, rightInset = 0, topInset = 0, bottomInset = 0;
-            int width = getWidth();
-			int height = getHeight();
 			for(ViewportReservedAreaSupplier supplier : reservedAreaSuppliers) {
                 Rectangle reservedArea = supplier.getReservedArea();
                 if(reservedArea.width == 0 || reservedArea.height == 0)
@@ -146,60 +152,60 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 boolean isAtTheBottom = r.y + r.height == height;
                 if(! (isOnTheLeft || isOnTheRight || isAtTheTop || isAtTheBottom))
                 	continue;
-    			final boolean overlapsOnXAxis = newContentRectangle.x + dx < r.x + r.width
-    					&& newContentRectangle.x + dx + newContentRectangle.width > r.x;
-    			final boolean overlapsOnYAxis = newContentRectangle.y + dy < r.y + r.height
-    				&& newContentRectangle.y + dy + newContentRectangle.height > r.y;
+    			final boolean overlapsOnXAxis = contentRectangle.x + dx < r.x + r.width
+    					&& contentRectangle.x + dx + contentRectangle.width > r.x;
+    			final boolean overlapsOnYAxis = contentRectangle.y + dy < r.y + r.height
+    				&& contentRectangle.y + dy + contentRectangle.height > r.y;
 
                 if(! (overlapsOnXAxis && overlapsOnYAxis))
                 	continue;
 
-				if(isOnTheLeft && ! isOnTheRight && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
+				if(isOnTheLeft && ! isOnTheRight && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
                     leftInset = Math.max(leftInset, r.width);
                 }
-				else if(isOnTheRight && ! isOnTheLeft && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
+				else if(isOnTheRight && ! isOnTheLeft && ! isTooWide && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
                     rightInset = Math.max(rightInset, r.width);
                 }
-				else if(isAtTheTop && ! isAtTheBottom && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
+				else if(isAtTheTop && ! isAtTheBottom && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
                     topInset = Math.max(topInset, r.height);
                 }
-				else if(isAtTheBottom && ! isAtTheTop && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
+				else if(isAtTheBottom && ! isAtTheTop && ! isTooHigh && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
                     bottomInset = Math.max(bottomInset, r.height);
                 }
             }
 
             // --- Horizontal adjustment ---
-            boolean adjustLeft = leftInset > 0 && newContentRectangle.x < leftInset;
+            boolean adjustLeft = leftInset > 0 && contentRectangle.x < leftInset;
             boolean adjustRight = rightInset > 0 &&
-                    (newContentRectangle.x + newContentRectangle.width) > (width - rightInset);
+                    (contentRectangle.x + contentRectangle.width) > (width - rightInset);
 
             if(adjustLeft && !adjustRight && leftInset >= rightInset) {
-                candidateRect.x = newContentRectangle.x - leftInset;
-                candidateRect.width = newContentRectangle.width + leftInset;
+                candidateRect.x = contentRectangle.x - leftInset;
+                candidateRect.width = contentRectangle.width + leftInset;
             }
             else if(adjustRight && !adjustLeft && rightInset >= leftInset) {
-                candidateRect.width = newContentRectangle.width + rightInset;
+                candidateRect.width = contentRectangle.width + rightInset;
             }
             else if(adjustLeft && adjustRight) {
-                candidateRect.x = newContentRectangle.x - leftInset;
-                candidateRect.width = newContentRectangle.width + leftInset + rightInset;
+                candidateRect.x = contentRectangle.x - leftInset;
+                candidateRect.width = contentRectangle.width + leftInset + rightInset;
             }
 
             // --- Vertical adjustment ---
-            boolean adjustTop = topInset > 0 && newContentRectangle.y < topInset;
+            boolean adjustTop = topInset > 0 && contentRectangle.y < topInset;
             boolean adjustBottom = bottomInset > 0 &&
-                    (newContentRectangle.y + newContentRectangle.height) > (height - bottomInset);
+                    (contentRectangle.y + contentRectangle.height) > (height - bottomInset);
 
             if(adjustTop && !adjustBottom && topInset >= bottomInset) {
-                candidateRect.y = newContentRectangle.y - topInset;
-                candidateRect.height = newContentRectangle.height + topInset;
+                candidateRect.y = contentRectangle.y - topInset;
+                candidateRect.height = contentRectangle.height + topInset;
             }
             else if(adjustBottom && !adjustTop && bottomInset >= topInset) {
-                candidateRect.height = newContentRectangle.height + bottomInset;
+                candidateRect.height = contentRectangle.height + bottomInset;
             }
             else if(adjustTop && adjustBottom) {
-                candidateRect.y = newContentRectangle.y - topInset;
-                candidateRect.height = newContentRectangle.height + topInset + bottomInset;
+                candidateRect.y = contentRectangle.y - topInset;
+                candidateRect.height = contentRectangle.height + topInset + bottomInset;
             }
 
             super.scrollRectToVisible(candidateRect);
