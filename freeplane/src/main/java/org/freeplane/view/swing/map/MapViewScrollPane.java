@@ -110,11 +110,15 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
         public void scrollRectToVisible(final Rectangle newContentRectangle) {
             // Start with a copy of the original rectangle.
             Rectangle candidateRect = new Rectangle(newContentRectangle);
-            
+			int dx = positionAdjustment(getWidth(), newContentRectangle.width, newContentRectangle.x);
+			int dy = positionAdjustment(getHeight(), newContentRectangle.height, newContentRectangle.y);
+
             // Compute the maximum insets from all reserved area suppliers.
             // These insets represent the area reserved (i.e. the overlays) on each side.
             int leftInset = 0, rightInset = 0, topInset = 0, bottomInset = 0;
-            for(ViewportReservedAreaSupplier supplier : reservedAreaSuppliers) {
+            int width = getWidth();
+			int height = getHeight();
+			for(ViewportReservedAreaSupplier supplier : reservedAreaSuppliers) {
                 Rectangle reservedArea = supplier.getReservedArea();
                 if(reservedArea.width == 0 || reservedArea.height == 0)
                     continue;
@@ -130,31 +134,45 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                     r.height += r.y;
                     r.y = 0;
                 }
-                if(r.x + r.width > getWidth())
-                    r.width = getWidth() - r.x;
-                if(r.y + r.height > getHeight())
-                    r.height = getHeight() - r.y;
-                
+                if(r.x + r.width > width)
+                    r.width = width - r.x;
+                if(r.y + r.height > height)
+                    r.height = height - r.y;
+
                 // Determine which side the reserved area is drawn on.
-                if(r.x == 0 && r.width < getWidth() / 2) {
+                boolean isOnTheLeft = r.x == 0;
+                boolean isOnTheRight = r.x + r.width == width;
+                boolean isAtTheTop = r.y == 0;
+                boolean isAtTheBottom = r.y + r.height == height;
+                if(! (isOnTheLeft || isOnTheRight || isAtTheTop || isAtTheBottom))
+                	continue;
+    			final boolean overlapsOnXAxis = newContentRectangle.x + dx < r.x + r.width
+    					&& newContentRectangle.x + dx + newContentRectangle.width > r.x;
+    			final boolean overlapsOnYAxis = newContentRectangle.y + dy < r.y + r.height
+    				&& newContentRectangle.y + dy + newContentRectangle.height > r.y;
+
+                if(! (overlapsOnXAxis && overlapsOnYAxis))
+                	continue;
+
+				if(isOnTheLeft && ! isOnTheRight && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
                     leftInset = Math.max(leftInset, r.width);
                 }
-                if(r.x + r.width == getWidth() && r.x >= getWidth() / 2) {
+				else if(isOnTheRight && ! isOnTheLeft && (isAtTheTop == isAtTheBottom || r.width < r.height)) {
                     rightInset = Math.max(rightInset, r.width);
                 }
-                if(r.y == 0 && r.height < getHeight() / 2) {
+				else if(isAtTheTop && ! isAtTheBottom && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
                     topInset = Math.max(topInset, r.height);
                 }
-                if(r.y + r.height == getHeight() && r.y >= getHeight()/2) {
+				else if(isAtTheBottom && ! isAtTheTop && (isOnTheRight == isOnTheLeft || r.height <= r.width)) {
                     bottomInset = Math.max(bottomInset, r.height);
                 }
             }
-            
+
             // --- Horizontal adjustment ---
             boolean adjustLeft = leftInset > 0 && newContentRectangle.x < leftInset;
             boolean adjustRight = rightInset > 0 &&
-                    (newContentRectangle.x + newContentRectangle.width) > (getWidth() - rightInset);
-            
+                    (newContentRectangle.x + newContentRectangle.width) > (width - rightInset);
+
             if(adjustLeft && !adjustRight && leftInset >= rightInset) {
                 candidateRect.x = newContentRectangle.x - leftInset;
                 candidateRect.width = newContentRectangle.width + leftInset;
@@ -166,12 +184,12 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 candidateRect.x = newContentRectangle.x - leftInset;
                 candidateRect.width = newContentRectangle.width + leftInset + rightInset;
             }
-            
+
             // --- Vertical adjustment ---
             boolean adjustTop = topInset > 0 && newContentRectangle.y < topInset;
             boolean adjustBottom = bottomInset > 0 &&
-                    (newContentRectangle.y + newContentRectangle.height) > (getHeight() - bottomInset);
-            
+                    (newContentRectangle.y + newContentRectangle.height) > (height - bottomInset);
+
             if(adjustTop && !adjustBottom && topInset >= bottomInset) {
                 candidateRect.y = newContentRectangle.y - topInset;
                 candidateRect.height = newContentRectangle.height + topInset;
@@ -183,7 +201,7 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 candidateRect.y = newContentRectangle.y - topInset;
                 candidateRect.height = newContentRectangle.height + topInset + bottomInset;
             }
-            
+
             super.scrollRectToVisible(candidateRect);
         }
         private int positionAdjustment(int parentWidth, int childWidth, int childAt)    {
@@ -212,7 +230,6 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 
             return 0;
         }
-
         @Override
         public void paintComponent(Graphics g) {
             if(backgroundComponent != null) {
