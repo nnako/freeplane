@@ -59,6 +59,7 @@ import org.freeplane.core.ui.IUserInputListenerFactory;
 import org.freeplane.core.ui.components.IconListComponent;
 import org.freeplane.core.ui.components.TagIcon;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.util.ColorUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.ObjectRule;
 import org.freeplane.features.attribute.AttributeController;
@@ -872,9 +873,29 @@ public class NodeView extends JComponent implements INodeView {
     public Color getTextBackground(StyleOption styleOption) {
         Color modelBackgroundColor = styleController().getBackgroundColor(viewedNode, styleOption);
         if (modelBackgroundColor != null) {
+            if (modelBackgroundColor.getAlpha() < 255) {
+                return ColorUtils.blendColors(modelBackgroundColor, getBlendedBackgroundColor());
+            }
             return modelBackgroundColor;
         }
         return getBackgroundColor();
+    }
+
+    public Color getBlendedBackgroundColor() {
+        final Color cloudColor = getCloudColor();
+        if (cloudColor != null) {
+            if (cloudColor.getAlpha() < 255) {
+                final NodeView parentView = getParentView();
+                Color parentBackground = (parentView == null) ? map.getBackground() : parentView.getBlendedBackgroundColor();
+                return ColorUtils.blendColors(cloudColor, parentBackground);
+            }
+            return cloudColor;
+        }
+        final NodeView parentView = getParentView();
+        if (parentView == null) {
+            return map.getBackground();
+        }
+        return parentView.getBlendedBackgroundColor();
     }
 
     private NodeStyleController styleController() {
