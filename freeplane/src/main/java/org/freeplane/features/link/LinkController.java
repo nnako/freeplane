@@ -824,7 +824,7 @@ public class LinkController extends SelectionController implements IExtension {
 				final Matcher mat = patURI.matcher(inputValue);
 				if (mat.matches()) {
 					final String scheme = mat.group(1);
-					final String ssp = mat.group(2).replace('\\', '/');
+					final String ssp = mat.group(2);
 					final String fragment = mat.group(3);
 					return new Hyperlink(inputValue, new URI(scheme, ssp, fragment));
 				}
@@ -904,7 +904,8 @@ public class LinkController extends SelectionController implements IExtension {
 
 	// this will fail badly for non-menuitem uris!
 	public static String parseSpecialLink(final Hyperlink link) {
-		return convertPre15VersionStyleKeysToCurrent(link.getUri().getSchemeSpecificPart().substring(1));
+		String schemeSpecificPart = link.getUri().getSchemeSpecificPart();
+		return convertPre15VersionStyleKeysToCurrent(schemeSpecificPart.startsWith("_") ? schemeSpecificPart.substring(1) : schemeSpecificPart);
 	}
 
 	private static String convertPre15VersionStyleKeysToCurrent(final String actionKey) {
