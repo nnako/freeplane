@@ -58,8 +58,9 @@ class VerticalNodeViewLayoutStrategy {
 	private final Dimension contentSize;
 
 	public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout) {
-		this.view = view.getLayoutHelper();
-		this.contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
+		NodeViewLayoutHelper layoutHelper = view.getLayoutHelper();
+		this.view = layoutHelper;
+		this.contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(layoutHelper);
 		childViewCount = view.getComponentCount() - 1;
 		layoutChildViews(view);
 		this.top = 0;
