@@ -337,7 +337,7 @@ private Timer timer;
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
-						dropAsSibling ? Side.AS_SIBLING_BEFORE : side, dropAction);
+						dropAsSibling ? sides.get(dragOverRelation) : side, dropAction);
 				dtde.dropComplete(true);
 				return;
 			}
