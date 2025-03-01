@@ -428,14 +428,35 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		return textR;
 	}
 
+	public Rectangle getAvailableTextR(ZoomableLabel label) {
+		layoutZoomed(label);
+		int availableTextWidth = viewR.width;
+		if(iconR.width > 0 && label.getVerticalTextPosition() != SwingConstants.BOTTOM)
+			availableTextWidth -= iconR.width + label.getIconTextGap();
+		if(availableTextWidth == textR.width)
+			return textR;
+		Rectangle availableTextR = new Rectangle(textR);
+		int horizontalAlignment = label.getEffectiveHorizontalAlignment();
+		switch (horizontalAlignment) {
+		case SwingConstants.CENTER:
+			availableTextR.x -= (availableTextWidth - textR.width)/2;
+			break;
+		case SwingConstants.RIGHT:
+			availableTextR.x -= availableTextWidth - textR.width;
+			break;
+		}
+		availableTextR.width = availableTextWidth;
+		return availableTextR;
+	}
+
 	private void layoutZoomed(ZoomableLabel label) {
 		layoutIgnoringZoom(label);
 		final float zoom = label.getZoom();
 		if(zoom != 1f) {
 			viewR.x = (int)(iconR.x * zoom);
 			viewR.y = (int)(iconR.y * zoom);
-			viewR.width = (int)(iconR.width * zoom);
-			viewR.height = (int)(iconR.height * zoom);
+			viewR.width = (int)(viewR.width * zoom);
+			viewR.height = (int)(viewR.height * zoom);
 			iconR.x = (int)(iconR.x * zoom);
 			iconR.y = (int)(iconR.y * zoom);
 			iconR.width = (int)(iconR.width * zoom);

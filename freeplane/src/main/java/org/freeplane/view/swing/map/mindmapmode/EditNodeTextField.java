@@ -873,7 +873,7 @@ public class EditNodeTextField extends EditNodeBase {
 		KeyEvent firstEvent = eventQueue.getFirstEvent();
 
 		final ZoomableLabelUI parentUI = parent.getUI();
-		final Rectangle textR = parentUI.getTextR(parent);
+		final Rectangle textR = parentUI.getAvailableTextR(parent);
 		Point mouseEventPoint = null;
 		if (firstEvent == null) {
 			MouseEvent currentEvent = eventQueue.getMouseEvent();
