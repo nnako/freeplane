@@ -880,7 +880,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 		if (side.isSibling()) {
 			final NodeModel childNode = target;
 			parent = target.getParentNode();
-			insertionIndex = parent.getIndex(childNode);
+			insertionIndex = parent.getIndex(childNode) + (side == Side.AS_SIBLING_BEFORE ? 0 : 1);
 		}
 		else{
 			parent = target;
