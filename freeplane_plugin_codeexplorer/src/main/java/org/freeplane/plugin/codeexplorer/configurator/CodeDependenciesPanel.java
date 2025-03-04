@@ -6,7 +6,9 @@ import java.awt.Rectangle;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -18,6 +20,7 @@ import java.util.stream.Stream;
 import javax.swing.Box;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,7 +51,6 @@ import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.plugin.codeexplorer.dependencies.CodeDependency;
-import org.freeplane.plugin.codeexplorer.map.ClassNode;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 import org.freeplane.plugin.codeexplorer.map.SelectedNodeDependencies;
@@ -67,6 +69,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private final JLabel countLabel;
     private final List<Consumer<Object>> dependencySelectionCallbacks;
     private List<CodeDependency> allDependencies;
+    private boolean isLastColumnVisible = true;
 
     private AFreeplaneAction filterAction;
 
@@ -88,8 +91,16 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
             CodeDependency row = allDependencies.get(rowIndex);
             switch (columnIndex) {
                 case 0: return row.describeVerdict();
-                case 1: return ClassNode.classNameWithNestedClasses(row.getOriginClass());
-                case 2: return ClassNode.classNameWithNestedClasses(row.getTargetClass());
+                case 1: {
+                    String originName = toDisplayedFullName(row.getOriginClass());
+                    String targetName = toDisplayedFullName(row.getTargetClass());
+                    return shortenClassNameIfCommonPrefix(originName, targetName);
+                }
+                case 2: {
+                    String originName = toDisplayedFullName(row.getOriginClass());
+                    String targetName = toDisplayedFullName(row.getTargetClass());
+                    return shortenClassNameIfCommonPrefix(targetName, originName);
+                }
                 case 3: return row.getDescription();
                 default: return null;
             }
@@ -103,6 +114,33 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
             return columnIndex > 0;
+        }
+
+        private String shortenClassNameIfCommonPrefix(String name, String otherName) {
+            String[] nameParts = name.split("\\.");
+            String[] otherParts = otherName.split("\\.");
+
+            int commonPrefixCount = 0;
+            int minLength = Math.min(nameParts.length, otherParts.length);
+
+            for (int i = 0; i < minLength - 1; i++) {
+                if (nameParts[i].equals(otherParts[i])) {
+                    commonPrefixCount++;
+                } else {
+                    break;
+                }
+            }
+
+            if (commonPrefixCount > 0) {
+                // Build shortened name with prefix replaced by ".."
+                StringBuilder shortened = new StringBuilder("..");
+                for (int i = commonPrefixCount; i < nameParts.length; i++) {
+                    shortened.append(".").append(nameParts[i]);
+                }
+                return shortened.toString();
+            }
+
+            return name;
         }
     }
 
@@ -131,6 +169,12 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
          // Add the filterField to the CENTER to occupy the maximum available space
          topPanel.add(filterField, BorderLayout.CENTER);
 
+         // Add toggle button for last column visibility
+         JCheckBox toggleLastColumnButton = TranslatedElementFactory.createCheckBox("code.toggle_dependencies");
+         toggleLastColumnButton.setSelected(isLastColumnVisible);
+         toggleLastColumnButton.addActionListener(e -> toggleLastColumnVisibility());
+         topPanel.add(toggleLastColumnButton, BorderLayout.EAST);
+
          dependencyViewer = new JTable() {
 
             private static final long serialVersionUID = 1L;
@@ -154,7 +198,7 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         CellRendererWithTooltip cellRenderer = new CellRendererWithTooltip();
 
         TableColumnModel columnModel = dependencyViewer.getColumnModel();
-        updateColumn(columnModel, 0, 200, cellRenderer);
+        updateColumn(columnModel, 0, 80, cellRenderer);
         updateColumn(columnModel, 1, 200, cellRenderer);
         updateColumn(columnModel, 2, 200, cellRenderer);
         updateColumn(columnModel, 3, 1200, cellRenderer);
@@ -189,10 +233,11 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
         String[] filteredWords = filterField.getText().trim().split("[^\\w:.$]+");
         @SuppressWarnings("unchecked")
         TableRowSorter<DependenciesWrapper> rowSorter = (TableRowSorter<DependenciesWrapper>)dependencyViewer.getRowSorter();
-        if(filteredWords.length == 1 && filteredWords[0].isEmpty())
-            rowSorter.setRowFilter(null);
-        else {
-            RowFilter<DependenciesWrapper, Integer> dependencyFilter = new RowFilter<DependenciesWrapper, Integer>() {
+
+        // Text-based filter
+        RowFilter<DependenciesWrapper, Integer> textFilter = null;
+        if(!(filteredWords.length == 1 && filteredWords[0].isEmpty())) {
+            textFilter = new RowFilter<DependenciesWrapper, Integer>() {
                 BiPredicate<CodeDependency, String[]> combinedFilter = Stream.of(filteredWords)
                         .map(this::createPredicateFromString)
                         .reduce((x,y) -> true, BiPredicate::and);
@@ -237,9 +282,44 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
                     return combinedFilter.test(allDependencies.get(rowIndex), row);
                 }
             };
-
-            rowSorter.setRowFilter(dependencyFilter);
         }
+
+        // Duplicate row filter (only when the last column is hidden)
+        RowFilter<DependenciesWrapper, Integer> uniqueRowFilter = null;
+        if (!isLastColumnVisible) {
+            uniqueRowFilter = new RowFilter<DependenciesWrapper, Integer>() {
+                private final Set<String> visibleRowSignatures = new HashSet<>();
+
+                @Override
+                public boolean include(Entry<? extends DependenciesWrapper, ? extends Integer> entry) {
+                    // Create a signature using values from columns 0, 1, and 2
+                    StringBuilder signature = new StringBuilder();
+                    for (int i = 1; i < 3; i++) {
+                        signature.append(entry.getModel().getValueAt(entry.getIdentifier(), i));
+                        signature.append("||"); // delimiter
+                    }
+
+                    // Only include row if we haven't seen this signature before
+                    return visibleRowSignatures.add(signature.toString());
+                }
+            };
+        }
+
+        // Apply appropriate filter(s)
+        if (textFilter != null && uniqueRowFilter != null) {
+            // Both filters
+            rowSorter.setRowFilter(RowFilter.andFilter(Arrays.asList(textFilter, uniqueRowFilter)));
+        } else if (textFilter != null) {
+            // Text filter only
+            rowSorter.setRowFilter(textFilter);
+        } else if (uniqueRowFilter != null) {
+            // Unique filter only
+            rowSorter.setRowFilter(uniqueRowFilter);
+        } else {
+            // No filters
+            rowSorter.setRowFilter(null);
+        }
+
         dependencySelectionCallbacks.stream().forEach(x -> x.accept(this));
         scrollSelectedToVisible();
         updateRowCountLabelAndFilterAction();
@@ -278,11 +358,16 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
     private void update(IMapSelection selection) {
         Set<CodeDependency> selectedDependencies = getSelectedCodeDependencies().collect(Collectors.toSet());
         int selectedColumn = dependencyViewer.getSelectedColumn();
-        this.allDependencies = selection == null || ! (selection.getMap() instanceof CodeMap)
-                ? Collections.emptyList() :
-                    selectedDependencies(new SelectedNodeDependencies(selection));
+        this.allDependencies = Collections.emptyList();
         ((DependenciesWrapper)dependencyViewer.getModel()).fireTableDataChanged();
-        updateRowCountLabelAndFilterAction();
+        if (selection != null && selection.getMap() instanceof CodeMap) {
+			this.allDependencies = selectedDependencies(new SelectedNodeDependencies(selection));
+			updateDependencyFilter();
+		} else {
+	        TableRowSorter<?> rowSorter = (TableRowSorter<?>)dependencyViewer.getRowSorter();
+	        rowSorter.setRowFilter(null);
+			updateRowCountLabelAndFilterAction();
+		}
         if(! selectedDependencies.isEmpty()) {
             IntStream.range(0, allDependencies.size())
             .filter(i -> selectedDependencies.contains(allDependencies.get(i)))
@@ -340,7 +425,24 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
     private void updateRowCountLabelAndFilterAction() {
         int rowCount = dependencyViewer.getRowCount();
-        int dependencyCount = allDependencies.size();
+        int dependencyCount;
+
+        if (!isLastColumnVisible) {
+            // When last column is hidden, count unique dependencies based on origin/target
+            Set<String> uniqueSignatures = new HashSet<>();
+            for (CodeDependency dependency : allDependencies) {
+                StringBuilder signature = new StringBuilder();
+                signature.append(toDisplayedFullName(dependency.getOriginClass()))
+                         .append("||")
+                         .append(toDisplayedFullName(dependency.getTargetClass()));
+                uniqueSignatures.add(signature.toString());
+            }
+            dependencyCount = uniqueSignatures.size();
+        } else {
+            // When last column is visible, use the full count
+            dependencyCount = allDependencies.size();
+        }
+
         countLabel.setText("( " + rowCount + " / " + dependencyCount + " )");
         enableFilterAction();
     }
@@ -391,5 +493,35 @@ class CodeDependenciesPanel extends JPanel implements INodeSelectionListener, IM
 
     private String toDisplayedFullName(JavaClass originClass) {
         return CodeNode.findEnclosingNamedClass(originClass).getName().replace('$', '.');
+    }
+
+    private void toggleLastColumnVisibility() {
+        if (isLastColumnVisible) {
+            hideLastColumn();
+        } else {
+            showLastColumn();
+        }
+        isLastColumnVisible = !isLastColumnVisible;
+
+        // Update filters to reflect new column visibility state
+        updateDependencyFilter();
+    }
+
+    private void hideLastColumn() {
+        TableColumnModel columnModel = dependencyViewer.getColumnModel();
+        if (columnModel.getColumnCount() > 3) {
+            TableColumn column = columnModel.getColumn(3);
+            columnModel.removeColumn(column);
+        }
+    }
+
+    private void showLastColumn() {
+        TableColumnModel columnModel = dependencyViewer.getColumnModel();
+        if (columnModel.getColumnCount() == 3) {
+            TableColumn column = new TableColumn(3);
+            column.setHeaderValue(COLUMN_NAMES[3]);
+            columnModel.addColumn(column);
+            updateColumn(columnModel, 3, 1200, new CellRendererWithTooltip());
+        }
     }
 }
