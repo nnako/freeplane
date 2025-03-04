@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -265,7 +264,7 @@ class ArchitectureViolationsPanel extends JPanel {
     private JComponent createRuleTableToolbar(AFreeplaneAction enableServerAction) {
         FreeplaneToolBar toolbar = new FreeplaneToolBar(SwingConstants.HORIZONTAL);
         AbstractButton enableServerButton = FreeplaneToolBar.createButton(enableServerAction);
-        JButton deleteTestResultButton = TranslatedElementFactory.createButtonWithIcon("code.DeleteConfigurationsAction.text" + ".icon", "code.DeleteConfigurationsAction.text");
+        JButton deleteTestResultButton = TranslatedElementFactory.createButtonWithIcon("code.DeleteConfigurationsAction.icon", "code.DeleteConfigurationsAction.text");
         deleteTestResultButton.addActionListener(e -> deleteSelectedTestResults());
         JButton exploreTestResultButton = TranslatedElementFactory.createButtonWithIcon("code.explore.icon", "code.explore");
         exploreTestResultButton.addActionListener(e -> exploreSelectedTestResult());
