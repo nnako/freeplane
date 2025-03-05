@@ -146,13 +146,13 @@ class RmiMatcher implements GroupMatcher {
     private final GroupMatcher matcher;
     private final Map<String, GroupIdentifier> bundledGroups;
     private final Map<JavaClass, GroupIdentifier> rmiClasses;
-    private final Set<String> bundledGroupIs;
+    private final Set<String> bundledGroupIds;
 
 
     RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups, Map<JavaClass, GroupIdentifier> rmiClasses) {
         this.matcher = matcher;
         this.bundledGroups = bundledGroups;
-        this.bundledGroupIs =bundledGroups.values().stream().map(GroupIdentifier::getId).collect(Collectors.toSet());
+        this.bundledGroupIds =bundledGroups.values().stream().map(GroupIdentifier::getId).collect(Collectors.toSet());
         this.rmiClasses = rmiClasses;
     }
 
@@ -189,7 +189,7 @@ class RmiMatcher implements GroupMatcher {
 
     @Override
     public Optional<GroupMatcher> subgroupMatcher(String id){
-        if(! bundledGroupIs.contains(id))
+        if(! bundledGroupIds.contains(id))
             return Optional.empty();
         else
             return Optional.of(jc -> subgroupIdentifier(jc, id));
