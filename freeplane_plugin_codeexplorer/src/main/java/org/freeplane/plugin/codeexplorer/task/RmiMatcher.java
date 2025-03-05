@@ -28,7 +28,7 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnitAccess;
 import com.tngtech.archunit.core.domain.properties.HasName;
 
-class RmiMatcher implements GroupMatcher {
+class RmiMatcher extends BundlingGroupMatcher implements GroupMatcher {
 
     enum Mode {IMPLEMENTATIONS, INSTANTIATIONS}
 
@@ -143,32 +143,12 @@ class RmiMatcher implements GroupMatcher {
         }
     }
 
-    private final GroupMatcher matcher;
-    private final Map<String, GroupIdentifier> bundledGroups;
     private final Map<JavaClass, GroupIdentifier> rmiClasses;
-    private final Set<String> bundledGroupIds;
 
 
     RmiMatcher(GroupMatcher matcher, Map<String, GroupIdentifier> bundledGroups, Map<JavaClass, GroupIdentifier> rmiClasses) {
-        this.matcher = matcher;
-        this.bundledGroups = bundledGroups;
-        this.bundledGroupIds =bundledGroups.values().stream().map(GroupIdentifier::getId).collect(Collectors.toSet());
+    	super(matcher, bundledGroups);
         this.rmiClasses = rmiClasses;
-    }
-
-    @Override
-    public Optional<GroupIdentifier> groupIdentifier(JavaClass javaClass) {
-        return matcher.groupIdentifier(javaClass).map(gi -> bundledGroups.getOrDefault(gi.getId(), gi));
-    }
-
-    @Override
-    public Optional<GroupIdentifier> projectIdentifier(JavaClass javaClass) {
-        return matcher.groupIdentifier(javaClass);
-    }
-
-    @Override
-    public boolean belongsToGroup(JavaClass javaClass) {
-        return matcher.belongsToGroup(javaClass);
     }
 
     @Override
@@ -186,21 +166,4 @@ class RmiMatcher implements GroupMatcher {
             return Optional.empty();
         return ! originIdentifier.equals(targetIdentifier) ? Optional.of(MatchingCriteria.RMI) : Optional.empty();
     }
-
-    @Override
-    public Optional<GroupMatcher> subgroupMatcher(String id){
-        if(! bundledGroupIds.contains(id))
-            return Optional.empty();
-        else
-            return Optional.of(jc -> subgroupIdentifier(jc, id));
-    }
-
-    private Optional<GroupIdentifier> subgroupIdentifier(JavaClass javaClass, String identifier) {
-        Optional<GroupIdentifier> groupIdentifier = groupIdentifier(javaClass);
-        if(! groupIdentifier.isPresent() || ! groupIdentifier.get().getId().equals(identifier))
-            return Optional.empty();
-        else
-            return matcher.groupIdentifier(javaClass);
-    }
-
 }

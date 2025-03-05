@@ -7,9 +7,11 @@ package org.freeplane.plugin.codeexplorer.task;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -32,6 +34,8 @@ public class ParsedConfiguration {
     }
 
     private static final String CLASS_PATTERN = "[\\w\\.\\|\\(\\)\\*\\[\\]]+";
+
+    private static final String LOCATION_PATTERN = "[\\w\\.-]+(?:\\s*,\\s*[\\w\\.-]+)*";
 
     private static final String DIRECTION_PATTERN = Pattern.quote(DependencyDirection.UP.notation)
             + "|" + Pattern.quote(DependencyDirection.DOWN.notation)
@@ -57,6 +61,10 @@ public class ParsedConfiguration {
     private static final Pattern GROUP_PATTERN = Pattern.compile(
             "^\\s*(?:(ignore)\\s+)?(?:(class)\\s+)?group\\s+(" + CLASS_PATTERN + ")(?:\\s+as\\s+(.*?))?\\s*$");
 
+    private static final Pattern LOCATION_GROUP_PATTERN = Pattern.compile(
+            "^\\s*(?:(ignore)\\s+)?location\\s+group\\s+(" + LOCATION_PATTERN + ")(?:\\s+as\\s+(.*?))?\\s*$");
+
+
     private static final Pattern GROUP_RMI = Pattern.compile(
             "^\\s*group\\s+(?:RMI|rmi)(\\s+instances)?\\s*$");
 
@@ -68,6 +76,7 @@ public class ParsedConfiguration {
     private final CodeAttributeMatcher codeAttributeMatcher;
     private final List<String> subpaths;
     private final List<ClassNameMatcher> groupMatchers;
+    private final Map<String, String> locationGroups;
     private final Optional<RmiMatcher.Mode> rmiMatcherMode;
     private final ClassMatcher ignoredRmi;
 
@@ -81,12 +90,16 @@ public class ParsedConfiguration {
         List<ClassNameMatcher> groupMatchers = new ArrayList<>();
         RmiMatcher.Mode rmiMatcherMode = null;
         List<String> ignoredRmi = new ArrayList<>();
+        Map<String, String> locationGroups = new HashMap<>();
 
         String[] dslRules = dsl.split("\\n\\s*");
 
+        String dslRule = "";
         for (String dslRuleLine : dslRules) {
-            String dslRule = dslRuleLine.trim();
-            if(dslRule.isEmpty() || dslRule.startsWith("#") || dslRule.startsWith("//"))
+            dslRule = dslRule.endsWith(",") ? dslRule + dslRuleLine.trim()
+            : dslRule.endsWith("\\") ? dslRule.substring(0, dslRule.length() - 1) + dslRuleLine.trim()
+            : dslRuleLine.trim();
+            if(dslRule.isEmpty() || dslRule.startsWith("#") || dslRule.startsWith("//") || dslRule.endsWith(",") || dslRule.endsWith("\\"))
                 continue;
             Matcher dependencyMatcher = DEPENDENCY_RULE_PATTERN.matcher(dslRule);
             if (dependencyMatcher.find()) {
@@ -130,6 +143,14 @@ public class ParsedConfiguration {
                 groupMatchers.add(new ClassNameMatcher(pattern, ignores, matchesClasses, name));
                 continue;
             }
+            Matcher locationGroupPatternMatcher = LOCATION_GROUP_PATTERN.matcher(dslRule);
+            if (locationGroupPatternMatcher.find()) {
+                final boolean ignores = locationGroupPatternMatcher.group(1) != null;
+                final String[] locations = locationGroupPatternMatcher.group(2).split("\\s*,\\s*");
+                final String name = ignores ? "" : Optional.ofNullable(locationGroupPatternMatcher.group(3)).orElse(locations[0]);
+                Arrays.asList(locations).forEach(location -> locationGroups.computeIfAbsent(location, x -> name));
+                continue;
+            }
             Matcher importedAnnotationMatcher = IMPORTED_ANNOTATION_PATTERN.matcher(dslRule);
             if(importedAnnotationMatcher.find()) {
                 final String annotationPattern = importedAnnotationMatcher.group(2);
@@ -146,6 +167,7 @@ public class ParsedConfiguration {
         this.codeAttributeMatcher = new CodeAttributeMatcher(importedAnnotations);
         this.subpaths = subpaths;
         this.groupMatchers = groupMatchers;
+        this.locationGroups = locationGroups;
         this.rmiMatcherMode = Optional.ofNullable(rmiMatcherMode);
         this.ignoredRmi = new ClassMatcher(ignoredRmi);
     }
@@ -176,15 +198,19 @@ public class ParsedConfiguration {
                 return ConfigurationChange.CONFIGURATION;
         if(! groupMatchers.equals(previousConfiguration.groupMatchers)
                 || ! ignoredRmi.equals(previousConfiguration.ignoredRmi)
-                || ! rmiMatcherMode.equals(previousConfiguration.rmiMatcherMode))
+                || ! rmiMatcherMode.equals(previousConfiguration.rmiMatcherMode)
+                || ! locationGroups.equals(previousConfiguration.locationGroups))
                 return ConfigurationChange.GROUPS;
         return ConfigurationChange.SAME;
     }
 
     public GroupMatcher createGroupMatcher(Set<File> projectLocations, JavaClasses classes) {
-        DirectoryMatcher groupMatcher = createDirectoryMatcher(projectLocations);
-        return rmiMatcherMode.map(mode ->
-                new RmiMatcher.Factory(groupMatcher, classes, mode, ignoredRmi).createMatcher())
-            .orElse(groupMatcher);
+        DirectoryMatcher directoryMatcher = createDirectoryMatcher(projectLocations);
+        GroupMatcher matcher = rmiMatcherMode.map(mode ->
+                new RmiMatcher.Factory(directoryMatcher, classes, mode, ignoredRmi).createMatcher())
+            .orElse(directoryMatcher);
+        if(locationGroups.isEmpty())
+        	return matcher;
+        return new BundlingGroupMatcher.Factory(matcher, classes, locationGroups).createMatcher();
     }
 }
