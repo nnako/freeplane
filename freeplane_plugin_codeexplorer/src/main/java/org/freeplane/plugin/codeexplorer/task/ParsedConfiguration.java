@@ -207,9 +207,9 @@ public class ParsedConfiguration {
     public GroupMatcher createGroupMatcher(Set<File> projectLocations, JavaClasses classes) {
         DirectoryMatcher directoryMatcher = createDirectoryMatcher(projectLocations);
         GroupMatcher rmiMatcher = rmiMatcherMode.map(mode ->
-                new RmiMatcher.Factory(directoryMatcher, classes, mode, ignoredRmi).createMatcher())
+                new RmiMatcherFactory(directoryMatcher, classes, mode, ignoredRmi).createMatcher())
             .orElse(directoryMatcher);
-        GroupMatcher locationMatcher = locationGroups.isEmpty() ? rmiMatcher : new BundlingGroupMatcher.Factory(rmiMatcher, classes, locationGroups).createMatcher();
+        GroupMatcher locationMatcher = locationGroups.isEmpty() ? rmiMatcher : new LocationMatcherFactory(rmiMatcher, classes, locationGroups).createMatcher();
 		return locationMatcher;
     }
 }
