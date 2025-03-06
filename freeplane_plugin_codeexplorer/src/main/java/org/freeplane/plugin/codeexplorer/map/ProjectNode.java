@@ -57,20 +57,20 @@ class ProjectNode extends CodeNode implements GroupFinder{
         return projectNode;
     }
     private ProjectNode(String projectName, CodeMap map, JavaClasses classes, GroupMatcher groupMatcher) {
-        this(projectName, map, ROOT_INDEX, classes, groupMatcher, new ConcurrentHashMap<>());
+        this(projectName, ":projectRoot:", map, ROOT_INDEX, classes, groupMatcher, new ConcurrentHashMap<>());
     }
 
     @Override
     String idWithOwnGroupIndex(String idWithoutIndex) {
         return groupIndex >= 0 ? super.idWithOwnGroupIndex(idWithoutIndex) : idWithoutIndex;
     }
-    private ProjectNode(String projectName, CodeMap map, int groupIndex, JavaClasses classes, GroupMatcher groupMatcher, Map<String, Map.Entry<Integer, String>> projectIdsByLocation) {
+    private ProjectNode(String projectName, String idWithoutIndex, CodeMap map, int groupIndex, JavaClasses classes, GroupMatcher groupMatcher, Map<String, Map.Entry<Integer, String>> projectIdsByLocation) {
         super(map, groupIndex);
         this.classes = classes;
         this.groupMatcher = groupMatcher;
         this.rootPackage = classes.getDefaultPackage();
         this.projectIdsByLocation = projectIdsByLocation;
-        setID(idWithOwnGroupIndex(":projectRoot:"));
+        setID(idWithOwnGroupIndex(idWithoutIndex));
 
         if(isRoot()) {
             classes.stream()
@@ -117,7 +117,7 @@ class ProjectNode extends CodeNode implements GroupFinder{
                 .parallel()
                 .map(gi ->
                     groupMatcher.subgroupMatcher(gi.getId()).map(subgroupMatcher ->
-                     (CodeNode) new ProjectNode(gi.getName(), map, projectIdsByLocation.get(gi.getId()).getKey(), classes, subgroupMatcher, projectIdsByLocation))
+                     (CodeNode) new ProjectNode(gi.getName(), getID(), map, addLocation(gi).getKey(), classes, subgroupMatcher, projectIdsByLocation))
                     .orElseGet(() ->
                     new PackageNode(rootPackage, getMap(), gi.getName(), projectIdsByLocation.get(gi.getId()).getKey(), true)))
                 .collect(Collectors.toMap(x -> x.groupIndex, x -> x));

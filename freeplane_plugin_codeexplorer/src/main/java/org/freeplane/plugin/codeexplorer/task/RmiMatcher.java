@@ -96,7 +96,7 @@ class RmiMatcher extends BundlingGroupMatcher implements GroupMatcher {
         private void addSubclassDependencies(Optional<GroupIdentifier> dependingGroupIdentifier, JavaClass superClass, JavaClass javaClass){
             JavaClass enclosingNamedClass = CodeNode.findEnclosingNamedClass(javaClass);
             if(! ignoredRmi.matches(enclosingNamedClass)) {
-                Optional<GroupIdentifier> groupIdentifier = matcher.groupIdentifier(javaClass);
+                Optional<GroupIdentifier> groupIdentifier = matcher.projectIdentifier(javaClass);
                 groupIdentifier.ifPresent(gi -> {
                     if (dependingGroupIdentifier.isPresent()) {
                         GroupIdentifier dgi = dependingGroupIdentifier.get();
@@ -121,7 +121,7 @@ class RmiMatcher extends BundlingGroupMatcher implements GroupMatcher {
         private void addConstructorDependencies(
                 GroupIdentifier groupIdentifier, JavaCodeUnitAccess<? extends CodeUnitAccessTarget> access) {
             JavaClass callingClass = access.getOriginOwner();
-            Optional<GroupIdentifier> callingGroupIdentifier = matcher.groupIdentifier(callingClass);
+            Optional<GroupIdentifier> callingGroupIdentifier = matcher.projectIdentifier(callingClass);
             callingGroupIdentifier.ifPresent(cgi -> {
                 if (!cgi.equals(groupIdentifier)) {
                     addRmiClass(callingClass, cgi);
