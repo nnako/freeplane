@@ -259,7 +259,7 @@ private Timer timer;
 		}
 		final NodeModel node = getMainView(event.getDropTargetContext()).getNodeView().getNode();
 		if (dropAction == DnDConstants.ACTION_LINK) {
-			return isFromSameMap(node, droppedNodes);
+			return areFromSameMap(node, droppedNodes);
 		}
 
 		if (dropAction == DnDConstants.ACTION_MOVE) {
@@ -276,7 +276,7 @@ private Timer timer;
 		return false;
 	}
 
-	private boolean isFromSameMap(final NodeModel targetNode, final Collection<NodeModel> droppedNodes) {
+	private boolean areFromSameMap(final NodeModel targetNode, final Collection<NodeModel> droppedNodes) {
 		for (final NodeModel selected : droppedNodes) {
 			if (selected.getMap() != targetNode.getMap())
 				return false;
@@ -358,10 +358,10 @@ private Timer timer;
 				}
 			}
 			else {
-				final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
 				if (DnDConstants.ACTION_MOVE == dropAction
 						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-						&& isFromSameMap(targetNode, selecteds)) {
+						&& areFromSameMap(targetNode, getNodeObjects(t))) {
+					final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
 					final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
 					moveNodes(mapController, targetNode, t, insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD), isTopOrLeft);
 

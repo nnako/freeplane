@@ -606,7 +606,7 @@ public class MMapController extends MapController {
 
 
     public void moveNodeAndItsClones(NodeModel child, final NodeModel newParent, int newIndex) {
-        if(child.subtreeContainsCloneOf(newParent)){
+        if(child.subtreeContainsCloneOf(newParent) || child.getMap() != newParent.getMap()){
             UITools.errorMessage("not allowed");
             return;
         }
