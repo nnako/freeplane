@@ -271,6 +271,13 @@ public class ReminderHook extends PersistentNodeHook implements IExtension {
 		return ReminderExtension.class;
 	}
 
+
+
+	@Override
+	public void undoableDeactivateHook(NodeModel node) {
+		node.removeExtension(ClockState.class);
+		super.undoableDeactivateHook(node);
+	}
 	@Override
 	public void remove(final NodeModel node, final IExtension extension) {
 		final ReminderExtension reminderExtension = (ReminderExtension) extension;
