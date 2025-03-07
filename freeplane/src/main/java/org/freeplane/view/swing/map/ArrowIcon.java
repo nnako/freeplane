@@ -30,10 +30,12 @@ import javax.swing.Icon;
  * Mar 5, 2011
  */
 class ArrowIcon implements Icon{
+
+	public final static ArrowIcon UP = new ArrowIcon(false);
+	public final static ArrowIcon DOWN = new ArrowIcon(true);
 	/**
      *
      */
-    private final NodeView nodeView;
 	final private boolean down;
 	final private static int ARROW_HEIGTH = 5;
 	final private static int ARROW_HALF_WIDTH = 4;
@@ -41,9 +43,8 @@ class ArrowIcon implements Icon{
 	final private static int ICON_WIDTH = 1 + ARROW_HALF_WIDTH * 2 + 1;
 
 
-	public ArrowIcon(NodeView nodeView, boolean down) {
+	private ArrowIcon(boolean down) {
         super();
-		this.nodeView = nodeView;
         this.down = down;
     }
 

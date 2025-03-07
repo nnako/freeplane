@@ -280,7 +280,7 @@ class NodeViewFactory {
 				nodeView.addContent(detailContent, NodeView.DETAIL_VIEWER_POSITION);
 			}
 			if (detailText.isHidden()) {
-				final ArrowIcon icon = new ArrowIcon(nodeView, true);
+				final ArrowIcon icon = ArrowIcon.DOWN;
 				detailContent.setIcon(icon);
 				detailContent.updateText("");
 				detailContent.setTextRenderingIcon(null);
@@ -289,7 +289,7 @@ class NodeViewFactory {
 				detailContent.setFont(map.getDetailFont());
 				detailContent.setHorizontalAlignment(map.getDetailHorizontalAlignment());
 				detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
-				detailContent.setIcon(new ArrowIcon(nodeView, false));
+				detailContent.setIcon(ArrowIcon.UP);
 				String text;
 				try {
 					TextController textController = map.getModeController().getExtension(TextController.class);
