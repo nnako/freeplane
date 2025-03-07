@@ -47,18 +47,18 @@ public class DetailsViewMouseListener extends LinkNavigatorMouseListener {
 
 	@Override
     public void mouseClicked(MouseEvent e) {
-		final ModeController mc = Controller.getCurrentController().getModeController();
+		final NodeView nodeView = nodeSelector.getRelatedNodeView(e);
+		if (nodeView == null || ! nodeView.getMap().isSelected())
+			return;
+		final ModeController mc = nodeView.getMap().getModeController();
 		if (Compat.isMacOsX()) {
 			final JPopupMenu popupmenu = mc.getUserInputListenerFactory().getNodePopupMenu();
 			if (popupmenu.isShowing()) {
 				return;
 			}
 		}
-		final NodeView nodeView = nodeSelector.getRelatedNodeView(e);
-		if (nodeView == null)
-			return;
 		final NodeModel model = nodeView.getNode();
-    	TextController controller = TextController.getController();
+    	TextController controller = mc.getExtension(TextController.class);
 		if (eventFromHideDisplayArea(e)){
 			final IMapSelection selection = Controller.getCurrentController().getSelection();
 			selection.preserveRootNodeLocationOnScreen();
@@ -66,7 +66,7 @@ public class DetailsViewMouseListener extends LinkNavigatorMouseListener {
 		}
 		else {
 			nodeSelector.extendSelection(e, false);
-			if (canEdit(controller) && isEditingStartEvent(e)) {
+			if (mc.canEdit(model.getMap()) && canEdit(controller) && isEditingStartEvent(e)) {
 				final boolean editLong = e.isAltDown();
 				if(! editLong)
 					((MTextController)controller).getEventQueue().activate(e);
