@@ -1746,6 +1746,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	                || selectPreferredVisibleChild(direction, continious)
 	                || selectSiblingOnTheOtherSide(direction, continious)
 	                || selectPreferredVisibleSiblingOrAncestor(direction, continious)
+	                || selectPreferredVisibleAncestorSibling(direction, continious)
 	                || unfoldInDirection(direction)
 	                || scroll(direction);
 
@@ -1915,6 +1916,30 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         }
         return false;
     }
+
+    private boolean selectPreferredVisibleAncestorSibling(SelectionDirection direction,
+            final boolean continious) {
+        boolean isOutlineLayoutSet = isOutlineLayoutSet();
+        if(isOutlineLayoutSet)
+            return false;
+
+        int oldSiblingMaxLevel = siblingMaxLevel;
+        siblingMaxLevel = -1;
+        for (NodeView oldSelectedParent = selection.getSelectionEnd().getParentNodeView();
+        		oldSelectedParent != null && ! oldSelectedParent.isRoot();
+        		oldSelectedParent = oldSelectedParent.getParentNodeView())
+        {
+        	final NodeView newSelected = suggestNewSelectedSibling(direction, oldSelectedParent);
+        	if(newSelected != null) {
+        		siblingMaxLevel = oldSiblingMaxLevel;
+        		select(newSelected, continious);
+        		return true;
+        	}
+        }
+        siblingMaxLevel = oldSiblingMaxLevel;
+        return false;
+    }
+
 
     private void selectPreservingSiblingMaxLevel(NodeView newSelected, final boolean continious) {
         int oldSiblingMaxLevel = this.siblingMaxLevel;
