@@ -25,6 +25,8 @@ import java.awt.Graphics2D;
 
 import javax.swing.Icon;
 
+import org.freeplane.core.ui.components.UITools;
+
 /**
  * @author Dimitry Polivaev
  * Mar 5, 2011
@@ -37,8 +39,8 @@ class ArrowIcon implements Icon{
      *
      */
 	final private boolean down;
-	final private static int ARROW_HEIGTH = 5;
-	final private static int ARROW_HALF_WIDTH = 4;
+	final private static int ARROW_HEIGTH = (int) (5 * UITools.FONT_SCALE_FACTOR);
+	final private static int ARROW_HALF_WIDTH = (int) (4 * UITools.FONT_SCALE_FACTOR);
 	final private static int ICON_HEIGTH = ARROW_HEIGTH + 2;
 	final private static int ICON_WIDTH = 1 + ARROW_HALF_WIDTH * 2 + 1;
 
@@ -71,7 +73,6 @@ class ArrowIcon implements Icon{
 			ys[0] = 1;
 			ys[1] = ys[2] = 1 + ARROW_HEIGTH;
 		}
-		Graphics2D g2= (Graphics2D) g;
 		g.drawPolygon(xs, ys, 3);
     }
 
