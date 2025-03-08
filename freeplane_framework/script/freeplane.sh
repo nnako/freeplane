@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # we only want to test the script, not Freeplane itself
 if ( echo "${DEBUG}" | grep -qe "script" ); then
