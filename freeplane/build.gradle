@@ -243,6 +243,22 @@ task generateIconGroupProperties {
         props.store(System.out, null)
     }
 }
+
+task copyLauncherImages(type: Copy) {
+    from('src/editor/resources/images/') {
+        include('Freeplane_frame_icon_32x32.png')
+        rename('Freeplane_frame_icon_32x32.png', 'freeplane.png')
+    }
+    
+    from('src/editor/resources/images/') {
+        include('Freeplane_frame_icon_256x256.png')
+        rename('Freeplane_frame_icon_256x256.png', 'freeplane256.png')
+    }
+    into(globalBin)
+}
+
+build.dependsOn copyLauncherImages
+
 task copyFlatLafDll(type: Copy) {
     def dependencyFile = configurations.lib.find { it.name.startsWith('flatlaf-')}
     from zipTree(dependencyFile)

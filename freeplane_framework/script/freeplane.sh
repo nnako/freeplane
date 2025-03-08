@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # we only want to test the script, not Freeplane itself
 if ( echo "${DEBUG}" | grep -qe "script" ); then
@@ -198,10 +198,17 @@ if [ $JAVA_MAJOR_VERSION -ge 11 ]; then
 	JAVA_OPTS="--add-exports java.desktop/sun.awt.shell=ALL-UNNAMED $JAVA_OPTS"
 	JAVA_OPTS="--add-opens java.desktop/sun.awt.X11=ALL-UNNAMED $JAVA_OPTS"
 	JAVA_OPTS="--add-opens java.desktop/javax.swing.text.html=ALL-UNNAMED $JAVA_OPTS"
+	JAVA_OPTS="--add-opens java.desktop/com.apple.eawt=ALL-UNNAMED $JAVA_OPTS"
 	JAVA_OPTS="-Dorg.osgi.framework.system.capabilities=osgi.ee;osgi.ee=\"JavaSE\";version:List=\"1.8,15\" $JAVA_OPTS"
 fi
 if [ $JAVA_MAJOR_VERSION -ge 18 ]; then
 	JAVA_OPTS="-Djava.security.manager=allow $JAVA_OPTS"
+fi
+
+
+if [[ "$(uname)" == "Darwin" ]]; then
+	JAVA_OPTS="-Xdock:icon=${freedir}/freeplane256.png $JAVA_OPTS"
+	JAVA_OPTS="-Xdock:name=Freeplane $JAVA_OPTS"
 fi
 
 # enable this in order to turn off the splash screen:
