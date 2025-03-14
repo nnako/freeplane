@@ -581,11 +581,13 @@ public class MMapController extends MapController {
     				@Override
     				public void act() {
     					node.setSide(side);
+    					mapSaved(node.getMap(), false);
     					delayedNodeRefresh(node, Side.class, oldSide, side);
     				}
     				@Override
     				public void undo() {
     					node.setSide(oldSide);
+    					mapSaved(node.getMap(), false);
     					delayedNodeRefresh(node, Side.class, side, oldSide);
     				}
 
