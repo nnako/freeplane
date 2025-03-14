@@ -249,7 +249,11 @@ public class MainView extends ZoomableLabel {
 
     private DragOverDirection dragOverDirection(final Point p) {
         final DragOverDirection dragOverDirection;
-        if (p.getY() < getHeight() * 1 / 6)
+        if(p.getX() < getWidth() * 1 / 6)
+            dragOverDirection = DragOverDirection.DROP_LEFT;
+        else if (p.getX() >= getWidth() * 5 / 6)
+            dragOverDirection = DragOverDirection.DROP_RIGHT;
+        else if (p.getY() < getHeight() * 1 / 6)
             dragOverDirection = DragOverDirection.DROP_UP;
         else if (p.getY() >= getHeight() * 5 / 6)
             dragOverDirection = DragOverDirection.DROP_DOWN;
