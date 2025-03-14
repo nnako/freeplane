@@ -19,6 +19,7 @@
  */
 package org.freeplane.view.swing.map.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -26,11 +27,14 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -65,8 +69,11 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.DefaultEditorKit.PasteAction;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.NavigationFilter;
 import javax.swing.text.Position.Bias;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.StyledEditorKit.BoldAction;
 import javax.swing.text.StyledEditorKit.ItalicAction;
@@ -77,9 +84,6 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTMLWriter;
 import javax.swing.text.html.StyleSheet;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
@@ -105,12 +109,12 @@ import org.freeplane.features.text.mindmapmode.EventBuffer;
 import org.freeplane.features.text.mindmapmode.MTextController;
 import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.ui.IMapViewManager;
+import org.freeplane.view.swing.map.FreeplaneTooltip;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.map.ZoomableLabel;
 import org.freeplane.view.swing.map.ZoomableLabelUI;
-import org.freeplane.view.swing.map.ZoomableLabelUI.LayoutData;
 
 import com.lightdev.app.shtm.SHTMLPanel;
 import com.lightdev.app.shtm.SHTMLWriter;
@@ -328,7 +332,7 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 		else SPLIT_KEY_CODE = -1;
 	}
-	private class TextFieldListener implements KeyListener, FocusListener, MouseListener {
+	private class TextFieldListener implements KeyListener, FocusListener, MouseListener, AWTEventListener {
 		private static final int KEYSTROKE_MODIFIERS = KeyEvent.ALT_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK | KeyEvent.CTRL_DOWN_MASK | KeyEvent.META_DOWN_MASK;
 		final int CANCEL = 2;
 		final int EDIT = 1;
@@ -356,6 +360,23 @@ public class EditNodeTextField extends EditNodeBase {
 			ModeController modeController = Controller.getCurrentModeController();
             modeController.setBlocked(true);
             ((MTextController)modeController.getExtension(TextController.class)).setCurrentBlockingEditor(EditNodeTextField.this);
+            Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.FOCUS_EVENT_MASK);
+		}
+
+
+		@Override
+		public void eventDispatched(AWTEvent event) {
+		    if (event instanceof FocusEvent) {
+		        FocusEvent fe = (FocusEvent) event;
+
+		        // If focus is moving away from the text editor
+		        if (fe.getID() == FocusEvent.FOCUS_GAINED && ! fe.isTemporary()
+		        		&& fe.getComponent() != textfield
+		        		&& fe.getOppositeComponent() != textfield
+		        		&& fe.getOppositeComponent() != null) {
+		        	focusLost(new FocusEvent(textfield, FocusEvent.FOCUS_LOST, false, fe.getComponent()));
+		        }
+		    }
 		}
 
 		@Override
@@ -370,7 +391,9 @@ public class EditNodeTextField extends EditNodeBase {
 				return;
 			}
 			Component oppositeComponent = e.getOppositeComponent();
-			if (e.isTemporary() && oppositeComponent == null) {
+			if (e.isTemporary() && (oppositeComponent == null ||
+					oppositeComponent == SwingUtilities.getRootPane(nodeView)
+					|| SwingUtilities.getAncestorOfClass(FreeplaneTooltip.class, oppositeComponent) != null)) {
 				return;
 			}
 			Window myWindow = SwingUtilities.getWindowAncestor(e.getComponent());
@@ -622,6 +645,7 @@ public class EditNodeTextField extends EditNodeBase {
 		if (textfield == null) {
 			return;
 		}
+		Toolkit.getDefaultToolkit().removeAWTEventListener((AWTEventListener) textFieldListener);
 		ModeController modeController = nodeView.getMap().getModeController();
         modeController.setBlocked(false);
 		((MTextController)modeController.getExtension(TextController.class)).unsetCurrentBlockingEditor(EditNodeTextField.this);
