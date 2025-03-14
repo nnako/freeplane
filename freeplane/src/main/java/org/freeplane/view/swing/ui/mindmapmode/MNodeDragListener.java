@@ -136,9 +136,6 @@ public class MNodeDragListener implements DragGestureListener {
 					return;
 			}
 		}
-		if (dragActionType == DnDConstants.ACTION_LINK) {
-			return;
-		}
 		Cursor cursor = getCursorByAction(dragActionType);
 		final Transferable t = MapClipboardController.getController().copy(Controller.getCurrentController().getSelection());
 		if (isLinkDragEvent(e)) {
