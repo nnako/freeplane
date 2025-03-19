@@ -20,9 +20,14 @@
 package org.freeplane.features.styles;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.WeakHashMap;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -73,12 +79,16 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.mode.NodeHookDescriptor;
 import org.freeplane.features.mode.PersistentNodeHook;
 import org.freeplane.features.styles.ConditionalStyleModel.Item;
+import org.freeplane.features.ui.IMapViewChangeListener;
+import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.features.url.UrlManager;
 import org.freeplane.features.url.mindmapmode.MFileManager;
 import org.freeplane.features.url.mindmapmode.TemplateManager;
 import org.freeplane.n3.nanoxml.XMLElement;
 import org.freeplane.view.swing.features.filepreview.MindMapPreviewWithOptions;
 import org.freeplane.view.swing.map.IconLocation;
+import org.freeplane.view.swing.map.MapView;
+import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.map.TagLocation;
 
 /**
@@ -105,7 +115,40 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 	public static final String FIT_TO_VIEWPORT = "fit_to_viewport";
 
 	private static final ThreadLocal<Boolean> followedStyleUpdateActive = ThreadLocal.withInitial(() -> Boolean.FALSE);
+	private static final WeakHashMap<MapModel, String> updatedFollowedMaps = new WeakHashMap<MapModel, String>();
 
+	static {
+		IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
+		if(! GraphicsEnvironment.isHeadless()) {
+			mapViewManager.addMapViewChangeListener(new IMapViewChangeListener() {
+				@Override
+				public void afterViewChange(Component oldView, Component newView) {
+					if(! (newView instanceof MapView))
+						return;
+					MapView mapView = (MapView)newView;
+					MapModel newMap = mapView.getMap();
+					String followedMapPath = updatedFollowedMaps.remove(newMap);
+					if(followedMapPath == null)
+						return;
+                    String message = TextUtils.format("stylesUpdated", newMap.getTitle(), followedMapPath);
+                    NodeView root = mapView.getRoot();
+					if(root.isShowing())
+                    	UITools.showMessage(message, JOptionPane.INFORMATION_MESSAGE);
+                    else
+                    	root.addHierarchyListener(new HierarchyListener() {
+							@Override
+							public void hierarchyChanged(HierarchyEvent e) {
+								if(root.isShowing()) {
+									root.removeHierarchyListener(this);
+									SwingUtilities.invokeLater(() ->
+										UITools.showMessage(message, JOptionPane.INFORMATION_MESSAGE));
+								}
+							}
+						});
+				}
+			});
+		}
+	}
 	public static void install(boolean persistent){
 		new MapStyle(persistent);
 	}
@@ -739,7 +782,13 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
                     loadStyleMapContainer(source.toURL()).ifPresent(styleMapContainer ->
                     {
                         new StyleExchange(styleMapContainer, targetMap).copyMapStylesNoUndoNoRefresh();
-                        UITools.showMessage(TextUtils.format("stylesUpdated", targetMap.getTitle(), followedMapPath), JOptionPane.INFORMATION_MESSAGE);
+                        try {
+							Controller.getCurrentController().getViewController().invokeAndWait(
+							    () -> updatedFollowedMaps.put(targetMap, followedMapPath));
+						} catch (InvocationTargetException | InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
                         SwingUtilities.invokeLater(() -> targetMap.setSaved(false));
                     });
                 }
