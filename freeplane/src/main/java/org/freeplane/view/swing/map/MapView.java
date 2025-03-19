@@ -2880,7 +2880,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	 */
 	@Override
 	protected void validateTree() {
-		if(isDisplayable()) {
+		if(isDisplayable() && getRoot().isDisplayable()) {
 			validateSelecteds();
 			getRoot().validateTree();
 			super.validateTree();
