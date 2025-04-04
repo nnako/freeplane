@@ -3,6 +3,7 @@ package org.freeplane.features.styles;
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.undo.IActor;
 import org.freeplane.core.undo.IUndoHandler;
+import org.freeplane.features.attribute.AttributeRegistry;
 import org.freeplane.features.edge.AutomaticEdgeColorHook;
 import org.freeplane.features.icon.IconRegistry;
 import org.freeplane.features.map.MapModel;
@@ -95,6 +96,13 @@ class StyleExchange {
         IconRegistry iconRegistry = targetMap.getIconRegistry();
         styleMap.setIconRegistry(iconRegistry);
         iconRegistry.registryMapContent(styleMap);
+        AttributeRegistry attributeRegistry = targetMap.getExtension(AttributeRegistry.class);
+        if(attributeRegistry != null) {
+        	styleMap.putExtension(AttributeRegistry.class, attributeRegistry);
+        }
+        else {
+        	styleMap.removeExtension(AttributeRegistry.class);
+        }
     	final NodeModel targetRoot = targetMap.getRootNode();
     	final MapStyleModel target = MapStyleModel.getExtensionOrNull(targetRoot);
     	if(target == null){
