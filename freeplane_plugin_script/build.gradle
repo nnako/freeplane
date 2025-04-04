@@ -12,7 +12,7 @@ dependencies {
 		exclude group:'org.codehaus.groovy', module:'groovy-cli-picocli'
 	}
 	lib 'org.apache.groovy:groovy-dateutil:4.0.23'
-	lib 'org.apache.ivy:ivy:2.5.2'
+	lib 'org.apache.ivy:ivy:2.5.3'
 
 }
 

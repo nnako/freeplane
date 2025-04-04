@@ -1,9 +1,9 @@
 repositories {
-    maven { url "https://josm.openstreetmap.de/nexus/content/groups/public/" }
+    maven { url "https://josm.openstreetmap.de/repository/releases/" }
 }
 
 dependencies {
     implementation project(':freeplane')
 
-    lib 'org.openstreetmap.jmapviewer:jmapviewer:2.22'
+    lib 'org.openstreetmap.jmapviewer:jmapviewer:2.24'
 }

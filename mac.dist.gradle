@@ -208,7 +208,7 @@ def defineMacBuildTasks =  { architecture ->
 
   def notarytool = tasks.create ("notarytool_${architecture}", Exec) {
     commandLine 'bash', '-e', '-c', """
-    set -x; xcrun notarytool submit $globalDist/Freeplane-${distVersion}-${architecture}.dmg --keychain-profile ${macAppProperties['macapp.notarytool.keychainprofile']} --no-s3-acceleration
+    set -x; xcrun notarytool submit $globalDist/Freeplane-${distVersion}-${architecture}.dmg --keychain-profile ${macAppProperties['macapp.notarytool.keychainprofile']}
     """
     dependsOn signDmg
   }
