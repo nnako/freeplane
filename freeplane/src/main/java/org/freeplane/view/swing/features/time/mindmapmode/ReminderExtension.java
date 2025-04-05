@@ -73,7 +73,7 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
     				NodeStream.of(newMap.getRootNode())
     				.map(ReminderExtension::getExtension)
     				.filter( e -> e != null)
-    				.forEach(ReminderExtension::scheduleTimer);
+    				.forEach(ReminderExtension::reminderDisplayed);
     			}
 
     		});
@@ -162,7 +162,14 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
     	scheduleTimer();
     }
 
+    private void reminderDisplayed() {
+    	scheduleTimer(true);
+    }
+
     void scheduleTimer() {
+    	scheduleTimer(false);
+    }
+    private void scheduleTimer(boolean showPastReminders) {
         long timeBeforeReminder = remindUserAt - System.currentTimeMillis();
         reminderInThePast = timeBeforeReminder < - MAXIMAL_DELAY;
         int delay = (int) Math.min(Integer.MAX_VALUE, Math.max(0, timeBeforeReminder));
@@ -171,7 +178,7 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
             timer.setRepeats(false);
         }
         timer.start();
-        if(reminderInThePast)
+        if(reminderInThePast && showPastReminders)
             pastReminders.addNode(node);
         displayStateIcon(ClockState.CLOCK_VISIBLE, node, false);
     }
