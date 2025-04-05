@@ -118,8 +118,8 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 	private static final WeakHashMap<MapModel, String> updatedFollowedMaps = new WeakHashMap<MapModel, String>();
 
 	static {
-		IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
 		if(! GraphicsEnvironment.isHeadless()) {
+			IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
 			mapViewManager.addMapViewChangeListener(new IMapViewChangeListener() {
 				@Override
 				public void afterViewChange(Component oldView, Component newView) {
