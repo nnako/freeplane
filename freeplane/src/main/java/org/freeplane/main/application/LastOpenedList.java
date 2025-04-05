@@ -182,7 +182,7 @@ public class LastOpenedList implements IMapViewChangeListener, IMapChangeListene
     }
 
 	@Override
-	public void afterViewCreated(Component oldView, Component newView) {
+	public void afterViewDisplayed(Component oldView, Component newView) {
 		final MapModel map = getMapModel(newView);
 		final RecentFile recentFile = findRecentFileByMapModel(map);
 		// the next line will only succeed if the map is already opened

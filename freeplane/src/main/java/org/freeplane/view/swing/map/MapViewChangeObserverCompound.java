@@ -90,19 +90,20 @@ class MapViewChangeObserverCompound {
 	}
 
 	void mapViewCreated(final MapView previousMapView, MapView createdMapView) {
+		fireMapViewCreated(createdMapView);
 		if(! createdMapView.isShowing())
 		{
 			fireMapViewCreatedAfterItIsDisplayed(previousMapView, createdMapView);
 		}
 		else if (!createdMapView.isLayoutCompleted()) {
-			fireMapViewCreatedLater(previousMapView, createdMapView);
+			fireMapViewDisplayedLater(previousMapView, createdMapView);
 		}
 		else {
-			fireMapViewCreated(previousMapView, createdMapView);
+			fireMapViewDisplayed(previousMapView, createdMapView);
 		}
 	}
 
-	private void fireMapViewCreatedLater(final MapView previousView, MapView createdMapView) {
+	private void fireMapViewDisplayedLater(final MapView previousView, MapView createdMapView) {
 	    EventQueue.invokeLater(new Runnable() {
 	    	public void run() {
 	    		mapViewCreated(previousView, createdMapView);
@@ -122,9 +123,15 @@ class MapViewChangeObserverCompound {
 		createdMapView.addHierarchyListener(retryEventListener);
 	}
 
-	private void fireMapViewCreated(final MapView previousMapView, MapView createdMapView) {
+	private void fireMapViewCreated(MapView createdMapView) {
 	    for (final IMapViewChangeListener observer : viewListeners.toArray(new IMapViewChangeListener[]{})) {
-			observer.afterViewCreated(previousMapView, createdMapView);
+			observer.afterViewCreated(createdMapView);
+		}
+    }
+
+	private void fireMapViewDisplayed(final MapView previousMapView, MapView createdMapView) {
+	    for (final IMapViewChangeListener observer : viewListeners.toArray(new IMapViewChangeListener[]{})) {
+			observer.afterViewDisplayed(previousMapView, createdMapView);
 		}
     }
 

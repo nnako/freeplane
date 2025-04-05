@@ -1197,7 +1197,7 @@ implements IExtension, NodeChangeAnnouncer{
             else {
                 mapViewManager.addMapViewChangeListener(new IMapViewChangeListener() {
                     @Override
-                    public void afterViewCreated(Component oldView, Component newView) {
+                    public void afterViewDisplayed(Component oldView, Component newView) {
                         mapViewManager.removeMapViewChangeListener(this);
                         select(node);
                     }

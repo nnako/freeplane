@@ -808,6 +808,19 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 		}
 		return list;
 	}
+
+	@Override
+	public boolean containsView(MapModel map) {
+		if(selectedMapView != null && selectedMapView.getMap().equals(map))
+			return true;
+		for (final MapView view : mapViewVector) {
+			if (view.getMap().equals(map)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void afterViewChange(final Component oldMap, final Component pNewMap) {
 		Controller controller = Controller.getCurrentController();
@@ -834,7 +847,7 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 
 
 	@Override
-    public void afterViewCreated(Component oldView, Component newView) {
+    public void afterViewDisplayed(Component oldView, Component newView) {
 	    updateMapList();
     }
 

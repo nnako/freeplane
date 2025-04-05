@@ -119,7 +119,7 @@ public class CodeModeControllerFactory {
 		controller.getMapViewManager().addMapViewChangeListener(new IMapViewChangeListener() {
 
 		    @Override
-		    public void afterViewCreated(Component oldView, Component newView) {
+		    public void afterViewDisplayed(Component oldView, Component newView) {
 		        ((MapView)newView).setRepaintsViewOnSelectionChange(true);
 		    }
 
