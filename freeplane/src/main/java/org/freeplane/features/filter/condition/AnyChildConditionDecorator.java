@@ -38,6 +38,7 @@ public class AnyChildConditionDecorator extends DecoratedCondition implements IC
 		super(originalCondition, NAME, DESCRIPTION);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
 		return node.getChildren().stream().anyMatch(originalCondition::checkNode);
 	}
@@ -46,7 +47,7 @@ public class AnyChildConditionDecorator extends DecoratedCondition implements IC
     public boolean checksChildren() {
         return true;
     }
-	
-	
+
+
 
 }

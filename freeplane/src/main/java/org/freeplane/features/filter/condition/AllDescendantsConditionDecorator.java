@@ -38,20 +38,19 @@ public class AllDescendantsConditionDecorator extends DecoratedCondition impleme
 		super(originalCondition, NAME, DESCRIPTION);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
-	    return  node.hasChildren() && checkDescentants(node);
+		return  node.hasChildren()
+				&& node.getChildren().stream().allMatch(child ->
+					originalCondition.checkNode(child) &&
+						(! child.hasChildren() || ConditionCache.INSTANCE.checkNode(child, this)));
 	}
-
-    private boolean checkDescentants(final NodeModel node) {
-        return node.getChildren().stream().allMatch(child -> 
-	        originalCondition.checkNode(child) && checkDescentants(child));
-    }
 
     @Override
     public boolean checksDescendants() {
         return true;
     }
-	
-	
+
+
 
 }

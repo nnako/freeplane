@@ -38,10 +38,11 @@ public class ConditionNotSatisfiedDecorator extends DecoratedCondition implement
 		super(originalCondition, NAME, DECORATOR_KEY);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
 		return !originalCondition.checkNode(node);
 	}
-	
-	
+
+
 
 }

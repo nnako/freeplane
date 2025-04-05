@@ -38,16 +38,17 @@ public class AnyDescendantConditionDecorator extends DecoratedCondition implemen
 		super(originalCondition, NAME, DESCRIPTION);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
-        return node.getChildren().stream().anyMatch(child -> 
-        originalCondition.checkNode(child) || checkNode(child));
+        return node.getChildren().stream().anyMatch(child ->
+            originalCondition.checkNode(child) || ConditionCache.INSTANCE.checkNode(child, this));
 	}
 
     @Override
     public boolean checksDescendants() {
         return true;
     }
-	
-	
+
+
 
 }

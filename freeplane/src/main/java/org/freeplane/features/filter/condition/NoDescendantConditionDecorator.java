@@ -41,7 +41,7 @@ public class NoDescendantConditionDecorator extends DecoratedCondition implement
 	@Override
     public boolean checkNode(final NodeModel node) {
         return node.getChildren().stream().allMatch(child ->
-        ! originalCondition.checkNode(child) && checkNode(child));
+            ! originalCondition.checkNode(child) && ConditionCache.INSTANCE.checkNode(child, this));
 	}
 
     @Override

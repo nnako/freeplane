@@ -38,20 +38,21 @@ public class AnyAncestorConditionDecorator extends DecoratedCondition implements
 		super(originalCondition, NAME, DESCRIPTION);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
         NodeModel parentNode = node.getParentNode();
         if(parentNode == null)
             return false;
         if (originalCondition.checkNode(parentNode))
             return true;
-        return checkNode(parentNode);
+        return ConditionCache.INSTANCE.checkNode(parentNode, this);
 	}
 
     @Override
     public boolean checksAncestors() {
         return true;
     }
-	
-	
+
+
 
 }

@@ -38,6 +38,7 @@ public class ParentConditionDecorator extends DecoratedCondition implements ICom
 		super(originalCondition, NAME, DESCRIPTION);
 	}
 
+	@Override
 	public boolean checkNode(final NodeModel node) {
 		NodeModel parentNode = node.getParentNode();
         return parentNode != null && originalCondition.checkNode(parentNode);
@@ -47,7 +48,7 @@ public class ParentConditionDecorator extends DecoratedCondition implements ICom
     public boolean checksParent() {
         return true;
     }
-	
-	
+
+
 
 }
