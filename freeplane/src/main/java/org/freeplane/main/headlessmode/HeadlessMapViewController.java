@@ -289,6 +289,11 @@ public class HeadlessMapViewController implements IMapViewManager {
 		return Collections.emptyList();
 	}
 
+	@Override
+	public boolean containsView(MapModel map) {
+		 return false;
+	}
+
 	public JScrollPane getScrollPane() {
 		throw new RuntimeException("Method not implemented");
 	}

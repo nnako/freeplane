@@ -136,6 +136,7 @@ public interface IMapViewManager {
 
 	public Map<String, MapModel> getMaps(String modename);
 
+	public boolean containsView(MapModel map);
 	public List<Component> getViews(MapModel map);
 	public void obtainFocusForSelected();
 	public void setMapTitles();
