@@ -19,8 +19,11 @@
  */
 package org.freeplane.view.swing.features.time.mindmapmode;
 
+import java.awt.Component;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.time.Duration;
+import java.util.WeakHashMap;
 
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -37,10 +40,14 @@ import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeDeletionEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeMoveEvent;
+import org.freeplane.features.map.NodeStream;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.script.IScriptStarter;
+import org.freeplane.features.ui.IMapViewChangeListener;
+import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.view.swing.features.time.mindmapmode.nodelist.ShowPastRemindersOnce;
+import org.freeplane.view.swing.map.MapView;
 
 /**
  * @author Dimitry Polivaev 30.11.2008
@@ -49,6 +56,30 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
     private static final ShowPastRemindersOnce pastReminders = new ShowPastRemindersOnce();
     private static final int BLINKING_PERIOD = 1000;
     private static final int MAXIMAL_DELAY = (int) Duration.ofMinutes(5).toMillis();
+
+    private static final WeakHashMap<MapModel, Boolean> updatedMaps = new WeakHashMap<>();
+    static {
+    	if(! GraphicsEnvironment.isHeadless()) {
+    		IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
+    		mapViewManager.addMapViewChangeListener(new IMapViewChangeListener() {
+
+    			@Override
+    			public void afterViewCreated(Component newView) {
+    				MapView mapView = (MapView)newView;
+    				MapModel newMap = mapView.getMap();
+    				Boolean shouldRegisterPastExceptions = updatedMaps.remove(newMap);
+    				if(shouldRegisterPastExceptions == null)
+    					return;
+    				NodeStream.of(newMap.getRootNode())
+    				.map(ReminderExtension::getExtension)
+    				.filter( e -> e != null)
+    				.forEach(ReminderExtension::scheduleTimer);
+    			}
+
+    		});
+    	}
+    }
+
     /**
      */
     public static ReminderExtension getExtension(final NodeModel node) {
@@ -118,7 +149,19 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
     public void setScript(String script) {
         this.script = script;
     }
-    
+
+    void reminderAdded() {
+    	MapModel map = node.getMap();
+    	if(updatedMaps.containsKey(map))
+    		return;
+    	IMapViewManager mapViewManager = Controller.getCurrentController().getMapViewManager();
+    	if (!mapViewManager.containsView(map)) {
+    		updatedMaps.put(map, Boolean.TRUE);
+    		return;
+    	}
+    	scheduleTimer();
+    }
+
     void scheduleTimer() {
         long timeBeforeReminder = remindUserAt - System.currentTimeMillis();
         reminderInThePast = timeBeforeReminder < - MAXIMAL_DELAY;
@@ -128,7 +171,6 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
             timer.setRepeats(false);
         }
         timer.start();
-        final NodeModel node = getNode();
         if(reminderInThePast)
             pastReminders.addNode(node);
         displayStateIcon(ClockState.CLOCK_VISIBLE, node, false);
@@ -164,7 +206,7 @@ public class ReminderExtension implements IExtension, IMapChangeListener, IMapLi
             scheduleTimer();
             return;
         }
-            
+
         if(!reminderInThePast && containsScript()){
             reminderInThePast = true;
             runScript();
