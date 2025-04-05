@@ -2590,30 +2590,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 	}
 
-	public void render(final Graphics g1, final Rectangle source, final Rectangle target) {
-		final Graphics2D g = (Graphics2D) g1;
-		final AffineTransform old = g.getTransform();
-		final double scaleX = (0.0 + target.width) / source.width;
-		final double scaleY = (0.0 + target.height) / source.height;
-		final double zoom;
-		if(scaleX < scaleY){
-			zoom = scaleX;
-		}
-		else{
-			zoom = scaleY;
-		}
-		final AffineTransform tr2 = new AffineTransform(old);
-		tr2.translate(target.getWidth() / 2, target.getHeight() / 2);
-		tr2.scale(zoom, zoom);
-		tr2.translate(-source.getX()- (source.getWidth() ) / 2, -source.getY()- (source.getHeight()) / 2);
-		g.setTransform(tr2);
-		final Rectangle clipBounds = g1.getClipBounds();
-		g1.clipRect(source.x, source.y, source.width, source.height);
-		print(g1);
-		g.setTransform(old);
-		g1.setClip(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
-	}
-
 	@Override
 	public int print(final Graphics graphics, final PageFormat pageFormat, final int pageIndex) {
 		double userZoomFactor = ResourceController.getResourceController().getDoubleProperty("user_zoom", 1);
