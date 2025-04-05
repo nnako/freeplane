@@ -2201,8 +2201,16 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	    boolean backgroundIsPaintedByViewport = paintingPurpose == PaintingPurpose.PAINTING && backgroundComponent != null && fitToViewport;
         if(!usesTransparentBackgroundForPrinting && !backgroundIsPaintedByViewport) {
 	        g.setColor(getBackground() );
-	        g.fillRect(0, 0, getWidth(), getHeight() );
-	    }
+	        Rectangle clip = g.getClipBounds();
+	        if (clip != null) {
+	            int x = Math.max(0, clip.x);
+	            int y = Math.max(0, clip.y);
+	            int w = Math.min(getWidth() - x, clip.width - (x - clip.x));
+	            int h = Math.min(getHeight() - y, clip.height - (y - clip.y));
+	            g.fillRect(x, y, w, h);
+	        } else {
+	            g.fillRect(0, 0, getWidth(), getHeight());
+	        }	    }
         if (backgroundComponent != null && paintingPurpose != PaintingPurpose.OVERVIEW && ! fitToViewport) {
 			paintBackgroundComponent(g);
 		}
