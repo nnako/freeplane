@@ -196,7 +196,7 @@ public class MMapClipboardController extends MapClipboardController implements M
             }
         }
 
-        private void paste(final NodeModel target, final Side side) {
+        private void paste(NodeModel target, final Side side) {
             final ArrayList<String> textLines = new ArrayList<>(Arrays.asList(textFromClipboard.split(MapClipboardController.NODESEPARATOR)));
             final MMapController mapController = (MMapController) Controller.getCurrentModeController().getMapController();
             final MapReader mapReader = mapController.getMapReader();
@@ -211,6 +211,8 @@ public class MMapClipboardController extends MapClipboardController implements M
                         newModel.removeExtension(FreeNode.class);
                         newModel.setSide(side.isSibling() ? target.getSide() : side);
                         mapController.insertNode(newModel, target, InsertionRelation.bySide(side));
+                        if(side == Side.AS_SIBLING_AFTER)
+                        	target = newModel;
                     }
                     catch (final XMLException e) {
                         LogUtils.severe("error on paste", e);
