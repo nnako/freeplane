@@ -61,7 +61,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.RootPaneContainer;
 import javax.swing.Timer;
@@ -69,7 +68,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicEditorPaneUI;
 
@@ -107,7 +105,6 @@ abstract public class FrameController implements ViewController {
 	public static final String VAQUA_LAF_NAME = "VAqua";
 	public static final String VAQUA_LAF_CLASS_NAME = "org.violetlib.aqua.AquaLookAndFeel";
     private static final String DARCULA_LAF_CLASS_NAME = "com.bulenkov.darcula.DarculaLaf";
-    private static final String MOTIF_LAF__CLASS_NAME = "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
 	private static final double DEFAULT_SCALING_FACTOR = 0.8;
 	private static final String MENU_ITEM_FONT_SIZE_PROPERTY = "menuItemFontSize";
 
@@ -655,6 +652,8 @@ abstract public class FrameController implements ViewController {
 		}
 	}
 	static {
+		UIManager.getInstalledLookAndFeels();
+		OSKeyBindingManager.initialize();
 	    UIManager.addPropertyChangeListener(new PropertyChangeListener() {
 	        @Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -666,7 +665,7 @@ abstract public class FrameController implements ViewController {
 
 	}
     private static void fixLookAndFeelUI(){
-    	addHotKeysToMotifInputMaps();
+    	OSKeyBindingManager.applyToCurrentLookAndFeel();
     	configureFlatLookAndFeel();
 		UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
 		UIManager.put("ComboBox.squareButton", Boolean.FALSE);
@@ -747,56 +746,6 @@ abstract public class FrameController implements ViewController {
         else if(NonSelectingFlatEditorPaneUI.class.getName().equals(UIManager.get("EditorPaneUI"))){
         	UIManager.put("EditorPaneUI", BasicEditorPaneUI.class.getName());
         }
-	}
-
-	private static void addHotKeysToMotifInputMaps() {
-	    if (UIManager.getLookAndFeel().getClass().getName().equals(MOTIF_LAF__CLASS_NAME)) {
-	        UIDefaults uiDefaults = UIManager.getDefaults();
-	        for (Object key : uiDefaults.keySet()) {
-	            Object value = uiDefaults.get(key);
-
-	            if (value instanceof UIDefaults.LazyInputMap) {
-	                uiDefaults.put(key, createModifiedLazyValue((UIDefaults.LazyInputMap) value));
-	            } else if (value instanceof InputMapUIResource  || value instanceof InputMap) {
-	                InputMap modified = modifyInputMap((InputMap) value);
-	                uiDefaults.put(key, modified);
-	            }
-	        }
-	    }
-	}
-
-	private static Map<String, KeyStroke> keystrokes = new HashMap<>();
-
-	private static UIDefaults.LazyValue createModifiedLazyValue(UIDefaults.LazyInputMap lazyInputMap) {
-	    return table -> {
-	        Object value = lazyInputMap.createValue(table);
-	        return (value instanceof InputMap) ? modifyInputMap((InputMap) value) : value;
-	    };
-	}
-
-	private static InputMap modifyInputMap(InputMap inputMap) {
-	    KeyStroke keyStrokeControlC = keystrokes.computeIfAbsent("control C", KeyStroke::getKeyStroke);
-	    if (inputMap.get(keyStrokeControlC) != null)
-	        return inputMap;
-
-	    KeyStroke keyStrokeCopy = keystrokes.computeIfAbsent("COPY", KeyStroke::getKeyStroke);
-	    Object copyValue = inputMap.get(keyStrokeCopy);
-	    if (copyValue != null)
-	        inputMap.put(keyStrokeControlC, copyValue);
-
-	    KeyStroke keyStrokeControlV = keystrokes.computeIfAbsent("control V", KeyStroke::getKeyStroke);
-	    KeyStroke keyStrokePaste = keystrokes.computeIfAbsent("PASTE", KeyStroke::getKeyStroke);
-	    Object pasteValue = inputMap.get(keyStrokePaste);
-	    if (pasteValue != null)
-	        inputMap.put(keyStrokeControlV, pasteValue);
-
-	    KeyStroke keyStrokeControlX = keystrokes.computeIfAbsent("control X", KeyStroke::getKeyStroke);
-	    KeyStroke keyStrokeCut = keystrokes.computeIfAbsent("CUT", KeyStroke::getKeyStroke);
-	    Object cutValue = inputMap.get(keyStrokeCut);
-	    if (cutValue != null)
-	        inputMap.put(keyStrokeControlX, cutValue);
-
-	    return inputMap;
 	}
 
 	private static void scaleDefaultUIFonts(double scalingFactor) {

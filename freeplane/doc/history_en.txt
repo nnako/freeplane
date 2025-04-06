@@ -7,6 +7,7 @@ Show available tags in attribute panel
 Insert tags on double click
 Add strike through option
 Support local installation without admin privileges on Windows
+Use OS default look and feel key bindings across all look and feels
 Code Explorer improvements
 Bug fixes
 
