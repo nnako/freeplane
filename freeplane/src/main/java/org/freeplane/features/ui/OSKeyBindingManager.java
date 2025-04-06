@@ -8,6 +8,7 @@ import java.util.WeakHashMap;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -34,6 +35,10 @@ public class OSKeyBindingManager {
         "List.actionMap", "Table.actionMap", "TableHeader.actionMap",
         "CheckBox.actionMap", "RadioButton.actionMap", "Button.actionMap",
         "ToggleButton.actionMap", "RootPane.actionMap"
+    );
+
+    private static final List<String> editableComponentInputMaps = Arrays.asList(
+        "Tree.focusInputMap", "List.focusInputMap", "Table.ancestorInputMap"
     );
 
     static {
@@ -84,7 +89,22 @@ public class OSKeyBindingManager {
             }
         }
 
+        ensureF2EditBinding(targetDefaults);
+
         patchedLAFs.add(laf);
+    }
+
+    private static void ensureF2EditBinding(UIDefaults defaults) {
+        KeyStroke f2 = KeyStroke.getKeyStroke("F2");
+        
+        for (String key : editableComponentInputMaps) {
+            InputMap im = (InputMap) defaults.get(key);
+            if (im != null && (key.equals("Tree.focusInputMap") 
+            || key.equals("Table.ancestorInputMap") 
+            || key.equals("List.focusInputMap"))) {
+                im.put(f2, "startEditing");
+            }
+        }
     }
 
     private OSKeyBindingManager() {
