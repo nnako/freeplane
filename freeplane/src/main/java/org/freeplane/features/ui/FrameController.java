@@ -69,6 +69,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicEditorPaneUI;
 
@@ -749,42 +750,54 @@ abstract public class FrameController implements ViewController {
 	}
 
 	private static void addHotKeysToMotifInputMaps() {
-        if(UIManager.getLookAndFeel().getClass().getName().equals(MOTIF_LAF__CLASS_NAME)) {
-            UIDefaults uiDefaults = UIManager.getDefaults();
-            uiDefaults.replaceAll((k, v) -> replaceMotifLazyInputMaps(k, v));
-         }
-    }
+	    if (UIManager.getLookAndFeel().getClass().getName().equals(MOTIF_LAF__CLASS_NAME)) {
+	        UIDefaults uiDefaults = UIManager.getDefaults();
+	        for (Object key : uiDefaults.keySet()) {
+	            Object value = uiDefaults.get(key);
+
+	            if (value instanceof UIDefaults.LazyInputMap) {
+	                uiDefaults.put(key, createModifiedLazyValue((UIDefaults.LazyInputMap) value));
+	            } else if (value instanceof InputMapUIResource  || value instanceof InputMap) {
+	                InputMap modified = modifyInputMap((InputMap) value);
+	                uiDefaults.put(key, modified);
+	            }
+	        }
+	    }
+	}
 
 	private static Map<String, KeyStroke> keystrokes = new HashMap<>();
 
-    private static Object replaceMotifLazyInputMaps(Object k, Object v) {
-        if(!(v instanceof UIDefaults.LazyInputMap))
-            return v;
-        return new UIDefaults.LazyValue() {
-            @Override
-            public Object createValue(UIDefaults table) {
-                 Object value = ((UIDefaults.LazyInputMap) v).createValue(table);
-                 if (! (value instanceof InputMap))
-                     return value;
-                 InputMap inputMap = (InputMap) value;
-                 KeyStroke keyStrokeControlC = keystrokes.computeIfAbsent("control C", KeyStroke::getKeyStroke);
-                 if(inputMap.get(keyStrokeControlC) != null)
-                     return value;
-                 KeyStroke keyStrokeCopy = keystrokes.computeIfAbsent("COPY", KeyStroke::getKeyStroke);
-                 Object copyValue = inputMap.get(keyStrokeCopy);
-                 if(copyValue == null)
-                     return value;
-                 inputMap.put(keyStrokeControlC, copyValue);
-                 KeyStroke keyStrokePaste = keystrokes.computeIfAbsent("PASTE", KeyStroke::getKeyStroke);
-                 KeyStroke keyStrokeControlV = keystrokes.computeIfAbsent("control V", KeyStroke::getKeyStroke);
-                 inputMap.put(keyStrokeControlV, inputMap.get(keyStrokePaste));
-                 KeyStroke keyStrokeCut = keystrokes.computeIfAbsent("CUT", KeyStroke::getKeyStroke);
-                 KeyStroke keyStrokeControlX = keystrokes.computeIfAbsent("control X", KeyStroke::getKeyStroke);
-                 inputMap.put(keyStrokeControlX, inputMap.get(keyStrokeCut));
-                 return inputMap;
-           }
-        };
-    }
+	private static UIDefaults.LazyValue createModifiedLazyValue(UIDefaults.LazyInputMap lazyInputMap) {
+	    return table -> {
+	        Object value = lazyInputMap.createValue(table);
+	        return (value instanceof InputMap) ? modifyInputMap((InputMap) value) : value;
+	    };
+	}
+
+	private static InputMap modifyInputMap(InputMap inputMap) {
+	    KeyStroke keyStrokeControlC = keystrokes.computeIfAbsent("control C", KeyStroke::getKeyStroke);
+	    if (inputMap.get(keyStrokeControlC) != null)
+	        return inputMap;
+
+	    KeyStroke keyStrokeCopy = keystrokes.computeIfAbsent("COPY", KeyStroke::getKeyStroke);
+	    Object copyValue = inputMap.get(keyStrokeCopy);
+	    if (copyValue != null)
+	        inputMap.put(keyStrokeControlC, copyValue);
+
+	    KeyStroke keyStrokeControlV = keystrokes.computeIfAbsent("control V", KeyStroke::getKeyStroke);
+	    KeyStroke keyStrokePaste = keystrokes.computeIfAbsent("PASTE", KeyStroke::getKeyStroke);
+	    Object pasteValue = inputMap.get(keyStrokePaste);
+	    if (pasteValue != null)
+	        inputMap.put(keyStrokeControlV, pasteValue);
+
+	    KeyStroke keyStrokeControlX = keystrokes.computeIfAbsent("control X", KeyStroke::getKeyStroke);
+	    KeyStroke keyStrokeCut = keystrokes.computeIfAbsent("CUT", KeyStroke::getKeyStroke);
+	    Object cutValue = inputMap.get(keyStrokeCut);
+	    if (cutValue != null)
+	        inputMap.put(keyStrokeControlX, cutValue);
+
+	    return inputMap;
+	}
 
 	private static void scaleDefaultUIFonts(double scalingFactor) {
 		final UIDefaults uiDefaults = UIManager.getDefaults();
