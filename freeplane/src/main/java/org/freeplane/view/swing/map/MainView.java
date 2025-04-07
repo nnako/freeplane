@@ -282,11 +282,7 @@ public class MainView extends ZoomableLabel {
 	    return dtde.isDataFlavorSupported(TagSelection.tagFlavor ) ? DragOverRelation.TAG : dragOverRelation(dtde.getLocation());
 	}
 
-	public DragOverRelation dragOverRelation(final DropTargetDragEvent dtde) {
-	    return dtde.isDataFlavorSupported(TagSelection.tagFlavor ) ? DragOverRelation.TAG : dragOverRelation(dtde.getLocation());
-	}
-
-	private DragOverRelation dragOverRelation(Point location) {
+	public DragOverRelation dragOverRelation(Point location) {
 		NodeView nodeView = getNodeView();
 		final DragOverDirection dragOverDirection = dragOverDirection(location);
 		return dragOverDirection.relation(nodeView.layoutOrientation(), nodeView.side());

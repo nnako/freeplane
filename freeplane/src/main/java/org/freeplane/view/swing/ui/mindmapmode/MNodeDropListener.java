@@ -19,7 +19,9 @@
  */
 package org.freeplane.view.swing.ui.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -30,8 +32,7 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
@@ -81,9 +81,6 @@ public class MNodeDropListener implements DropTargetListener {
 	}
 
 
-private static final int UNFOLD_DELAY_MILLISECONDS = 500;
-private Timer timer;
-
 // 	final private ModeController modeController;
 
 	public MNodeDropListener() {
@@ -114,7 +111,6 @@ private Timer timer;
 	@Override
 	public void dragEnter(final DropTargetDragEvent dtde) {
 		if (isDragAcceptable(dtde)) {
-			supportFolding(dtde);
 			dtde.acceptDrag(DnDConstants.ACTION_MOVE);
 
 		}
@@ -123,28 +119,33 @@ private Timer timer;
 		}
 	}
 
-	private void supportFolding(final DropTargetDragEvent dtde) {
-		final MainView node = getMainView(dtde);
-		if(isInFoldingRegion(dtde)){
-			startUnfoldTimer(node);
-		}
-		else{
-			stopUnfoldTimer();
-		}
-    }
-
-	private boolean isInFoldingRegion(DropTargetDragEvent dtde) {
-	    final MainView node = getMainView(dtde);
-	    return node.dragOverRelation(dtde).isChild();
-	}
-
 	@Override
 	public void dragExit(final DropTargetEvent e) {
-	    MainView node = getMainView(e);
-	    stopUnfoldTimer();
-	    final MainView mainView = node;
-	    mainView.stopDragOver();
-	    mainView.repaint();
+		final MainView mainView = getMainView(e);
+		mainView.stopDragOver();
+		mainView.repaint();
+		if(isInFoldingRegion(mainView)) {
+			NodeView nodeView = mainView.getNodeView();
+			if(nodeView.isFolded()) {
+				final NodeModel node = nodeView.getNode();
+				MapView map = nodeView.getMap();
+				if(map.isSelected())
+					map.getModeController().getMapController().unfold(node, map.getFilter());
+				else
+					nodeView.setFolded(false);
+			}
+		}
+
+	}
+
+	private boolean isInFoldingRegion(final MainView node) {
+	    AWTEvent currentEvent = EventQueue.getCurrentEvent();
+	    if(! (currentEvent instanceof MouseEvent))
+	    	return false;
+	    MouseEvent mouseEvent = ((MouseEvent)currentEvent);
+	    if(mouseEvent.getComponent() != node)
+	    	return false;
+	    return node.dragOverRelation(mouseEvent.getPoint()).isChild();
 	}
 
 	private MainView getMainView(final DropTargetEvent e) {
@@ -163,45 +164,9 @@ private Timer timer;
 	@Override
 	public void dragOver(final DropTargetDragEvent dtde) {
 		if(isDragAcceptable(dtde)) {
-			supportFolding(dtde);
-
 			final MainView dropTarget = getMainView(dtde.getDropTargetContext());
 			dropTarget.setDragOverDirection(dtde);
 		}
-	}
-
-	private void startUnfoldTimer(final MainView mainView) {
-		if(timer == null){
-			timer = new Timer(UNFOLD_DELAY_MILLISECONDS, new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-				    if(mainView.isDisplayable()){
-				        NodeView nodeView = mainView.getNodeView();
-				        if(nodeView.isFolded()) {
-				            final NodeModel node = nodeView.getNode();
-				            MapView map = nodeView.getMap();
-				            if(map.isSelected())
-				                map.getModeController().getMapController().unfold(node, map.getFilter());
-				            else
-				                nodeView.setFolded(false);
-				        }
-					}
-				}
-			});
-			timer.setRepeats(false);
-			timer.start();
-		}
-    }
-
-	private void stopUnfoldTimer() {
-	    if(timer != null){
-	    	timer.stop();
-	    	timer = null;
-	    }
-
-    }
-
-	public void dragScroll(final DropTargetDragEvent e) {
 	}
 
 	private boolean isDragAcceptable(final DropTargetDragEvent event) {
@@ -300,7 +265,6 @@ private Timer timer;
 	@Override
 	public void drop(final DropTargetDropEvent dtde) {
 		try {
-		    stopUnfoldTimer();
 			final MainView mainView = getMainView(dtde.getDropTargetContext());
 			final NodeView targetNodeView = mainView.getNodeView();
 			final MapView mapView = targetNodeView.getMap();
