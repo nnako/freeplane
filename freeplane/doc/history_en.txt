@@ -9,6 +9,8 @@ Add strike through option
 Support local installation without admin privileges on Windows
 Use OS default look and feel key bindings across all look and feels
 Code Explorer improvements
+Fold/unfold when mouse pointer goes over folding control mark
+Unfold by drag and drop when dragged object leaves node
 Bug fixes
 
 ==============================
