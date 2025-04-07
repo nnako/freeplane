@@ -110,7 +110,7 @@ public class NodeSelector {
                             {
                             	MapController mapController = modeController.getMapController();
                             	if(isInFoldingRegion) {
-                            		mapController.toggleFolded(node);
+                            		mapController.toggleFoldedAndScroll(node);
                             	}
                             	else {
                             		controller.getSelection().selectAsTheOnlyOneSelected(node);
@@ -153,14 +153,13 @@ public class NodeSelector {
 		if (selectionMethod.equals(SELECTION_METHOD_BY_CLICK)) {
 			return;
 		}
-		if (selectionMethod.equals(SELECTION_METHOD_DIRECT)) {
-			delayedSelection = new TimeDelayedSelection(e, isInFoldingRegion);
+		delayedSelection = new TimeDelayedSelection(e, isInFoldingRegion);
+		if (selectionMethod.equals(SELECTION_METHOD_DIRECT) && ! isInFoldingRegion) {
 			delayedSelection.actionPerformed(new ActionEvent(this, 0, ""));
 			return;
 		}
 		final int timeForDelayedSelection = ResourceController.getResourceController().getIntProperty(
 		    TIME_FOR_DELAYED_SELECTION, 100);
-		delayedSelection = new TimeDelayedSelection(e, isInFoldingRegion);
 		timerForDelayedSelection = new Timer(timeForDelayedSelection, delayedSelection);
 		timerForDelayedSelection.setRepeats(false);
 		timerForDelayedSelection.start();
