@@ -51,7 +51,6 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.url.UrlManager;
 import org.freeplane.features.url.mindmapmode.MFileManager;
 import org.freeplane.view.swing.ui.mindmapmode.INodeSelector;
-import org.freeplane.view.swing.ui.mindmapmode.NodeSelector;
 
 /**
  * @author Dimitry Polivaev

@@ -17,7 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.freeplane.view.swing.ui.mindmapmode;
+package org.freeplane.view.swing.map.attribute;
 
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
@@ -29,12 +29,14 @@ import javax.swing.SwingUtilities;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.view.swing.ui.mindmapmode.GlassPaneManager;
+import org.freeplane.view.swing.ui.mindmapmode.INodeSelector;
 
 /**
  * @author Dimitry Polivaev
  * Mar 3, 2011
  */
-public class NodeSelector implements INodeSelector {
+class NodeSelector implements INodeSelector {
 	private NodeModel node = null;
 	private JDialog dialog;
 	NodeModel getNode() {
