@@ -188,14 +188,9 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 	 */
 	@Override
 	public void mouseDragged(final MouseEvent e) {
-		if(isInFoldingControl(e))
-			nodeSelector.createTimer(e, true);
-		else if (!nodeSelector.isInside(e))
-			return;
-		else {
-			nodeSelector.stopTimerForDelayedSelection();
+		nodeSelector.stopTimerForDelayedSelection();
+		if (nodeSelector.isInside(e))
 			nodeSelector.extendSelection(e, false);
-		}
 	}
 
 
