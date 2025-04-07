@@ -39,6 +39,7 @@ import javax.swing.text.JTextComponent;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.Compat;
 import org.freeplane.features.map.IMapSelection;
+import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
@@ -79,11 +80,15 @@ public class NodeSelector {
 	private static boolean mouseWasMoved = false;
 	private final MovedMouseEventFilter windowMouseTracker = new MovedMouseEventFilter();
 
-	protected class TimeDelayedSelection implements ActionListener {
-		final private MouseEvent mouseEvent;
+	protected static class TimeDelayedSelection implements ActionListener {
+		private final MouseEvent mouseEvent;
+		private final boolean isInFoldingRegion;
+		private boolean wasFired;
 
-		TimeDelayedSelection(final MouseEvent e) {
+		TimeDelayedSelection(final MouseEvent e, boolean isInFoldingRegion) {
 			this.mouseEvent = e;
+			this.isInFoldingRegion = isInFoldingRegion;
+			this.wasFired = false;
 		}
 
 		@Override
@@ -103,9 +108,16 @@ public class NodeSelector {
 		                NodeModel node = nodeV.getNode();
 		                MouseEventActor.INSTANCE.withMouseEvent( () ->
                             {
-								controller.getSelection().selectAsTheOnlyOneSelected(node);
-								modeController.getMapController().scrollNodeTreeAfterSelect(node);
+                            	MapController mapController = modeController.getMapController();
+                            	if(isInFoldingRegion) {
+                            		mapController.toggleFolded(node);
+                            	}
+                            	else {
+                            		controller.getSelection().selectAsTheOnlyOneSelected(node);
+                            		mapController.scrollNodeTreeAfterSelect(node);
+                            	}
 							});
+		                this.wasFired = true;
 		            }
 		        }
 		    }
@@ -116,14 +128,16 @@ public class NodeSelector {
 
 	private Rectangle controlRegionForDelayedSelection;
 	private Timer timerForDelayedSelection;
+	private TimeDelayedSelection delayedSelection;
 
-	public void createTimer(final MouseEvent e) {
-	    if(! mouseWasMoved)
-	        return;
-		if (controlRegionForDelayedSelection != null && controlRegionForDelayedSelection.contains(e.getPoint())) {
+	public void createTimer(final MouseEvent e, boolean isInFoldingRegion) {
+		if(! mouseWasMoved
+				|| controlRegionForDelayedSelection != null && controlRegionForDelayedSelection.contains(e.getPoint())) {
 			return;
 		}
-		if (!isInside(e))
+		if (!(isInFoldingRegion || isInside(e)))
+			return;
+		if(isInFoldingRegion && (delayedSelection != null && delayedSelection.isInFoldingRegion && delayedSelection.wasFired))
 			return;
 		stopTimerForDelayedSelection();
 		Window focusedWindow = FocusManager.getCurrentManager().getFocusedWindow();
@@ -140,12 +154,14 @@ public class NodeSelector {
 			return;
 		}
 		if (selectionMethod.equals(SELECTION_METHOD_DIRECT)) {
-			new TimeDelayedSelection(e).actionPerformed(new ActionEvent(this, 0, ""));
+			delayedSelection = new TimeDelayedSelection(e, isInFoldingRegion);
+			delayedSelection.actionPerformed(new ActionEvent(this, 0, ""));
 			return;
 		}
 		final int timeForDelayedSelection = ResourceController.getResourceController().getIntProperty(
-		    TIME_FOR_DELAYED_SELECTION, 0);
-		timerForDelayedSelection = new Timer(timeForDelayedSelection, new TimeDelayedSelection(e));
+		    TIME_FOR_DELAYED_SELECTION, 100);
+		delayedSelection = new TimeDelayedSelection(e, isInFoldingRegion);
+		timerForDelayedSelection = new Timer(timeForDelayedSelection, delayedSelection);
 		timerForDelayedSelection.setRepeats(false);
 		timerForDelayedSelection.start();
 	}
@@ -161,6 +177,7 @@ public class NodeSelector {
 		}
 		timerForDelayedSelection = null;
 		controlRegionForDelayedSelection = null;
+		delayedSelection = null;
 	}
 
 	protected Rectangle getControlRegion(final Point2D p) {

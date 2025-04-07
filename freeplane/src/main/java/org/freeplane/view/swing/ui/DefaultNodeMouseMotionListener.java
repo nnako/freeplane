@@ -188,16 +188,25 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 	 */
 	@Override
 	public void mouseDragged(final MouseEvent e) {
-		if (!nodeSelector.isInside(e))
+		if(isInFoldingControl(e))
+			nodeSelector.createTimer(e, true);
+		else if (!nodeSelector.isInside(e))
 			return;
-		nodeSelector.stopTimerForDelayedSelection();
-		nodeSelector.extendSelection(e, false);
+		else {
+			nodeSelector.stopTimerForDelayedSelection();
+			nodeSelector.extendSelection(e, false);
+		}
+	}
+
+
+	private boolean isInFoldingControl(final MouseEvent e) {
+		return isInFoldingRegion(e) && ((MainView)e.getComponent()).getFoldingControlBounds().contains(e.getPoint());
 	}
 
 	@Override
 	public void mouseEntered(final MouseEvent e) {
 		if (nodeSelector.isRelevant(e)) {
-			nodeSelector.createTimer(e);
+			nodeSelector.createTimer(e, isInFoldingControl(e));
 			mouseMoved(e);
 		}
 	}
@@ -231,7 +240,7 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 			requiredCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 			node.setMouseArea(MouseArea.LINK);
         }
-        else if (isInFoldingRegion(e)){
+        else if (isInFoldingControl(e)){
         	requiredCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
         	node.setMouseArea(MouseArea.FOLDING);
         }
@@ -242,7 +251,7 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
         if (node.getCursor().getType() != requiredCursor.getType() || requiredCursor.getType() == Cursor.CUSTOM_CURSOR && node.getCursor() != requiredCursor) {
         	node.setCursor(requiredCursor);
         }
-		nodeSelector.createTimer(e);
+		nodeSelector.createTimer(e, isInFoldingControl(e));
 	}
 
 	@Override

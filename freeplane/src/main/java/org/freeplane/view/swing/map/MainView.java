@@ -826,6 +826,9 @@ public class MainView extends ZoomableLabel {
 			paintFoldingRectangleImmediately();
 	}
 
+	public Rectangle getFoldingControlBounds() {
+		return getFoldingRectangleBounds(getNodeView(), true);
+	}
 	Rectangle getFoldingRectangleBounds(final NodeView nodeView, boolean drawsControls) {
 	    return painter.getFoldingRectangleBounds(nodeView, drawsControls);
 	}
