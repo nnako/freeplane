@@ -35,13 +35,11 @@ import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.dnd.Autoscroll;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -49,8 +47,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -859,7 +855,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		addPropertyChangeListener(SPOTLIGHT_ENABLED, repaintOnClientPropertyChangeListener);
 		if(ResourceController.getResourceController().getBooleanProperty("activateSpotlightByDefault"))
 		    putClientProperty(SPOTLIGHT_ENABLED, Boolean.TRUE);
-		nodeViewFolder = new NodeViewFolder();
+		nodeViewFolder = new NodeViewFolder(true);
 		setMap(viewedMap);
         mapScroller.setAnchorView(currentRootView);
 	}

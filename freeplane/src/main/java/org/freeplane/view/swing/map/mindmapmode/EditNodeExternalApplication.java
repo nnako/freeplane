@@ -24,8 +24,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.MessageFormat;
 
-import javax.swing.RootPaneContainer;
-
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.FileUtils;
 import org.freeplane.core.util.LogUtils;

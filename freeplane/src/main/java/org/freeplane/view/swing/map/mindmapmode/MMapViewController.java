@@ -48,7 +48,6 @@ import org.freeplane.features.text.mindmapmode.EditNodeBase.IEditControl;
 import org.freeplane.features.text.mindmapmode.EditNodeWYSIWYG;
 import org.freeplane.features.text.mindmapmode.IEditBaseCreator;
 import org.freeplane.features.url.UrlManager;
-import org.freeplane.features.url.mindmapmode.MFileManager;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewController;

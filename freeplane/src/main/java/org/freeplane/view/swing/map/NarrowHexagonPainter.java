@@ -25,7 +25,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 
 import org.freeplane.features.nodestyle.NodeGeometryModel;
-import org.freeplane.view.swing.map.VariableInsetsPainter.PaintOperation;
 
 class NarrowHexagonPainter extends VariableInsetsPainter {
 	private static final double HORIZONTAL_MARGIN_FACTOR = 1.0;

@@ -55,7 +55,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ComboBoxEditor;
 import javax.swing.Icon;
-import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;

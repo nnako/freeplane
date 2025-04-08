@@ -26,7 +26,6 @@ import java.util.List;
 import javax.swing.Icon;
 
 import org.freeplane.core.util.TextUtils;
-import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.format.FormattedDate;
 import org.freeplane.features.map.NodeModel;
 

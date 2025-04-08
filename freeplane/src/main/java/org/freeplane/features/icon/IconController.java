@@ -22,15 +22,12 @@ package org.freeplane.features.icon;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.swing.SwingUtilities;
 
 import org.freeplane.api.HorizontalTextAlignment;
 import org.freeplane.api.LengthUnit;
@@ -43,12 +40,6 @@ import org.freeplane.core.ui.components.TagIcon;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.components.html.CssRuleBuilder;
 import org.freeplane.core.util.HtmlUtils;
-import org.freeplane.core.util.Hyperlink;
-import org.freeplane.core.util.LogUtils;
-import org.freeplane.core.util.TextUtils;
-import org.freeplane.features.attribute.AttributeRegistry;
-import org.freeplane.features.attribute.AttributeTableLayoutModel;
-import org.freeplane.features.attribute.NodeAttributeTableModel;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.filter.condition.ConditionFactory;
 import org.freeplane.features.icon.factory.IconStoreFactory;
@@ -66,12 +57,10 @@ import org.freeplane.features.styles.IStyle;
 import org.freeplane.features.styles.LogicalStyleController;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.text.ShortenedTextModel;
-import org.freeplane.features.text.TextController;
 import org.freeplane.features.styles.MapStyle;
 import org.freeplane.features.styles.MapStyleModel;
 import org.freeplane.features.styles.StyleNode;
 import org.freeplane.view.swing.map.MapView;
-import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.map.TagLocation;
 
 /**

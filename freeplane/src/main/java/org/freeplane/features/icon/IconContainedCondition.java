@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.swing.Icon;
 
-import org.freeplane.core.ui.components.ObjectIcon;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.icon.factory.IconStoreFactory;

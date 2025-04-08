@@ -25,7 +25,6 @@ import java.util.List;
 import javax.swing.Icon;
 
 import org.freeplane.core.util.TextUtils;
-import org.freeplane.features.filter.StringMatchingStrategy.Type;
 
 /**
  * @author Dimitry Polivaev

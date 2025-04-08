@@ -24,7 +24,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
-import javax.swing.JTree;
 import javax.swing.TransferHandler;
 
 import org.freeplane.core.extension.IExtension;

@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 
-import org.freeplane.features.icon.Tag;
-
 /**
  * @author Dimitry Polivaev
  */

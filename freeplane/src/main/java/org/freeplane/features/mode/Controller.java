@@ -42,7 +42,6 @@ import org.freeplane.features.map.IMapLifeCycleListener;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.IMapSelection.NodePosition;
 import org.freeplane.features.map.MapModel;
-import org.freeplane.features.mode.mindmapmode.MModeController;
 import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.features.ui.ViewController;
 import org.freeplane.main.application.ApplicationLifecycleListener;

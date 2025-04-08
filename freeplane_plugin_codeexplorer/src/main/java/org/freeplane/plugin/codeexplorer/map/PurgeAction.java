@@ -29,7 +29,6 @@ import org.freeplane.core.ui.components.OptionalDontShowMeAgainDialog;
 import org.freeplane.core.ui.components.OptionalDontShowMeAgainDialog.MessageType;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
-import org.freeplane.features.mode.mindmapmode.MModeController;
 
 class PurgeAction extends AFreeplaneAction {
 	/**

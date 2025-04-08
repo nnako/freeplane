@@ -26,12 +26,9 @@ import javax.swing.Icon;
 
 import org.freeplane.core.io.xml.TreeXmlReader;
 import org.freeplane.core.io.xml.TreeXmlWriter;
-import org.freeplane.core.util.TextUtils;
 import org.freeplane.core.util.TypeReference;
-import org.freeplane.features.explorer.MapExplorerConditionController;
 import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.filter.condition.CompareConditionAdapter;
-import org.freeplane.features.filter.condition.ConditionFactory.ConditionOperator;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.text.TextController;
 import org.freeplane.n3.nanoxml.XMLElement;

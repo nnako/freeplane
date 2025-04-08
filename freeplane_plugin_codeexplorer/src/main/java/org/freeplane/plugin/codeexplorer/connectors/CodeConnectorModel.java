@@ -9,7 +9,6 @@ import java.util.Objects;
 
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.link.ConnectorModel;
-import org.freeplane.features.map.NodeModel;
 import org.freeplane.plugin.codeexplorer.dependencies.DependencyVerdict;
 import org.freeplane.plugin.codeexplorer.map.CodeNode;
 

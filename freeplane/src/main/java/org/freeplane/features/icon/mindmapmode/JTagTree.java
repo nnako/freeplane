@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.swing.DropMode;
-import javax.swing.JTree;
 import javax.swing.plaf.TreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;

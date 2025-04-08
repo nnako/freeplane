@@ -3,7 +3,6 @@ package org.freeplane.features.note.mindmapmode;
 import java.awt.Window;
 import java.util.regex.Pattern;
 
-import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.util.HtmlUtils;

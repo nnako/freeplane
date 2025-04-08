@@ -27,7 +27,6 @@ import javax.swing.Icon;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.StringMatchingStrategy;
-import org.freeplane.features.filter.StringMatchingStrategy.Type;
 
 /**
  * @author Dimitry Polivaev

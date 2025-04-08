@@ -23,7 +23,6 @@ import org.freeplane.core.resources.ResourceController;
 import org.freeplane.features.help.OpenURLAction;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.mindmapmode.MModeController;
-import org.freeplane.plugin.codeexplorer.archunit.ArchUnitServer;
 import org.freeplane.plugin.codeexplorer.configurator.CodeProjectController;
 import org.freeplane.plugin.codeexplorer.map.CodeMap;
 import org.freeplane.plugin.codeexplorer.map.CodeMapController;

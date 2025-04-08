@@ -8,7 +8,6 @@ import javax.swing.Icon;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.StringMatchingStrategy.Type;
 import org.freeplane.features.filter.condition.ConditionFactory.ConditionOperator;
-import org.freeplane.features.text.TextController;
 import org.freeplane.n3.nanoxml.XMLElement;
 
 public abstract class StringConditionAdapter extends ASelectableCondition {

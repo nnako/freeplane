@@ -32,7 +32,6 @@ import org.freeplane.core.util.collection.ExtendedComboBoxModel;
 import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.filter.condition.DefaultConditionRenderer;
 import org.freeplane.features.filter.condition.IElementaryConditionController;
-import org.freeplane.features.mode.Controller;
 import org.freeplane.n3.nanoxml.XMLElement;
 
 /**

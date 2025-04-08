@@ -81,8 +81,6 @@ import net.infonode.docking.SplitWindow;
 import net.infonode.docking.TabWindow;
 import net.infonode.docking.View;
 import net.infonode.docking.WindowPopupMenuFactory;
-import net.infonode.docking.action.CloseWindowAction;
-import net.infonode.docking.internalutil.InternalDockingUtil;
 import net.infonode.docking.properties.DockingWindowProperties;
 import net.infonode.docking.properties.RootWindowProperties;
 import net.infonode.docking.properties.TabWindowProperties;

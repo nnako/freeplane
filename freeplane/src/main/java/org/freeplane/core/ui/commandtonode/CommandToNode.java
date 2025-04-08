@@ -7,7 +7,6 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.AFreeplaneAction;
-import org.freeplane.core.ui.AccelerateableAction;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.link.LinkController;

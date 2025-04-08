@@ -17,7 +17,6 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.LabelUI;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 import javax.swing.text.html.HTMLDocument;

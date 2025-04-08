@@ -6,7 +6,6 @@ import java.awt.KeyboardFocusManager;
 import java.util.List;
 
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.freeplane.core.ui.components.IconListComponent;

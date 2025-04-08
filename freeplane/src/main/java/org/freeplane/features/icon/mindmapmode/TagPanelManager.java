@@ -13,7 +13,6 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
-import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
 import javax.swing.Icon;

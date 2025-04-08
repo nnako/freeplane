@@ -21,8 +21,6 @@ package org.freeplane.view.swing.map;
 
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-
 import javax.swing.Icon;
 
 import org.freeplane.core.ui.components.UITools;

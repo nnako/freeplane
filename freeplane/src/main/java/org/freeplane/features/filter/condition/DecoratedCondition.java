@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
-import javax.swing.JComponent;
-
-import org.freeplane.core.ui.components.ObjectIcon;
 import org.freeplane.core.ui.components.TextIcon;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.NodeModel;

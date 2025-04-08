@@ -34,7 +34,6 @@ import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
 import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.NamedIcon;
-import org.freeplane.features.icon.Tag;
 import org.freeplane.features.icon.factory.IconFactory;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.styles.LogicalStyleController.StyleOption;

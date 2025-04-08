@@ -25,8 +25,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.undo.IUndoHandler;
 import org.freeplane.core.util.TextUtils;

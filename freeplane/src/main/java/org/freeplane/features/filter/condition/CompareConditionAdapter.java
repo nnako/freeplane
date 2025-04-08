@@ -28,7 +28,6 @@ import javax.swing.Icon;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.core.util.TypeReference;
-import org.freeplane.features.explorer.MapExplorerConditionController;
 import org.freeplane.features.filter.StringMatchingStrategy;
 import org.freeplane.features.filter.StringMatchingStrategy.Type;
 import org.freeplane.features.filter.condition.ConditionFactory.ConditionOperator;

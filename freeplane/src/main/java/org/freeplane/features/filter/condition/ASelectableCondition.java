@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-
 import org.freeplane.core.ui.components.IconListComponent;
 import org.freeplane.core.ui.components.IconRow;
 import org.freeplane.core.ui.components.ObjectIcon;

@@ -25,7 +25,6 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
-import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.filter.condition.ASelectableCondition;
 import org.freeplane.features.filter.condition.ICondition;
 import org.freeplane.features.map.NodeModel;

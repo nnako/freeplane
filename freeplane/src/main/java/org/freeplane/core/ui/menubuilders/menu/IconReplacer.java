@@ -1,9 +1,6 @@
 package org.freeplane.core.ui.menubuilders.menu;
 
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 
