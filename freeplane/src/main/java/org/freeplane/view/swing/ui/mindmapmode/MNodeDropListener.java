@@ -22,6 +22,7 @@ package org.freeplane.view.swing.ui.mindmapmode;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -61,6 +62,7 @@ import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.MainView;
+import org.freeplane.view.swing.map.MainView.DragOverDirection;
 import org.freeplane.view.swing.map.MainView.DragOverRelation;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewIconListComponent;
@@ -145,10 +147,24 @@ public class MNodeDropListener implements DropTargetListener {
 	    MouseEvent mouseEvent = ((MouseEvent)currentEvent);
 	    if(mouseEvent.getComponent() != node)
 	    	return false;
-	    return node.dragOverRelation(mouseEvent.getPoint()).isChild();
+	    Point p = mouseEvent.getPoint();
+		final DragOverDirection dragOverDirection;
+		if(p.x < 0 && p.y >= 0 && p.y <node.getHeight())
+		    dragOverDirection = DragOverDirection.DROP_LEFT;
+		else if (p.x >= node.getWidth() && p.y >= 0 && p.y <node.getHeight())
+		    dragOverDirection = DragOverDirection.DROP_RIGHT;
+		else if (p.y < 0 && p.x >= 0 && p.x < node.getWidth())
+		    dragOverDirection = DragOverDirection.DROP_UP;
+		else if (p.y >= node.getHeight() && p.x >= 0 && p.x < node.getWidth())
+		    dragOverDirection = DragOverDirection.DROP_DOWN;
+		else return false;
+
+		NodeView nodeView = node.getNodeView();
+		DragOverRelation relation = dragOverDirection.relation(nodeView.layoutOrientation(), nodeView.side());
+		return relation.isChild() && nodeView.childrenSides().matches(relation == DragOverRelation.CHILD_BEFORE);
 	}
 
-	private MainView getMainView(final DropTargetEvent e) {
+    private MainView getMainView(final DropTargetEvent e) {
 	    DropTargetContext dropTargetContext = e.getDropTargetContext();
 		return getMainView(dropTargetContext);
     }
