@@ -117,7 +117,7 @@ public class MainView extends ZoomableLabel {
             void paint(MainView view, final Graphics2D graphics) {/**/}
 
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return DragOverRelation.NOT_AVAILABLE;
             }
         },
@@ -129,7 +129,7 @@ public class MainView extends ZoomableLabel {
                 graphics.fillRect(0, 0, view.getWidth() - 1, view.getHeight() - 1);
             }
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT
                         ? DragOverRelation.CHILD_BEFORE
                         : DragOverRelation.SIBLING_BEFORE;
@@ -143,7 +143,7 @@ public class MainView extends ZoomableLabel {
                 graphics.fillRect(0, 0, view.getWidth() - 1, view.getHeight() - 1);
             }
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT
                         ? DragOverRelation.CHILD_AFTER
                         : DragOverRelation.SIBLING_AFTER;
@@ -157,7 +157,7 @@ public class MainView extends ZoomableLabel {
                 graphics.fillRect(0, 0, view.getWidth() * 3 / 4, view.getHeight() - 1);
             }
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT
                         ? side == Side.BOTTOM_OR_RIGHT
                             ? DragOverRelation.SIBLING_BEFORE
@@ -174,7 +174,7 @@ public class MainView extends ZoomableLabel {
 
             }
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT
                         ? side == Side.BOTTOM_OR_RIGHT
                             ? DragOverRelation.SIBLING_AFTER
@@ -192,7 +192,7 @@ public class MainView extends ZoomableLabel {
             	graphics.setStroke(stroke);
              }
             @Override
-            DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
+            public DragOverRelation relation(LayoutOrientation layoutOrientation, Side side) {
                 return DragOverRelation.TAG;
             }
         },
@@ -200,7 +200,7 @@ public class MainView extends ZoomableLabel {
 
         abstract void paint(MainView view, final Graphics2D graphics);
 
-        abstract DragOverRelation relation(LayoutOrientation layoutOrientation, Side side);
+        public abstract DragOverRelation relation(LayoutOrientation layoutOrientation, Side side);
     }
 	static final String USE_COMMON_OUT_POINT_FOR_ROOT_NODE_STRING = "use_common_out_point_for_root_node";
     public static boolean USE_COMMON_OUT_POINT_FOR_ROOT_NODE = ResourceController.getResourceController().getBooleanProperty(USE_COMMON_OUT_POINT_FOR_ROOT_NODE_STRING);
@@ -249,19 +249,19 @@ public class MainView extends ZoomableLabel {
 
     private DragOverDirection dragOverDirection(final Point p) {
         final DragOverDirection dragOverDirection;
-        if(p.getX() < getWidth() * 1 / 6)
+        if(p.x < getWidth() * 1 / 6)
             dragOverDirection = DragOverDirection.DROP_LEFT;
-        else if (p.getX() >= getWidth() * 5 / 6)
+        else if (p.x >= getWidth() * 5 / 6)
             dragOverDirection = DragOverDirection.DROP_RIGHT;
-        else if (p.getY() < getHeight() * 1 / 6)
+        else if (p.y < getHeight() * 1 / 6)
             dragOverDirection = DragOverDirection.DROP_UP;
-        else if (p.getY() >= getHeight() * 5 / 6)
+        else if (p.y >= getHeight() * 5 / 6)
             dragOverDirection = DragOverDirection.DROP_DOWN;
-        else if(p.getX() < getWidth() * 1 / 4)
+        else if(p.x < getWidth() * 1 / 4)
             dragOverDirection = DragOverDirection.DROP_LEFT;
-        else if (p.getX() >= getWidth() * 3 / 4)
+        else if (p.x >= getWidth() * 3 / 4)
             dragOverDirection = DragOverDirection.DROP_RIGHT;
-        else if (p.getY() < getHeight() * 1 / 2)
+        else if (p.y < getHeight() * 1 / 2)
             dragOverDirection = DragOverDirection.DROP_UP;
         else
             dragOverDirection = DragOverDirection.DROP_DOWN;
@@ -282,7 +282,7 @@ public class MainView extends ZoomableLabel {
 	    return dtde.isDataFlavorSupported(TagSelection.tagFlavor ) ? DragOverRelation.TAG : dragOverRelation(dtde.getLocation());
 	}
 
-	public DragOverRelation dragOverRelation(Point location) {
+	private DragOverRelation dragOverRelation(Point location) {
 		NodeView nodeView = getNodeView();
 		final DragOverDirection dragOverDirection = dragOverDirection(location);
 		return dragOverDirection.relation(nodeView.layoutOrientation(), nodeView.side());
