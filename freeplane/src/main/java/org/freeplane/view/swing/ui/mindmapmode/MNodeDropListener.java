@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
@@ -280,7 +281,6 @@ public class MNodeDropListener implements DropTargetListener {
 		try {
 			final MainView mainView = getMainView(dtde.getDropTargetContext());
 			final NodeView targetNodeView = mainView.getNodeView();
-			nodeFolder.adjustFolding(Collections.singleton(targetNodeView));
 			final MapView mapView = targetNodeView.getMap();
 			mapView.select();
 			final NodeModel targetNode = targetNodeView.getNode();
@@ -290,11 +290,13 @@ public class MNodeDropListener implements DropTargetListener {
 			mainView.stopDragOver();
 			mainView.repaint();
 			if (!isDropAcceptable(dtde, dropAction)) {
+				adjustFoldingOnDrop(targetNodeView, false);
 				dtde.rejectDrop();
 				return;
 			}
 			DragOverRelation dragOverRelation = mainView.dragOverRelation(dtde);
 			if(dragOverRelation == DragOverRelation.NOT_AVAILABLE) {
+				adjustFoldingOnDrop(targetNodeView, false);
 			    dtde.rejectDrop();
 			    return;
 			}
@@ -304,6 +306,7 @@ public class MNodeDropListener implements DropTargetListener {
 			if ((dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY)) {
 				final NodeModel parent = dropAsSibling ? targetNode.getParentNode() : targetNode;
 				if (!mapController.isWriteable(parent)) {
+					adjustFoldingOnDrop(targetNodeView, false);
 					dtde.rejectDrop();
 					final String message = TextUtils.getText("node_is_write_protected");
 					UITools.errorMessage(message);
@@ -312,6 +315,7 @@ public class MNodeDropListener implements DropTargetListener {
 			}
 			final boolean isTopOrLeft = dragOverRelation == DragOverRelation.CHILD_BEFORE;
 			if (!dtde.isLocalTransfer()) {
+				adjustFoldingOnDrop(targetNodeView, dragOverRelation.isChild());
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
@@ -319,6 +323,7 @@ public class MNodeDropListener implements DropTargetListener {
 				dtde.dropComplete(true);
 				return;
 			}
+			adjustFoldingOnDrop(targetNodeView, dragOverRelation.isChild());
 			dtde.acceptDrop(dropAction);
 			if (dropAction == DnDConstants.ACTION_LINK) {
 				int yesorno = JOptionPane.YES_OPTION;
@@ -365,6 +370,18 @@ public class MNodeDropListener implements DropTargetListener {
 			return;
 		}
 		dtde.dropComplete(true);
+	}
+
+
+	private void adjustFoldingOnDrop(final NodeView targetNodeView, boolean asChild) {
+		boolean unfoldsTarget = asChild && ResourceController.getResourceController().getBooleanProperty("unfold_on_paste");
+		if(unfoldsTarget) {
+			nodeFolder.adjustFolding(Collections.singleton(targetNodeView));
+		}
+		else {
+			NodeView parentNodeView = targetNodeView.getParentNodeView();
+			nodeFolder.adjustFolding(parentNodeView != null ? Collections.singleton(parentNodeView) : Collections.emptySet());
+		}
 	}
 
 	private int getDropAction(final DropTargetDropEvent dtde) throws UnsupportedFlavorException, IOException {
