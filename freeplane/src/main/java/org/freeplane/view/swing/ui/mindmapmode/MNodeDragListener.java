@@ -13,6 +13,7 @@ import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceAdapter;
 import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceListener;
+import java.awt.dnd.DropTargetListener;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
@@ -36,12 +37,15 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.map.NodeViewFolder;
 import org.freeplane.view.swing.ui.MouseEventActor;
 
 /**
  * The NodeDragListener which belongs to every NodeView
  */
 public class MNodeDragListener implements DragGestureListener {
+
+	private final NodeViewFolder nodeFolder = new NodeViewFolder(false);
 
 	public void addDragListener(MainView mainView) {
 		addDragListenerToComponent(mainView);
@@ -57,6 +61,7 @@ public class MNodeDragListener implements DragGestureListener {
 
 	@Override
 	public void dragGestureRecognized(final DragGestureEvent e) {
+		nodeFolder.reset();
 		final Component component =  e.getComponent();
 		final NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
 		final MapView mapView = nodeView.getMap();
@@ -112,6 +117,7 @@ public class MNodeDragListener implements DragGestureListener {
 			e.startDrag(cursor, image, new Point(), t, new DragSourceAdapter() {
 				@Override
 				public void dragDropEnd(DragSourceDropEvent dsde) {
+					nodeFolder.reset();
 					if(trashBinListener != null)
 						trashBinListener.dragDropEnd(dsde);
 					if(dsde.getDropSuccess() && dsde.getDropAction() == DnDConstants.ACTION_MOVE
@@ -147,7 +153,13 @@ public class MNodeDragListener implements DragGestureListener {
 			((MindMapNodesSelection) t).setDropAction(DnDConstants.ACTION_COPY);
 		}
 		try {
-			e.startDrag(cursor, t, new DragSourceAdapter() {});
+			e.startDrag(cursor, t, new DragSourceAdapter() {
+
+				@Override
+				public void dragDropEnd(DragSourceDropEvent dsde) {
+					nodeFolder.reset();
+				}
+			});
 		}
 		catch (final InvalidDnDOperationException ex) {
 		}
@@ -166,6 +178,9 @@ public class MNodeDragListener implements DragGestureListener {
 			default:
 				return DragSource.DefaultMoveDrop;
 		}
+	}
+	public DropTargetListener createDropListener() {
+		return new MNodeDropListener(nodeFolder);
 	}
 
 }

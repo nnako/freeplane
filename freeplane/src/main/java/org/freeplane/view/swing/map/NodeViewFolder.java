@@ -5,56 +5,70 @@
  */
 package org.freeplane.view.swing.map;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
 import javax.swing.SwingUtilities;
 
-class NodeViewFolder {
-    private final Map<NodeView, Void> unfoldedNodeViews = new WeakHashMap<>();
+public class NodeViewFolder {
+    private final Set<NodeView> unfoldedNodeViews = Collections.newSetFromMap(new WeakHashMap<>());
+    private final boolean unfoldsSingleChildren;
 
-    void foldingWasSet(NodeView view) {
-        if(unfoldedNodeViews.containsKey(view))
+
+
+    public NodeViewFolder(boolean unfoldsSingleChildren) {
+		super();
+		this.unfoldsSingleChildren = unfoldsSingleChildren;
+	}
+
+	public void foldingWasSet(NodeView view) {
+        if(unfoldedNodeViews.contains(view))
             unfoldedNodeViews.remove(view);
     }
 
+    public void reset() {
+    	unfoldedNodeViews.clear();
+    }
 
-    void adjustFolding(Set<NodeView> selectedNodeViews) {
-        Set<NodeView> selectedNodeViewsWithAncestors = withAncestors(selectedNodeViews);
-        NodeView[] toFold = unfoldedNodeViews.keySet().stream()
-                .filter(nodeView -> ! selectedNodeViewsWithAncestors.contains(nodeView)
+
+    public void adjustFolding(Set<NodeView> unfoldNodeViews) {
+        Set<NodeView> unfoldNodeViewsWithAncestors = withAncestors(unfoldNodeViews);
+        NodeView[] toFold = unfoldedNodeViews.stream()
+                .filter(nodeView -> ! unfoldNodeViewsWithAncestors.contains(nodeView)
                 && SwingUtilities.isDescendingFrom(nodeView, nodeView.getMap()))
                 .toArray(NodeView[]::new);
         Stream.of(toFold)
         .filter(nodeView -> nodeView.getNode().isFoldable())
         .forEach(nodeView -> nodeView.setFolded(true));
 
-        selectedNodeViews.stream()
+        unfoldNodeViews.stream()
         .forEach(nodeView -> {
             boolean hasUnfoldView = false;
             if (nodeView.isFolded()) {
                 nodeView.setFolded(false);
-                unfoldedNodeViews.put(nodeView, null);
+                unfoldedNodeViews.add(nodeView);
                 hasUnfoldView = true;
             }
 
-            for( NodeView descendant = nodeView;;) {
-                LinkedList<NodeView> childrenViews = descendant.getChildrenViews();
-                if (childrenViews.size() != 1)
-                    break;
-                descendant = childrenViews.get(0);
-                if(descendant.isFolded()) {
-                    descendant.setFolded(false);
-                    if(! hasUnfoldView) {
-                        unfoldedNodeViews.put(descendant, null);
-                        hasUnfoldView = true;
-                    }
-                }
-            }
+            if(unfoldsSingleChildren) {
+				for( NodeView descendant = nodeView;;) {
+				    LinkedList<NodeView> childrenViews = descendant.getChildrenViews();
+				    if (childrenViews.size() != 1)
+				        break;
+				    descendant = childrenViews.get(0);
+				    if(descendant.isFolded()) {
+				        descendant.setFolded(false);
+				        if(! hasUnfoldView) {
+				            unfoldedNodeViews.add(descendant);
+				            hasUnfoldView = true;
+				        }
+				    }
+				}
+			}
         });
     }
     private HashSet<NodeView> withAncestors(Set<NodeView> nodeViews) {

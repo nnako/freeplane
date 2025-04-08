@@ -36,6 +36,7 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ import org.freeplane.view.swing.map.MainView.DragOverRelation;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewIconListComponent;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.map.NodeViewFolder;
 import org.freeplane.view.swing.ui.MouseEventActor;
 
 public class MNodeDropListener implements DropTargetListener {
@@ -77,6 +79,7 @@ public class MNodeDropListener implements DropTargetListener {
 		sides.put(DragOverRelation.SIBLING_BEFORE, Side.AS_SIBLING_BEFORE);
 	}
 	static private final EnumMap<DragOverRelation, InsertionRelation> insertionRelations = new EnumMap<>(DragOverRelation.class);
+	private final NodeViewFolder nodeFolder;
 	static {
 		insertionRelations.put(DragOverRelation.SIBLING_AFTER, InsertionRelation.AS_SIBLING_AFTER);
 		insertionRelations.put(DragOverRelation.SIBLING_BEFORE, InsertionRelation.AS_SIBLING_BEFORE);
@@ -85,7 +88,8 @@ public class MNodeDropListener implements DropTargetListener {
 
 // 	final private ModeController modeController;
 
-	public MNodeDropListener() {
+	MNodeDropListener(NodeViewFolder nodeFolder) {
+		this.nodeFolder = nodeFolder;
 	}
 
 
@@ -128,14 +132,7 @@ public class MNodeDropListener implements DropTargetListener {
 		mainView.repaint();
 		if(isInFoldingRegion(mainView)) {
 			NodeView nodeView = mainView.getNodeView();
-			if(nodeView.isFolded()) {
-				final NodeModel node = nodeView.getNode();
-				MapView map = nodeView.getMap();
-				if(map.isSelected())
-					map.getModeController().getMapController().unfold(node, map.getFilter());
-				else
-					nodeView.setFolded(false);
-			}
+			nodeFolder.adjustFolding(Collections.singleton(nodeView));
 		}
 
 	}
@@ -283,6 +280,7 @@ public class MNodeDropListener implements DropTargetListener {
 		try {
 			final MainView mainView = getMainView(dtde.getDropTargetContext());
 			final NodeView targetNodeView = mainView.getNodeView();
+			nodeFolder.adjustFolding(Collections.singleton(targetNodeView));
 			final MapView mapView = targetNodeView.getMap();
 			mapView.select();
 			final NodeModel targetNode = targetNodeView.getNode();

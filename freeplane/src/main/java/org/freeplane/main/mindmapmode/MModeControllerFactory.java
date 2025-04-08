@@ -290,8 +290,9 @@ public class MModeControllerFactory {
 		MMapExplorerController.install(modeController, textController);
 		LinkController.install(new MLinkController(modeController));
 		NodeStyleController.install(new MNodeStyleController(modeController));
-		userInputListenerFactory.setNodeDragListener(new MNodeDragListener());
-		userInputListenerFactory.setNodeDropTargetListener(new MNodeDropListener());
+		MNodeDragListener nodeDragListener = new MNodeDragListener();
+		userInputListenerFactory.setNodeDragListener(nodeDragListener);
+		userInputListenerFactory.setNodeDropTargetListener(nodeDragListener.createDropListener());
 		LocationController.install(new MLocationController());
 		LayoutController.install(new MLayoutController());
 		final MLogicalStyleController logicalStyleController = new MLogicalStyleController(modeController);
