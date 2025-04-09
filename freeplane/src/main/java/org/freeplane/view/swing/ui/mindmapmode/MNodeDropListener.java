@@ -290,13 +290,11 @@ public class MNodeDropListener implements DropTargetListener {
 			mainView.stopDragOver();
 			mainView.repaint();
 			if (!isDropAcceptable(dtde, dropAction)) {
-				adjustFoldingOnDrop(targetNodeView, false);
 				dtde.rejectDrop();
 				return;
 			}
 			DragOverRelation dragOverRelation = mainView.dragOverRelation(dtde);
 			if(dragOverRelation == DragOverRelation.NOT_AVAILABLE) {
-				adjustFoldingOnDrop(targetNodeView, false);
 			    dtde.rejectDrop();
 			    return;
 			}
@@ -306,7 +304,6 @@ public class MNodeDropListener implements DropTargetListener {
 			if ((dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY)) {
 				final NodeModel parent = dropAsSibling ? targetNode.getParentNode() : targetNode;
 				if (!mapController.isWriteable(parent)) {
-					adjustFoldingOnDrop(targetNodeView, false);
 					dtde.rejectDrop();
 					final String message = TextUtils.getText("node_is_write_protected");
 					UITools.errorMessage(message);

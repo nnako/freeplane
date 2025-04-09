@@ -117,6 +117,10 @@ public class MNodeDragListener implements DragGestureListener {
 			e.startDrag(cursor, image, new Point(), t, new DragSourceAdapter() {
 				@Override
 				public void dragDropEnd(DragSourceDropEvent dsde) {
+					nodeFolder.adjustFolding(Collections.emptySet());
+					if(! dsde.getDropSuccess()) {
+						nodeView.scrollNodeToVisible();
+					}
 					nodeFolder.reset();
 					if(trashBinListener != null)
 						trashBinListener.dragDropEnd(dsde);
@@ -157,6 +161,10 @@ public class MNodeDragListener implements DragGestureListener {
 
 				@Override
 				public void dragDropEnd(DragSourceDropEvent dsde) {
+					nodeFolder.adjustFolding(Collections.emptySet());
+					if(! dsde.getDropSuccess()) {
+						nodeView.scrollNodeToVisible();
+					}
 					nodeFolder.reset();
 				}
 			});
