@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
@@ -312,7 +313,7 @@ public class MNodeDropListener implements DropTargetListener {
 			}
 			final boolean isTopOrLeft = dragOverRelation == DragOverRelation.CHILD_BEFORE;
 			if (!dtde.isLocalTransfer()) {
-				adjustFoldingOnDrop(targetNodeView, dragOverRelation.isChild());
+				adjustFoldingOnDrop(targetNodeView, dragOverRelation);
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
 				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
@@ -320,7 +321,6 @@ public class MNodeDropListener implements DropTargetListener {
 				dtde.dropComplete(true);
 				return;
 			}
-			adjustFoldingOnDrop(targetNodeView, dragOverRelation.isChild());
 			dtde.acceptDrop(dropAction);
 			if (dropAction == DnDConstants.ACTION_LINK) {
 				int yesorno = JOptionPane.YES_OPTION;
@@ -360,6 +360,7 @@ public class MNodeDropListener implements DropTargetListener {
 						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
 				}
 			}
+			adjustFoldingOnDrop(targetNodeView, dragOverRelation);
 		}
 		catch (final Exception e) {
 			LogUtils.severe("Drop exception:", e);
@@ -370,14 +371,21 @@ public class MNodeDropListener implements DropTargetListener {
 	}
 
 
-	private void adjustFoldingOnDrop(final NodeView targetNodeView, boolean asChild) {
-		boolean unfoldsTarget = asChild && ResourceController.getResourceController().getBooleanProperty("unfold_on_paste");
-		if(unfoldsTarget) {
+	private void adjustFoldingOnDrop(final NodeView targetNodeView, DragOverRelation dragOverRelation) {
+		boolean unfoldsTarget = ResourceController.getResourceController().getBooleanProperty("unfold_on_paste");
+		if(dragOverRelation == DragOverRelation.TAG || unfoldsTarget && dragOverRelation.isChild()) {
 			nodeFolder.adjustFolding(Collections.singleton(targetNodeView));
 		}
 		else {
-			NodeView parentNodeView = targetNodeView.getParentNodeView();
-			nodeFolder.adjustFolding(parentNodeView != null ? Collections.singleton(parentNodeView) : Collections.emptySet());
+			NodeView parentNodeView = targetNodeView.getAncestorWithVisibleContent();
+			Set<NodeView> nodesKeptUnfold;
+			if(parentNodeView == null || parentNodeView.isRoot())
+				nodesKeptUnfold = Collections.emptySet();
+			else if(dragOverRelation.isChild() || unfoldsTarget)
+				nodesKeptUnfold = Collections.singleton(parentNodeView);
+			else
+				nodesKeptUnfold = Collections.singleton(parentNodeView.getAncestorWithVisibleContent());
+			nodeFolder.adjustFolding(nodesKeptUnfold);
 		}
 	}
 
