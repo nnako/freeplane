@@ -374,17 +374,11 @@ public class MNodeDropListener implements DropTargetListener {
 	private void adjustFoldingOnDrop(final NodeView targetNodeView, DragOverRelation dragOverRelation) {
 		boolean unfoldsTarget = ResourceController.getResourceController().getBooleanProperty("unfold_on_paste");
 		Set<NodeView> nodesKeptUnfold;
-		if(dragOverRelation == DragOverRelation.TAG || unfoldsTarget && dragOverRelation.isChild()) {
+		if(unfoldsTarget && (dragOverRelation == DragOverRelation.TAG || dragOverRelation.isChild())) {
 			nodesKeptUnfold = Collections.singleton(targetNodeView);
 		}
 		else {
-			NodeView parentNodeView = targetNodeView.getAncestorWithVisibleContent();
-			if(parentNodeView == null || parentNodeView.isRoot())
-				nodesKeptUnfold = Collections.emptySet();
-			else if(dragOverRelation.isChild() || unfoldsTarget)
-				nodesKeptUnfold = Collections.singleton(parentNodeView);
-			else
-				nodesKeptUnfold = Collections.singleton(parentNodeView.getAncestorWithVisibleContent());
+			nodesKeptUnfold = Collections.emptySet();
 		}
 		nodeFolder.adjustFolding(nodesKeptUnfold);
 		nodeFolder.reset();
