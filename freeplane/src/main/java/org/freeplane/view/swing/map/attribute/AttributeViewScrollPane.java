@@ -19,14 +19,19 @@
  */
 package org.freeplane.view.swing.map.attribute;
 
+import java.awt.Adjustable;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 class AttributeViewScrollPane extends JScrollPane {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -38,7 +43,7 @@ class AttributeViewScrollPane extends JScrollPane {
 		setOpaque(false);
 		getViewport().setOpaque(false);
 	}
-	
+
 	@Override
 	public Dimension getMaximumSize() {
 		return getPreferredSize();
@@ -60,5 +65,44 @@ class AttributeViewScrollPane extends JScrollPane {
     public boolean isValidateRoot() {
 	    return false;
     }
-	
+
+    @Override
+	public JScrollBar createHorizontalScrollBar() {
+        return new FilteredScrollBar(Adjustable.HORIZONTAL);
+    }
+
+    @Override
+	public JScrollBar createVerticalScrollBar() {
+        return new FilteredScrollBar(Adjustable.VERTICAL);
+    }
+
+	private static class FilteredScrollBar extends JScrollBar {
+
+        /**
+		 * Comment for <code>serialVersionUID</code>
+		 */
+		private static final long serialVersionUID = -688620479795225879L;
+
+		public FilteredScrollBar(int orientation) {
+            super(orientation);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            AffineTransform tx = g2.getTransform();
+
+            double scaleX = tx.getScaleX();
+            double scaleY = tx.getScaleY();
+
+            int w = (int) Math.floor(getWidth() * scaleX);
+            int h = (int) Math.floor(getHeight() * scaleY);
+
+            if (w >= 2 && h >= 2) {
+                super.paintComponent(g);
+            }
+        }
+    }
+
+
 }
