@@ -60,6 +60,8 @@ def defineMacBuildTasks =  { architecture ->
      delete "build/macosapp/app-image-${architecture}" 
    }
 
+   macosapp_extractzip.mustRunAfter macosapp_deleteAppImage
+
    def jpackage_macosxapp = tasks.create ("jpackage_macosxapp_${architecture}", Exec) {
 
    	commandLine jpackage,
