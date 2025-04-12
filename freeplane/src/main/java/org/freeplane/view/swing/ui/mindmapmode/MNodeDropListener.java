@@ -373,20 +373,21 @@ public class MNodeDropListener implements DropTargetListener {
 
 	private void adjustFoldingOnDrop(final NodeView targetNodeView, DragOverRelation dragOverRelation) {
 		boolean unfoldsTarget = ResourceController.getResourceController().getBooleanProperty("unfold_on_paste");
+		Set<NodeView> nodesKeptUnfold;
 		if(dragOverRelation == DragOverRelation.TAG || unfoldsTarget && dragOverRelation.isChild()) {
-			nodeFolder.adjustFolding(Collections.singleton(targetNodeView));
+			nodesKeptUnfold = Collections.singleton(targetNodeView);
 		}
 		else {
 			NodeView parentNodeView = targetNodeView.getAncestorWithVisibleContent();
-			Set<NodeView> nodesKeptUnfold;
 			if(parentNodeView == null || parentNodeView.isRoot())
 				nodesKeptUnfold = Collections.emptySet();
 			else if(dragOverRelation.isChild() || unfoldsTarget)
 				nodesKeptUnfold = Collections.singleton(parentNodeView);
 			else
 				nodesKeptUnfold = Collections.singleton(parentNodeView.getAncestorWithVisibleContent());
-			nodeFolder.adjustFolding(nodesKeptUnfold);
 		}
+		nodeFolder.adjustFolding(nodesKeptUnfold);
+		nodeFolder.reset();
 	}
 
 	private int getDropAction(final DropTargetDropEvent dtde) throws UnsupportedFlavorException, IOException {

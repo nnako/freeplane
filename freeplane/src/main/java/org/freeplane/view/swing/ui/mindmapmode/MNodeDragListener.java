@@ -117,11 +117,8 @@ public class MNodeDragListener implements DragGestureListener {
 			e.startDrag(cursor, image, new Point(), t, new DragSourceAdapter() {
 				@Override
 				public void dragDropEnd(DragSourceDropEvent dsde) {
-					if(! dsde.getDropSuccess()) {
-						nodeFolder.adjustFolding(Collections.emptySet());
-						nodeView.scrollNodeToVisible();
-					}
-					nodeFolder.reset();
+					nodeFolder.adjustFolding(Collections.emptySet());
+					nodeView.getMap().getSelected().scrollNodeToVisible();
 					if(trashBinListener != null)
 						trashBinListener.dragDropEnd(dsde);
 					if(dsde.getDropSuccess() && dsde.getDropAction() == DnDConstants.ACTION_MOVE
@@ -161,11 +158,8 @@ public class MNodeDragListener implements DragGestureListener {
 
 				@Override
 				public void dragDropEnd(DragSourceDropEvent dsde) {
-					if(! dsde.getDropSuccess()) {
-						nodeFolder.adjustFolding(Collections.emptySet());
-						nodeView.scrollNodeToVisible();
-					}
-					nodeFolder.reset();
+					nodeFolder.adjustFolding(Collections.emptySet());
+					nodeView.getMap().getSelected().scrollNodeToVisible();
 				}
 			});
 		}

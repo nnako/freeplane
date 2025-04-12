@@ -5,6 +5,7 @@
  */
 package org.freeplane.view.swing.map;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -44,6 +45,11 @@ public class NodeViewFolder {
         Stream.of(toFold)
         .filter(nodeView -> nodeView.getNode().isFoldable())
         .forEach(nodeView -> nodeView.setFolded(true));
+
+        if(unfoldNodeViews.isEmpty())
+        	unfoldedNodeViews.clear();
+        else
+        	unfoldNodeViews.removeAll(Arrays.asList(toFold));
 
         unfoldNodeViews.stream()
         .forEach(nodeView -> {
