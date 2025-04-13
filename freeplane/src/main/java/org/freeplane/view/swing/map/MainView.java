@@ -36,6 +36,7 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -1013,7 +1014,17 @@ public class MainView extends ZoomableLabel {
 
 	@Override
 	public void paintComponent(Graphics graphics) {
-		painter.paintComponent(graphics);
+		Graphics2D g2 = (Graphics2D) graphics;
+		int width = getWidth();
+		int height = getHeight();
+		AffineTransform transform = g2.getTransform();
+		if(height * transform.getScaleY() <= 2 
+				|| width * transform.getScaleX() <= 2) {
+			g2.setColor(getBorderColor());
+			g2.fillRect(0, 0, width, height);
+		}
+		else
+			painter.paintComponent(graphics);
 	}
 
 	@Override
