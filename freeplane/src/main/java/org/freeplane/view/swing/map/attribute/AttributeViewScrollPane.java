@@ -28,6 +28,7 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 class AttributeViewScrollPane extends JScrollPane {
 	/**
@@ -68,40 +69,47 @@ class AttributeViewScrollPane extends JScrollPane {
 
     @Override
 	public JScrollBar createHorizontalScrollBar() {
-        return new FilteredScrollBar(Adjustable.HORIZONTAL);
+        return new BugFixScrollBar(Adjustable.HORIZONTAL);
     }
 
     @Override
 	public JScrollBar createVerticalScrollBar() {
-        return new FilteredScrollBar(Adjustable.VERTICAL);
+        return new BugFixScrollBar(Adjustable.VERTICAL);
     }
 
-	private static class FilteredScrollBar extends JScrollBar {
+	private static class BugFixScrollBar extends JScrollBar {
 
         /**
 		 * Comment for <code>serialVersionUID</code>
 		 */
 		private static final long serialVersionUID = -688620479795225879L;
 
-		public FilteredScrollBar(int orientation) {
+		public BugFixScrollBar(int orientation) {
             super(orientation);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g;
-            AffineTransform tx = g2.getTransform();
-
-            double scaleX = tx.getScaleX();
-            double scaleY = tx.getScaleY();
-
-            int w = (int) Math.floor(getWidth() * scaleX);
-            int h = (int) Math.floor(getHeight() * scaleY);
-
-            if (w >= 2 && h >= 2) {
-                super.paintComponent(g);
-            }
+            if(needsFixForWindowsUI()) {
+            	g.setColor(getForeground());
+            	g.fillRect(0, 0, getWidth(), getHeight());
+            	g.setColor(getBackground());
+            	g.drawRect(1, 1, getWidth()-2, getHeight()-2);
+            } else
+				super.paintComponent(g);
         }
+
+		private boolean needsFixForWindowsUI() {
+			return isPaintingForPrint() && getUI().getClass().getSimpleName().equals("WindowsScrollBarUI");
+		}
+
+		@Override
+		protected void paintChildren(Graphics g) {
+            if(! needsFixForWindowsUI())
+            	super.paintChildren(g);
+		}
+        
+        
     }
 
 
