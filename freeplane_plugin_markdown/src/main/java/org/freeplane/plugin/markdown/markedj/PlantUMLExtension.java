@@ -1,8 +1,8 @@
 package org.freeplane.plugin.markdown.markedj;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +20,7 @@ import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
 import net.sourceforge.plantuml.core.DiagramDescription;
+import org.freeplane.core.resources.ResourceController;
 
 public class PlantUMLExtension implements Extension {
     public static String[] EXPRESSIONS = new String[]{
@@ -43,8 +44,23 @@ public class PlantUMLExtension implements Extension {
         }
     }
 
-    private static final String PRAGMA_LAYOUT_SMETANA = "!pragma layout smetana";
-    private static final FileFormatOption FILE_FORMAT_OPTION_PNG = new FileFormatOption(FileFormat.PNG);
+    private static String plantUmlInclude = "";
+    static {
+        URL plantumlConfigUrl = ResourceController.getResourceController().getResource("plantuml-include.txt");
+        if (plantumlConfigUrl != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(plantumlConfigUrl.openStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            plantUmlInclude = stringBuilder.toString();
+        }
+    }
+    private static final FileFormatOption FILE_FORMAT_OPTION_PNG_NO_METADATA = new FileFormatOption(FileFormat.PNG, false);
 
     @Override
     public LexResult lex(String src, Lexer.LexerContext context, TokenConsumer consumer) {
@@ -70,21 +86,31 @@ public class PlantUMLExtension implements Extension {
     @Override
     public String parse(Parser.ParserContext context, Function<Parser.ParserContext, String> tok) {
         PlantUMLToken plantUmlToken = (PlantUMLToken) context.currentToken();
-        String plantUmlCode = plantUmlToken.getText();
-        final List<String> plantumlList = Arrays.asList(plantUmlCode.split("\n"));
-        boolean smetanaFound = plantumlList.stream().map(String::trim).anyMatch(PRAGMA_LAYOUT_SMETANA::equals);
-        if (!smetanaFound) {
-            LinkedList<String> list = new LinkedList<>(plantumlList);
-            list.add(1, PRAGMA_LAYOUT_SMETANA);
-            plantUmlCode = String.join("\n", list);
+        StringBuilder plantUmlStringBuilder = new StringBuilder();
+        if (plantUmlInclude.isEmpty()) {
+            plantUmlStringBuilder.append(plantUmlToken.getText());
+        } else {
+            try (BufferedReader plantUmlStringReader = new BufferedReader(new StringReader(plantUmlToken.getText()))) {
+                String line;
+                int lineIndex = 0;
+                while ((line = plantUmlStringReader.readLine()) != null) {
+                    if (lineIndex == 1) {
+                        plantUmlStringBuilder.append(plantUmlInclude).append("\n");
+                    }
+                    plantUmlStringBuilder.append(line).append("\n");
+                    lineIndex++;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        SourceStringReader reader = new SourceStringReader(plantUmlCode);
+        SourceStringReader reader = new SourceStringReader(plantUmlStringBuilder.toString());
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DiagramDescription diagramDescription;
         boolean useCache = ImageIO.getUseCache();
         try {
         	ImageIO.setUseCache(false);
-            diagramDescription = reader.outputImage(outputStream, FILE_FORMAT_OPTION_PNG);
+            diagramDescription = reader.outputImage(outputStream, FILE_FORMAT_OPTION_PNG_NO_METADATA);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -93,9 +119,9 @@ public class PlantUMLExtension implements Extension {
         }
         if (diagramDescription != null) {
             String base64String = Base64.getEncoder().encodeToString(outputStream.toByteArray());
-            return String.format("<div class=\"plantuml\"><img src=\"data:image/png;base64,%s\"></div>%n", base64String);
+            return String.format("<div class=\"plantuml\">%n<img src=\"data:image/png;base64,%s\">%n</div>%n", base64String);
         } else {
-            return String.format("<pre><code>/!\\ Diagram creation failed /!\\%n%n%s</code></pre>", plantUmlCode);
+            return String.format("<pre><code>/!\\ Diagram creation failed /!\\%n%n%s</code></pre>", plantUmlStringBuilder);
         }
     }
 
