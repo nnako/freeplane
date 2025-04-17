@@ -851,7 +851,6 @@ public class MMapClipboardController extends MapClipboardController implements M
 			if (newNodes == null) {
 			    newNodes = new LinkedList<NodeModel>();
 			}
-			boolean hadChildren = target.hasChildren();
 			newNodes.clear();
 			handler.paste(t, target, side, dropAction);
 			if ( ! side.isSibling()) {
@@ -860,11 +859,6 @@ public class MMapClipboardController extends MapClipboardController implements M
                         mapController.unfoldAndScroll(target, controller.getSelection().getFilter());
                     }
                 }
-			    else if(! hadChildren) {
-                    if (! ResourceController.getResourceController().getBooleanProperty(RESOURCE_UNFOLD_ON_PASTE)) {
-                        mapController.fold(target);
-                    }
-			    }
 			}
 			for (final NodeModel child : newNodes) {
 			    AttributeController.getController().performRegistrySubtreeAttributes(child);

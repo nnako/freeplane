@@ -407,14 +407,8 @@ public class MNodeDropListener implements DropTargetListener {
 				mapController.setSide(movedNodes, targetNode.getSide());
 			}
 			else {
-				boolean hadChildren = targetNode.hasChildren();
 				List<NodeModel> nodesChangingParent = movedNodes.stream().filter(node -> targetNode != node.getParentNode()).collect(Collectors.toList());
 				mapController.moveNodes(movedNodes, targetNode, insertionRelation);
-				if(! hadChildren) {
-                    if (! ResourceController.getResourceController().getBooleanProperty(PROPERTY_UNFOLD_ON_PASTE)) {
-                        mapController.fold(targetNode);
-                    }
-			    }
 				Side side = isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
 				mapController.setSide(side == Side.DEFAULT ? nodesChangingParent : movedNodes, side);
 			}
