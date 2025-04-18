@@ -575,7 +575,7 @@ public class NodeView extends JComponent implements INodeView {
 	    NodeView sibling = this;
 	    NodeView lastSibling = this;
 	    NodeView parentView = getParentView();
-	    while (sibling != map.getRoot()) {
+	    while (parentView != null) {
 	        lastSibling = sibling;
 	        LayoutOrientation parentLayoutOrientation = parentView.layoutOrientation();
             if (requiredLayoutOrientation == parentLayoutOrientation) {
@@ -588,7 +588,7 @@ public class NodeView extends JComponent implements INodeView {
 			parentView = parentView.getParentView();
 		}
 	    if(sibling.getChildNodesAlignment().isStacked() && ! sibling.usesHorizontalLayout())
-            return sibling.isRoot() ? null : sibling;
+            return parentView == null ? null : sibling;
 		Filter filter = map.getFilter();
 		int siblingMaxLevel = map.getSiblingMaxLevel();
 		while (sibling.getNode().getNodeLevel(filter) < siblingMaxLevel
