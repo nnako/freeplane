@@ -19,110 +19,136 @@ package org.freeplane.view.swing.map;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
- * The StepFunction2 class represents a step function y(x) using a linked list structure.
+ * The StepFunction class represents a step function y(x) using a linked list structure.
  * Each node represents a segment [x1, x2) with a constant y value.
  * Segments do not overlap, and the linked list is maintained in ascending x order.
  */
-class StepFunction {
-    public static final int DEFAULT_VALUE = Integer.MAX_VALUE;
+public interface StepFunction {
 
-    enum CombineOperation {
-        MAX, MIN
-    }
+    int DEFAULT_VALUE = Integer.MAX_VALUE;
 
-    private final int x1;        // Start of segment (inclusive)
-    private final int x2;        // End of segment (exclusive)
-    private final int y;         // Value in this segment
-    private final int dx;        // X-offset for translation
-    private final int dy;        // Y-offset for translation
+    int evaluate(int x);
+    Set<Integer> samplePoints();
 
-    private final StepFunction next;
-
-    // Operation to apply when combining with next segment
-    private final CombineOperation combineOperation;
-
-    StepFunction(int x1, int x2, int y) {
-        this(x1, x2, y, 0, 0, null, null);
-    }
-
-    private StepFunction(int x1, int x2, int y, int dx, int dy, StepFunction next, CombineOperation combineOperation) {
-        this.x1 = x1 < x2 ? x1 : x2 - 1;
-        this.x2 = x2;
-        this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.next = next;
-        this.combineOperation = combineOperation;
-    }
-    public int evaluate(int x) {
-        int adjX = x - dx;
-        boolean inThis  = adjX >= x1 && adjX < x2;
-        int     curr    = inThis ? y + dy : DEFAULT_VALUE;
-
-        int child = next == null
-            ? DEFAULT_VALUE
-            : next.evaluate(adjX);
-        if (child != DEFAULT_VALUE) child += dy;
-
-        if (curr == DEFAULT_VALUE)             return child;
-        if (child == DEFAULT_VALUE)            return curr;
-        return combineOperation == CombineOperation.MAX
-             ? Math.max(curr, child)
-             : Math.min(curr, child);
-    }
-
-    public int distance(StepFunction other) {
-        if (other == null) {
-            return 0;
-        }
-
-        Set<Integer> samplePoints = new HashSet<>(this.samplePoints());
-        samplePoints.addAll(other.samplePoints());
-
-        int minDistance = DEFAULT_VALUE;
-        for (int x : samplePoints) {
-            int y1 = this.evaluate(x);
+    default int distance(StepFunction other) {
+        if (other == null) return 0;
+        Set<Integer> pts = new HashSet<>(samplePoints());
+        pts.addAll(other.samplePoints());
+        int min = DEFAULT_VALUE;
+        for (int x : pts) {
+            int y1 = evaluate(x);
             int y2 = other.evaluate(x);
             if (y1 != DEFAULT_VALUE && y2 != DEFAULT_VALUE) {
                 int d = y1 - y2;
-                minDistance = (minDistance == DEFAULT_VALUE) ? d : Math.min(minDistance, d);
+                min = (min == DEFAULT_VALUE) ? d : Math.min(min, d);
             }
         }
-        return minDistance;
+        return min;
     }
 
-    // Helper to collect all true segment boundaries (with correct dx accumulation)
-    private Set<Integer> samplePoints() {
-        Set<Integer> points = new TreeSet<>();
-        int cumDx = 0;
-        StepFunction cur = this;
-        while (cur != null) {
-            cumDx += cur.dx;                     // add this node’s offset exactly once
-            points.add(cur.x1 + cumDx);          // left‑inclusive
-            points.add(cur.x2 + cumDx);          // right‑exclusive boundary
-            cur = cur.next;
-        }
-        return points;
+    // Static factory for the first (segment) function
+    static StepFunction segment(int x1, int x2, int y) {
+        return new SegmentFunction(x1, x2, y);
     }
 
-    public StepFunction addSegmentTakingMax(int x1, int x2, int y) {
-        return new StepFunction(x1, x2, y, 0, 0, this, CombineOperation.MAX);
+    // Default instance methods for transformation and combination
+    default StepFunction translate(int dx, int dy) {
+        return new TranslatedFunction(this, dx, dy);
     }
 
-    public StepFunction addSegmentTakingMin(int x1, int x2, int y) {
-        return new StepFunction(x1, x2, y, 0, 0, this, CombineOperation.MIN);
+    default StepFunction combine(StepFunction other, CombineOperation op) {
+        return new CombinedFunction(this, other, op);
+    }
+}
+
+//CombineOperation.java
+enum CombineOperation {
+ MAX, MIN
+}
+
+class SegmentFunction implements StepFunction {
+    private final int x1;
+    private final int x2;
+    private final int y;
+
+    public SegmentFunction(int x1, int x2, int y) {
+        if (x1 >= x2) throw new IllegalArgumentException();
+        this.x1 = x1;
+        this.x2 = x2;
+        this.y = y;
     }
 
-    public StepFunction translate(int dx, int dy) {
-        return new StepFunction(x1, x2, y, this.dx + dx, this.dy + dy, next, combineOperation);
+    @Override
+    public int evaluate(int x) {
+        return (x >= x1 && x < x2) ? y : DEFAULT_VALUE;
     }
 
-	@Override
-	public String toString() {
-		return "StepFunction2 [x1=" + x1 + ", x2=" + x2 + ", y=" + y + ", dx=" + dx + ", dy=" + dy
-				+ ", combineOperation=" + combineOperation + ", next=" + next + "]";
-	}
+    @Override
+    public Set<Integer> samplePoints() {
+        Set<Integer> pts = new HashSet<>();
+        pts.add(x1);
+        pts.add(x2);
+        return pts;
+    }
+}
+
+class TranslatedFunction implements StepFunction {
+    private final StepFunction inner;
+    private final int dx;
+    private final int dy;
+
+    public TranslatedFunction(StepFunction inner, int dx, int dy) {
+        if (inner == null) throw new IllegalArgumentException();
+        this.inner = inner;
+        this.dx = dx;
+        this.dy = dy;
+    }
+
+    @Override
+    public int evaluate(int x) {
+        int val = inner.evaluate(x - dx);
+        return val == DEFAULT_VALUE ? DEFAULT_VALUE : val + dy;
+    }
+
+    @Override
+    public Set<Integer> samplePoints() {
+        return inner.samplePoints().stream()
+            .map(p -> p + dx)
+            .collect(Collectors.toSet());
+    }
+}
+
+class CombinedFunction implements StepFunction {
+    private final StepFunction left;
+    private final StepFunction right;
+    private final CombineOperation op;
+
+    public CombinedFunction(StepFunction left, StepFunction right, CombineOperation op) {
+        if (left == null || right == null || op == null) throw new IllegalArgumentException();
+        this.left = left;
+        this.right = right;
+        this.op = op;
+    }
+
+    @Override
+    public int evaluate(int x) {
+        int a = left.evaluate(x);
+        int b = right.evaluate(x);
+        if (a == DEFAULT_VALUE && b == DEFAULT_VALUE) return DEFAULT_VALUE;
+        if (a == DEFAULT_VALUE) return b;
+        if (b == DEFAULT_VALUE) return a;
+        return op == CombineOperation.MAX
+            ? Math.max(a, b)
+            : Math.min(a, b);
+    }
+
+    @Override
+    public Set<Integer> samplePoints() {
+        Set<Integer> pts = new HashSet<>(left.samplePoints());
+        pts.addAll(right.samplePoints());
+        return pts;
+    }
 }
