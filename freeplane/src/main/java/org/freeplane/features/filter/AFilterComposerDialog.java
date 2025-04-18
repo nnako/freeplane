@@ -704,7 +704,7 @@ public abstract class AFilterComposerDialog extends JDialog implements IMapViewC
 					ASelectableCondition value, int index, boolean isSelected, boolean cellHasFocus) {
 				DefaultConditionRenderer conditionRenderer = filterController.getConditionRenderer();
 				JComponent component = conditionRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-				if(index >= 0 && index < internalConditionsModel.getPinnedConditionsCount())
+				if(internalConditionsModel != null && index >= 0 && index < internalConditionsModel.getPinnedConditionsCount())
 					component.setBorder(pinnedBorder);
 				return component;
 			}
