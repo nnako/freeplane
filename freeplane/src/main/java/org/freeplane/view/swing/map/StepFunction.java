@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * The StepFunction class represents a step function y(x) using a linked list structure.
- * Each node represents a segment [x1, x2) with a constant y value.
+ * Each node represents a segment [x1, x2] with a constant y value.
  * Segments do not overlap, and the linked list is maintained in ascending x order.
  */
 public interface StepFunction {
@@ -31,19 +31,23 @@ public interface StepFunction {
     int DEFAULT_VALUE = Integer.MAX_VALUE;
 
     int evaluate(int x);
-    Set<Integer> samplePoints(int minX, int maxX);
+    Set<Integer> samplePoints();
 
     default int distance(StepFunction other) {
         if (other == null) return 0;
-        Set<Integer> pts = new HashSet<>(samplePoints(other.minX(), other.maxX()));
-        pts.addAll(other.samplePoints(minX(), maxX()));
+        Set<Integer> pts = new HashSet<>(samplePoints());
+        pts.addAll(other.samplePoints());
+        int minX = Math.max(minX(), other.minX());
+        int maxX = Math.min(maxX(), other.maxX());
         int min = DEFAULT_VALUE;
         for (int x : pts) {
-            int y1 = evaluate(x);
-            int y2 = other.evaluate(x);
-            if (y1 != DEFAULT_VALUE && y2 != DEFAULT_VALUE) {
-                int d = y1 - y2;
-                min = (min == DEFAULT_VALUE) ? d : Math.min(min, d);
+            if(minX <= x && x <= maxX) {
+                int y1 = evaluate(x);
+                int y2 = other.evaluate(x);
+                if (y1 != DEFAULT_VALUE && y2 != DEFAULT_VALUE) {
+                    int d = y1 - y2;
+                    min = (min == DEFAULT_VALUE) ? d : Math.min(min, d);
+                }
             }
         }
         return min;
@@ -87,28 +91,26 @@ class SegmentFunction implements StepFunction {
 
     @Override
     public int evaluate(int x) {
-        return (x >= x1 && x < x2) ? y : DEFAULT_VALUE;
+        return (x >= x1 && x <= x2) ? y : DEFAULT_VALUE;
     }
 
     @Override
-    public Set<Integer> samplePoints(int minX, int maxX) {
-    	Set<Integer> pts = new HashSet<>();
-    	if(minX <= x1 && x1 < maxX)
-    		pts.add(x1);
-    	if(minX <= x2 && x2 < maxX)
-    		pts.add(x2);
+    public Set<Integer> samplePoints() {
+        Set<Integer> pts = new HashSet<>();
+        pts.add(x1);
+        pts.add(x2);
         return pts;
     }
 
-	@Override
-	public int minX() {
-		return x1;
-	}
+    @Override
+    public int minX() {
+        return x1;
+    }
 
-	@Override
-	public int maxX() {
-		return x2;
-	}
+    @Override
+    public int maxX() {
+        return x2;
+    }
 }
 
 class TranslatedFunction implements StepFunction {
@@ -130,29 +132,29 @@ class TranslatedFunction implements StepFunction {
     }
 
     @Override
-    public Set<Integer> samplePoints(int minX, int maxX) {
-        return inner.samplePoints(minX - dx, maxX - dx).stream()
+    public Set<Integer> samplePoints() {
+        return inner.samplePoints().stream()
             .map(p -> p + dx)
             .collect(Collectors.toSet());
     }
 
-	@Override
-	public int minX() {
-		return inner.minX() + dx;
-	}
+    @Override
+    public int minX() {
+        return inner.minX() + dx;
+    }
 
-	@Override
-	public int maxX() {
-		return inner.maxX() + dy;
-	}
-
-
+    @Override
+    public int maxX() {
+        return inner.maxX() + dx;
+    }
 }
 
 class CombinedFunction implements StepFunction {
     private final StepFunction left;
     private final StepFunction right;
     private final CombineOperation op;
+    // cache for computed sample points
+    private Set<Integer> samplePointsCache;
 
     public CombinedFunction(StepFunction left, StepFunction right, CombineOperation op) {
         if (left == null || right == null || op == null) throw new IllegalArgumentException();
@@ -174,19 +176,35 @@ class CombinedFunction implements StepFunction {
     }
 
     @Override
-    public Set<Integer> samplePoints(int minX, int maxX) {
-        Set<Integer> pts = new HashSet<>(left.samplePoints(minX, maxX));
-        pts.addAll(right.samplePoints(minX, maxX));
-        return pts;
+    public Set<Integer> samplePoints() {
+        if (samplePointsCache != null) {
+            return samplePointsCache;
+        }
+
+        Set<Integer> pts = new HashSet<>();
+        for (Integer x : left.samplePoints()) {
+            int y = evaluate(x);
+            if (y == left.evaluate(x) && (y != evaluate(x - 1)|| y != evaluate(x + 1))) {
+                pts.add(x);
+            }
+        }
+        for (Integer x : right.samplePoints()) {
+            int y = evaluate(x);
+            if (y == right.evaluate(x) && (y != evaluate(x - 1)|| y != evaluate(x + 1))) {
+                pts.add(x);
+            }
+        }
+        samplePointsCache = pts;
+        return samplePointsCache;
     }
 
-	@Override
-	public int minX() {
-		return Math.min(left.minX(), right.minX());
-	}
+    @Override
+    public int minX() {
+        return Math.min(left.minX(), right.minX());
+    }
 
-	@Override
-	public int maxX() {
-		return Math.max(left.maxX(), right.maxX());
-	}
+    @Override
+    public int maxX() {
+        return Math.max(left.maxX(), right.maxX());
+    }
 }

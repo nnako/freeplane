@@ -18,6 +18,7 @@
 package org.freeplane.view.swing.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
 import org.junit.Test;
 
 public class StepFunctionTest {
@@ -27,15 +28,17 @@ public class StepFunctionTest {
     public void testSegmentEvaluate() {
         assertThat(base.evaluate(-1)).isEqualTo(StepFunction.DEFAULT_VALUE);
         assertThat(base.evaluate(0)).isEqualTo(8);
-        assertThat(base.evaluate(9)).isEqualTo(8);
-        assertThat(base.evaluate(10)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        assertThat(base.evaluate(10)).isEqualTo(8);
+        assertThat(base.evaluate(11)).isEqualTo(StepFunction.DEFAULT_VALUE);
     }
 
     @Test
     public void testRightExclusiveSemantics() {
         StepFunction f = StepFunction.segment(5, 6, 42);
+        assertThat(f.evaluate(4)).isEqualTo(StepFunction.DEFAULT_VALUE);  // right edge excluded
         assertThat(f.evaluate(5)).isEqualTo(42);                          // left edge
-        assertThat(f.evaluate(6)).isEqualTo(StepFunction.DEFAULT_VALUE);  // right edge excluded
+        assertThat(f.evaluate(6)).isEqualTo(42);                          // left edge
+        assertThat(f.evaluate(7)).isEqualTo(StepFunction.DEFAULT_VALUE);  // right edge excluded
     }
 
     @Test
@@ -43,8 +46,8 @@ public class StepFunctionTest {
         StepFunction t = base.translate(5, 2);
         assertThat(t.evaluate(4)).isEqualTo(StepFunction.DEFAULT_VALUE);
         assertThat(t.evaluate(5)).isEqualTo(8 + 2);
-        assertThat(t.evaluate(14)).isEqualTo(8 + 2);
-        assertThat(t.evaluate(15)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        assertThat(t.evaluate(15)).isEqualTo(8 + 2);
+        assertThat(t.evaluate(16)).isEqualTo(StepFunction.DEFAULT_VALUE);
     }
 
     @Test
@@ -53,8 +56,8 @@ public class StepFunctionTest {
         // total dx=5, dy=5
         assertThat(t.evaluate(4)).isEqualTo(StepFunction.DEFAULT_VALUE);
         assertThat(t.evaluate(5)).isEqualTo(8 + 5);
-        assertThat(t.evaluate(14)).isEqualTo(8 + 5);
-        assertThat(t.evaluate(15)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        assertThat(t.evaluate(15)).isEqualTo(8 + 5);
+        assertThat(t.evaluate(16)).isEqualTo(StepFunction.DEFAULT_VALUE);
     }
 
     @Test
@@ -66,7 +69,7 @@ public class StepFunctionTest {
         // x=6: both defined → max(8,3)=8
         assertThat(maxed.evaluate(6)).isEqualTo(8);
         // x=10: base undef, s2 defined →3
-        assertThat(maxed.evaluate(10)).isEqualTo(3);
+        assertThat(maxed.evaluate(11)).isEqualTo(3);
 
         StepFunction mined = base.combine(s2, CombineOperation.MIN);
         // x=6: min(8,3)=3
@@ -121,5 +124,62 @@ public class StepFunctionTest {
                                  .combine(base, CombineOperation.MIN);
         assertThat(upper.distance(lower)).isEqualTo(4);
         assertThat(lower.distance(upper)).isEqualTo(-4);
+    }
+
+    @Test
+    public void testSamplePointsSegment() {
+        StepFunction s = StepFunction.segment(2, 7, 5);
+        assertThat(s.samplePoints()).containsExactlyInAnyOrder(2, 7);
+    }
+
+    @Test
+    public void testSamplePointsTranslated() {
+        StepFunction t = StepFunction.segment(2, 7, 5).translate(3, 1);
+        // endpoints shifted by dx only
+        assertThat(t.samplePoints()).containsExactlyInAnyOrder(5, 10);
+    }
+
+    @Test
+    public void testSamplePointsCombinedMax() {
+        StepFunction base = StepFunction.segment(0, 10, 8);
+        StepFunction s2 = StepFunction.segment(5, 15, 3);
+        StepFunction maxed = base.combine(s2, CombineOperation.MAX);
+        // only points where the max-survivor comes from left or right
+        assertThat(maxed.samplePoints()).containsExactlyInAnyOrder(0, 10, 15);
+    }
+
+    @Test
+    public void testSamplePointsCombinedMin() {
+        StepFunction base = StepFunction.segment(0, 10, 8);
+        StepFunction s2 = StepFunction.segment(5, 15, 3);
+        StepFunction mined = base.combine(s2, CombineOperation.MIN);
+        // only points where the min-survivor comes from left or right
+        assertThat(mined.samplePoints()).containsExactlyInAnyOrder(0, 5, 15);
+    }
+
+    @Test
+    public void testSamplePointsCombinedMaxEqualOverlap() {
+        StepFunction f1 = StepFunction.segment(0, 10, 8);
+        StepFunction f2 = StepFunction.segment(5, 15, 8);
+        StepFunction combined = f1.combine(f2, CombineOperation.MAX);
+        assertThat(combined.samplePoints()).containsExactlyInAnyOrder(0, 15);
+    }
+
+    @Test
+    public void testSamplePointsCombinedMinEqualOverlap() {
+        StepFunction f1 = StepFunction.segment(0, 10, 8);
+        StepFunction f2 = StepFunction.segment(5, 15, 8);
+        StepFunction combined = f1.combine(f2, CombineOperation.MIN);
+        assertThat(combined.samplePoints()).containsExactlyInAnyOrder(0, 15);
+    }
+
+    @Test
+    public void testSamplePointsCache() {
+        StepFunction f1 = StepFunction.segment(0, 10, 8);
+        StepFunction f2 = StepFunction.segment(5, 15, 3);
+        StepFunction combined = f1.combine(f2, CombineOperation.MAX);
+        Set<Integer> pts1 = combined.samplePoints();
+        Set<Integer> pts2 = combined.samplePoints();
+        assertThat(pts2).isSameAs(pts1);
     }
 }
