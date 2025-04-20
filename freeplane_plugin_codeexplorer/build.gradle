@@ -5,5 +5,5 @@ dependencies {
     lib 'com.google.code.gson:gson:2.12.1'
     lib 'org.slf4j:slf4j-nop:2.1.0-alpha1'
     lib 'org.freeplane.archunit:freeplane-archunit-extension:0.0.2'
-    testImplementation 'org.assertj:assertj-core:4.0.0-M1'
+    testImplementation 'org.assertj:assertj-core:3.27.3'
 }
