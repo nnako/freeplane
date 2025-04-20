@@ -31,12 +31,12 @@ public interface StepFunction {
     int DEFAULT_VALUE = Integer.MAX_VALUE;
 
     int evaluate(int x);
-    Set<Integer> samplePoints();
+    Set<Integer> samplePoints(int minX, int maxX);
 
     default int distance(StepFunction other) {
         if (other == null) return 0;
-        Set<Integer> pts = new HashSet<>(samplePoints());
-        pts.addAll(other.samplePoints());
+        Set<Integer> pts = new HashSet<>(samplePoints(other.minX(), other.maxX()));
+        pts.addAll(other.samplePoints(minX(), maxX()));
         int min = DEFAULT_VALUE;
         for (int x : pts) {
             int y1 = evaluate(x);
@@ -62,6 +62,10 @@ public interface StepFunction {
     default StepFunction combine(StepFunction other, CombineOperation op) {
         return new CombinedFunction(this, other, op);
     }
+
+    int minX();
+
+    int maxX();
 }
 
 //CombineOperation.java
@@ -87,12 +91,24 @@ class SegmentFunction implements StepFunction {
     }
 
     @Override
-    public Set<Integer> samplePoints() {
-        Set<Integer> pts = new HashSet<>();
-        pts.add(x1);
-        pts.add(x2);
+    public Set<Integer> samplePoints(int minX, int maxX) {
+    	Set<Integer> pts = new HashSet<>();
+    	if(minX <= x1 && x1 < maxX)
+    		pts.add(x1);
+    	if(minX <= x2 && x2 < maxX)
+    		pts.add(x2);
         return pts;
     }
+
+	@Override
+	public int minX() {
+		return x1;
+	}
+
+	@Override
+	public int maxX() {
+		return x2;
+	}
 }
 
 class TranslatedFunction implements StepFunction {
@@ -114,11 +130,23 @@ class TranslatedFunction implements StepFunction {
     }
 
     @Override
-    public Set<Integer> samplePoints() {
-        return inner.samplePoints().stream()
+    public Set<Integer> samplePoints(int minX, int maxX) {
+        return inner.samplePoints(minX - dx, maxX - dx).stream()
             .map(p -> p + dx)
             .collect(Collectors.toSet());
     }
+
+	@Override
+	public int minX() {
+		return inner.minX() + dx;
+	}
+
+	@Override
+	public int maxX() {
+		return inner.maxX() + dy;
+	}
+
+
 }
 
 class CombinedFunction implements StepFunction {
@@ -146,9 +174,19 @@ class CombinedFunction implements StepFunction {
     }
 
     @Override
-    public Set<Integer> samplePoints() {
-        Set<Integer> pts = new HashSet<>(left.samplePoints());
-        pts.addAll(right.samplePoints());
+    public Set<Integer> samplePoints(int minX, int maxX) {
+        Set<Integer> pts = new HashSet<>(left.samplePoints(minX, maxX));
+        pts.addAll(right.samplePoints(minX, maxX));
         return pts;
     }
+
+	@Override
+	public int minX() {
+		return Math.min(left.minX(), right.minX());
+	}
+
+	@Override
+	public int maxX() {
+		return Math.max(left.maxX(), right.maxX());
+	}
 }
