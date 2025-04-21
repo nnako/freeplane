@@ -228,4 +228,23 @@ public class StepFunctionTest {
         // gap returns max(10,20)
         assertThat(f.evaluate(3)).isEqualTo(20);
     }
+
+    @Test
+    public void testFlattenedNestedTranslateEvaluate() {
+        StepFunction base = StepFunction.segment(1, 2, 3);
+        StepFunction nested = base.translate(2, 3).translate(4, 5);
+        // total dx=6, dy=8
+        assertThat(nested.evaluate(1 + 6)).isEqualTo(3 + 8);
+        assertThat(nested.evaluate(2 + 6)).isEqualTo(3 + 8);
+        // outside range remains undefined
+        assertThat(nested.evaluate(1 + 5)).isEqualTo(StepFunction.DEFAULT_VALUE);
+    }
+
+    @Test
+    public void testFlattenedNestedTranslateSamplePoints() {
+        StepFunction base = StepFunction.segment(2, 7, 5);
+        StepFunction nested = base.translate(3, 1).translate(4, 2);
+        // endpoints shifted by total dx only
+        assertThat(nested.samplePoints()).containsExactlyInAnyOrder(2 + 3 + 4, 7 + 3 + 4);
+    }
 }

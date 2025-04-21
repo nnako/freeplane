@@ -147,6 +147,12 @@ class TranslatedFunction implements StepFunction {
     public int maxX() {
         return inner.maxX() + dx;
     }
+
+    @Override
+    public StepFunction translate(int dx, int dy) {
+        // flatten nested translations by delegating to inner
+        return inner.translate(this.dx + dx, this.dy + dy);
+    }
 }
 
 class CombinedFunction implements StepFunction {
