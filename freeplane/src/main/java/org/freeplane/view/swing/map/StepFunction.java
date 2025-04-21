@@ -156,15 +156,28 @@ class CombinedFunction implements StepFunction {
     // cache for computed sample points
     private Set<Integer> samplePointsCache;
 
-    public CombinedFunction(StepFunction left, StepFunction right, CombineOperation op) {
-        if (left == null || right == null || op == null) throw new IllegalArgumentException();
-        this.left = left;
-        this.right = right;
+    public CombinedFunction(StepFunction first, StepFunction second, CombineOperation op) {
+        if (first == null || second == null || op == null) throw new IllegalArgumentException();
+        if (first.minX() <= second.minX()) {
+            this.left = first;
+            this.right = second;
+        }
+        else {
+            this.left = second;
+            this.right = first;
+        }
         this.op = op;
     }
 
     @Override
     public int evaluate(int x) {
+        if(x > left.maxX() && x < right.minX()) {
+            int a = left.evaluate(left.maxX());
+            int b = right.evaluate(right.minX());
+            return op == CombineOperation.MIN
+                ? Math.max(a, b)
+                : Math.min(a, b);
+        }
         int a = left.evaluate(x);
         int b = right.evaluate(x);
         if (a == DEFAULT_VALUE && b == DEFAULT_VALUE) return DEFAULT_VALUE;

@@ -182,4 +182,50 @@ public class StepFunctionTest {
         Set<Integer> pts2 = combined.samplePoints();
         assertThat(pts2).isSameAs(pts1);
     }
+
+    @Test
+    public void testCombineGapBehaviourMax() {
+        StepFunction f = StepFunction.segment(0, 2, 10)
+            .combine(StepFunction.segment(5, 7, 20), CombineOperation.MAX);
+        // gap between x=2 and x=5: should return min(10, 20) = 10
+        assertThat(f.evaluate(3)).isEqualTo(10);
+        // ensure endpoints remain correct
+        assertThat(f.evaluate(2)).isEqualTo(10);
+        assertThat(f.evaluate(5)).isEqualTo(20);
+    }
+
+    @Test
+    public void testCombineGapBehaviourMin() {
+        StepFunction f = StepFunction.segment(0, 2, 10)
+            .combine(StepFunction.segment(5, 7, 20), CombineOperation.MIN);
+        // gap between x=2 and x=5: should return max(10, 20) = 20
+        assertThat(f.evaluate(3)).isEqualTo(20);
+        // ensure endpoints remain correct
+        assertThat(f.evaluate(2)).isEqualTo(10);
+        assertThat(f.evaluate(5)).isEqualTo(20);
+    }
+
+    @Test
+    public void testCombineConstructorSwapsArgumentsMax() {
+        StepFunction first = StepFunction.segment(5, 7, 20);
+        StepFunction second = StepFunction.segment(0, 2, 10);
+        StepFunction f = first.combine(second, CombineOperation.MAX);
+        // swapped so behaves like (0,2)->(5,7)
+        assertThat(f.evaluate(1)).isEqualTo(10);
+        assertThat(f.evaluate(6)).isEqualTo(20);
+        // gap returns min(10,20)
+        assertThat(f.evaluate(3)).isEqualTo(10);
+    }
+
+    @Test
+    public void testCombineConstructorSwapsArgumentsMin() {
+        StepFunction first = StepFunction.segment(5, 7, 20);
+        StepFunction second = StepFunction.segment(0, 2, 10);
+        StepFunction f = first.combine(second, CombineOperation.MIN);
+        // swapped so behaves like (0,2)->(5,7)
+        assertThat(f.evaluate(1)).isEqualTo(10);
+        assertThat(f.evaluate(6)).isEqualTo(20);
+        // gap returns max(10,20)
+        assertThat(f.evaluate(3)).isEqualTo(20);
+    }
 }
