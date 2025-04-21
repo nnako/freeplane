@@ -49,7 +49,7 @@ class VerticalNodeViewLayoutStrategy {
     private boolean rightSideCoordinatesAreSet;
     private boolean leftSideCoordinaresAreSet;
 
-    final private boolean allowsCompactLayout;
+    final private CompactLayout compactLayout;
 
     private final int defaultVGap;
     private static final int SUMMARY_DEFAULT_HGAP_PX = LocationModel.DEFAULT_HGAP_PX * 7 / 12;
@@ -78,7 +78,7 @@ class VerticalNodeViewLayoutStrategy {
     private int baseY;
     private int minY;
 
-    public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout) {
+    public VerticalNodeViewLayoutStrategy(NodeView view, CompactLayout compactLayout) {
         NodeViewLayoutHelper layoutHelper = view.getLayoutHelper();
         this.view = layoutHelper;
         this.contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(layoutHelper);
@@ -92,7 +92,7 @@ class VerticalNodeViewLayoutStrategy {
         this.isChildFreeNode = new boolean[childViewCount];
         this.spaceAround = view.getSpaceAround();
         this.defaultVGap = view.getMap().getZoomed(LocationModel.DEFAULT_VGAP.toBaseUnits());
-        this.allowsCompactLayout = allowsCompactLayout;
+        this.compactLayout = compactLayout;
     }
 
     private void layoutChildViews(NodeView view) {
@@ -423,11 +423,11 @@ class VerticalNodeViewLayoutStrategy {
             top -= upperGap;
             y += upperGap;
         }
-        if (childShiftY < 0 && !allowsCompactLayout) {
+        if (childShiftY < 0 && !compactLayout.isCompact()) {
             yCoordinates[index] = y;
             y -= childShiftY;
         } else {
-            if (!isFirstVisibleLaidOutChild || allowsCompactLayout) {
+            if (!isFirstVisibleLaidOutChild || compactLayout.isCompact()) {
                 y += childShiftY;
             }
             yCoordinates[index] = y;
@@ -458,7 +458,7 @@ class VerticalNodeViewLayoutStrategy {
 
     private int calculateRegularChildVerticalDelta(NodeViewLayoutHelper child, int childShiftY, boolean isFirstVisible, ChildNodesAlignment alignment) {
         int delta = 0;
-        if ((childShiftY < 0 || isFirstVisible) && !allowsCompactLayout) {
+        if ((childShiftY < 0 || isFirstVisible) && !compactLayout.isCompact()) {
             delta += childShiftY;
         }
         int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(child);

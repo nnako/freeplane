@@ -780,7 +780,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	final private ComponentAdapter viewportSizeChangeListener;
 	private final INodeChangeListener connectorChangeListener;
 	private boolean scrollsViewAfterLayout = true;
-	private boolean allowsCompactLayout;
+	private CompactLayout compactLayout;
     private TagLocation tagLocation;
     private IconLocation iconLocation;
     private boolean repaintsViewOnSelectionChange;
@@ -881,7 +881,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
         final String fitToViewportAsString = mapStyle.getPropertySetDefault(viewedMap, MapStyle.FIT_TO_VIEWPORT);
         fitToViewport = Boolean.parseBoolean(fitToViewportAsString);
-        allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+        compactLayout = mapStyle.allowsCompactLayout(viewedMap);
         tagLocation = mapStyle.tagLocation(viewedMap);
         iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
@@ -1541,9 +1541,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			setFitToViewport(Boolean.parseBoolean(fitToViewportAsString));
 			loadBackgroundImage();
 		}
-        if (property.equals(MapStyle.ALLOW_COMPACT_LAYOUT_PROPERTY)) {
+        if (property.equals(MapStyle.COMPACT_LAYOUT_PROPERTY)) {
             final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
-            allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+            compactLayout = mapStyle.allowsCompactLayout(viewedMap);
             getRoot().resetLayoutPropertiesRecursively();
             revalidate();
             repaint();
@@ -3091,8 +3091,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 	}
 
-	boolean allowsCompactLayout() {
-		return allowsCompactLayout;
+	CompactLayout compactLayout() {
+		return compactLayout;
 	}
 
 	@Override
