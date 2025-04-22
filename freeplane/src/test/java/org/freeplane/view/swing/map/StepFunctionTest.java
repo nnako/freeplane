@@ -247,4 +247,49 @@ public class StepFunctionTest {
         // endpoints shifted by total dx only
         assertThat(nested.samplePoints()).containsExactlyInAnyOrder(2 + 3 + 4, 7 + 3 + 4);
     }
+
+    @Test
+    public void testCombineFallback() {
+        StepFunction main = StepFunction.segment(0, 5, 10);
+        StepFunction fallback = StepFunction.segment(3, 8, 20);
+        StepFunction combined = main.combine(fallback, CombineOperation.FALLBACK);
+
+        // x=2: main defined -> 10
+        assertThat(combined.evaluate(2)).isEqualTo(10);
+        // x=4: main defined -> 10 (even though fallback is defined)
+        assertThat(combined.evaluate(4)).isEqualTo(10);
+        // x=6: main undefined, fallback defined -> 20
+        assertThat(combined.evaluate(6)).isEqualTo(20);
+        // x=9: outside combined range -> DEFAULT_VALUE
+        assertThat(combined.evaluate(9)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        // x=-1: outside combined range -> DEFAULT_VALUE 
+        assertThat(combined.evaluate(-1)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        
+        // Edge case: right at the combined maxX
+        assertThat(combined.evaluate(8)).isEqualTo(20);
+        // Edge case: right at the combined minX
+        assertThat(combined.evaluate(0)).isEqualTo(10);
+    }
+
+    @Test
+    public void testCombineFallbackWithGaps() {
+        StepFunction main = StepFunction.segment(2, 4, 10);
+        StepFunction fallback = StepFunction.segment(6, 8, 20);
+        StepFunction combined = main.combine(fallback, CombineOperation.FALLBACK);
+
+        // within main domain
+        assertThat(combined.evaluate(2)).isEqualTo(10);
+        assertThat(combined.evaluate(4)).isEqualTo(10);
+
+        // within fallback domain
+        assertThat(combined.evaluate(6)).isEqualTo(20);
+        assertThat(combined.evaluate(8)).isEqualTo(20);
+
+        // in the gap between main and fallback: x=5 -> fallback at fallback.minX (6)
+        assertThat(combined.evaluate(5)).isEqualTo(20);
+
+        // outside combined domain: <2 or >8 -> DEFAULT_VALUE
+        assertThat(combined.evaluate(1)).isEqualTo(StepFunction.DEFAULT_VALUE);
+        assertThat(combined.evaluate(9)).isEqualTo(StepFunction.DEFAULT_VALUE);
+    }
 }

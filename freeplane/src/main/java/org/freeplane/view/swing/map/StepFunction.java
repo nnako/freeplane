@@ -74,7 +74,7 @@ public interface StepFunction {
 
 //CombineOperation.java
 enum CombineOperation {
- MAX, MIN
+    MAX, MIN, FALLBACK
 }
 
 class SegmentFunction implements StepFunction {
@@ -161,10 +161,17 @@ class CombinedFunction implements StepFunction {
     private final CombineOperation op;
     // cache for computed sample points
     private Set<Integer> samplePointsCache;
+    private final int minX;
+    private final int maxX;
 
     public CombinedFunction(StepFunction first, StepFunction second, CombineOperation op) {
         if (first == null || second == null || op == null) throw new IllegalArgumentException();
-        if (first.minX() <= second.minX()) {
+        this.op = op;
+        if (op == CombineOperation.FALLBACK) {
+            this.left = first;
+            this.right = second;
+        }
+        else if (first.minX() <= second.minX()) {
             this.left = first;
             this.right = second;
         }
@@ -172,12 +179,29 @@ class CombinedFunction implements StepFunction {
             this.left = second;
             this.right = first;
         }
-        this.op = op;
+        this.minX = Math.min(left.minX(), right.minX());
+        this.maxX = Math.max(left.maxX(), right.maxX());
     }
 
     @Override
     public int evaluate(int x) {
-        if(x > left.maxX() && x < right.minX()) {
+        if(x < minX || x > maxX)
+            return DEFAULT_VALUE;
+        if (op == CombineOperation.FALLBACK) {
+            int mainVal = left.evaluate(x);
+            if (mainVal != DEFAULT_VALUE) {
+                return mainVal;
+            }
+            if (x < right.minX()) {
+                return right.evaluate(right.minX());
+            }
+            if (x > right.maxX()) {
+                return right.evaluate(right.maxX());
+            }
+            int fbVal = right.evaluate(x);
+            return fbVal;
+        }
+        if (x > left.maxX() && x < right.minX()) {
             int a = left.evaluate(left.maxX());
             int b = right.evaluate(right.minX());
             return op == CombineOperation.MIN
@@ -186,7 +210,6 @@ class CombinedFunction implements StepFunction {
         }
         int a = left.evaluate(x);
         int b = right.evaluate(x);
-        if (a == DEFAULT_VALUE && b == DEFAULT_VALUE) return DEFAULT_VALUE;
         if (a == DEFAULT_VALUE) return b;
         if (b == DEFAULT_VALUE) return a;
         return op == CombineOperation.MAX
@@ -219,11 +242,11 @@ class CombinedFunction implements StepFunction {
 
     @Override
     public int minX() {
-        return Math.min(left.minX(), right.minX());
+        return minX;
     }
 
     @Override
     public int maxX() {
-        return Math.max(left.maxX(), right.maxX());
+        return maxX;
     }
 }
