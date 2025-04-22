@@ -72,11 +72,6 @@ class VerticalNodeViewLayoutStrategy {
     private boolean areChildrenSeparatedByY;
     private int[] summaryBaseX;
 
-    // fields for content bounds calculation
-    private int contentX;
-    private int contentY;
-    private int baseY;
-    private int minY;
 
     public VerticalNodeViewLayoutStrategy(NodeView view, CompactLayout compactLayout) {
         NodeViewLayoutHelper layoutHelper = view.getLayoutHelper();
@@ -596,26 +591,19 @@ class VerticalNodeViewLayoutStrategy {
     private void applyLayoutToChildComponents() {
         int spaceAround = view.getSpaceAround();
         int cloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(view);
-        computeContentBounds(cloudHeight, spaceAround);
-        view.setContentBounds(contentX, contentY, contentSize.width, contentSize.height);
-        arrangeChildComponents(contentX, contentY, baseY, cloudHeight, spaceAround);
-        view.setTopOverlap(-minY);
-    }
-
-    /**
-     * Computes contentX, contentY, baseY, minY and cloudHeight for layout.
-     */
-    private void computeContentBounds(int cloudHeight, int spaceAround) {
         int leftMostX = IntStream.of(xCoordinates).min().orElse(0);
-        contentX = Math.max(spaceAround, -leftMostX);
-        contentY = spaceAround + cloudHeight/2 - Math.min(0, top);
+        int contentX = Math.max(spaceAround, -leftMostX);
+        int contentY = spaceAround + cloudHeight/2 - Math.min(0, top);
         view.setContentVisible(view.isContentVisible());
-        baseY = contentY - spaceAround + top;
-        minY = calculateMinY(contentY, baseY, cloudHeight);
+        int baseY = contentY - spaceAround + top;
+        int minY = calculateMinY(contentY, baseY, cloudHeight);
         if (minY < 0) {
             contentY -= minY;
             baseY -= minY;
         }
+        view.setContentBounds(contentX, contentY, contentSize.width, contentSize.height);
+        arrangeChildComponents(contentX, contentY, baseY, cloudHeight, spaceAround);
+        view.setTopOverlap(-minY);
     }
 
     private int calculateMinY(int contentY, int baseY, int cloudHeight) {
