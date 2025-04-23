@@ -338,7 +338,7 @@
 					<Entry builder="radio_button_group">
 						<Entry name="SetStringMapPropertyAction.compact_layout.AVOID" />
 						<Entry name="SetStringMapPropertyAction.compact_layout.ALLOW" />
-						<Entry name="SetStringMapPropertyAction.compact_layout.FORCE" />
+						<Entry name="SetStringMapPropertyAction.compact_layout.AUTO" />
 					</Entry>
 				</Entry>
 				<Entry name="SetBooleanPropertyAction.outline_view_fits_window_width" />

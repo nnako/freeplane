@@ -64,7 +64,7 @@ public interface StepFunction {
     }
 
     default StepFunction combine(StepFunction other, CombineOperation op) {
-        return new CombinedFunction(this, other, op);
+        return other == null ? this : new CombinedFunction(this, other, op);
     }
 
     int minX();
@@ -83,7 +83,8 @@ class SegmentFunction implements StepFunction {
     private final int y;
 
     public SegmentFunction(int x1, int x2, int y) {
-        if (x1 >= x2) throw new IllegalArgumentException();
+        if (x1 >= x2)
+        	throw new IllegalArgumentException();
         this.x1 = x1;
         this.x2 = x2;
         this.y = y;

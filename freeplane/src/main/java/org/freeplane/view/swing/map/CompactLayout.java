@@ -5,7 +5,7 @@
  */
 package org.freeplane.view.swing.map;
 
-public enum CompactLayout {AVOID, ALLOW, FORCE;
+public enum CompactLayout {AVOID, ALLOW, AUTO;
     boolean isCompact() {
     	return this != AVOID;
     }

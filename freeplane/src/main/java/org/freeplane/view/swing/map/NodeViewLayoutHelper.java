@@ -17,6 +17,8 @@ class NodeViewLayoutHelper {
 	private NodeView view;
 	private int topOverlap;
 	private int bottomOverlap;
+	private StepFunction topBoundary;
+	private StepFunction bottomBoundary;
 
 	NodeViewLayoutHelper(NodeView view) {
 		this.view = view;
@@ -152,6 +154,24 @@ class NodeViewLayoutHelper {
 	void setBottomOverlap(int bottomOverlap) {
 		this.bottomOverlap = bottomOverlap;
 	}
+
+
+	StepFunction getTopBoundary() {
+		return topBoundary;
+	}
+
+	void setTopBoundary(StepFunction topBoundary) {
+		this.topBoundary = topBoundary;
+	}
+
+	StepFunction getBottomBoundary() {
+		return bottomBoundary;
+	}
+
+	void setBottomBoundary(StepFunction bottomBoundary) {
+		this.bottomBoundary = bottomBoundary;
+	}
+
 	NodeViewLayoutHelper getParentView() {
 		NodeView parentView = view.getParentView();
 		return parentView != null ? parentView.getLayoutHelper() : null;
