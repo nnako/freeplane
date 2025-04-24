@@ -780,7 +780,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	final private ComponentAdapter viewportSizeChangeListener;
 	private final INodeChangeListener connectorChangeListener;
 	private boolean scrollsViewAfterLayout = true;
-	private CompactLayout compactLayout;
+	private boolean allowsCompactLayout;
+	private boolean isAutoCompactLayoutEnabled;
     private TagLocation tagLocation;
     private IconLocation iconLocation;
     private boolean repaintsViewOnSelectionChange;
@@ -881,7 +882,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
         final String fitToViewportAsString = mapStyle.getPropertySetDefault(viewedMap, MapStyle.FIT_TO_VIEWPORT);
         fitToViewport = Boolean.parseBoolean(fitToViewportAsString);
-        compactLayout = mapStyle.allowsCompactLayout(viewedMap);
+        allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+        isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
         tagLocation = mapStyle.tagLocation(viewedMap);
         iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
@@ -1541,9 +1543,16 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			setFitToViewport(Boolean.parseBoolean(fitToViewportAsString));
 			loadBackgroundImage();
 		}
-        if (property.equals(MapStyle.COMPACT_LAYOUT_PROPERTY)) {
+        if (property.equals(MapStyle.ALLOW_COMPACT_LAYOUT_PROPERTY)) {
             final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
-            compactLayout = mapStyle.allowsCompactLayout(viewedMap);
+            allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+            getRoot().resetLayoutPropertiesRecursively();
+            revalidate();
+            repaint();
+        }
+        if (property.equals(MapStyle.AUTO_COMPACT_LAYOUT_PROPERTY)) {
+            final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
+            isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
             getRoot().resetLayoutPropertiesRecursively();
             revalidate();
             repaint();
@@ -3091,8 +3100,12 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 	}
 
-	CompactLayout compactLayout() {
-		return compactLayout;
+	boolean allowsCompactLayout() {
+		return allowsCompactLayout;
+	}
+
+	boolean isAutoCompactLayoutEnabled() {
+		return isAutoCompactLayoutEnabled;
 	}
 
 	@Override

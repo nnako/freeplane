@@ -39,8 +39,10 @@ public class NodeViewLayout implements INodeViewLayout{
     public void layoutContainer(final Container c) {
         NodeView view = (NodeView) c;
  		if(view.getContent() != null){
-        	CompactLayout compactLayout = view.getMap().compactLayout();
-			final VerticalNodeViewLayoutStrategy layoutData = new VerticalNodeViewLayoutStrategy(view, compactLayout);
+        	MapView map = view.getMap();
+			boolean allowsCompactLayout = map.allowsCompactLayout();
+			boolean isAutoCompactLayoutEnabled = map.isAutoCompactLayoutEnabled();
+			final VerticalNodeViewLayoutStrategy layoutData = new VerticalNodeViewLayoutStrategy(view, allowsCompactLayout, isAutoCompactLayoutEnabled);
         	layoutData.calculateLayoutData();
         }
     }

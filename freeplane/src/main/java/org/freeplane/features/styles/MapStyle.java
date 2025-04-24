@@ -86,7 +86,6 @@ import org.freeplane.features.url.mindmapmode.MFileManager;
 import org.freeplane.features.url.mindmapmode.TemplateManager;
 import org.freeplane.n3.nanoxml.XMLElement;
 import org.freeplane.view.swing.features.filepreview.MindMapPreviewWithOptions;
-import org.freeplane.view.swing.map.CompactLayout;
 import org.freeplane.view.swing.map.IconLocation;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
@@ -102,8 +101,8 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
     private static final String TAG_CATEGORY_SEPARATOR_ATTRIBUTE = "category_separator";
 
     private static final String TAGS_ELEMENT = "tags";
-    private static final String ALLOW_COMPACT_LAYOUT_PROPERTY = "allow_compact_layout";
-    public static final String COMPACT_LAYOUT_PROPERTY = "compact_layout";
+    public static final String ALLOW_COMPACT_LAYOUT_PROPERTY = "allow_compact_layout";
+    public static final String AUTO_COMPACT_LAYOUT_PROPERTY = "auto_compact_layout";
     public static final String SHOW_TAG_CATEGORIES_PROPERTY = "showTagCategories";
 
     public static final String SHOW_TAGS_PROPERTY = "show_tags";
@@ -319,11 +318,6 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		            if(key.equals(UrlManager.FREEPLANE_ADD_ON_FILE_EXTENSION))
 		                continue;
 		            String valueAsString = attribute.getValue().toString();
-		            if(key.equals(ALLOW_COMPACT_LAYOUT_PROPERTY)) {
-		                CompactLayout layoutValue = Boolean.parseBoolean(valueAsString) ? CompactLayout.ALLOW : CompactLayout.AVOID;
-		                properties.put(COMPACT_LAYOUT_PROPERTY, layoutValue.name());
-		                continue;
-		            }
 		            properties.put(key, valueAsString);
 		        }
 		    }
@@ -474,10 +468,13 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 	    return null;
 	}
 
-	public CompactLayout allowsCompactLayout(MapModel map) {
-		return MapStyleModel.getExtension(map).getEnumProperty(COMPACT_LAYOUT_PROPERTY, CompactLayout.AVOID);
+	public boolean allowsCompactLayout(MapModel map) {
+		return getBooleanProperty(map, ALLOW_COMPACT_LAYOUT_PROPERTY);
 	}
 
+	public boolean isAutoCompactLayoutEnabled(MapModel map) {
+		return getBooleanProperty(map, AUTO_COMPACT_LAYOUT_PROPERTY);
+	}
 
     public TagLocation tagLocation(MapModel map) {
         return MapStyleModel.getExtension(map).getEnumProperty(SHOW_TAGS_PROPERTY, TagLocation.UNDER_NODES);

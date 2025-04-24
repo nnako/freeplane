@@ -19,6 +19,7 @@ package org.freeplane.view.swing.map;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +68,27 @@ public interface StepFunction {
         return other == null ? this : new CombinedFunction(this, other, op);
     }
 
+    default String explain() {
+    	return new TreeSet<>(samplePoints()).stream()
+    			.map(this::explain)
+    			.collect(Collectors.joining(", "));
+    }
+	default String explain(int x) {
+		int y = evaluate(x);
+		int yBefore = evaluate(x-1);
+		int yAfter = evaluate(x+1);
+		StringBuilder builder = new StringBuilder();
+		if(yBefore != DEFAULT_VALUE && yBefore != y)
+			builder.append(explain(x-1, yBefore) + ", ");
+		builder.append(explain(x, y));
+		if(yAfter != DEFAULT_VALUE && yAfter != y)
+			builder.append(", " + explain(x+1, yAfter));
+		return builder.toString();
+	}
+	default String explain(int x, int y) {
+		return "" + y + "(" + x + ")";
+	}
+
     int minX();
 
     int maxX();
@@ -84,7 +106,7 @@ class SegmentFunction implements StepFunction {
 
     public SegmentFunction(int x1, int x2, int y) {
         if (x1 >= x2)
-        	throw new IllegalArgumentException();
+            throw new IllegalArgumentException();
         this.x1 = x1;
         this.x2 = x2;
         this.y = y;
@@ -111,6 +133,10 @@ class SegmentFunction implements StepFunction {
     @Override
     public int maxX() {
         return x2;
+    }
+    @Override
+    public String toString() {
+        return explain();
     }
 }
 
@@ -153,6 +179,11 @@ class TranslatedFunction implements StepFunction {
     public StepFunction translate(int dx, int dy) {
         // flatten nested translations by delegating to inner
         return inner.translate(this.dx + dx, this.dy + dy);
+    }
+
+    @Override
+    public String toString() {
+        return explain();
     }
 }
 
@@ -249,5 +280,10 @@ class CombinedFunction implements StepFunction {
     @Override
     public int maxX() {
         return maxX;
+    }
+
+    @Override
+    public String toString() {
+        return explain();
     }
 }
