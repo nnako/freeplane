@@ -706,10 +706,9 @@ class VerticalNodeViewLayoutStrategy {
             StepFunction viewTopBoundary;
             StepFunction viewBottomBoundary;
             if(view.usesHorizontalLayout() == parentView.usesHorizontalLayout()) {
-                final int segmentExtra = Math.max(cloudExtra, extraGapForChildren);
-                final int segmentStart = contentX - segmentExtra;
-                final int segmentEnd = contentX + contentSize.width + segmentExtra;
-                viewBottomBoundary = contentSize.width <= 0 ? null : StepFunction.segment(segmentStart, segmentEnd, contentY + contentSize.height + segmentExtra);
+                final int segmentStart = contentX;
+                final int segmentEnd = contentX + contentSize.width;
+                viewBottomBoundary = contentSize.width <= 0 ? null : StepFunction.segment(segmentStart, segmentEnd, contentY + contentSize.height + cloudExtra);
                 viewBottomBoundary = leftBottomBoundary == null ? viewBottomBoundary :
                     viewBottomBoundary == null ? leftBottomBoundary.translate(contentX, baseY) :
                         viewBottomBoundary.combine(leftBottomBoundary.translate(contentX, baseY), CombineOperation.MAX);
@@ -717,7 +716,7 @@ class VerticalNodeViewLayoutStrategy {
                     viewBottomBoundary == null ? rightBottomBoundary.translate(contentX, baseY) :
                         viewBottomBoundary.combine(rightBottomBoundary.translate(contentX, baseY), CombineOperation.MAX);
 
-                viewTopBoundary = contentSize.width <= 0 ? null : StepFunction.segment(segmentStart, segmentEnd, contentY - segmentExtra);
+                viewTopBoundary = contentSize.width <= 0 ? null : StepFunction.segment(segmentStart, segmentEnd, contentY - cloudExtra);
                 for (int i = childViewCount - 1; i >= 0; i--) {
                     NodeViewLayoutHelper child = view.getComponent(i);
                     StepFunction childTopBoundary = child.getTopBoundary();
