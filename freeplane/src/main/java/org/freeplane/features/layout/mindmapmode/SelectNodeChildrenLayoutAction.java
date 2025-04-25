@@ -25,11 +25,6 @@ public class SelectNodeChildrenLayoutAction extends AFreeplaneAction {
     }
 
     @Override
-    public String getTextKey() {
-        return "OptionPanel.children_nodes_layouts";
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
         MLayoutController layoutController = (MLayoutController) Controller.getCurrentModeController().getExtension(LayoutController.class);
         NodeModel selected = Controller.getCurrentController().getSelection().getSelected();
