@@ -50,6 +50,10 @@ class NodeViewLayoutHelper {
 		return view.getNode();
 	}
 
+	NodeView getView() {
+		return view;
+	}
+
     int getMinimalDistanceBetweenChildren() {
         return view.getMinimalDistanceBetweenChildren();
     }
@@ -77,13 +81,7 @@ class NodeViewLayoutHelper {
 	}
 
 
-    int getContentYForSummary() {
-        Component component = view.getContent();
-        return usesHorizontallayout(component) ? component.getX(): component.getY();
-    }
-
-
-	int getContentWidth() {
+    int getContentWidth() {
 		Component component = view.getContent();
         return usesHorizontallayout(view) ? component.getHeight(): component.getWidth();
 	}
