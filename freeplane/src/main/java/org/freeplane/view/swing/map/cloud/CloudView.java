@@ -147,6 +147,8 @@ abstract public class CloudView {
         final Polygon p = new Polygon();
         final LinkedList<Point> coordinates = new LinkedList<Point>();
         source.getCoordinates(coordinates);
+        if(coordinates.isEmpty())
+            return p;
         final ConvexHull hull = new ConvexHull();
         final Vector<Point> res = hull.calculateHull(coordinates);
         Point lastPt = null;
