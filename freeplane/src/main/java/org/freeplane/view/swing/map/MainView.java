@@ -728,10 +728,12 @@ public class MainView extends ZoomableLabel {
 	public boolean contains(int x, int y) {
 	    if(super.contains(x, y))
 	        return true;
-	    if(lastMouseEventTarget != null && lastMouseEventTarget != this)
-	        return false;
-		final Point p = new Point(x, y);
-		return isInFoldingRegion(p) || isInDragRegion(p);
+	    if(lastMouseEventTarget == null || lastMouseEventTarget == this
+	    		|| (getNodeView().isSelected() && !lastMouseEventTarget.getNodeView().isSelected())) {
+	    	final Point p = new Point(x, y);
+	    	return isInFoldingRegion(p) || isInDragRegion(p);
+	    } else
+			return false;
 	}
 
 
@@ -1018,7 +1020,7 @@ public class MainView extends ZoomableLabel {
 		int width = getWidth();
 		int height = getHeight();
 		AffineTransform transform = g2.getTransform();
-		if(height * transform.getScaleY() <= 2 
+		if(height * transform.getScaleY() <= 2
 				|| width * transform.getScaleX() <= 2) {
 			g2.setColor(getBorderColor());
 			g2.fillRect(0, 0, width, height);
