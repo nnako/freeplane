@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12" height="23" version="1.1" viewBox="0 0 12 23" xmlns="http://www.w3.org/2000/svg">
+ <path d="m8.86 10a0.64 0.64 0 0 1 0.64 0.64v1.72a0.64 0.64 0 0 1-0.64 0.64h-5.72a0.64 0.64 0 0 1-0.64-0.64v-1.72a0.64 0.64 0 0 1 0.64-0.64h5.72m0-1h-5.72a1.65 1.65 0 0 0-1.64 1.64v1.72a1.64 1.64 0 0 0 1.64 1.64h5.72a1.63 1.63 0 0 0 1.64-1.64v-1.72a1.64 1.64 0 0 0-1.64-1.64z" fill="#0071bc"/>
+ <g transform="translate(-.5 1)" fill="#333333">
+  <rect x="5" y="15.5" width="3" height="5.5"/>
+  <polyline points="2.5 17 6.5 13 10.5 17"/>
+ </g>
+ <g transform="translate(-.5 -1)" fill="#333333">
+  <rect x="5" y="2" width="3" height="6"/>
+  <polyline points="10.5 6 6.5 10 2.5 6"/>
+ </g>
+</svg>

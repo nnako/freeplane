@@ -54,6 +54,7 @@
 		</Entry>
 		<Entry builder="separator" />
 		<Entry builder="childNodesLayout" />
+		<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" />
 		<Entry builder="separator" />
 		<Entry builder="main_toolbar_style" usedBy="EDITOR" row="1" width="11"/>
 		<Entry usedBy="EDITOR" row="2">
@@ -502,7 +503,7 @@
 				<Entry name="SetBooleanPropertyAction.copyFormatToNewChild" />
 				<Entry builder="separator" />
 				<Entry name="SelectNodeChildrenLayoutAction"/>
-				<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" />
+				<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" usedBy="NO_CONSTRAINT"/>
 				<Entry name="SetBooleanMapPropertyAction.allow_compact_layout" />
 			</Entry>
 		</Entry>

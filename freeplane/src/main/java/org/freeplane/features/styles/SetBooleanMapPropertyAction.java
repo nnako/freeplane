@@ -35,7 +35,7 @@ import org.freeplane.features.mode.ModeController;
  * Mar 2, 2011
  */
 @SuppressWarnings("serial")
-@SelectableAction(checkOnPopup = true)
+@SelectableAction(checkOnPopup = true, checkOnNodeChange = true)
 @EnabledAction(checkOnNodeChange = true)
 public class SetBooleanMapPropertyAction extends AFreeplaneAction{
 
