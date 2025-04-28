@@ -29,8 +29,8 @@ class NodeViewLayoutHelper {
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
 	}
 
-	int getAdditionalCloudHeigth() {
-		return CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(view);
+	int getAdditionalCloudHeight() {
+		return CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(view);
 	}
 
 	int getComponentCount() {

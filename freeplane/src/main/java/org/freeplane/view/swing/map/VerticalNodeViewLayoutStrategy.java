@@ -419,7 +419,7 @@ class VerticalNodeViewLayoutStrategy {
                                 NodeViewLayoutHelper child,
                                 int childRegularHeight,
                                 int childShiftY) {
-        final int additionalCloudHeigth = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(child);
+        final int additionalCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
         if (isFirstVisibleLaidOutChild()
                 && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
                 && contentSize.height > 0) {
@@ -428,7 +428,7 @@ class VerticalNodeViewLayoutStrategy {
 		int extraVGap = calculateExtraVerticalGap(
                 childRegularHeight,
                 child.getContentHeight(),
-                additionalCloudHeigth);
+                additionalCloudHeight);
 		int upperGap = align(extraVGap);
 		int distance = 0;
         if(isAutoCompactLayoutEnabled && bottomBoundary != null) {
@@ -501,7 +501,7 @@ class VerticalNodeViewLayoutStrategy {
         switch (childNodesAlignment) {
 		case FLOW:
 		case AUTO:
-			childContentHeightSum += child.getContentHeight() + additionalCloudHeigth;
+			childContentHeightSum += child.getContentHeight() + additionalCloudHeight;
 			sideShiftY= (child.getContentY() - spaceAround - child.getTopOverlap()) + upperGap + childContentHeightSum/2;
 			break;
 		case AFTER_PARENT:
@@ -597,7 +597,7 @@ class VerticalNodeViewLayoutStrategy {
 
     private int calculateSummaryChildVerticalPosition(int groupUpper, int groupLower,
             NodeViewLayoutHelper child, int childShiftY) {
-        int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(child);
+        int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
         int childContentHeight = child.getContentHeight() + childCloudHeight;
         return (groupUpper + groupLower) / 2
                 - childContentHeight / 2 + childShiftY
@@ -630,7 +630,7 @@ class VerticalNodeViewLayoutStrategy {
 
     private void applyLayoutToChildComponents() {
         int spaceAround = view.getSpaceAround();
-        int cloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(view);
+        int cloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(view);
         int leftMostX = IntStream.of(xCoordinates).min().orElse(0);
         int contentX = Math.max(spaceAround, -leftMostX);
         int contentY = spaceAround + cloudHeight/2 - Math.min(0, totalShiftY);

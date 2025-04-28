@@ -87,7 +87,7 @@ public class DefaultConditionRenderer implements ListCellRenderer, TableCellRend
             label.setFont(font);
             final int fontHeight = label.getFontMetrics(font).getHeight();
             UIIcon uiIcon = (UIIcon) value;
-            Icon icon = FixedSizeUIIcon.withHeigth(uiIcon.getUrl(), fontHeight, uiIcon.hasStandardSize());
+            Icon icon = FixedSizeUIIcon.withHeight(uiIcon.getUrl(), fontHeight, uiIcon.hasStandardSize());
             label.setIcon(icon);
             label.setHorizontalAlignment(SwingConstants.CENTER);
             label.setOpaque(false);

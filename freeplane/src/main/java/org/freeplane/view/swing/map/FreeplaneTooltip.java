@@ -61,9 +61,9 @@ public class FreeplaneTooltip extends JToolTip {
 
 	private Dimension tooltipSize(GraphicsConfiguration graphicsConfiguration) {
 		final Rectangle screenBounds = graphicsConfiguration.getBounds();
-		final int screenHeigth = screenBounds.height - 80;
+		final int screenHeight = screenBounds.height - 80;
 		final int screenWidth = screenBounds.width - 80;
-		final int maximumHeight = Math.min(screenHeigth, getIntProperty("toolTipManager.max_tooltip_height"));
+		final int maximumHeight = Math.min(screenHeight, getIntProperty("toolTipManager.max_tooltip_height"));
 		int maximumWidth = Math.min(screenWidth, getIntProperty("toolTipManager.max_tooltip_width"));
 		final Dimension maximumSize = new Dimension(maximumWidth, maximumHeight);
 		return maximumSize;

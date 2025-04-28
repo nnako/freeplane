@@ -321,7 +321,7 @@ public class NodeView extends JComponent implements INodeView {
 				final CloudController cloudController = CloudController.getController(modeController);
 				final CloudModel cloud = cloudController.getCloud(getNode(), getStyleOption());
 				if (cloud != null) {
-					additionalDistanceForConvexHull += CloudView.getAdditionalHeigth(cloud, this) / 5;
+					additionalDistanceForConvexHull += CloudView.getAdditionalHeight(cloud, this) / 5;
 				}
 			}
 

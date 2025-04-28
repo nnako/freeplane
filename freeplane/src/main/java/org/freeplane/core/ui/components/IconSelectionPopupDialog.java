@@ -136,7 +136,7 @@ public class IconSelectionPopupDialog extends JDialog implements MouseListener {
 			}
 		});
 		numOfIcons = icons.size();
-        final int singleIconSize = (int) ((IconFactory.DEFAULT_UI_ICON_HEIGTH.toBaseUnits()+ 0.5) * 1.1);
+        final int singleIconSize = (int) ((IconFactory.DEFAULT_UI_ICON_HEIGHT.toBaseUnits()+ 0.5) * 1.1);
         int xDimension = Math.min(20, (int) Math.ceil(Math.sqrt(numOfIcons)) * 16 / 9);
         final ToolbarLayout layout = ToolbarLayout.vertical();
         layout.setMaximumWidth(Math.min(singleIconSize * xDimension, UITools.getScreenBounds(frame.getGraphicsConfiguration()).width * 4 / 5));

@@ -8,20 +8,20 @@ public class CloudHeightCalculator {
     /**
      * Calculates the tree height increment because of the clouds.
      */
-    public int getAdditionalCloudHeigth(final NodeView node) {
+    public int getAdditionalCloudHeight(final NodeView node) {
         if (!node.isSubtreeVisible()) {
             return 0;
         }
         final CloudModel cloud = node.getCloudModel();
         if (cloud != null) {
-            return CloudView.getAdditionalHeigth(cloud, node);
+            return CloudView.getAdditionalHeight(cloud, node);
         }
         else {
             return 0;
         }
     }
-	public int getAdditionalCloudHeigth(NodeViewLayoutHelper accessor) {
-		return accessor.getAdditionalCloudHeigth();
+	public int getAdditionalCloudHeight(NodeViewLayoutHelper accessor) {
+		return accessor.getAdditionalCloudHeight();
 	}
 
 }

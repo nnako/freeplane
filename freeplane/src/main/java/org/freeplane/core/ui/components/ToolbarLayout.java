@@ -59,7 +59,7 @@ public class ToolbarLayout implements LayoutManager {
 		int lastBlockFinish = 0;
 		Insets insets = container.getInsets();
 		int leftMargin = insets.left;
-		int heigth =  insets.top;
+		int height =  insets.top;
 		final int maximumWidth = calculateMaxWidth(container) - insets.left - insets.right;
 		for (int i = 0;; i++) {
 			final Component component = i < container.getComponentCount() ? container.getComponent(i) : null;
@@ -69,10 +69,10 @@ public class ToolbarLayout implements LayoutManager {
 					for (int j = lastBlockStart; j < lastBlockFinish; j++) {
 						final Component c = container.getComponent(j);
 						final int width = getPreferredWidth(c, maximumWidth);
-						c.setBounds(x, heigth, width, lastBlockHeight);
+						c.setBounds(x, height, width, lastBlockHeight);
 						x += width;
 					}
-					heigth += lastBlockHeight;
+					height += lastBlockHeight;
 					lastBlockWidth = blockWidth;
 					lastBlockHeight = blockHeight;
 					lastBlockStart = lastBlockFinish;
@@ -129,7 +129,7 @@ public class ToolbarLayout implements LayoutManager {
 		int maxWidth = calculateMaxWidth(container) - insets.left - insets.right;
 		for(;;) {
 	        int width = 0;
-	        int heigth = 0;
+	        int height = 0;
 	        int blockWidth = 0;
 	        int blockHeight = 0;
 	        int lastBlockWidth = 0;
@@ -140,7 +140,7 @@ public class ToolbarLayout implements LayoutManager {
 	            final Component component = i < container.getComponentCount() ? container.getComponent(i) : null;
 	            if (component == null || component instanceof JSeparator || blockEndPosition == BlockEndPosition.ANYWHERE) {
 	                if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + blockWidth > maxWidth) {
-	                    heigth += lastBlockHeight;
+	                    height += lastBlockHeight;
 	                    lastBlockWidth = blockWidth;
 	                    lastBlockHeight = blockHeight;
 	                    lastBlockStart = lastBlockFinish;
@@ -165,7 +165,7 @@ public class ToolbarLayout implements LayoutManager {
 	            blockHeight = Math.max(compPreferredSize.height, blockHeight);
 	        }
 	        if(maxWidth >= width) {
-	            Dimension preferredSize = new Dimension(width + insets.left + insets.right, heigth + insets.top + insets.bottom);
+	            Dimension preferredSize = new Dimension(width + insets.left + insets.right, height + insets.top + insets.bottom);
 	            return preferredSize;
 	        }
 	        else

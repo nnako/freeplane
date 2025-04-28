@@ -78,21 +78,21 @@ public class OutlineLayout implements INodeViewLayout {
 		for (int i = 0; i < childCount; i++) {
 			final NodeView component = (NodeView) view.getComponent(i);
 			child = component;
-			final int additionalCloudHeigth = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(child) / 2;
-			y += additionalCloudHeigth;
+			final int additionalCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child) / 2;
+			y += additionalCloudHeight;
 			final int x = baseX - child.getContent().getX();
 			child.setLocation(x, y);
 			final int childHeight = child.getHeight() - 2 * spaceAround;
 			if (childHeight != 0) {
-				y += childHeight + vgap + additionalCloudHeigth;
+				y += childHeight + vgap + additionalCloudHeight;
 			}
-			right = Math.max(right, x + child.getWidth() + additionalCloudHeigth);
+			right = Math.max(right, x + child.getWidth() + additionalCloudHeight);
 		}
 		final int bottom = content.getY() + content.getHeight() + spaceAround;
 		if (child != null) {
 			final NodeView node = child;
 			view.setSize(right,
-			    Math.max(bottom, child.getY() + child.getHeight() + CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(node) / 2));
+			    Math.max(bottom, child.getY() + child.getHeight() + CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(node) / 2));
 		}
 		else {
 			view.setSize(right, bottom);

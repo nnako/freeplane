@@ -37,9 +37,9 @@ class ArrowIcon implements Icon{
      *
      */
 	final private boolean down;
-	final private static int ARROW_HEIGTH = (int) (5 * UITools.FONT_SCALE_FACTOR);
+	final private static int ARROW_HEIGHT = (int) (5 * UITools.FONT_SCALE_FACTOR);
 	final private static int ARROW_HALF_WIDTH = (int) (4 * UITools.FONT_SCALE_FACTOR);
-	final private static int ICON_HEIGTH = ARROW_HEIGTH + 2;
+	final private static int ICON_HEIGHT = ARROW_HEIGHT + 2;
 	final private static int ICON_WIDTH = 1 + ARROW_HALF_WIDTH * 2 + 1;
 
 
@@ -49,7 +49,7 @@ class ArrowIcon implements Icon{
     }
 
 	public int getIconHeight() {
-		return ICON_HEIGTH;
+		return ICON_HEIGHT;
     }
 
 	public int getIconWidth() {
@@ -64,12 +64,12 @@ class ArrowIcon implements Icon{
 		xs[1] = 1;
 		xs[2] = xs[0] + ARROW_HALF_WIDTH;
 		if(down){
-			ys[0] = 1 + ARROW_HEIGTH;
+			ys[0] = 1 + ARROW_HEIGHT;
 			ys[1] = ys[2] = 1;
 		}
 		else{
 			ys[0] = 1;
-			ys[1] = ys[2] = 1 + ARROW_HEIGTH;
+			ys[1] = ys[2] = 1 + ARROW_HEIGHT;
 		}
 		g.drawPolygon(xs, ys, 3);
     }

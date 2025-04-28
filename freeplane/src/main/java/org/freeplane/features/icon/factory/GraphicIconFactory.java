@@ -31,12 +31,12 @@ class GraphicIconFactory implements IconFactory {
 
 	@Override
 	public Icon getIcon(final UIIcon uiIcon) {
-		return getIcon(uiIcon.getUrl(), DEFAULT_UI_ICON_HEIGTH);
+		return getIcon(uiIcon.getUrl(), DEFAULT_UI_ICON_HEIGHT);
 	}
 
 	@Override
 	public Icon getIcon(final URL url) {
-		return getIcon(url, DEFAULT_UI_ICON_HEIGTH);
+		return getIcon(url, DEFAULT_UI_ICON_HEIGHT);
 	}
 
 	private String createCacheKey(final URL url, final int heightPixels) {
