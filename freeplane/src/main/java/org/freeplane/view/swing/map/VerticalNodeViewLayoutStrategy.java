@@ -422,16 +422,16 @@ class VerticalNodeViewLayoutStrategy {
 
         handleFirstVisibleChildAlignment();
 
+        int distance = calculateAvailableDistanceForCompactLayout(child, index);
         int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
         int upperGap = align(extraVGap);
 
-        int distance = calculateAvailableDistanceForCompactLayout(child, index);
         if(distance == StepFunction.DEFAULT_VALUE) {
-			distance = -y;
-			y = 0;
-			extraVGap -= upperGap;
-			upperGap = 0;
-		}
+            distance = -y;
+            y = 0;
+            extraVGap -= upperGap;
+            upperGap = 0;
+        }
         else if (distance != 0) {
             y -= distance;
             extraVGap += extraGapForChildren - upperGap;
@@ -480,15 +480,18 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private int calculateAvailableDistanceForCompactLayout(NodeViewLayoutHelper child, int index) {
-        int distance = 0;
         if (isAutoCompactLayoutEnabled && bottomBoundary != null) {
-            StepFunction childTopBoundary = child.getTopBoundary();
+            StepFunction childTopBoundary;
+            if(view.usesHorizontalLayout() != child.usesHorizontalLayout() || child.getChildNodesAlignment().isStacked())
+            	childTopBoundary = StepFunction.segment(spaceAround, child.getWidth() - spaceAround, spaceAround + child.getTopOverlap());
+            else
+            	childTopBoundary = child.getTopBoundary();
             if (childTopBoundary != null) {
                 childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-                distance = childTopBoundary.distance(bottomBoundary);
+                return childTopBoundary.distance(bottomBoundary);
             }
         }
-        return distance;
+        return 0;
     }
 
     private int adjustForLeftChildrenWithHandles(NodeViewLayoutHelper child, int extraVGap) {
@@ -666,11 +669,14 @@ class VerticalNodeViewLayoutStrategy {
 
     private void updateBottomBoundary(NodeViewLayoutHelper child, int index, int y, CombineOperation combineOperation) {
         if(isAutoCompactLayoutEnabled) {
-            StepFunction childBottomBoundary = child.getBottomBoundary();
-            if(childBottomBoundary != null) {
-                childBottomBoundary = childBottomBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-                bottomBoundary = bottomBoundary == null ? childBottomBoundary : childBottomBoundary.combine(bottomBoundary, combineOperation);
-            }
+            StepFunction childBottomBoundary;
+            if(view.usesHorizontalLayout() != child.usesHorizontalLayout() || child.getChildNodesAlignment().isStacked())
+            	childBottomBoundary = StepFunction.segment(spaceAround, child.getWidth() - spaceAround,
+            			child.getHeight() - spaceAround + child.getTopOverlap());
+            else
+            	childBottomBoundary = child.getBottomBoundary();
+            childBottomBoundary = childBottomBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
+            bottomBoundary = bottomBoundary == null ? childBottomBoundary : childBottomBoundary.combine(bottomBoundary, combineOperation);
         }
     }
 
@@ -797,14 +803,6 @@ class VerticalNodeViewLayoutStrategy {
             return;
         }
 
-        if (view.usesHorizontalLayout() == parentView.usesHorizontalLayout()) {
-            calculateSameOrientationLayoutBoundaries(contentX, contentY, baseY, cloudExtra);
-        } else {
-            calculateQuerOrientationLayoutBoundaries(spaceAround, width, height);
-        }
-    }
-
-    private void calculateSameOrientationLayoutBoundaries(int contentX, int contentY, int baseY, int cloudExtra) {
         final int segmentStart = contentX;
         final int segmentEnd = contentX + contentSize.width;
 
@@ -851,14 +849,6 @@ class VerticalNodeViewLayoutStrategy {
         }
 
         return viewTopBoundary;
-    }
-
-    private void calculateQuerOrientationLayoutBoundaries(int spaceAround, int width, int height) {
-        StepFunction viewTopBoundary = StepFunction.segment(spaceAround, width - 2 * spaceAround, spaceAround);
-        StepFunction viewBottomBoundary = StepFunction.segment(spaceAround, width - 2 * spaceAround, height - spaceAround);
-
-        view.setTopBoundary(viewTopBoundary);
-        view.setBottomBoundary(viewBottomBoundary);
     }
 
     private boolean isFirstVisibleLaidOutChild() {

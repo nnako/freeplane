@@ -142,7 +142,8 @@ class NodeViewLayoutHelper {
 	}
 
 	void setTopOverlap(int topOverlap) {
-		this.topOverlap = topOverlap;
+		final NodeViewLayoutHelper parentView = getParentView();
+		this.topOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  topOverlap : 0 ;
 	}
 
 	int getBottomOverlap() {
@@ -150,7 +151,8 @@ class NodeViewLayoutHelper {
 	}
 
 	void setBottomOverlap(int bottomOverlap) {
-		this.bottomOverlap = bottomOverlap;
+		final NodeViewLayoutHelper parentView = getParentView();
+		this.bottomOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  bottomOverlap : 0 ; ;
 	}
 
 
