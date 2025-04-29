@@ -425,8 +425,9 @@ class VerticalNodeViewLayoutStrategy {
         int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
         int upperGap = align(extraVGap);
 
-        int distance = adjustForAutoCompactLayout(child, index);
+        int distance = calculateAvailableDistanceForCompactLayout(child, index);
         if (distance != 0 && distance != StepFunction.DEFAULT_VALUE) {
+            y -= distance;
             extraVGap += extraGapForChildren - upperGap;
             upperGap = extraGapForChildren;
         }
@@ -472,16 +473,13 @@ class VerticalNodeViewLayoutStrategy {
         }
     }
 
-    private int adjustForAutoCompactLayout(NodeViewLayoutHelper child, int index) {
+    private int calculateAvailableDistanceForCompactLayout(NodeViewLayoutHelper child, int index) {
         int distance = 0;
         if (isAutoCompactLayoutEnabled && bottomBoundary != null) {
             StepFunction childTopBoundary = child.getTopBoundary();
             if (childTopBoundary != null) {
                 childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
                 distance = childTopBoundary.distance(bottomBoundary);
-                if (distance != 0 && distance != StepFunction.DEFAULT_VALUE) {
-                    y -= distance;
-                }
             }
         }
         return distance;
@@ -500,6 +498,22 @@ class VerticalNodeViewLayoutStrategy {
         }
         return added;
     }
+
+    private int adjustForRightChildrenWithHandles(NodeViewLayoutHelper child, int extraVGap) {
+        int added = 0;
+        if (!child.paintsChildrenOnTheLeft() && view.usesHorizontalLayout()) {
+            int missingWidth = child.getMinimumDistanceConsideringHandles() - vGap - extraVGap;
+            if (missingWidth > 0) {
+                y += missingWidth;
+                if (!isFirstVisibleLaidOutChild()) {
+                    added += missingWidth;
+                }
+            }
+        }
+        return added;
+    }
+
+
 
     private void setYCoordinate(int index, int childShiftY) {
         if (childShiftY < 0 && !allowsCompactLayout) {
@@ -521,20 +535,6 @@ class VerticalNodeViewLayoutStrategy {
         } else if (childRegularHeight != 0) {
             vGap = summarizedNodeDistance(minimalDistanceBetweenChildren);
         }
-    }
-
-    private int adjustForRightChildrenWithHandles(NodeViewLayoutHelper child, int extraVGap) {
-        int added = 0;
-        if (!child.paintsChildrenOnTheLeft() && view.usesHorizontalLayout()) {
-            int missingWidth2 = child.getMinimumDistanceConsideringHandles() - vGap - extraVGap;
-            if (missingWidth2 > 0) {
-                y += missingWidth2;
-                if (!isFirstVisibleLaidOutChild()) {
-                    added += missingWidth2;
-                }
-            }
-        }
-        return added;
     }
 
     private void updateTotalSideShiftY(NodeViewLayoutHelper child,
