@@ -444,7 +444,6 @@ class VerticalNodeViewLayoutStrategy {
             y += upperGap;
         }
 
-        updateTotalSideShiftY(childShiftY);
 
         setYCoordinate(index, childShiftY);
 
@@ -462,7 +461,7 @@ class VerticalNodeViewLayoutStrategy {
         y += childRegularHeight;
         bottomY = Math.max(bottomY, y);
 
-        updateTotalSideShiftYForAlignment(child, childContentHeightSum, additionalCloudHeight, upperGap, extraVGap, childRegularHeight, distance);
+        updateTotalSideShiftY(child, childShiftY, childContentHeightSum, additionalCloudHeight, upperGap, extraVGap, childRegularHeight, distance);
     }
 
     private void handleFirstVisibleChildAlignment() {
@@ -502,12 +501,6 @@ class VerticalNodeViewLayoutStrategy {
         return added;
     }
 
-    private void updateTotalSideShiftY(int childShiftY) {
-        if ((childShiftY < 0 || isFirstVisibleLaidOutChild()) && !allowsCompactLayout) {
-            totalSideShiftY += childShiftY;
-        }
-    }
-
     private void setYCoordinate(int index, int childShiftY) {
         if (childShiftY < 0 && !allowsCompactLayout) {
             yCoordinates[index] = y;
@@ -544,7 +537,13 @@ class VerticalNodeViewLayoutStrategy {
         return added;
     }
 
-    private void updateTotalSideShiftYForAlignment(NodeViewLayoutHelper child, int childContentHeightSum, int additionalCloudHeight, int upperGap, int extraVGap, int childRegularHeight, int distance) {
+    private void updateTotalSideShiftY(NodeViewLayoutHelper child,
+            int childShiftY,
+            int childContentHeightSum, int additionalCloudHeight, int upperGap, int extraVGap, int childRegularHeight, int distance) {
+        if ((childShiftY < 0 || isFirstVisibleLaidOutChild()) && !allowsCompactLayout) {
+            totalSideShiftY += childShiftY;
+        }
+
         final int sideShiftY;
         switch (childNodesAlignment) {
             case FLOW:
@@ -757,8 +756,8 @@ class VerticalNodeViewLayoutStrategy {
 
             int x = contentX + xCoordinates[i];
             int y = (viewLevels.summaryLevels[i] == 0 && free)
-			? contentY + yCoordinates[i]
-			: baseY + yCoordinates[i] - childTopOverlap;
+            ? contentY + yCoordinates[i]
+            : baseY + yCoordinates[i] - childTopOverlap;
 
             child.setLocation(x, y);
 
@@ -832,7 +831,7 @@ class VerticalNodeViewLayoutStrategy {
 
     private StepFunction calculateTopBoundary(int contentY, int cloudExtra, int segmentStart,
                                             int segmentEnd) {
-		StepFunction viewTopBoundary = contentSize.width <= 0 ? null :
+        StepFunction viewTopBoundary = contentSize.width <= 0 ? null :
             StepFunction.segment(segmentStart, segmentEnd, contentY - cloudExtra);
 
         for (int i = childViewCount - 1; i >= 0; i--) {
