@@ -426,7 +426,13 @@ class VerticalNodeViewLayoutStrategy {
         int upperGap = align(extraVGap);
 
         int distance = calculateAvailableDistanceForCompactLayout(child, index);
-        if (distance != 0 && distance != StepFunction.DEFAULT_VALUE) {
+        if(distance == StepFunction.DEFAULT_VALUE) {
+			distance = -y;
+			y = 0;
+			extraVGap -= upperGap;
+			upperGap = 0;
+		}
+        else if (distance != 0) {
             y -= distance;
             extraVGap += extraGapForChildren - upperGap;
             upperGap = extraGapForChildren;
