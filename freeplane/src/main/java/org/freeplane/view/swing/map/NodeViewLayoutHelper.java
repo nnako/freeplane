@@ -249,10 +249,6 @@ class NodeViewLayoutHelper {
         return view.getMinimumDistanceConsideringHandles();
     }
 
-    boolean paintsChildrenOnTheLeft() {
-        return view.paintsChildrenOnTheLeft();
-    }
-
     @Override
     public String toString() {
         return "NodeViewLayoutHelper [view=" + view + "]";
