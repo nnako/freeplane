@@ -49,6 +49,7 @@ class VerticalNodeViewLayoutStrategy {
     private final boolean[] isChildFreeNode;
     private StepFunction bottomBoundary;
     private int bottomY;
+    private int bottomContentY;
     private StepFunction leftBottomBoundary;
     private StepFunction rightBottomBoundary;
     private SummaryLevels viewLevels;
@@ -242,6 +243,7 @@ class VerticalNodeViewLayoutStrategy {
         level = viewLevels.highestSummaryLevel + 1;
         y = 0;
         bottomY = 0;
+        bottomContentY = 0;
         bottomBoundary = null;
         vGap = 0;
         visibleLaidOutChildCounter = 0;
@@ -413,13 +415,7 @@ class VerticalNodeViewLayoutStrategy {
         int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
         int upperGap = childNodesAlignment.align(extraVGap);
 
-        if(availableSpace == StepFunction.DEFAULT_VALUE) {
-            availableSpace = -y;
-            y = 0;
-            extraVGap -= upperGap;
-            upperGap = 0;
-        }
-        else if (availableSpace != 0) {
+        if (availableSpace != 0) {
             y -= availableSpace;
             extraVGap += extraGapForChildren - upperGap;
             upperGap = extraGapForChildren;
@@ -473,6 +469,7 @@ class VerticalNodeViewLayoutStrategy {
             else
                 vGap += lowerGap;
             bottomY = Math.max(bottomY, y + childRegularHeight);
+            bottomContentY = y + child.getContentY() - child.getTopOverlap() - spaceAround + child.getContentHeight();
             yBottomCoordinates[index] = y;
             updateBottomBoundary(child, index, y, CombineOperation.FALLBACK);
             y += childRegularHeight;
@@ -511,7 +508,8 @@ class VerticalNodeViewLayoutStrategy {
                 childTopBoundary = child.getTopBoundary();
             if (childTopBoundary != null) {
                 childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-                return childTopBoundary.distance(bottomBoundary);
+                int topContentY = y + child.getContentY() - child.getTopOverlap() - spaceAround;
+                return Math.min(childTopBoundary.distance(bottomBoundary), topContentY - bottomContentY);
             }
         }
         return 0;
@@ -564,6 +562,8 @@ class VerticalNodeViewLayoutStrategy {
                 summaryY += childRegularHeight + minimalGapBetweenChildren;
             }
             y = Math.max(y, summaryY);
+            bottomY = Math.max(bottomY, summaryY);
+            bottomContentY = Math.max(bottomContentY, summaryY);
         }
     }
 
