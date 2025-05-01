@@ -1457,7 +1457,7 @@ public class NodeView extends JComponent implements INodeView {
 		if (PAINT_DEBUG_INFO && isSelected() && paintingMode.equals(PaintingMode.SELECTED_NODES)){
 			final int spaceAround = getZoomed(SPACE_AROUND);
 			g.setColor(UITools.getTextColorForBackground(getBackgroundColor()));
-			g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+			g.drawRect(spaceAround - 3, spaceAround - 3, getWidth() - 2 * spaceAround + 4, getHeight() - 2 * spaceAround + 4);
 			g.drawRect(spaceAround - 1, spaceAround - 1, getWidth() - 2 * spaceAround, getHeight() - 2 * spaceAround);
 			Object debugInfo = getClientProperty(DEBUG_INFO_PROPERTY);
 			if(debugInfo != null)
