@@ -412,6 +412,7 @@ class VerticalNodeViewLayoutStrategy {
         handleFirstVisibleChildAlignment();
 
         int availableSpace = calculateAvailableSpaceForCompactLayout(child, index);
+        int y0 = y;
         int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
         int upperGap = childNodesAlignment.align(extraVGap);
 
@@ -443,16 +444,17 @@ class VerticalNodeViewLayoutStrategy {
 
         if (childRegularHeight != 0) {
 
-            final int yRef = isFirstVisibleLaidOutChild() ? 0 : bottomY + childShiftY;
             if (isFirstVisibleLaidOutChild() && !allowsCompactLayout) {
                 totalSideShiftY += childNodesAlignment.placement() == Placement.CENTER ? childShiftY * 2 : childShiftY;
             }
             if (childNodesAlignment == ChildNodesAlignment.FLOW
                     || childNodesAlignment == ChildNodesAlignment.AUTO) {
-                int yFlow = yBegin + child.getContentY() - child.getTopOverlap() - spaceAround + child.getContentHeight()/2 - vGap/2;
-                if(yFlow > yRef)
-                    totalSideShiftY -= 2 * (yFlow - yRef) + (child.getContentHeight() & 1) - (vGap & 1);
+                final int availableSpaceForFolded = calculateAvailableSpaceForFolded(child, index, y0);
+                int yFlow = child.getContentY() - child.getTopOverlap() - spaceAround + child.getContentHeight()/2 + vGap/2 + upperGap - availableSpace + availableSpaceForFolded;
+                final int deltaShift = 2 * yFlow + (child.getContentHeight() & 1) + (vGap & 1);
+                totalSideShiftY -= deltaShift;
             } else if (childNodesAlignment.placement() != Placement.TOP) {
+                final int yRef = isFirstVisibleLaidOutChild() ? 0 : bottomY + childShiftY;
                 int yEnd = yBegin + childRegularHeight;
                 if(yEnd > yRef) {
                     totalSideShiftY -= (yEnd - yRef);
@@ -511,6 +513,18 @@ class VerticalNodeViewLayoutStrategy {
                 final int contentDistance = topContentY - bottomContentY;
                 return Math.min(distance, contentDistance);
             }
+        }
+        return 0;
+    }
+
+    private int calculateAvailableSpaceForFolded(NodeViewLayoutHelper child, int index, int y) {
+        if (isAutoCompactLayoutEnabled && bottomBoundary != null) {
+            StepFunction childTopBoundary = StepFunction.segment(child.getContentX(), child.getContentX() + child.getContentWidth(), spaceAround + child.getTopOverlap());
+            childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
+            int topContentY = y + child.getTopOverlap();
+            final int distance = childTopBoundary.distance(bottomBoundary);
+            final int contentDistance = topContentY - bottomContentY;
+            return Math.min(distance, contentDistance);
         }
         return 0;
     }
