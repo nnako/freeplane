@@ -78,6 +78,7 @@ class VerticalNodeViewLayoutStrategy {
     private boolean currentSideLeft;
 
     private int baseDistanceToChildren;
+    private int fullBaseDistanceToChildren;
     private boolean areChildrenSeparatedByY;
     private int[] summaryBaseX;
 
@@ -104,7 +105,8 @@ class VerticalNodeViewLayoutStrategy {
         this.defaultVGap = view.getMap().getZoomed(LocationModel.DEFAULT_VGAP.toBaseUnits());
         this.minimalGapBetweenChildren = view.getMinimalDistanceBetweenChildren();
         this.extraGapForChildren = calculateExtraGapForChildren(minimalGapBetweenChildren);
-
+        this.baseDistanceToChildren = view.getBaseDistanceToChildren();
+        this.fullBaseDistanceToChildren = view.getFullBaseDistanceToChildren();
     }
 
     private void layoutChildViews(NodeView view) {
@@ -150,7 +152,6 @@ class VerticalNodeViewLayoutStrategy {
 
     private void calculateLayoutX(final boolean laysOutLeftSide) {
         currentSideLeft = laysOutLeftSide;
-        baseDistanceToChildren = view.getBaseDistanceToChildren();
         areChildrenSeparatedByY = childNodesAlignment.isStacked();
         level = viewLevels.highestSummaryLevel + 1;
         summaryBaseX = new int[level];
@@ -519,7 +520,11 @@ class VerticalNodeViewLayoutStrategy {
 
     private int calculateAvailableSpaceForFolded(NodeViewLayoutHelper child, int index, int y) {
         if (isAutoCompactLayoutEnabled && bottomBoundary != null) {
-            StepFunction childTopBoundary = StepFunction.segment(child.getContentX(), child.getContentX() + child.getContentWidth(), spaceAround + child.getTopOverlap());
+        	final int contentX = child.getContentX();
+            final int segmentStart = contentX - fullBaseDistanceToChildren/2 + 1;
+            final int segmentEnd = contentX + contentSize.width + fullBaseDistanceToChildren/2 - 1;
+
+			StepFunction childTopBoundary = StepFunction.segment(segmentStart, segmentEnd, spaceAround + child.getTopOverlap());
             childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
             int topContentY = y + child.getTopOverlap();
             final int distance = childTopBoundary.distance(bottomBoundary);
@@ -762,8 +767,8 @@ class VerticalNodeViewLayoutStrategy {
             return;
         }
 
-        final int segmentStart = contentX;
-        final int segmentEnd = contentX + contentSize.width;
+        final int segmentStart = contentX - fullBaseDistanceToChildren/2 + 1;
+        final int segmentEnd = contentX + contentSize.width + fullBaseDistanceToChildren/2 - 1;
 
         StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudExtra, segmentStart, segmentEnd);
         StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudExtra, segmentStart, segmentEnd);

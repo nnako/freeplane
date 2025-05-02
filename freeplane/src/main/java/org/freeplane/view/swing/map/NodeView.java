@@ -911,9 +911,17 @@ public class NodeView extends JComponent implements INodeView {
     }
 
     public int getBaseDistanceToChildren() {
-        final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
-        return map.getZoomed(distance - LocationModel.DEFAULT_HGAP_PX);
+        return getBaseDistanceToChildren(LocationModel.DEFAULT_HGAP_PX);
     }
+
+    int getFullBaseDistanceToChildren() {
+        return getBaseDistanceToChildren(0);
+    }
+
+	private int getBaseDistanceToChildren(int zeroPoint) {
+		final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
+        return map.getZoomed(distance - zeroPoint);
+	}
 
 	public ChildNodesAlignment getChildNodesAlignment() {
 	    updateLayoutProperties();

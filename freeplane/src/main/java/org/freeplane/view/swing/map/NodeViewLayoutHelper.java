@@ -62,6 +62,10 @@ class NodeViewLayoutHelper {
         return view.getBaseDistanceToChildren();
     }
 
+    int getFullBaseDistanceToChildren() {
+        return view.getFullBaseDistanceToChildren();
+    }
+
 	int getSpaceAround() {
 		return view.getSpaceAround();
 	}
