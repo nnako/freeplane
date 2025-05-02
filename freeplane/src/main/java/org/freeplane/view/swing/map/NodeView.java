@@ -911,17 +911,9 @@ public class NodeView extends JComponent implements INodeView {
     }
 
     public int getBaseDistanceToChildren() {
-        return getBaseDistanceToChildren(LocationModel.DEFAULT_HGAP_PX);
+        final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
+		return map.getZoomed(distance - LocationModel.DEFAULT_HGAP_PX);
     }
-
-    int getFullBaseDistanceToChildren() {
-        return getBaseDistanceToChildren(0);
-    }
-
-	private int getBaseDistanceToChildren(int zeroPoint) {
-		final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
-        return map.getZoomed(distance - zeroPoint);
-	}
 
 	public ChildNodesAlignment getChildNodesAlignment() {
 	    updateLayoutProperties();
@@ -1043,11 +1035,19 @@ public class NodeView extends JComponent implements INodeView {
 	int getMinimumDistanceConsideringHandles() {
 	    int draggingAreaWidth = mainView.getDraggingAreaWidth();
 	    if(!usesHorizontalLayout()) {
-	        final int preferredFoldingSymbolWidth = Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+	        final int preferredFoldingSymbolWidth = getPreferredFoldingSymbolWidth();
 	        return draggingAreaWidth + preferredFoldingSymbolWidth;
 	    }
 	    else
 	        return draggingAreaWidth;
+	}
+
+	int getPreferredFoldingSymbolWidth() {
+		return Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+	}
+
+	int getPreferredHandleWidth() {
+		return Math.max(getPreferredFoldingSymbolWidth(), mainView.getDraggingAreaWidth());
 	}
 
 	public int getZoomedStateSymbolHalfWidth() {

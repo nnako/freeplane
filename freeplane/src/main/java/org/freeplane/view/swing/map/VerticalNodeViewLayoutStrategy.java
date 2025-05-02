@@ -78,7 +78,6 @@ class VerticalNodeViewLayoutStrategy {
     private boolean currentSideLeft;
 
     private int baseDistanceToChildren;
-    private int fullBaseDistanceToChildren;
     private boolean areChildrenSeparatedByY;
     private int[] summaryBaseX;
 
@@ -106,7 +105,6 @@ class VerticalNodeViewLayoutStrategy {
         this.minimalGapBetweenChildren = view.getMinimalDistanceBetweenChildren();
         this.extraGapForChildren = calculateExtraGapForChildren(minimalGapBetweenChildren);
         this.baseDistanceToChildren = view.getBaseDistanceToChildren();
-        this.fullBaseDistanceToChildren = view.getFullBaseDistanceToChildren();
     }
 
     private void layoutChildViews(NodeView view) {
@@ -435,7 +433,7 @@ class VerticalNodeViewLayoutStrategy {
         yCoordinates[index] = yBegin;
 
         if (childRegularHeight != 0) {
-            adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, upperGap, availableSpace, y0, index);
+            adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, availableSpace, y0);
             updateGapsAndBoundaries(index, child, childRegularHeight, extraVGap, upperGap);
         }
     }
@@ -457,7 +455,7 @@ class VerticalNodeViewLayoutStrategy {
 
     private void adjustTotalShiftForAlignment(NodeViewLayoutHelper child, int childShiftY,
                                         int yBegin, int childRegularHeight,
-                                        int upperGap, int availableSpace, int y0, int index) {
+                                        int availableSpace, int y0) {
         if (isFirstVisibleLaidOutChild() && !allowsCompactLayout) {
             totalSideShiftY += childNodesAlignment.placement() == Placement.CENTER ?
                 childShiftY * 2 : childShiftY;
@@ -757,7 +755,7 @@ class VerticalNodeViewLayoutStrategy {
         view.setTopOverlap(topOverlap);
         view.setBottomOverlap(height - heightWithoutOverlap);
 
-        if(! view.isFree())
+        if(! view.isFree() && isAutoCompactLayoutEnabled)
             calculateAndSetBoundaries(contentX, contentY, baseY, cloudExtra, spaceAround, width, height);
         else {
             view.setTopBoundary(null);
@@ -772,9 +770,9 @@ class VerticalNodeViewLayoutStrategy {
         if (parentView == null || !isAutoCompactLayoutEnabled || width <= spaceAround || height <= spaceAround) {
             return;
         }
-
-        final int segmentStart = contentX - fullBaseDistanceToChildren/2 + 1;
-        final int segmentEnd = contentX + contentSize.width + fullBaseDistanceToChildren/2 - 1;
+        final int handleSpace = view.getPreferredHandleWidth() / 2;
+        final int segmentStart = contentX - handleSpace;
+        final int segmentEnd = contentX + contentSize.width + handleSpace;
 
         StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudExtra, segmentStart, segmentEnd);
         StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudExtra, segmentStart, segmentEnd);

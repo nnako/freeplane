@@ -62,11 +62,7 @@ class NodeViewLayoutHelper {
         return view.getBaseDistanceToChildren();
     }
 
-    int getFullBaseDistanceToChildren() {
-        return view.getFullBaseDistanceToChildren();
-    }
-
-	int getSpaceAround() {
+ 	int getSpaceAround() {
 		return view.getSpaceAround();
 	}
 
@@ -251,6 +247,10 @@ class NodeViewLayoutHelper {
 
     int getMinimumDistanceConsideringHandles() {
         return view.getMinimumDistanceConsideringHandles();
+    }
+
+    int getPreferredHandleWidth() {
+        return view.getPreferredHandleWidth();
     }
 
     @Override
