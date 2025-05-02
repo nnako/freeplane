@@ -399,24 +399,24 @@ implements IExtension, NodeChangeAnnouncer{
 	    scrollNodeTree(node, "scrollOnUnfold");
 	}
 
+	private void scrollNodeToVisibleLater(final NodeModel node) {
+    	SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeToVisible(node));
+	}
+
 	public void scrollNodeTreeAfterSelect(final NodeModel node) {
 	    scrollNodeTree(node, "scrollOnSelect");
 	}
 
 	private void scrollNodeTree(final NodeModel node, String propertyName) {
     ResourceController resourceController = ResourceController.getResourceController();
-	if (resourceController.getBooleanProperty(propertyName)
-			&& !(MouseEventActor.INSTANCE.isActive()
-			&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
-    	SwingUtilities.invokeLater(new Runnable() {
-    		@Override
-    		public void run() {
-    			Controller.getCurrentController().getSelection().scrollNodeTreeToVisible(node);
-    		}
-    	});
-
-    }
-}
+    	if (resourceController.getBooleanProperty(propertyName)
+    			&& !(MouseEventActor.INSTANCE.isActive()
+    			&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
+        	SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeTreeToVisible(node));
+    	}
+    	else
+    		scrollNodeToVisibleLater(node);
+	}
 
 	public void setFolded(final NodeModel node, final boolean fold, Filter filter) {
 		if(!fold || node.isRoot())
@@ -445,20 +445,22 @@ implements IExtension, NodeChangeAnnouncer{
     }
 
 
-
-
-    public void toggleFoldedAndScroll(Filter filter, NodeModel selected,
-            List<NodeModel> childNodes) {
+    public void toggleFoldedAndScroll(NodeModel node, List<NodeModel> childNodes,
+            Filter filter) {
         boolean unfolded = toggleFolded(filter, childNodes);
         if(unfolded)
-            scrollNodeTreeAfterUnfold(selected);
+            scrollNodeTreeAfterUnfold(node);
+        else
+        	scrollNodeToVisibleLater(node);
     }
 
     public void toggleFoldedAndScroll(final NodeModel node, Filter filter){
         if(canBeUnfoldedOnCurrentView(node, filter))
             unfoldAndScroll(node, filter);
-        else
-            fold(node);
+		else {
+			fold(node);
+			scrollNodeToVisibleLater(node);
+		}
     }
 
 	public void unfold(final NodeModel node, Filter filter) {

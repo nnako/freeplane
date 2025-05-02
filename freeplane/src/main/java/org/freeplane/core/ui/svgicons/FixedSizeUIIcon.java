@@ -105,7 +105,7 @@ public class FixedSizeUIIcon implements Icon {
         return height;
     }
 
-    public static FixedSizeUIIcon withHeigth(URL url, int heightInPixel, boolean hasStandardSize) {
+    public static FixedSizeUIIcon withHeight(URL url, int heightInPixel, boolean hasStandardSize) {
         FixedSizeUIIcon fixedSizeUIIcon = new FixedSizeUIIcon(url, heightInPixel, heightInPixel);
         return hasStandardSize ? fixedSizeUIIcon : fixedSizeUIIcon.withProportionalWidth();
     }

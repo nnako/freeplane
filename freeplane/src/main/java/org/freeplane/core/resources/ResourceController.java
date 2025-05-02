@@ -418,7 +418,7 @@ public abstract class ResourceController {
 			return null;
 		URL url = getIconResource(resourcePath);
 		if (url != null) {
-			return IconFactory.getInstance().getIcon(url, IconFactory.DEFAULT_UI_ICON_HEIGTH);
+			return IconFactory.getInstance().getIcon(url, IconFactory.DEFAULT_UI_ICON_HEIGHT);
 		}
 		else if(! isOptional){
 			LogUtils.severe("can not load icon '" + resourcePath + "'");

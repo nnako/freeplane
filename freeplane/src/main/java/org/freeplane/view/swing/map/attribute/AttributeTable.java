@@ -192,7 +192,7 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 	static private AttributeTableCellRenderer dtcr = new AttributeTableCellRenderer();
 	private static final int EXTRA_HEIGHT = 4;
 	static private CursorUpdater cursorUpdater = new CursorUpdater();
-	private static final int MAX_HEIGTH = 600;
+	private static final int MAX_HEIGHT = 600;
 	private static final long serialVersionUID = 1L;
 	private static final int CURSOR_WIDTH = 2;
 	public static AttributeTable getSelectedTable(){
@@ -623,11 +623,11 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 			final ModeController modeController = map.getModeController();
 			final NodeStyleController nsc = NodeStyleController.getController(modeController);
 			dimension.width = Math.min(map.getZoomed(nsc.getMaxWidth(nodeView.getNode(), nodeView.getStyleOption()).toBaseUnits()), dimension.width);
-			dimension.height = Math.min(map.getZoomed(AttributeTable.MAX_HEIGTH) - getTableHeaderHeight(), dimension.height);
+			dimension.height = Math.min(map.getZoomed(AttributeTable.MAX_HEIGHT) - getTableHeaderHeight(), dimension.height);
 		}
 		else{
 //			dimension.width = Math.min(MAX_WIDTH, dimension.width);
-//			dimension.height = Math.min(MAX_HEIGTH, dimension.height);
+//			dimension.height = Math.min(MAX_HEIGHT, dimension.height);
 		}
 		return dimension;
 	}

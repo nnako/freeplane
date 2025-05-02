@@ -63,7 +63,7 @@ class ToggleChildrenFoldedAction extends AFreeplaneAction {
 	                .flatMap(List::stream)
 	                .collect(Collectors.toList());
             if(selectedNodes.size() == 1)
-                mapController.toggleFoldedAndScroll(filter, mapSelection.getSelected(), childNodes);
+                mapController.toggleFoldedAndScroll(mapSelection.getSelected(), childNodes, filter);
             else
                 mapController.toggleFolded(filter, childNodes);
 

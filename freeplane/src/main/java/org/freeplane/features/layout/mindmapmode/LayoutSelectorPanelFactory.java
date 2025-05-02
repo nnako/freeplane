@@ -32,7 +32,7 @@ class LayoutSelectorPanelFactory {
 
     public final static Icon RIGHT_ARROW_ICON = IconFactory.getInstance()
             .getIcon(ResourceController.getResourceController().getIconResource("/images/layouts/right_arrow.svg?useAccentColor=true"),
-                    IconFactory.DEFAULT_UI_ICON_HEIGTH.zoomBy(2));
+                    IconFactory.DEFAULT_UI_ICON_HEIGHT.zoomBy(2));
 
     static public ButtonSelectorPanel createLayoutSelectorPanel() {
         final Vector<ButtonIcon> icons = new Vector<>(LayoutSelectorPanelFactory.LAYOUTS.length);
@@ -47,7 +47,7 @@ class LayoutSelectorPanelFactory {
             else
                 componentBefore = ComponentBefore.NOTHING;
             icons.add(new ButtonIcon(layout.name(),
-                    IconFactory.getInstance().getIcon(url, IconFactory.DEFAULT_UI_ICON_HEIGTH.zoomBy(2)),
+                    IconFactory.getInstance().getIcon(url, IconFactory.DEFAULT_UI_ICON_HEIGHT.zoomBy(2)),
                     description(layout), componentBefore));
         }
         Collection<String> alignmentNames = Stream.of(LayoutSelectorPanelFactory.LAYOUTS).map(Enum::name).collect(Collectors.toList());

@@ -39,7 +39,7 @@ import org.freeplane.features.icon.UIIcon;
  */
 public interface IconFactory {
 
-	Quantity<LengthUnit> DEFAULT_UI_ICON_HEIGTH = ResourceController.getResourceController()
+	Quantity<LengthUnit> DEFAULT_UI_ICON_HEIGHT = ResourceController.getResourceController()
 		    .getLengthQuantityProperty("toolbar_icon_height");
 
 	IconFactory FACTORY = ! GraphicsEnvironment.isHeadless() ? GraphicIconFactory.FACTORY : HeadlessIconFactory.FACTORY;

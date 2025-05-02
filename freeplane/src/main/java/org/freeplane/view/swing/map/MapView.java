@@ -781,6 +781,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private final INodeChangeListener connectorChangeListener;
 	private boolean scrollsViewAfterLayout = true;
 	private boolean allowsCompactLayout;
+	private boolean isAutoCompactLayoutEnabled;
     private TagLocation tagLocation;
     private IconLocation iconLocation;
     private boolean repaintsViewOnSelectionChange;
@@ -882,6 +883,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         final String fitToViewportAsString = mapStyle.getPropertySetDefault(viewedMap, MapStyle.FIT_TO_VIEWPORT);
         fitToViewport = Boolean.parseBoolean(fitToViewportAsString);
         allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+        isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
         tagLocation = mapStyle.tagLocation(viewedMap);
         iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
@@ -1544,6 +1546,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if (property.equals(MapStyle.ALLOW_COMPACT_LAYOUT_PROPERTY)) {
             final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
             allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
+            getRoot().resetLayoutPropertiesRecursively();
+            revalidate();
+            repaint();
+        }
+        if (property.equals(MapStyle.AUTO_COMPACT_LAYOUT_PROPERTY)) {
+            final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
+            isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
             getRoot().resetLayoutPropertiesRecursively();
             revalidate();
             repaint();
@@ -3093,6 +3102,10 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 	boolean allowsCompactLayout() {
 		return allowsCompactLayout;
+	}
+
+	boolean isAutoCompactLayoutEnabled() {
+		return isAutoCompactLayoutEnabled;
 	}
 
 	@Override

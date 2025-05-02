@@ -17,6 +17,8 @@ class NodeViewLayoutHelper {
 	private NodeView view;
 	private int topOverlap;
 	private int bottomOverlap;
+	private StepFunction topBoundary;
+	private StepFunction bottomBoundary;
 
 	NodeViewLayoutHelper(NodeView view) {
 		this.view = view;
@@ -27,8 +29,8 @@ class NodeViewLayoutHelper {
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
 	}
 
-	int getAdditionalCloudHeigth() {
-		return CloudHeightCalculator.INSTANCE.getAdditionalCloudHeigth(view);
+	int getAdditionalCloudHeight() {
+		return CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(view);
 	}
 
 	int getComponentCount() {
@@ -48,6 +50,10 @@ class NodeViewLayoutHelper {
 		return view.getNode();
 	}
 
+	NodeView getView() {
+		return view;
+	}
+
     int getMinimalDistanceBetweenChildren() {
         return view.getMinimalDistanceBetweenChildren();
     }
@@ -56,7 +62,7 @@ class NodeViewLayoutHelper {
         return view.getBaseDistanceToChildren();
     }
 
-	int getSpaceAround() {
+ 	int getSpaceAround() {
 		return view.getSpaceAround();
 	}
 
@@ -75,13 +81,7 @@ class NodeViewLayoutHelper {
 	}
 
 
-    int getContentYForSummary() {
-        Component component = view.getContent();
-        return usesHorizontallayout(component) ? component.getX(): component.getY();
-    }
-
-
-	int getContentWidth() {
+    int getContentWidth() {
 		Component component = view.getContent();
         return usesHorizontallayout(view) ? component.getHeight(): component.getWidth();
 	}
@@ -142,7 +142,8 @@ class NodeViewLayoutHelper {
 	}
 
 	void setTopOverlap(int topOverlap) {
-		this.topOverlap = topOverlap;
+		final NodeViewLayoutHelper parentView = getParentView();
+		this.topOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  topOverlap : 0 ;
 	}
 
 	int getBottomOverlap() {
@@ -150,8 +151,27 @@ class NodeViewLayoutHelper {
 	}
 
 	void setBottomOverlap(int bottomOverlap) {
-		this.bottomOverlap = bottomOverlap;
+		final NodeViewLayoutHelper parentView = getParentView();
+		this.bottomOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  bottomOverlap : 0 ; ;
 	}
+
+
+	StepFunction getTopBoundary() {
+		return topBoundary;
+	}
+
+	void setTopBoundary(StepFunction topBoundary) {
+		this.topBoundary = topBoundary;
+	}
+
+	StepFunction getBottomBoundary() {
+		return bottomBoundary;
+	}
+
+	void setBottomBoundary(StepFunction bottomBoundary) {
+		this.bottomBoundary = bottomBoundary;
+	}
+
 	NodeViewLayoutHelper getParentView() {
 		NodeView parentView = view.getParentView();
 		return parentView != null ? parentView.getLayoutHelper() : null;
@@ -229,8 +249,8 @@ class NodeViewLayoutHelper {
         return view.getMinimumDistanceConsideringHandles();
     }
 
-    boolean paintsChildrenOnTheLeft() {
-        return view.paintsChildrenOnTheLeft();
+    int getPreferredHandleWidth() {
+        return view.getPreferredHandleWidth();
     }
 
     @Override

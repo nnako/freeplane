@@ -11,7 +11,7 @@
 ; Predrag Cuklin 18/06/2009 - Universial Version
 ;****************************************************************************
 
-#define MyVersion "1.12.10"
+#define MyVersion "1.12.11"
 #define MyStatus ""
 #define MyAppName "Freeplane"
 #define MyAppPublisher "Open source"
@@ -170,7 +170,7 @@ end;
 
 function IsExistingInstallation: Boolean;
 begin
-  Result := DirExists(ExpandConstant('{pf}\{#MyAppName}')) or 
+  Result := DirExists(ExpandConstant('{pf}\{#MyAppName}')) or
             DirExists(ExpandConstant('{localappdata}\Programs\{#MyAppName}'));
 end;
 

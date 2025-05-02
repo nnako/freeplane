@@ -321,7 +321,7 @@ public class NodeView extends JComponent implements INodeView {
 				final CloudController cloudController = CloudController.getController(modeController);
 				final CloudModel cloud = cloudController.getCloud(getNode(), getStyleOption());
 				if (cloud != null) {
-					additionalDistanceForConvexHull += CloudView.getAdditionalHeigth(cloud, this) / 5;
+					additionalDistanceForConvexHull += CloudView.getAdditionalHeight(cloud, this) / 5;
 				}
 			}
 
@@ -912,7 +912,7 @@ public class NodeView extends JComponent implements INodeView {
 
     public int getBaseDistanceToChildren() {
         final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
-        return map.getZoomed(distance - LocationModel.DEFAULT_HGAP_PX);
+		return map.getZoomed(distance - LocationModel.DEFAULT_HGAP_PX);
     }
 
 	public ChildNodesAlignment getChildNodesAlignment() {
@@ -1035,11 +1035,19 @@ public class NodeView extends JComponent implements INodeView {
 	int getMinimumDistanceConsideringHandles() {
 	    int draggingAreaWidth = mainView.getDraggingAreaWidth();
 	    if(!usesHorizontalLayout()) {
-	        final int preferredFoldingSymbolWidth = Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+	        final int preferredFoldingSymbolWidth = getPreferredFoldingSymbolWidth();
 	        return draggingAreaWidth + preferredFoldingSymbolWidth;
 	    }
 	    else
 	        return draggingAreaWidth;
+	}
+
+	int getPreferredFoldingSymbolWidth() {
+		return Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+	}
+
+	int getPreferredHandleWidth() {
+		return Math.max(getPreferredFoldingSymbolWidth(), mainView.getDraggingAreaWidth());
 	}
 
 	public int getZoomedStateSymbolHalfWidth() {
@@ -1457,7 +1465,7 @@ public class NodeView extends JComponent implements INodeView {
 		if (PAINT_DEBUG_INFO && isSelected() && paintingMode.equals(PaintingMode.SELECTED_NODES)){
 			final int spaceAround = getZoomed(SPACE_AROUND);
 			g.setColor(UITools.getTextColorForBackground(getBackgroundColor()));
-			g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+			g.drawRect(spaceAround - 3, spaceAround - 3, getWidth() - 2 * spaceAround + 4, getHeight() - 2 * spaceAround + 4);
 			g.drawRect(spaceAround - 1, spaceAround - 1, getWidth() - 2 * spaceAround, getHeight() - 2 * spaceAround);
 			Object debugInfo = getClientProperty(DEBUG_INFO_PROPERTY);
 			if(debugInfo != null)

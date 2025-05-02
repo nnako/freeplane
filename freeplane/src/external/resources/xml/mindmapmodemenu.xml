@@ -35,10 +35,10 @@
 			<Entry name="NewChildAction" icon="NewChildToolbar.icon" row="1" weight = "1"/>
 			<Entry name="NewSiblingAction" row="1" weight = "1"/>
 			<Entry builder="dropdownMenu" text = "menu_add_newNode" width = "2" row="2">
-	            <Entry name="NewPreviousSiblingAction" />
-	            <Entry name="NewParentNode" />
-	            <Entry name="NewFreeNodeAction" />
-	            <Entry name="NewSummaryAction"/>
+							<Entry name="NewPreviousSiblingAction" />
+							<Entry name="NewParentNode" />
+							<Entry name="NewFreeNodeAction" />
+							<Entry name="NewSummaryAction"/>
 			</Entry>
 		</Entry>
 		<Entry builder="separator" />
@@ -54,6 +54,7 @@
 		</Entry>
 		<Entry builder="separator" />
 		<Entry builder="childNodesLayout" />
+		<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" />
 		<Entry builder="separator" />
 		<Entry builder="main_toolbar_style" usedBy="EDITOR" row="1" width="11"/>
 		<Entry usedBy="EDITOR" row="2">
@@ -98,8 +99,8 @@
 			</Entry>
 			<Entry builder="separator" />
 			<Entry name="ExportAction" />
-            <Entry name="ExportBranchesAction" />
-            <Entry name="ExportBranchAction"  accelerator="alt shift A" />
+						<Entry name="ExportBranchesAction" />
+						<Entry name="ExportBranchAction"  accelerator="alt shift A" />
 			<Entry name="import" usedBy = "EDITOR" >
 				<Entry name="ImportBranchAction" />
 				<Entry name="ImportLinkedBranchAction" />
@@ -111,11 +112,11 @@
 				<Entry name="ImportMindmanagerFiles" />
 			</Entry>
 			<Entry builder="separator" />
-            <Entry name="print">
-    			<Entry name="PageAction" />
-    			<Entry name="PrintPreviewAction" />
-    			<Entry name="PrintAction" accelerator="control P" />
-            </Entry>
+						<Entry name="print">
+					<Entry name="PageAction" />
+					<Entry name="PrintPreviewAction" />
+					<Entry name="PrintAction" accelerator="control P" />
+						</Entry>
 			<Entry builder="separator" />
 			<Entry name="FilePropertiesAction" />
 			<Entry builder="separator" />
@@ -132,8 +133,8 @@
 			</Entry>
 			<Entry builder="separator" />
 			<Entry usedBy = "EDITOR" >
-                <Entry name="UndoAction" accelerator="control Z" />
-                <Entry name="RedoAction" accelerator="control Y" />
+								<Entry name="UndoAction" accelerator="control Z" />
+								<Entry name="RedoAction" accelerator="control Y" />
 				<Entry builder="separator" />
 				<Entry name="menu_node_core">
 					<Entry name="EditAction" accelerator="F2" />
@@ -217,81 +218,81 @@
 				<Entry name="AllMapsNodeListAction" />
 			</Entry>
 		</Entry>
-        <Entry name="insert">
-          <Entry usedBy = "EDITOR" >
-            <Entry name="menu_newNode" >
-              <Entry name="NewChildAction" accelerator="TAB" />
-              <Entry name="NewSiblingAction" accelerator="ENTER" />
-              <Entry name="NewPreviousSiblingAction" accelerator="shift ENTER" />
-              <Entry name="NewParentNode" accelerator="shift TAB" />
-              <Entry name="NewFreeNodeAction" />
-              <Entry name="NewSummaryAction" accelerator="control shift TAB"/>
-              <Entry name="NewNodeLinkedToMenuItemOnNextClickAction" />
-              <Entry builder="separator" />
-              <Entry name="DeleteAction" accelerator="DELETE" />
-            </Entry>
-            <Entry name="menu_cloud" >
-              <Entry builder="radio_button_group">
-                <Entry name="CloudShapeAction.ARC" accelerator="control shift B" />
-                <Entry name="CloudShapeAction.STAR" />
-                <Entry name="CloudShapeAction.RECT" />
-                <Entry name="CloudShapeAction.ROUND_RECT" />
-              </Entry>
-              <Entry builder="separator" />
-              <Entry name="CloudColorAction" />
-              <Entry builder="separator" />
-              <Entry name="RemoveCloudAction"/>
-            </Entry>
-            <Entry name="AddConnectorAction" accelerator="control L" />
-            <Entry name="links" >
-              <Entry name="SetLinkByFileChooserAction" accelerator="control shift K" />
-              <Entry name="SetLinkByTextFieldAction" accelerator="control K" />
-              <Entry builder="separator"/>
-              <Entry name="RemoveLinkAction" />
-              <Entry builder="separator"/>
-              <Entry name="ExtractLinkFromTextAction" />
-              <Entry name="AddLocalLinkAction" accelerator="alt shift L" />
-              <Entry name="AddMenuItemLinkAction" />
-              <Entry name="AddExecutionLinkAction" />
-              <Entry builder="separator" />
-              <Entry name="NewNodeLinkedToMenuItemOnNextClickAction" />
-              <Entry builder="separator" />
-              <Entry name="SetLinkAnchorAction" />
-              <Entry name="MakeLinkFromAnchorAction" />
-              <Entry name="MakeLinkToAnchorAction" />
-              <Entry name="ClearLinkAnchorAction" />
-            </Entry>
-            <Entry name="menu_image" >
-              <Entry name="ExternalImageAddAction" />
-              <Entry builder="separator" />
-              <Entry name="ExternalImageRemoveAction" />
-            </Entry>
-            <Entry name="icons" >
-              <Entry name="IconSelectionPlugin" accelerator="control F2" />
-              <Entry name="menu_iconByCategory">
-                <Entry builder="icon_actions" />
-              </Entry>
-              <Entry name="progress">
-                <Entry name="IconProgressIconUpAction" accelerator="alt LESS" />
-                <Entry name="IconProgressIconDownAction" accelerator="alt shift LESS" />
-                <Entry builder="separator" />
-                <Entry name="IconProgressExtended10Action" />
-                <Entry name="IconProgressExtended25Action" />
-                <Entry builder="separator" />
-                <Entry name="IconProgressRemoveAction" />
-              </Entry>
-              <Entry name="IconUnionHierarchyAction" />
-              <Entry name="IconIntersectionHierarchyAction" />
-              <Entry builder="separator" />
-              <Entry name="menu_remove_icons" >
-                <Entry name="SetBooleanPropertyAction.iconActionRemovesIconIfExists"/>
-                <Entry name="RemoveIcon_0_Action" />
-                <Entry name="RemoveIconAction" />
-                <Entry name="RemoveAllIconsAction" />
-              </Entry>
-            </Entry>
-          </Entry>
-        </Entry>
+				<Entry name="insert">
+					<Entry usedBy = "EDITOR" >
+						<Entry name="menu_newNode" >
+							<Entry name="NewChildAction" accelerator="TAB" />
+							<Entry name="NewSiblingAction" accelerator="ENTER" />
+							<Entry name="NewPreviousSiblingAction" accelerator="shift ENTER" />
+							<Entry name="NewParentNode" accelerator="shift TAB" />
+							<Entry name="NewFreeNodeAction" />
+							<Entry name="NewSummaryAction" accelerator="control shift TAB"/>
+							<Entry name="NewNodeLinkedToMenuItemOnNextClickAction" />
+							<Entry builder="separator" />
+							<Entry name="DeleteAction" accelerator="DELETE" />
+						</Entry>
+						<Entry name="menu_cloud" >
+							<Entry builder="radio_button_group">
+								<Entry name="CloudShapeAction.ARC" accelerator="control shift B" />
+								<Entry name="CloudShapeAction.STAR" />
+								<Entry name="CloudShapeAction.RECT" />
+								<Entry name="CloudShapeAction.ROUND_RECT" />
+							</Entry>
+							<Entry builder="separator" />
+							<Entry name="CloudColorAction" />
+							<Entry builder="separator" />
+							<Entry name="RemoveCloudAction"/>
+						</Entry>
+						<Entry name="AddConnectorAction" accelerator="control L" />
+						<Entry name="links" >
+							<Entry name="SetLinkByFileChooserAction" accelerator="control shift K" />
+							<Entry name="SetLinkByTextFieldAction" accelerator="control K" />
+							<Entry builder="separator"/>
+							<Entry name="RemoveLinkAction" />
+							<Entry builder="separator"/>
+							<Entry name="ExtractLinkFromTextAction" />
+							<Entry name="AddLocalLinkAction" accelerator="alt shift L" />
+							<Entry name="AddMenuItemLinkAction" />
+							<Entry name="AddExecutionLinkAction" />
+							<Entry builder="separator" />
+							<Entry name="NewNodeLinkedToMenuItemOnNextClickAction" />
+							<Entry builder="separator" />
+							<Entry name="SetLinkAnchorAction" />
+							<Entry name="MakeLinkFromAnchorAction" />
+							<Entry name="MakeLinkToAnchorAction" />
+							<Entry name="ClearLinkAnchorAction" />
+						</Entry>
+						<Entry name="menu_image" >
+							<Entry name="ExternalImageAddAction" />
+							<Entry builder="separator" />
+							<Entry name="ExternalImageRemoveAction" />
+						</Entry>
+						<Entry name="icons" >
+							<Entry name="IconSelectionPlugin" accelerator="control F2" />
+							<Entry name="menu_iconByCategory">
+								<Entry builder="icon_actions" />
+							</Entry>
+							<Entry name="progress">
+								<Entry name="IconProgressIconUpAction" accelerator="alt LESS" />
+								<Entry name="IconProgressIconDownAction" accelerator="alt shift LESS" />
+								<Entry builder="separator" />
+								<Entry name="IconProgressExtended10Action" />
+								<Entry name="IconProgressExtended25Action" />
+								<Entry builder="separator" />
+								<Entry name="IconProgressRemoveAction" />
+							</Entry>
+							<Entry name="IconUnionHierarchyAction" />
+							<Entry name="IconIntersectionHierarchyAction" />
+							<Entry builder="separator" />
+							<Entry name="menu_remove_icons" >
+								<Entry name="SetBooleanPropertyAction.iconActionRemovesIconIfExists"/>
+								<Entry name="RemoveIcon_0_Action" />
+								<Entry name="RemoveIconAction" />
+								<Entry name="RemoveAllIconsAction" />
+							</Entry>
+						</Entry>
+					</Entry>
+				</Entry>
 		<Entry name="view">
 			<Entry name="NewMapViewAction" />
 			<Entry name="zoom">
@@ -334,7 +335,6 @@
 			</Entry>
 			<Entry name="menu_viewmode" >
 				<Entry name="ViewLayoutTypeAction.OUTLINE" />
-				<Entry name="SetBooleanMapPropertyAction.allow_compact_layout" usedBy = "EDITOR" />
 				<Entry name="SetBooleanPropertyAction.outline_view_fits_window_width" />
 				<Entry name="ToggleFullScreenAction" accelerator="F11" />
 				<Entry name="SetBooleanMapViewPropertyAction.spotlight" />
@@ -406,71 +406,71 @@
 				</Entry>
 				<Entry name="SetBooleanMapPropertyAction.show_note_icons" />
 				<Entry name="ShowNotesInMapAction" />
-                <Entry name="SetBooleanPropertyAction.noteFollowsSelection" />
-                <Entry name="SetBooleanPropertyAction.simplyhtml.note.show_menu" />
-                <Entry name="SetBooleanPropertyAction.simplyhtml.note.show_toolbars" />
+								<Entry name="SetBooleanPropertyAction.noteFollowsSelection" />
+								<Entry name="SetBooleanPropertyAction.simplyhtml.note.show_menu" />
+								<Entry name="SetBooleanPropertyAction.simplyhtml.note.show_toolbars" />
 			</Entry>
 		</Entry>
 		<Entry name="format" >
 			<Entry usedBy = "EDITOR" >
-            <Entry name="map_background">
-              <Entry name="MapBackgroundImageAction" />
-              <Entry name="SetBooleanMapPropertyAction.fit_to_viewport" />
-              <Entry name="MapBackgroundColorAction" />
-              <Entry name="MapBackgroundClearAction" />
-            </Entry>
-            <Entry name="menu_coreFormat">
-              <Entry name="BoldAction" accelerator="control B" />
-              <Entry name="ItalicAction" accelerator="control I" />
-              <Entry name="StrikeThroughAction"/>
-              <Entry name="IncreaseNodeFontAction" accelerator="control PLUS" />
-              <Entry name="DecreaseNodeFontAction" accelerator="control MINUS" />
-              <Entry builder="separator" />
-              <Entry name="TextAlignAction.LEFT" />
-              <Entry name="TextAlignAction.CENTER" />
-              <Entry name="TextAlignAction.RIGHT" />
-              <Entry builder="separator" />
-              <Entry name="TextWritingDirectionAction.LEFT_TO_RIGHT" />
-              <Entry name="TextWritingDirectionAction.RIGHT_TO_LEFT" />
-              <Entry builder="separator" />
-              <Entry name="NodeColorAction" accelerator="alt shift F" />
-              <Entry name="BlinkingNodeHookAction" />
-              <Entry name="NodeColorBlendAction" />
-              <Entry builder="separator" />
-              <Entry name="NodeBackgroundColorAction" accelerator="alt shift B" />
-              <Entry builder="separator" />
-              <Entry name="EditNodeCssAction"/>
-              <Entry name="UsePlainTextAction" accelerator="alt shift P" />
-              <Entry builder="separator" />
-              <Entry builder="radio_button_group" name="nodeShapes" textKey="OptionPanel.nodeshape">
-	              <Entry name="NodeShapeAction.fork" />
-	              <Entry name="NodeShapeAction.bubble" />
-	              <Entry name="NodeShapeAction.oval" />
-	              <Entry name="NodeShapeAction.rectangle" />
-	              <Entry name="NodeShapeAction.wide_hexagon" />
-	              <Entry name="NodeShapeAction.narrow_hexagon" />
-	          </Entry>
-              <Entry name="EdgeProperties">
-                <Entry builder="radio_button_group" name="edgeStyles" textKey="styles">
-                  <Entry name="EdgeStyleAsParentAction" />
-                  <Entry name="EdgeStyleAction.linear" />
-                  <Entry name="EdgeStyleAction.bezier" />
-                  <Entry name="EdgeStyleAction.sharp_linear" />
-                  <Entry name="EdgeStyleAction.sharp_bezier" />
-                  <Entry name="EdgeStyleAction.horizontal" />
-                  <Entry name="EdgeStyleAction.hide_edge" />
-                </Entry>
-                <Entry builder="radio_button_group" name="edge_widths">
-                  <Entry name="EdgeWidthAction_width_parent" />
-                  <Entry name="EdgeWidthAction_width_thin" />
-                  <Entry name="EdgeWidthAction_1" />
-                  <Entry name="EdgeWidthAction_2" />
-                  <Entry name="EdgeWidthAction_4" />
-                  <Entry name="EdgeWidthAction_8" />
-                </Entry>
-                <Entry name="EdgeColorAction" accelerator="alt shift E" />
-              </Entry>
-            </Entry>
+						<Entry name="map_background">
+							<Entry name="MapBackgroundImageAction" />
+							<Entry name="SetBooleanMapPropertyAction.fit_to_viewport" />
+							<Entry name="MapBackgroundColorAction" />
+							<Entry name="MapBackgroundClearAction" />
+						</Entry>
+						<Entry name="menu_coreFormat">
+							<Entry name="BoldAction" accelerator="control B" />
+							<Entry name="ItalicAction" accelerator="control I" />
+							<Entry name="StrikeThroughAction"/>
+							<Entry name="IncreaseNodeFontAction" accelerator="control PLUS" />
+							<Entry name="DecreaseNodeFontAction" accelerator="control MINUS" />
+							<Entry builder="separator" />
+							<Entry name="TextAlignAction.LEFT" />
+							<Entry name="TextAlignAction.CENTER" />
+							<Entry name="TextAlignAction.RIGHT" />
+							<Entry builder="separator" />
+							<Entry name="TextWritingDirectionAction.LEFT_TO_RIGHT" />
+							<Entry name="TextWritingDirectionAction.RIGHT_TO_LEFT" />
+							<Entry builder="separator" />
+							<Entry name="NodeColorAction" accelerator="alt shift F" />
+							<Entry name="BlinkingNodeHookAction" />
+							<Entry name="NodeColorBlendAction" />
+							<Entry builder="separator" />
+							<Entry name="NodeBackgroundColorAction" accelerator="alt shift B" />
+							<Entry builder="separator" />
+							<Entry name="EditNodeCssAction"/>
+							<Entry name="UsePlainTextAction" accelerator="alt shift P" />
+							<Entry builder="separator" />
+							<Entry builder="radio_button_group" name="nodeShapes" textKey="OptionPanel.nodeshape">
+								<Entry name="NodeShapeAction.fork" />
+								<Entry name="NodeShapeAction.bubble" />
+								<Entry name="NodeShapeAction.oval" />
+								<Entry name="NodeShapeAction.rectangle" />
+								<Entry name="NodeShapeAction.wide_hexagon" />
+								<Entry name="NodeShapeAction.narrow_hexagon" />
+						</Entry>
+							<Entry name="EdgeProperties">
+								<Entry builder="radio_button_group" name="edgeStyles" textKey="styles">
+									<Entry name="EdgeStyleAsParentAction" />
+									<Entry name="EdgeStyleAction.linear" />
+									<Entry name="EdgeStyleAction.bezier" />
+									<Entry name="EdgeStyleAction.sharp_linear" />
+									<Entry name="EdgeStyleAction.sharp_bezier" />
+									<Entry name="EdgeStyleAction.horizontal" />
+									<Entry name="EdgeStyleAction.hide_edge" />
+								</Entry>
+								<Entry builder="radio_button_group" name="edge_widths">
+									<Entry name="EdgeWidthAction_width_parent" />
+									<Entry name="EdgeWidthAction_width_thin" />
+									<Entry name="EdgeWidthAction_1" />
+									<Entry name="EdgeWidthAction_2" />
+									<Entry name="EdgeWidthAction_4" />
+									<Entry name="EdgeWidthAction_8" />
+								</Entry>
+								<Entry name="EdgeColorAction" accelerator="alt shift E" />
+							</Entry>
+						</Entry>
 				<Entry name="styleActions" textKey="menu_applyStyle">
 					<Entry builder="style_actions" />
 					<Entry builder="noActions" />
@@ -499,9 +499,12 @@
 					<Entry builder="new_node_style_actions" />
 					<Entry builder="noActions" />
 				</Entry>
-				<Entry name="SelectNodeChildrenLayoutAction"/>
 				<Entry name="SetBooleanPropertyAction.copyFormatToNewSibling" />
 				<Entry name="SetBooleanPropertyAction.copyFormatToNewChild" />
+				<Entry builder="separator" />
+				<Entry name="SelectNodeChildrenLayoutAction"/>
+				<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" usedBy="NO_CONSTRAINT"/>
+				<Entry name="SetBooleanMapPropertyAction.allow_compact_layout" />
 			</Entry>
 		</Entry>
 		<Entry name="navigate" builder="menu_navigate">
@@ -568,7 +571,7 @@
 			<Entry name="SelectFilteredElementAction.NODE" />
 			<Entry name="SelectFilteredElementAction.NODE_AND_CONNECTOR" />
 			<Entry name="SelectFilteredElementAction.CONNECTOR" />
-            <Entry name="ShowAncestorsAction" />
+						<Entry name="ShowAncestorsAction" />
 			<Entry name="ShowDescendantsAction" />
 			<Entry name="HideMatchingNodesAction" />
 			<Entry builder="separator" />
@@ -592,8 +595,8 @@
 			<Entry name="QuickHighlightAction" />
 			<Entry name="QuickFindAllAction" />
 			<Entry name="QuickFilterAction" />
-            <Entry name="QuickAndFilterAction" />
-            <Entry name="QuickOrFilterAction" />
+						<Entry name="QuickAndFilterAction" />
+						<Entry name="QuickOrFilterAction" />
 		</Entry>
 		<Entry name="extras">
 			<Entry name="TimeManagementAction" accelerator="control T" />
@@ -609,10 +612,10 @@
 			<Entry name="ExecuteScriptForSelectionAction" plugin="org.freeplane.plugin.script" />
 			<Entry name="ExecuteScriptForAllNodes" plugin="org.freeplane.plugin.script" />
 			<Entry name="ScriptEditor" />
-            <Entry name="formula.EvaluateAllAction" plugin="org.freeplane.plugin.formula" />
-            <Entry name="formula.ClearDependenciesAction" plugin="org.freeplane.plugin.formula" accelerator="alt F5" />
-            <Entry name="formula.TracePrecedentsAction" plugin="org.freeplane.plugin.formula" accelerator="alt F6" />
-            <Entry name="formula.TraceDependentsAction" plugin="org.freeplane.plugin.formula" accelerator="alt F7" />
+						<Entry name="formula.EvaluateAllAction" plugin="org.freeplane.plugin.formula" />
+						<Entry name="formula.ClearDependenciesAction" plugin="org.freeplane.plugin.formula" accelerator="alt F5" />
+						<Entry name="formula.TracePrecedentsAction" plugin="org.freeplane.plugin.formula" accelerator="alt F6" />
+						<Entry name="formula.TraceDependentsAction" plugin="org.freeplane.plugin.formula" accelerator="alt F7" />
 			<Entry builder="separator" />
 			<Entry name="SetAcceleratorOnNextClickAction" />
 			<Entry name="acceleratorPresets">
@@ -642,8 +645,8 @@
 			</Entry>
 		</Entry>
 		<Entry name="help" textKey="menu_help">
-            <Entry name="CommandSearchAction" accelerator="control F1" />
-            <Entry builder="separator" />
+						<Entry name="CommandSearchAction" accelerator="control F1" />
+						<Entry builder="separator" />
 			<Entry name="web_resources">
 				<Entry name="OpenFreeplaneSiteAction" />
 				<Entry name="AskForHelp" />
@@ -652,12 +655,12 @@
 			</Entry>
 			<Entry builder="separator" />
 			<Entry name="AboutAction" builder="removeOnMac"/>
-            <Entry name="UpdateCheckAction" />
+						<Entry name="UpdateCheckAction" />
 			<Entry builder="separator" />
 			<Entry name="TutorialAction" />
 			<Entry name="DocumentationAction" accelerator="F1" />
 			<Entry name="LatestFeaturesAction" />
-            <Entry name="FreeplaneHandbook" />
+						<Entry name="FreeplaneHandbook" />
 			<Entry name="HotKeyInfoAction" />
 			<Entry name="OpenApiDocumentationAction" plugin="org.freeplane.plugin.script" />
 			<Entry builder="separator" />
@@ -690,81 +693,81 @@
 		<Entry name="JumpOutAction"  accelerator="control ESCAPE"/>
 	</Entry>
 	<Entry name="node_popup" builder="node_popup">
-        <Entry usedBy = "EDITOR" >
+				<Entry usedBy = "EDITOR" >
 			<Entry name="CutAction" accelerator="control X" usedBy = "EDITOR" />
 		</Entry>
-        <Entry name="menu_copy">
-          <Entry name="CopyAction" accelerator="control C" />
-          <Entry name="CopySingleAction" accelerator="control shift C" />
-          <Entry name="CopyIDAction" />
-          <Entry name="CopyNodeURIAction" />
-          <Entry name="CopyAttributes" />
-        </Entry>
-	    <Entry usedBy = "EDITOR" >
+				<Entry name="menu_copy">
+					<Entry name="CopyAction" accelerator="control C" />
+					<Entry name="CopySingleAction" accelerator="control shift C" />
+					<Entry name="CopyIDAction" />
+					<Entry name="CopyNodeURIAction" />
+					<Entry name="CopyAttributes" />
+				</Entry>
+			<Entry usedBy = "EDITOR" >
 			<Entry name="PasteAction" accelerator="control V" usedBy = "EDITOR" />
-            <Entry name="menu_remove">
-            	<Entry name="DeleteAction" />
-    		    <Entry name="DeleteDetailsAction" />
-                <Entry name="RemoveNoteAction" />
-                <Entry name="attributes_RemoveAllAttributesAction" />
-            </Entry>
+						<Entry name="menu_remove">
+							<Entry name="DeleteAction" />
+						<Entry name="DeleteDetailsAction" />
+								<Entry name="RemoveNoteAction" />
+								<Entry name="attributes_RemoveAllAttributesAction" />
+						</Entry>
 			<Entry name="edit">
-	    		<Entry name="EditLongAction" accelerator="alt ENTER" />
-	    		<Entry name="EditTagsAction" accelerator="alt F8"/>
-	    		<Entry name="EditDetailsInDialogAction" accelerator="control F3" />
-	    		<Entry name="EditDetailsAction" accelerator="F3" />
-	            <Entry name="EditNoteInDialogAction" />
-	            <Entry name="EditAttributesAction"/>
+					<Entry name="EditLongAction" accelerator="alt ENTER" />
+					<Entry name="EditTagsAction" accelerator="alt F8"/>
+					<Entry name="EditDetailsInDialogAction" accelerator="control F3" />
+					<Entry name="EditDetailsAction" accelerator="F3" />
+							<Entry name="EditNoteInDialogAction" />
+							<Entry name="EditAttributesAction"/>
 				<Entry name="SetNodeAliasAction" />
-	        </Entry>
-          <Entry name = "insert" >
-            <Entry name="menu_add_newNode" >
-              <Entry name="NewChildAction" />
-              <Entry name="NewSiblingAction" />
-              <Entry name="NewPreviousSiblingAction" />
-              <Entry name="NewParentNode" />
-              <Entry name="NewFreeNodeAction" />
-              <Entry name="NewSummaryAction"/>
-              <Entry builder="separator" />
-              <Entry name="DeleteAction" />
-            </Entry>
-            <Entry name="menu_add_image" >
-              <Entry name="ExternalImageAddAction" />
-              <Entry builder="separator" />
-              <Entry name="ExternalImageRemoveAction" />
-            </Entry>
-	        <Entry name="menu_add_link" >
-	          <Entry name="SetLinkByFileChooserAction" />
-	          <Entry name="SetLinkByTextFieldAction" />
-	          <Entry builder="separator"/>
-	          <Entry name="RemoveLinkAction" />
-	          <Entry builder="separator"/>
-	          <Entry name="ExtractLinkFromTextAction" />
-	          <Entry name="AddLocalLinkAction" />
-	          <Entry name="AddMenuItemLinkAction" />
-	          <Entry name="AddExecutionLinkAction" />
-	          <Entry builder="separator" />
-	          <Entry name="SetLinkAnchorAction" />
-	          <Entry name="MakeLinkFromAnchorAction" />
-	          <Entry name="MakeLinkToAnchorAction" />
-	          <Entry name="ClearLinkAnchorAction" />
-	        </Entry>
-        </Entry>
-        <Entry name="AddConnectorAction" />
+					</Entry>
+					<Entry name = "insert" >
+						<Entry name="menu_add_newNode" >
+							<Entry name="NewChildAction" />
+							<Entry name="NewSiblingAction" />
+							<Entry name="NewPreviousSiblingAction" />
+							<Entry name="NewParentNode" />
+							<Entry name="NewFreeNodeAction" />
+							<Entry name="NewSummaryAction"/>
+							<Entry builder="separator" />
+							<Entry name="DeleteAction" />
+						</Entry>
+						<Entry name="menu_add_image" >
+							<Entry name="ExternalImageAddAction" />
+							<Entry builder="separator" />
+							<Entry name="ExternalImageRemoveAction" />
+						</Entry>
+					<Entry name="menu_add_link" >
+						<Entry name="SetLinkByFileChooserAction" />
+						<Entry name="SetLinkByTextFieldAction" />
+						<Entry builder="separator"/>
+						<Entry name="RemoveLinkAction" />
+						<Entry builder="separator"/>
+						<Entry name="ExtractLinkFromTextAction" />
+						<Entry name="AddLocalLinkAction" />
+						<Entry name="AddMenuItemLinkAction" />
+						<Entry name="AddExecutionLinkAction" />
+						<Entry builder="separator" />
+						<Entry name="SetLinkAnchorAction" />
+						<Entry name="MakeLinkFromAnchorAction" />
+						<Entry name="MakeLinkToAnchorAction" />
+						<Entry name="ClearLinkAnchorAction" />
+					</Entry>
+				</Entry>
+				<Entry name="AddConnectorAction" />
 		<Entry name="SetShortenerStateAction" />
-            <Entry name="styleActions" textKey="menu_applyStyle" >
-                <Entry builder="style_actions" />
-            </Entry>
-         </Entry>
+						<Entry name="styleActions" textKey="menu_applyStyle" >
+								<Entry builder="style_actions" />
+						</Entry>
+				</Entry>
 		<Entry builder="separator" />
 		<Entry name="AlwaysUnfoldedNodeAction" usedBy = "EDITOR" />
 		<Entry name="FreeNodeAction" usedBy = "EDITOR" />
 		<Entry builder="separator" />
-        <Entry name="goto" processOnPopup="true">
-          <Entry builder="link_actions" />
-          <Entry builder="clone_actions" />
-          <Entry name="GotoNodeAction" />
-        </Entry>
+				<Entry name="goto" processOnPopup="true">
+					<Entry builder="link_actions" />
+					<Entry builder="clone_actions" />
+					<Entry name="GotoNodeAction" />
+				</Entry>
 		<Entry name="EnterPassword" />
 		<Entry name="node_popup_scripting" plugin="org.freeplane.plugin.script"
 			builder="userScripts" />

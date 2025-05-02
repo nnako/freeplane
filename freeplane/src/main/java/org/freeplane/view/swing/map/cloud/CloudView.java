@@ -44,7 +44,7 @@ abstract public class CloudView {
 
 	/** the layout functions can get the additional height of the clouded node .
 	 * @param cloud */
-	static public int getAdditionalHeigth(CloudModel cloud, final NodeView source) {
+	static public int getAdditionalHeight(CloudModel cloud, final NodeView source) {
 		final CloudView heightCalculator = new CloudViewFactory().createCloudView(cloud, source);
 		return (int) (2.2 * heightCalculator.getDistanceToConvexHull());
 	}
@@ -147,6 +147,8 @@ abstract public class CloudView {
         final Polygon p = new Polygon();
         final LinkedList<Point> coordinates = new LinkedList<Point>();
         source.getCoordinates(coordinates);
+        if(coordinates.isEmpty())
+            return p;
         final ConvexHull hull = new ConvexHull();
         final Vector<Point> res = hull.calculateHull(coordinates);
         Point lastPt = null;

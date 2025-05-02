@@ -102,6 +102,7 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 
     private static final String TAGS_ELEMENT = "tags";
     public static final String ALLOW_COMPACT_LAYOUT_PROPERTY = "allow_compact_layout";
+    public static final String AUTO_COMPACT_LAYOUT_PROPERTY = "auto_compact_layout";
     public static final String SHOW_TAG_CATEGORIES_PROPERTY = "showTagCategories";
 
     public static final String SHOW_TAGS_PROPERTY = "show_tags";
@@ -471,6 +472,9 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		return getBooleanProperty(map, ALLOW_COMPACT_LAYOUT_PROPERTY);
 	}
 
+	public boolean isAutoCompactLayoutEnabled(MapModel map) {
+		return getBooleanProperty(map, AUTO_COMPACT_LAYOUT_PROPERTY);
+	}
 
     public TagLocation tagLocation(MapModel map) {
         return MapStyleModel.getExtension(map).getEnumProperty(SHOW_TAGS_PROPERTY, TagLocation.UNDER_NODES);

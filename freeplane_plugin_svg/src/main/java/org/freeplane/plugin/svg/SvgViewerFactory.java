@@ -52,16 +52,16 @@ public class SvgViewerFactory implements IViewerFactory {
                         final SVGLength svgWidth = svgElt.getWidth().getBaseVal();
                         final SVGLength svgHeight = svgElt.getHeight().getBaseVal();
                         float width = (float) Math.ceil(svgWidth.getValue());
-                        float heigth = (float) Math.ceil(svgHeight.getValue());
-                        if (width <= 1f && heigth <= 1f) {
+                        float height = (float) Math.ceil(svgHeight.getValue());
+                        if (width <= 1f && height <= 1f) {
                             width = ResourceController.getResourceController().getIntProperty(
                                     "default_external_component_width", 200);
-                            heigth = ResourceController.getResourceController().getIntProperty(
+                            height = ResourceController.getResourceController().getIntProperty(
                                     "default_external_component_height", 200);
                         }
-                        originalSize = new Dimension((int) width, (int) heigth);
+                        originalSize = new Dimension((int) width, (int) height);
                         svgElt.setAttributeNS(null, SVGConstants.SVG_VIEW_BOX_ATTRIBUTE, "0 0 " + width
-                                + " " + heigth);
+                                + " " + height);
                     } else {
                         float[] vb= ViewBox.parseViewBoxAttribute(svgElt, svgViewboxAttribute, bridgeContext);
                         originalSize = new Dimension((int) vb[2], (int) vb[3]);
