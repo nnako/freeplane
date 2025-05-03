@@ -466,12 +466,12 @@ class VerticalNodeViewLayoutStrategy {
             int yContentBegin = yBegin + child.getContentY() - child.getTopOverlap() - spaceAround;
 
             final int deltaShift = yContentBegin - (Math.max(bottomContentY, y0 -
-            	Math.max(availableSpace, 0)) + vGap) - childShiftY;
+                Math.max(availableSpace, 0)) + vGap) - childShiftY;
             if(deltaShift > 0)
                 totalSideShiftY -= 2 * deltaShift;
             totalSideShiftY -= child.getContentHeight() + vGap;
         } else if (childNodesAlignment.placement() != Placement.TOP) {
-        	final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
+            final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
             int yEnd = yBegin + childRegularHeight;
             if(yEnd > yRef) {
                 totalSideShiftY -= (yEnd - yRef);
@@ -622,14 +622,19 @@ class VerticalNodeViewLayoutStrategy {
 
         // Adjust coordinates for all group items
         for (int j = groupStartIndex[itemLevel]; j <= index; j++) {
-            NodeViewLayoutHelper groupItem = view.getComponent(j);
+            final NodeViewLayoutHelper childItem = view.getComponent(j);
+            NodeViewLayoutHelper groupItem = childItem;
             if (groupItem.isLeft() == currentSideLeft
                     && (viewLevels.summaryLevels[j] > 0
                     || !isChildFreeNode[j])) {
                 yCoordinates[j] -= deltaY;
                 if (j != index) {
-                    yBottomCoordinates[j] -= deltaY;
-                    updateBottomBoundary(view.getComponent(j), j, yBottomCoordinates[j], CombineOperation.FALLBACK);
+                    final NodeViewLayoutHelper child = view.getComponent(j);
+                    int childRegularHeight = child.getHeight() - child.getTopOverlap() - child.getBottomOverlap() - 2 * spaceAround;
+                    if(childRegularHeight != 0) {
+                        yBottomCoordinates[j] -= deltaY;
+                        updateBottomBoundary(child, j, yBottomCoordinates[j], CombineOperation.FALLBACK);
+                    }
                 }
             }
         }
