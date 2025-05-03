@@ -299,8 +299,8 @@ public class MainView extends ZoomableLabel {
 		return MainView.minimumSize;
 	}
 
-	int getZoomedFoldingMarkHalfWidth() {
-		return getNodeView().getZoomedFoldingMarkHalfWidth();
+	int getZoomedFoldingMarkHalfSize() {
+		return getNodeView().getZoomedFoldingMarkHalfSize();
 	}
 
 

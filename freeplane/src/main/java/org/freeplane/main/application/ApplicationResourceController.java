@@ -116,6 +116,7 @@ public class ApplicationResourceController extends ResourceController {
 		defProps = readDefaultPreferences();
 		props = readUsersPreferences(defProps);
 		replacePropertyKey("keepSelectedNodeVisibleAfterZoom", "keepSelectedNodeVisible");
+		replacePropertyKey("foldingsymbolwidth", "foldingsymbolsize");
 		securedProps = new Properties(props);
 		final File userDir = createUserDirectory();
 		final String resourceBaseDir = getResourceBaseDir();

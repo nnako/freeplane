@@ -27,13 +27,16 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import org.freeplane.api.LengthUnit;
+import org.freeplane.api.Quantity;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.nodestyle.NodeGeometryModel;
 import org.freeplane.view.swing.map.MainView.ConnectorLocation;
 
 abstract class MainViewPainter{
 
-    private static final Rectangle EMPTY_RECTANGLE = new Rectangle();
+    private static final double MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS = new Quantity<>(2, LengthUnit.pt).toBaseUnits();
+	private static final Rectangle EMPTY_RECTANGLE = new Rectangle();
     MainView mainView;
     MainViewPainter(MainView mainView){
         this.mainView = mainView;
@@ -43,17 +46,9 @@ abstract class MainViewPainter{
         int height = mainView.getHeight();
         NodeView nodeView = mainView.getNodeView();
         if (nodeView.usesHorizontalLayout() &&  (! onlyFolded || nodeView.isFolded())) {
-            height += 2 * mainView.getZoomedFoldingMarkHalfWidth();
+            height += 2 * mainView.getZoomedFoldingMarkHalfSize();
         }
         return height;
-    }
-    int getMainViewWidthWithFoldingMark(boolean onlyFolded) {
-        int width = mainView.getWidth();
-        final NodeView nodeView = mainView.getNodeView();
-        if (! nodeView.usesHorizontalLayout() && (! onlyFolded || nodeView.isFolded())) {
-            width += mainView.getZoomedFoldingMarkHalfWidth() * 3;
-        }
-        return width;
     }
 
 	int getSingleChildShift() {
@@ -123,20 +118,24 @@ abstract class MainViewPainter{
 	}
 
 	Rectangle getFoldingRectangleBounds(final NodeView nodeView, boolean drawsControls) {
-        final int width = drawsControls ? Math.max(mainView.getZoomedFoldingSwitchMinWidth(),
-                mainView.getZoomedFoldingMarkHalfWidth() * 2) : mainView.getZoomedFoldingMarkHalfWidth() * 2;
-		final int halfWidth = width / 2;
+        final int size = drawsControls ? Math.max(mainView.getZoomedFoldingSwitchMinWidth(),
+                mainView.getZoomedFoldingMarkHalfSize() * 2) : mainView.getZoomedFoldingMarkHalfSize() * 2;
+		final int halfHeight = size / 2;
+		final MapView map = nodeView.getMap();
+		final int halfWidth = map.isAutoCompactLayoutEnabled() && !drawsControls
+				? Math.min(map.getZoomed(MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS), halfHeight)
+				: halfHeight;
 		final Point p;
 		if(! drawsControls && ! nodeView.isFolded())
 		    return EMPTY_RECTANGLE;
 		if(nodeView.usesHorizontalLayout()) {
 		    if(nodeView.isTopOrLeft()) {
 		        p = getTopPoint();
-                p.y -= halfWidth;
+                p.y -= halfHeight;
 		    }
 		    else {
                 p = getBottomPoint();
-                p.y += halfWidth;
+                p.y += halfHeight;
 		    }
 		}
 		else {
@@ -148,7 +147,7 @@ abstract class MainViewPainter{
 		        p.x += halfWidth;
 		    }
 		}
-		Rectangle markBounds = new Rectangle(p.x - halfWidth, p.y-halfWidth, halfWidth*2, halfWidth*2);
+		Rectangle markBounds = new Rectangle(p.x - halfWidth, p.y-halfHeight, halfWidth*2, halfHeight*2);
         return markBounds;
     }
 

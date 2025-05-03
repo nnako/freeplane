@@ -50,7 +50,7 @@ class ForkPainter extends ShapedPainter {
 	        return super.getMainViewHeightWithFoldingMark(onlyFolded);
 		int height = mainView.getHeight();
 		if (! onlyFolded || nodeView.isFolded()) {
-			height += mainView.getZoomedFoldingMarkHalfWidth();
+			height += mainView.getZoomedFoldingMarkHalfSize();
 		}
 		return height;
 	}

@@ -1020,8 +1020,8 @@ public class NodeView extends JComponent implements INodeView {
 		return parentView.getVisibleSummarizedOrParentView(requiredLayoutOrientation, isChildTopOrLeft);
 	}
 
-	public int getZoomedFoldingMarkHalfWidth() {
-	    final int preferredFoldingSymbolHalfWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("foldingsymbolwidth").toBaseUnits() * map.getZoom()) / 2);
+	public int getZoomedFoldingMarkHalfSize() {
+	    final int preferredFoldingSymbolHalfWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("foldingsymbolsize").toBaseUnits() * map.getZoom()) / 2);
 	    return preferredFoldingSymbolHalfWidth;
 	}
 
@@ -1043,7 +1043,7 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	int getPreferredFoldingSymbolWidth() {
-		return Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+		return Math.max(getZoomedFoldingMarkHalfSize(), getZoomedFoldingSwitchMinWidth());
 	}
 
 	int getPreferredHandleWidth() {

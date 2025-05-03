@@ -132,7 +132,7 @@
 			<separator name="size_limits">
 				<number name="max_shortened_text_length" />
 				<number name="max_image_width" />
-				<length name="foldingsymbolwidth" defaultUnit = "pt" min="3" max = "50" step = "1" />
+				<length name="foldingsymbolsize" defaultUnit = "pt" min="3" max = "50" step = "1" />
 				<length name="foldingSwitchMinWidth" defaultUnit = "pt" min="3" max = "50" step = "1" />
 				<length name="statesymbolwidth"  defaultUnit = "pt" min="3" max = "50" step = "1"/>
 				<length name="dragging_area_width" defaultUnit = "pt" min="3" max = "50" step = "1" />
