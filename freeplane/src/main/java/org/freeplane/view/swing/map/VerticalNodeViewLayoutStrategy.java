@@ -28,6 +28,7 @@ import java.util.stream.IntStream;
 import org.freeplane.api.ChildNodesAlignment;
 import org.freeplane.api.ChildNodesAlignment.Placement;
 import org.freeplane.api.ChildrenSides;
+import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.features.filter.Filter;
@@ -363,7 +364,9 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private int calculateExtraGapForChildren(final int minimalDistanceBetweenChildren) {
-        if(3 * defaultVGap > minimalDistanceBetweenChildren)
+    	if(! view.getMap().spatiallySeparatesSubtrees())
+    		return 0;
+    	else if(3 * defaultVGap > minimalDistanceBetweenChildren)
             return minimalDistanceBetweenChildren + 2 * defaultVGap;
         else
             return (minimalDistanceBetweenChildren + 11 * 2 * defaultVGap) / 6;
@@ -387,7 +390,7 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private int calculateExtraVerticalGap(int childHeight, int contentHeight, int cloudHeight) {
-        if (childHeight <= 0) {
+        if (childHeight <= 0 || extraGapForChildren <= 0) {
             return 0;
         }
         int extraHeight = childHeight - (contentHeight + cloudHeight);

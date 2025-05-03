@@ -2,6 +2,7 @@
 1.12.11
 ==============================
 Format -> Automatic compact layout
+Format -> Spatially separate subtrees
 
 ==============================
 1.12.10

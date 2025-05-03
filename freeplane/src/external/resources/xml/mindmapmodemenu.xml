@@ -504,7 +504,8 @@
 				<Entry builder="separator" />
 				<Entry name="SelectNodeChildrenLayoutAction"/>
 				<Entry name="SetBooleanMapPropertyAction.auto_compact_layout" usedBy="NO_CONSTRAINT"/>
-				<Entry name="SetBooleanMapPropertyAction.allow_compact_layout" />
+                <Entry name="SetBooleanMapPropertyAction.allow_compact_layout" />
+				<Entry name="SetBooleanMapPropertyAction.spatiallySeparateSubtrees" />
 			</Entry>
 		</Entry>
 		<Entry name="navigate" builder="menu_navigate">
