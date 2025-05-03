@@ -1022,17 +1022,20 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	public int getZoomedFoldingMarkHalfSize() {
-	    final int preferredFoldingSymbolHalfWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("foldingsymbolsize").toBaseUnits() * map.getZoom()) / 2);
+		return getZoomedFoldingMarkHalfSize(1);
+	}
+	public int getZoomedFoldingMarkHalfSize(double f) {
+	    final int preferredFoldingSymbolHalfWidth = getZoomed(f * ResourceController.getResourceController().getLengthQuantityProperty("foldingsymbolsize").toBaseUnits()/2);
 	    return preferredFoldingSymbolHalfWidth;
 	}
 
-	public int getZoomedFoldingMarkHalfWidth() {
-		final int zoomedFoldingMarkHalfSize = getZoomedFoldingMarkHalfSize();
-		return Math.min(zoomedFoldingMarkHalfSize, getZoomed(MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS));
+	public int getZoomedFoldingMarkHalfWidth(double f) {
+		final int zoomedFoldingMarkHalfSize = getZoomedFoldingMarkHalfSize(f);
+		return Math.min(zoomedFoldingMarkHalfSize, getZoomed(f * MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS));
 	}
 
     public int getZoomedFoldingSwitchMinWidth() {
-        final int preferredFoldingSwitchMinWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("foldingSwitchMinWidth").toBaseUnits() * map.getZoom()));
+        final int preferredFoldingSwitchMinWidth = getZoomed(ResourceController.getResourceController().getLengthQuantityProperty("foldingSwitchMinWidth").toBaseUnits());
         return preferredFoldingSwitchMinWidth;
     }
 
@@ -1048,15 +1051,15 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	int getPreferredFoldingSymbolWidth() {
-		return Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
+		return Math.max(getZoomedFoldingMarkHalfWidth(1), getZoomedFoldingSwitchMinWidth());
 	}
 
 	int getPreferredHandleWidth() {
-		return Math.max(getPreferredFoldingSymbolWidth(), mainView.getDraggingAreaWidth());
+		return getZoomedFoldingMarkHalfWidth(6.6);
 	}
 
 	public int getZoomedStateSymbolHalfWidth() {
-		final int preferredFoldingSymbolHalfWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("statesymbolwidth").toBaseUnits() * map.getZoom()) / 2);
+		final int preferredFoldingSymbolHalfWidth = getZoomed(ResourceController.getResourceController().getLengthQuantityProperty("statesymbolwidth").toBaseUnits()/2);
 		return preferredFoldingSymbolHalfWidth;
 	}
 
