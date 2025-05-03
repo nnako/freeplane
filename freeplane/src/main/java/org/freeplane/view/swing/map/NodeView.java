@@ -156,6 +156,7 @@ public class NodeView extends JComponent implements INodeView {
     private LayoutOrientation layoutOrientation;
     private ChildrenSides childrenSides;
     private boolean isNodeNumberingEnabled;
+	static final double MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS = new Quantity<>(2, LengthUnit.pt).toBaseUnits();
 	public static final int IMAGE_VIEWER_POSITION = DETAIL_VIEWER_POSITION + 3;
 
 	protected NodeView(final NodeModel viewedNode, final MapView map) {
@@ -1025,6 +1026,10 @@ public class NodeView extends JComponent implements INodeView {
 	    return preferredFoldingSymbolHalfWidth;
 	}
 
+	public int getZoomedFoldingMarkHalfWidth() {
+		final int zoomedFoldingMarkHalfSize = getZoomedFoldingMarkHalfSize();
+		return Math.min(zoomedFoldingMarkHalfSize, getZoomed(MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS));
+	}
 
     public int getZoomedFoldingSwitchMinWidth() {
         final int preferredFoldingSwitchMinWidth = (int) ((ResourceController.getResourceController().getLengthQuantityProperty("foldingSwitchMinWidth").toBaseUnits() * map.getZoom()));
@@ -1043,7 +1048,7 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	int getPreferredFoldingSymbolWidth() {
-		return Math.max(getZoomedFoldingMarkHalfSize(), getZoomedFoldingSwitchMinWidth());
+		return Math.max(getZoomedFoldingMarkHalfWidth(), getZoomedFoldingSwitchMinWidth());
 	}
 
 	int getPreferredHandleWidth() {
@@ -1594,6 +1599,10 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	public int getZoomed(int x) {
+		return map.getZoomed(x);
+	}
+
+	public int getZoomed(double x) {
 		return map.getZoomed(x);
 	}
 

@@ -27,16 +27,13 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import org.freeplane.api.LengthUnit;
-import org.freeplane.api.Quantity;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.nodestyle.NodeGeometryModel;
 import org.freeplane.view.swing.map.MainView.ConnectorLocation;
 
 abstract class MainViewPainter{
 
-    private static final double MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS = new Quantity<>(2, LengthUnit.pt).toBaseUnits();
-	private static final Rectangle EMPTY_RECTANGLE = new Rectangle();
+    private static final Rectangle EMPTY_RECTANGLE = new Rectangle();
     MainView mainView;
     MainViewPainter(MainView mainView){
         this.mainView = mainView;
@@ -122,9 +119,8 @@ abstract class MainViewPainter{
                 mainView.getZoomedFoldingMarkHalfSize() * 2) : mainView.getZoomedFoldingMarkHalfSize() * 2;
 		final int halfHeight = size / 2;
 		final MapView map = nodeView.getMap();
-		final int halfWidth = map.isAutoCompactLayoutEnabled() && !drawsControls
-				? Math.min(map.getZoomed(MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS), halfHeight)
-				: halfHeight;
+		final int halfWidth = drawsControls ? halfHeight
+				: Math.min(map.getZoomed(NodeView.MAXIMUM_FOLDING_MARK_HALF_WIDTH_FOR_COMPACTED_MAPS), halfHeight);
 		final Point p;
 		if(! drawsControls && ! nodeView.isFolded())
 		    return EMPTY_RECTANGLE;

@@ -99,7 +99,7 @@ class FoldingCircle implements Drawable{
         int y = r.y;
         int width = r.width;
         int height = r.height;
-        float minimumStroke = height / 8f;
+        float minimumStroke = width / 4f;
         BasicStroke stroke = minimumStroke > UITools.FONT_SCALE_FACTOR * 1f ? new BasicStroke(minimumStroke) : BORDER_STROKE;
         int strokeLineWidth = (int) Math.ceil(stroke.getLineWidth() / 2);
         x += strokeLineWidth;
