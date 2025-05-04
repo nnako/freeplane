@@ -411,12 +411,26 @@ class VerticalNodeViewLayoutStrategy {
 
         int y0 = y;
         int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
+        int extraVGap;
+        int upperGap;
+        if(isAutoCompactLayoutEnabled) {
+            final int topContentY = getContentTop(child, y0);
+            final int contentAvailableSpace = topContentY - bottomContentY;
+            if(contentAvailableSpace - availableSpace == 0)
+            	extraVGap = 0;
+            else if (contentAvailableSpace - availableSpace > extraGapForChildren)
+            	extraVGap = extraGapForChildren;
+            else
+            	extraVGap = extraGapForChildren - (contentAvailableSpace - availableSpace);
+            upperGap = extraVGap;
+        }
+        else {
+        	extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
+        	upperGap = childNodesAlignment.align(extraVGap);
+        }
         if (availableSpace != 0) {
             y -= availableSpace;
         }
-
-        int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
-        int upperGap = childNodesAlignment.align(extraVGap);
 
         if (isFirstVisibleLaidOutChild()) {
             extraVGap -= upperGap;
@@ -463,7 +477,7 @@ class VerticalNodeViewLayoutStrategy {
 
         if (childNodesAlignment == ChildNodesAlignment.FLOW ||
             childNodesAlignment == ChildNodesAlignment.AUTO) {
-            int yContentBegin = yBegin + child.getContentY() - child.getTopOverlap() - spaceAround;
+            int yContentBegin = getContentTop(child, yBegin);
 
             final int deltaShift = yContentBegin - (Math.max(bottomContentY, y0 -
                 Math.max(availableSpace, 0)) + vGap) - childShiftY;
@@ -479,6 +493,10 @@ class VerticalNodeViewLayoutStrategy {
         }
     }
 
+	private int getContentTop(NodeViewLayoutHelper child, int y) {
+		return y + child.getContentY() - child.getTopOverlap() - spaceAround;
+	}
+
     private void updateGapsAndBoundaries(int index, NodeViewLayoutHelper child,
                                        int childRegularHeight, int extraVGap, int upperGap) {
         vGap = calculateNextVGap(index);
@@ -490,8 +508,7 @@ class VerticalNodeViewLayoutStrategy {
         else
             vGap += lowerGap;
 
-        bottomContentY = y + child.getContentY() - child.getTopOverlap() - spaceAround +
-                        child.getContentHeight();
+        bottomContentY = getContentTop(child, y) + child.getContentHeight();
         yBottom = Math.max(yBottom, y + childRegularHeight);
         yBottomCoordinates[index] = y;
         updateBottomBoundary(child, index, y, CombineOperation.FALLBACK);
@@ -529,7 +546,7 @@ class VerticalNodeViewLayoutStrategy {
                 childTopBoundary = child.getTopBoundary();
             if (childTopBoundary != null) {
                 childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-                int topContentY = y + child.getContentY() - child.getTopOverlap() - spaceAround;
+                int topContentY = getContentTop(child, y);
                 final int distance = childTopBoundary.distance(bottomBoundary);
                 final int contentDistance = topContentY - bottomContentY;
                 return Math.min(distance, contentDistance);
