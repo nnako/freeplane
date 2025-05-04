@@ -51,10 +51,6 @@ public class OutlineEdgeView extends EdgeView {
 
 	@Override
 	protected void draw(final Graphics2D g) {
-		final Color color = getColor(g);
-		g.setColor(color);
-		final Stroke stroke = getStroke();
-		g.setStroke(stroke);
 		g.drawLine(start.x, start.y, start.x, end.y);
 		g.drawLine(start.x, end.y, end.x, end.y);
 		if(getTarget().isSummary()){

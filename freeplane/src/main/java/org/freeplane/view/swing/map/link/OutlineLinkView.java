@@ -63,10 +63,6 @@ public class OutlineLinkView extends EdgeView {
 
 	@Override
 	protected void draw(final Graphics2D g) {
-		final Color color = getColor(g);
-		g.setColor(color);
-		final Stroke stroke = getStroke();
-		g.setStroke(stroke);
 		final int xMiddle = Math.max(start.x, end.x) + getSource().getMap().getZoomed(10);
 		xs = new int[] { start.x, xMiddle, xMiddle, end.x };
 		ys = new int[] { start.y, start.y, end.y, end.y };

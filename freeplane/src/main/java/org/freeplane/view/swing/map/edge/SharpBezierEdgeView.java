@@ -48,9 +48,6 @@ public class SharpBezierEdgeView extends SharpEdgeView {
 	@Override
 	protected void draw(final Graphics2D g) {
 		final GeneralPath graph = update();
-		g.setColor(getColor(g));
-		g.setPaint(getColor(g));
-		g.setStroke(getStroke());
 		g.fill(graph);
 		g.draw(graph);
 	}
@@ -59,16 +56,16 @@ public class SharpBezierEdgeView extends SharpEdgeView {
         final Point startControlPoint = getControlPoint(getStartConnectorLocation());
         final float zoom = getMap().getZoom();
         final float zoomedXCTRL = zoom * XCTRL;
-        final float xctrl = startControlPoint.x * zoomedXCTRL; 
-        final float yctrl = startControlPoint.y * zoomedXCTRL; 
+        final float xctrl = startControlPoint.x * zoomedXCTRL;
+        final float yctrl = startControlPoint.y * zoomedXCTRL;
         final Point endControlPoint = getControlPoint(getEndConnectorLocation());
         final float w = (getWidth() / 2f + 1) * zoom;
         final float w2 = w / 2;
         final int deltaX = getDeltaX();
         final int deltaY = getDeltaY();
-        final float childXctrl = deltaX > 0 ? endControlPoint.y * w2 : -endControlPoint.y * w2; 
-        final float childYctrl = deltaY > 0 ? endControlPoint.x * w2 : -endControlPoint.x * w2; 
-	    
+        final float childXctrl = deltaX > 0 ? endControlPoint.y * w2 : -endControlPoint.y * w2;
+        final float childYctrl = deltaY > 0 ? endControlPoint.x * w2 : -endControlPoint.x * w2;
+
 		one = new Point2D.Float(start.x + xctrl, start.y + yctrl);
 		two = new Point2D.Float(end.x - xctrl, end.y - yctrl);
 		final CubicCurve2D.Float line1 = new CubicCurve2D.Float();

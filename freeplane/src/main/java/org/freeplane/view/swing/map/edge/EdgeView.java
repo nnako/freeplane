@@ -260,6 +260,8 @@ public abstract class EdgeView {
     public void paint(final Graphics2D g) {
         final Stroke stroke = g.getStroke();
         final Color color = g.getColor();
+		g.setColor(getColor(g));
+		g.setStroke(getStroke());
         draw(g);
         g.setStroke(stroke);
         g.setColor(color);

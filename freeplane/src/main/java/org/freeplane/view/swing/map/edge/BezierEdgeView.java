@@ -43,34 +43,28 @@ public class BezierEdgeView extends EdgeView {
 	@Override
 	protected void draw(final Graphics2D g) {
 		final CubicCurve2D.Float graph = update();
-		final Color color = getColor(g);
-		g.setColor(color);
-		final Stroke stroke = getStroke();
-		g.setStroke(stroke);
 		g.draw(graph);
 		if (drawHiddenParentEdge()) {
 			g.setColor(g.getBackground());
 			g.setStroke(EdgeView.getEclipsedStroke());
 			g.draw(graph);
-			g.setStroke(stroke);
-			g.setColor(color);
 		}
 	}
 
 	private CubicCurve2D.Float update() {
         final Point startControlPoint = getControlPoint(getStartConnectorLocation());
         final int zoomedXCTRL = getMap().getZoomed(XCTRL);
-        final int xctrl = startControlPoint.x * zoomedXCTRL; 
-        final int yctrl = startControlPoint.y * zoomedXCTRL; 
+        final int xctrl = startControlPoint.x * zoomedXCTRL;
+        final int yctrl = startControlPoint.y * zoomedXCTRL;
         final Point endControlPoint = getControlPoint(getEndConnectorLocation());
         final int zoomedChildXCTRL = getMap().getZoomed(CHILD_XCTRL);
-        final int childXctrl = endControlPoint.x * zoomedChildXCTRL; 
-        final int childYctrl = endControlPoint.y * zoomedChildXCTRL; 
+        final int childXctrl = endControlPoint.x * zoomedChildXCTRL;
+        final int childYctrl = endControlPoint.y * zoomedChildXCTRL;
 		final CubicCurve2D.Float graph = new CubicCurve2D.Float();
 		graph.setCurve(start.x, start.y, start.x + xctrl, start.y + yctrl, end.x + childXctrl, end.y  + childYctrl, end.x, end.y);
 		return graph;
 	}
-	
+
 	@Override
 	public boolean detectCollision(final Point p) {
 		final CubicCurve2D.Float graph = update();

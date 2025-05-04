@@ -45,10 +45,6 @@ public class SummaryEdgeView extends EdgeView {
 	@Override
 	protected void draw(final Graphics2D g) {
 		final Shape graph = update();
-		final Color color = getColor(g);
-		g.setColor(color);
-		final Stroke stroke = getStroke();
-		g.setStroke(stroke);
 		g.draw(graph);
 	}
 
@@ -59,7 +55,7 @@ public class SummaryEdgeView extends EdgeView {
 		final int childXctrl = getMap().getZoomed(sign * SummaryEdgeView.CHILD_XCTRL);
 		final GeneralPath path = new GeneralPath(Path2D.WIND_EVEN_ODD, 5);
 		if(getSource().usesHorizontalLayout()) {
-			final int startY; 
+			final int startY;
 			if(isTopOrLeft)
 				startY = Math.min(start.y, end.y - childXctrl);
 			else
@@ -69,7 +65,7 @@ public class SummaryEdgeView extends EdgeView {
 			path.curveTo(start.x, startY + 2 * xctrl, end.x, startY, end.x, end.y);
 		}
 		else {
-			final int startX; 
+			final int startX;
 			if(isTopOrLeft)
 				startX = Math.min(start.x, end.x - childXctrl);
 			else
