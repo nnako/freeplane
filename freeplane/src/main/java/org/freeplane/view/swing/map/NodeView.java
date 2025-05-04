@@ -911,9 +911,9 @@ public class NodeView extends JComponent implements INodeView {
         return map.getZoomed(minimalDistanceBetweenChildren);
     }
 
-    public int getBaseDistanceToChildren() {
+    public int getBaseDistanceToChildren(int dx) {
         final double distance = getModeController().getExtension(LocationController.class).getBaseHGapToChildren(viewedNode).toBaseUnits();
-		return map.getZoomed(distance - LocationModel.DEFAULT_HGAP_PX);
+		return map.getZoomed(distance + dx);
     }
 
 	public ChildNodesAlignment getChildNodesAlignment() {
@@ -1052,10 +1052,6 @@ public class NodeView extends JComponent implements INodeView {
 
 	int getPreferredFoldingSymbolWidth() {
 		return Math.max(getZoomedFoldingMarkHalfWidth(1), getZoomedFoldingSwitchMinWidth());
-	}
-
-	int getPreferredHandleWidth() {
-		return getZoomedFoldingMarkHalfWidth(6.6);
 	}
 
 	public int getZoomedStateSymbolHalfWidth() {

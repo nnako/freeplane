@@ -77,11 +77,13 @@ class VerticalNodeViewLayoutStrategy {
     private int[] groupLowerYCoordinate;
     private boolean currentSideLeft;
 
-    private int baseDistanceToChildren;
+    private final int baseRelativeDistanceToChildren;
     private boolean areChildrenSeparatedByY;
     private int[] summaryBaseX;
 
-    private int extraGapForChildren;
+    private final int extraGapForChildren;
+	private final int foldingMarkReservedSpace;
+
 
 
     public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout, boolean isAutoCompactLayoutEnabled) {
@@ -104,7 +106,8 @@ class VerticalNodeViewLayoutStrategy {
         this.defaultVGap = view.getMap().getZoomed(LocationModel.DEFAULT_VGAP.toBaseUnits());
         this.minimalGapBetweenChildren = view.getMinimalDistanceBetweenChildren();
         this.extraGapForChildren = calculateExtraGapForChildren(minimalGapBetweenChildren);
-        this.baseDistanceToChildren = view.getBaseDistanceToChildren();
+        this.baseRelativeDistanceToChildren = view.getBaseDistanceToChildren(- LocationModel.DEFAULT_HGAP_PX);
+        this.foldingMarkReservedSpace = Math.max(1, view.getBaseDistanceToChildren(0) - 1);
     }
 
     private void layoutChildViews(NodeView view) {
@@ -160,7 +163,7 @@ class VerticalNodeViewLayoutStrategy {
                 level = viewLevels.summaryLevels[i];
                 boolean isFreeNode = child.isFree();
                 boolean isItem = level == 0;
-                int childHGap = calculateChildHorizontalGap(child, isItem, isFreeNode, baseDistanceToChildren);
+                int childHGap = calculateChildHorizontalGap(child, isItem, isFreeNode, baseRelativeDistanceToChildren);
                 if (isItem) {
                     assignRegularChildHorizontalPosition(i, child, oldLevel, childHGap);
                 } else {
@@ -792,9 +795,8 @@ class VerticalNodeViewLayoutStrategy {
         if (parentView == null || !isAutoCompactLayoutEnabled || width <= spaceAround || height <= spaceAround) {
             return;
         }
-        final int handleSpace = view.getPreferredHandleWidth() / 2;
-        final int segmentStart = contentX - handleSpace;
-        final int segmentEnd = contentX + contentSize.width + handleSpace;
+        final int segmentStart = view.isLeft() ? contentX - foldingMarkReservedSpace : contentX;
+        final int segmentEnd = view.isRight() ? contentX + contentSize.width + foldingMarkReservedSpace : contentX + contentSize.width;
 
         StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudExtra, segmentStart, segmentEnd);
         StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudExtra, segmentStart, segmentEnd);

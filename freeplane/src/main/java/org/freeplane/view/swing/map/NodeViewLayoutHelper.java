@@ -58,8 +58,8 @@ class NodeViewLayoutHelper {
         return view.getMinimalDistanceBetweenChildren();
     }
 
-    int getBaseDistanceToChildren() {
-        return view.getBaseDistanceToChildren();
+    int getBaseDistanceToChildren(int dx) {
+        return view.getBaseDistanceToChildren(dx);
     }
 
  	int getSpaceAround() {
@@ -122,6 +122,14 @@ class NodeViewLayoutHelper {
 
 	boolean isLeft() {
 		return view.isTopOrLeft();
+	}
+
+	boolean isRight() {
+		return ! (view.isTopOrLeft() || view.isRoot());
+	}
+
+	boolean isRoot() {
+		return view.isRoot();
 	}
 
 	int getHGap() {
@@ -247,10 +255,6 @@ class NodeViewLayoutHelper {
 
     int getMinimumDistanceConsideringHandles() {
         return view.getMinimumDistanceConsideringHandles();
-    }
-
-    int getPreferredHandleWidth() {
-        return view.getPreferredHandleWidth();
     }
 
     @Override
