@@ -97,13 +97,12 @@ import org.freeplane.view.swing.map.TagLocation;
  */
 @NodeHookDescriptor(hookName = "MapStyle")
 public class MapStyle extends PersistentNodeHook implements IExtension, IMapLifeCycleListener {
-	private static final String CATEGORIES_ATTRIBUTE = "categories";
+    private static final String CATEGORIES_ATTRIBUTE = "categories";
     private static final String TAG_CATEGORY_SEPARATOR_ATTRIBUTE = "category_separator";
 
     private static final String TAGS_ELEMENT = "tags";
     public static final String ALLOW_COMPACT_LAYOUT_PROPERTY = "allow_compact_layout";
     public static final String AUTO_COMPACT_LAYOUT_PROPERTY = "auto_compact_layout";
-    public static final String SPATIALLY_SEPARATE_SUBTREES_PROPERTY = "spatiallySeparateSubtrees";
     public static final String SHOW_TAG_CATEGORIES_PROPERTY = "showTagCategories";
 
     public static final String SHOW_TAGS_PROPERTY = "show_tags";
@@ -326,9 +325,6 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		        final boolean showsIcons = ResourceController.getResourceController().getBooleanProperty(SHOW_ICONS_PROPERTY);
 		        properties.put(SHOW_ICONS_PROPERTY, showsIcons ? IconLocation.BESIDE_NODES.name() : IconLocation.HIDE.name());
 		    }
-		    if(! properties.containsKey(SPATIALLY_SEPARATE_SUBTREES_PROPERTY)) {
-		        properties.put(SPATIALLY_SEPARATE_SUBTREES_PROPERTY, "true");
-		    }
 		}
 
 		private void loadTagProperties(IconRegistry iconRegistry, XMLElement xml) {
@@ -480,10 +476,6 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		return getBooleanProperty(map, AUTO_COMPACT_LAYOUT_PROPERTY);
 	}
 
-	public boolean spatiallySeparatesSubtrees(MapModel map) {
-		return getBooleanProperty(map, SPATIALLY_SEPARATE_SUBTREES_PROPERTY);
-	}
-
     public TagLocation tagLocation(MapModel map) {
         return MapStyleModel.getExtension(map).getEnumProperty(SHOW_TAGS_PROPERTY, TagLocation.UNDER_NODES);
     }
@@ -491,6 +483,7 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
     public IconLocation iconLocation(MapModel map) {
         return MapStyleModel.getExtension(map).getEnumProperty(SHOW_ICONS_PROPERTY, IconLocation.BESIDE_NODES);
     }
+
 
 	public boolean getBooleanProperty(MapModel map, String name) {
 		return MapStyleModel.getExtension(map).getBooleanProperty(name);

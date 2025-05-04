@@ -782,9 +782,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	private boolean scrollsViewAfterLayout = true;
 	private boolean allowsCompactLayout;
 	private boolean isAutoCompactLayoutEnabled;
-	private boolean spatiallySeparatesSubtrees;
-
-	private TagLocation tagLocation;
+    private TagLocation tagLocation;
     private IconLocation iconLocation;
     private boolean repaintsViewOnSelectionChange;
 
@@ -886,7 +884,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         fitToViewport = Boolean.parseBoolean(fitToViewportAsString);
         allowsCompactLayout = mapStyle.allowsCompactLayout(viewedMap);
         isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
-        spatiallySeparatesSubtrees = mapStyle.spatiallySeparatesSubtrees(viewedMap);
         tagLocation = mapStyle.tagLocation(viewedMap);
         iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
@@ -1556,13 +1553,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if (property.equals(MapStyle.AUTO_COMPACT_LAYOUT_PROPERTY)) {
             final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
             isAutoCompactLayoutEnabled = mapStyle.isAutoCompactLayoutEnabled(viewedMap);
-            getRoot().resetLayoutPropertiesRecursively();
-            revalidate();
-            repaint();
-        }
-        if (property.equals(MapStyle.SPATIALLY_SEPARATE_SUBTREES_PROPERTY)) {
-            final MapStyle mapStyle = getModeController().getExtension(MapStyle.class);
-            spatiallySeparatesSubtrees = mapStyle.spatiallySeparatesSubtrees(viewedMap);
             getRoot().resetLayoutPropertiesRecursively();
             revalidate();
             repaint();
@@ -3117,11 +3107,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	boolean isAutoCompactLayoutEnabled() {
 		return isAutoCompactLayoutEnabled;
 	}
-
-    boolean spatiallySeparatesSubtrees() {
-		return spatiallySeparatesSubtrees;
-	}
-
 
 	@Override
 	public void invalidate() {
