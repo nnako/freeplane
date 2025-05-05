@@ -275,18 +275,22 @@ class VerticalNodeViewLayoutStrategy {
                 int childShiftY = calculateDistance(child, NodeViewLayoutHelper::getShift);
 
                 if (level == 0) {
-                    if (isFreeNode) {
-                        assignFreeChildVerticalPosition(index, childShiftY, child);
-                    } else {
-                        assignRegularChildVerticalPosition(index, child, childRegularHeight, childShiftY);
-                        initializeSummaryGroupStart(index, oldLevel, child.isFirstGroupNode());
-                        if (childRegularHeight != 0) {
-                            visibleLaidOutChildCounter++;
-                            lastRegularChild = child;
-                        }
-                    }
+                	if (isFreeNode) {
+                		assignFreeChildVerticalPosition(index, childShiftY, child);
+                	} else {
+                    	handleFirstVisibleChildAlignment();
+                		if (childRegularHeight != 0) {
+                			assignRegularChildVerticalPosition(index, child, childRegularHeight, childShiftY);
+                			visibleLaidOutChildCounter++;
+                			lastRegularChild = child;
+                		}
+                		else {
+                		   	yCoordinates[index] = calculateInitialYPosition(childShiftY);
+                		}
+                		initializeSummaryGroupStart(index, oldLevel, child.isFirstGroupNode());
+                	}
                 } else {
-                    assignSummaryChildVerticalPosition(index, child, childRegularHeight, childShiftY);
+                	assignSummaryChildVerticalPosition(index, child, childRegularHeight, childShiftY);
                 }
                 if (!(isItem && isFreeNode)) {
                     updateSummaryGroupBounds(index, child, level, isItem, childRegularHeight);
@@ -406,53 +410,47 @@ class VerticalNodeViewLayoutStrategy {
 
 
     private void assignRegularChildVerticalPosition(int index,
-                                NodeViewLayoutHelper child,
-                                int childRegularHeight,
-                                int childShiftY) {
-        final int additionalCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
-        handleFirstVisibleChildAlignment();
+    		NodeViewLayoutHelper child,
+    		int childRegularHeight,
+    		int childShiftY) {
+    	int y0 = y;
+    	int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
+    	final int additionalCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
+    	int extraVGap;
+    	int upperGap;
+    	if(isAutoCompactLayoutEnabled) {
+    		final int topContentY = getContentTop(child, y0);
+    		final int contentAvailableSpace = topContentY - bottomContentY;
+    		if(contentAvailableSpace - availableSpace == 0)
+    			extraVGap = 0;
+    		else if (contentAvailableSpace - availableSpace > extraGapForChildren)
+    			extraVGap = extraGapForChildren;
+    		else
+    			extraVGap = extraGapForChildren - (contentAvailableSpace - availableSpace);
+    		upperGap = extraVGap;
+    	}
+    	else {
+    		extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
+    		upperGap = childNodesAlignment.align(extraVGap);
+    	}
+    	if (availableSpace != 0) {
+    		y -= availableSpace;
+    	}
 
-        int y0 = y;
-        int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
-        int extraVGap;
-        int upperGap;
-        if(isAutoCompactLayoutEnabled) {
-            final int topContentY = getContentTop(child, y0);
-            final int contentAvailableSpace = topContentY - bottomContentY;
-            if(contentAvailableSpace - availableSpace == 0)
-            	extraVGap = 0;
-            else if (contentAvailableSpace - availableSpace > extraGapForChildren)
-            	extraVGap = extraGapForChildren;
-            else
-            	extraVGap = extraGapForChildren - (contentAvailableSpace - availableSpace);
-            upperGap = extraVGap;
-        }
-        else {
-        	extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
-        	upperGap = childNodesAlignment.align(extraVGap);
-        }
-        if (availableSpace != 0) {
-            y -= availableSpace;
-        }
+    	if (isFirstVisibleLaidOutChild()) {
+    		extraVGap -= upperGap;
+    		upperGap = 0;
+    		totalSideShiftY -= childNodesAlignment.placement() == Placement.CENTER ?
+    				additionalCloudHeight : additionalCloudHeight/2;
+    	}
 
-        if (isFirstVisibleLaidOutChild()) {
-            extraVGap -= upperGap;
-            upperGap = 0;
-            totalSideShiftY -= childNodesAlignment.placement() == Placement.CENTER ?
-                additionalCloudHeight : additionalCloudHeight/2;
-        }
+    	y += vGap + upperGap;
 
-        if (childRegularHeight != 0) {
-            y += vGap + upperGap;
-        }
+    	int yBegin = calculateInitialYPosition(childShiftY);
+    	yCoordinates[index] = yBegin;
 
-        int yBegin = calculateInitialYPosition(childShiftY);
-        yCoordinates[index] = yBegin;
-
-        if (childRegularHeight != 0) {
-            adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, availableSpace, y0);
-            updateGapsAndBoundaries(index, child, childRegularHeight, extraVGap, upperGap);
-        }
+    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, availableSpace, y0);
+    	updateGapsAndBoundaries(index, child, childRegularHeight, extraVGap, upperGap);
     }
 
 
