@@ -300,7 +300,7 @@ class VerticalNodeViewLayoutStrategy {
         if(childNodesAlignment.placement() != Placement.TOP) {
 			totalSideShiftY += contentSize.height;
 	        if(lastRegularChild != null)
-	            totalSideShiftY += CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(lastRegularChild)/2;
+	            totalSideShiftY += lastRegularChild.getHeight() - spaceAround - lastRegularChild.getBottomOverlap() - lastRegularChild.getContentY() - lastRegularChild.getContentHeight();
 		}
         if(childNodesAlignment.placement() == Placement.CENTER)
             totalSideShiftY /= 2;
@@ -471,12 +471,10 @@ class VerticalNodeViewLayoutStrategy {
     private void adjustTotalShiftForAlignment(NodeViewLayoutHelper child, int childShiftY,
                                         int yBegin, int childRegularHeight, int additionalCloudHeight,
                                         int availableSpace, int y0) {
-        if (isFirstVisibleLaidOutChild()) {
-        	if(additionalCloudHeight != 0)
-        		totalSideShiftY -= childNodesAlignment.placement() == Placement.CENTER ?
-    				additionalCloudHeight : additionalCloudHeight/2;
+        final Placement placement = childNodesAlignment.placement();
+		if (isFirstVisibleLaidOutChild()) {
 			if (!allowsCompactLayout) {
-			    totalSideShiftY += childNodesAlignment.placement() == Placement.CENTER ?
+			    totalSideShiftY += placement == Placement.CENTER ?
 			        childShiftY * 2 : childShiftY;
 			}
 		}
@@ -492,7 +490,10 @@ class VerticalNodeViewLayoutStrategy {
                 totalSideShiftY -= 2 * deltaShift;
             totalSideShiftY -= child.getContentHeight() + vGap;
         } else {
-			if (childNodesAlignment.placement() != Placement.TOP) {
+			if (isFirstVisibleLaidOutChild() && (placement == Placement.TOP || placement == Placement.CENTER)) {
+				totalSideShiftY -= getContentTop(child, 0);
+			}
+			if (placement != Placement.TOP){
 			    final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
 			    int yEnd = yBegin + childRegularHeight;
 			    if(yEnd > yRef) {
