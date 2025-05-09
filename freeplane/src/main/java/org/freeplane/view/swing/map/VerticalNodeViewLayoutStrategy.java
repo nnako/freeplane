@@ -418,22 +418,18 @@ class VerticalNodeViewLayoutStrategy {
     	int y0 = y;
     	int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
     	final int additionalCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
-    	int extraVGap;
-    	int upperGap;
-    	if(isAutoCompactLayoutEnabled) {
+    	int extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
+    	int upperGap = childNodesAlignment.align(extraVGap);
+    	if(isAutoCompactLayoutEnabled && ! isFirstVisibleLaidOutChild()) {
     		final int topContentY = getContentTop(child, y0);
     		final int contentAvailableSpace = topContentY - bottomContentY;
-    		if(contentAvailableSpace - availableSpace == 0)
-    			extraVGap = 0;
-    		else if (contentAvailableSpace - availableSpace > extraGapForChildren)
-    			extraVGap = extraGapForChildren;
-    		else
-    			extraVGap = extraGapForChildren - (contentAvailableSpace - availableSpace);
-    		upperGap = extraVGap;
-    	}
-    	else {
-    		extraVGap = calculateExtraVerticalGap(childRegularHeight, child.getContentHeight(), additionalCloudHeight);
-    		upperGap = childNodesAlignment.align(extraVGap);
+    		if(contentAvailableSpace - availableSpace == 0) {
+				extraVGap -= upperGap;
+				upperGap = 0;
+			} else if (contentAvailableSpace - availableSpace < upperGap) {
+				extraVGap -= upperGap - (contentAvailableSpace - availableSpace);
+				upperGap = contentAvailableSpace - availableSpace;
+			}
     	}
     	if (availableSpace != 0) {
     		y -= availableSpace;
@@ -444,8 +440,10 @@ class VerticalNodeViewLayoutStrategy {
     		upperGap = 0;
     	}
 
-    	y += vGap + upperGap;
-
+    	if(availableSpace >= 0)
+    		y += vGap + upperGap;
+    	else
+    		y += Math.max(vGap + upperGap + availableSpace, 0);
     	int yBegin = calculateInitialYPosition(childShiftY);
     	yCoordinates[index] = yBegin;
 
@@ -473,7 +471,7 @@ class VerticalNodeViewLayoutStrategy {
                                         int availableSpace, int y0) {
         final Placement placement = childNodesAlignment.placement();
 		if (isFirstVisibleLaidOutChild()) {
-			if (!allowsCompactLayout) {
+			if (!allowsCompactLayout && childShiftY != 0) {
 			    totalSideShiftY += placement == Placement.CENTER ?
 			        childShiftY * 2 : childShiftY;
 			}
