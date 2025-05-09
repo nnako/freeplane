@@ -45,17 +45,31 @@ public class SharpLinearEdgeView extends SharpEdgeView {
 	protected void draw(final Graphics2D g) {
         final int deltaX = getDeltaX();
         final int deltaY = getDeltaY();
-		final int xs[] = { start.x + deltaX, end.x, start.x - deltaX};
-		final int ys[] = { start.y + deltaY, end.y, start.y - deltaY };
-		g.fillPolygon(xs, ys, 3);
+        if(start != shapeStart) {
+        	final int xs[] = { start.x, shapeStart.x + deltaX, end.x, shapeStart.x - deltaX};
+        	final int ys[] = { start.y, shapeStart.y + deltaY, end.y, shapeStart.y - deltaY};
+        	g.fillPolygon(xs, ys, 4);
+        } else {
+        	final int xs[] = { shapeStart.x + deltaX, end.x, shapeStart.x - deltaX};
+        	final int ys[] = { shapeStart.y + deltaY, end.y, shapeStart.y - deltaY };
+        	g.fillPolygon(xs, ys, 3);
+        }
 	}
 
 	@Override
 	public boolean detectCollision(final Point p) {
 		final int w = getMap().getZoomed(getWidth() / 2 + 1);
-		final int xs[] = { start.x, end.x, start.x };
-		final int ys[] = { start.y + w, end.y, start.y - w };
-		final Polygon polygon = new Polygon(xs, ys, 3);
+		final Polygon polygon;
+		if(start != shapeStart) {
+        	final int xs[] = { start.x, shapeStart.x, end.x, shapeStart.x, start.x};
+        	final int ys[] = { start.y, shapeStart.y, end.y, shapeStart.y, start.y};
+			polygon = new Polygon(xs, ys, 5);
+		}
+		else {
+			final int xs[] = { start.x, end.x, start.x };
+			final int ys[] = { start.y + w, end.y, start.y - w };
+			polygon = new Polygon(xs, ys, 3);
+		}
 		return new CollisionDetector().detectCollision(p, polygon);
 	}
 }

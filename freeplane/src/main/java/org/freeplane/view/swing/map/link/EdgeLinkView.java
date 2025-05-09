@@ -99,7 +99,7 @@ public class EdgeLinkView extends AConnectorView {
 			return;
 		}
 		if (isSourceVisible() && !linkController.getArrows(viewedConnector).start.equals(ArrowType.NONE)) {
-			Point p1 = edgeView.getStart();
+			Point p1 = edgeView.getShapeStart();
 			Point p2 = new Point(p1);
 			p2.translate(5, 0);
 			paintArrow(graphics, p2, p1);

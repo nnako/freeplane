@@ -2424,4 +2424,13 @@ public class NodeView extends JComponent implements INodeView {
 		 map.repaintVisible();
 	}
 
+
+
+	public boolean isAutoCompactLayoutEnabled() {
+		return map.isAutoCompactLayoutEnabled();
+	}
+
+	public boolean allowsCompactLayout() {
+		return map.allowsCompactLayout();
+	}
 }

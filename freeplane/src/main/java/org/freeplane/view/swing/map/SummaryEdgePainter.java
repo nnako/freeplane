@@ -106,9 +106,9 @@ class SummaryEdgePainter {
 		UITools.convertPointToAncestor(parentView, start1, source);
 		UITools.convertPointToAncestor(parentView, start2, source);
 		final EdgeView edgeView = new SummaryEdgeView(source, target, source);
-		edgeView.setStart(start1);
+		edgeView.setShapeStart(start1);
 		edgeView.paint(g);
-		edgeView.setStart(start2);
+		edgeView.setShapeStart(start2);
 		edgeView.paint(g);
 		return true;
 	}

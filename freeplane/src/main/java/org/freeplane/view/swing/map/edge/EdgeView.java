@@ -54,14 +54,14 @@ public abstract class EdgeView {
     }
 
     private final NodeView source;
-    protected Point start, end;
+    protected Point start, shapeStart, end;
 
-    public void setStart(Point start) {
-        this.start = start;
+    public void setShapeStart(Point shapeStart) {
+    	this.shapeStart = this.start = shapeStart;
     }
 
-    public Point getStart() {
-        return start;
+    public Point getShapeStart() {
+        return shapeStart;
     }
 
     public void setEnd(Point end) {
@@ -93,18 +93,20 @@ public abstract class EdgeView {
                     start = mainView.getBottomPoint();
                     startConnectorLocation = ConnectorLocation.BOTTOM;
                 } else {
-                    start = mainView.getTopPoint();
+                	start = mainView.getTopPoint();
                     startConnectorLocation = ConnectorLocation.TOP;
                 }
-            }
-            else if(target.isTopOrLeft()){
-                start = mainView.getRightPoint();
-                startConnectorLocation = ConnectorLocation.RIGHT;
-            }
-            else{
-                start = mainView.getLeftPoint();
-                startConnectorLocation = ConnectorLocation.LEFT;
-            }
+            } else {
+				if(target.isTopOrLeft()){
+					start = mainView.getRightPoint();
+				    startConnectorLocation = ConnectorLocation.RIGHT;
+				}
+				else{
+					start = mainView.getLeftPoint();
+				    startConnectorLocation = ConnectorLocation.LEFT;
+				}
+			}
+            shapeStart = start;
             if(target.isTopOrLeft()){
                 end = targetMainView.getRightPoint();
                 endConnectorLocation = ConnectorLocation.RIGHT;
@@ -130,6 +132,23 @@ public abstract class EdgeView {
 
             startConnectorLocation = mainView.getConnectorLocation(relativeLocation, LayoutOrientation.NOT_SET,  ChildNodesAlignment.NOT_SET);
             start = mainView.getConnectorPoint(relativeLocation, startConnectorLocation);
+        	final boolean needsSpaceForFoldingMark = source.isAutoCompactLayoutEnabled() && !childNodesAlignment.isStacked() && ! source.isRoot();
+			if(needsSpaceForFoldingMark) {
+				switch (startConnectorLocation) {
+				case LEFT:
+					shapeStart = new Point(start.x - source.getZoomedFoldingMarkHalfWidth(2), start.y);
+					break;
+				case RIGHT:
+					shapeStart = new Point(start.x + source.getZoomedFoldingMarkHalfWidth(2), start.y);
+					break;
+				default:
+					shapeStart = start;
+					break;
+				}
+		    }
+			else
+				shapeStart = start;
+
         }
     }
 
@@ -273,6 +292,8 @@ public abstract class EdgeView {
         createStart();
         UITools.convertPointToAncestor(target.getMainView(), end, paintedComponent);
         UITools.convertPointToAncestor(source.getMainView(), start, paintedComponent);
+        if(start != shapeStart && shapeStart != null)
+        	UITools.convertPointToAncestor(source.getMainView(), shapeStart, paintedComponent);
         align(start, end);
     }
 

@@ -23,8 +23,8 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Stroke;
-import java.awt.geom.CubicCurve2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 import org.freeplane.view.swing.map.NodeView;
@@ -66,25 +66,40 @@ public class SharpBezierEdgeView extends SharpEdgeView {
         final float childXctrl = deltaX > 0 ? endControlPoint.y * w2 : -endControlPoint.y * w2;
         final float childYctrl = deltaY > 0 ? endControlPoint.x * w2 : -endControlPoint.x * w2;
 
-		one = new Point2D.Float(start.x + xctrl, start.y + yctrl);
+		one = new Point2D.Float(shapeStart.x + xctrl, shapeStart.y + yctrl);
 		two = new Point2D.Float(end.x - xctrl, end.y - yctrl);
-		final CubicCurve2D.Float line1 = new CubicCurve2D.Float();
-		final CubicCurve2D.Float line2 = new CubicCurve2D.Float();
-		line1.setCurve(start.x - deltaX, start.y - deltaY, one.x - deltaX, one.y - deltaY, two.x - childXctrl, two.y - childYctrl, end.x - childXctrl/4,
-		    end.y - childYctrl / 4);
-		line2.setCurve(end.x + childXctrl/4, end.y + childYctrl / 4, two.x  + childXctrl, two.y + childYctrl, one.x + deltaX, one.y + deltaY, start.x + deltaX,
-		    start.y + deltaY);
+
 		final GeneralPath graph = new GeneralPath();
-		graph.append(line1, true);
-		graph.append(line2, true);
+
+		if(start != shapeStart) {
+			graph.moveTo(start.x  + deltaX, start.y + deltaY);
+			graph.lineTo(start.x  - deltaX, start.y - deltaY);
+			graph.lineTo(shapeStart.x - deltaX, shapeStart.y - deltaY);
+		}
+		else {
+			graph.moveTo(shapeStart.x - deltaX, shapeStart.y - deltaY);
+		}
+		graph.curveTo(one.x - deltaX, one.y - deltaY,
+		          two.x - childXctrl, two.y - childYctrl,
+		          end.x - childXctrl/4, end.y - childYctrl/4);
+
+		graph.lineTo(end.x + childXctrl/4, end.y + childYctrl/4);
+		graph.curveTo(two.x + childXctrl, two.y + childYctrl,
+		          one.x + deltaX, one.y + deltaY,
+		          shapeStart.x + deltaX, shapeStart.y + deltaY);
+
 		graph.closePath();
+
 		return graph;
 	}
 
 	@Override
 	public boolean detectCollision(final Point p) {
-		final CubicCurve2D.Float line1 = new CubicCurve2D.Float();
-		line1.setCurve(start.x, start.y, one.x, one.y, two.x, two.y, end.x, end.y);
-		return new CollisionDetector().detectCollision(p, line1);
+		final Path2D line = new Path2D.Float();
+		line.moveTo(start.x, start.y);
+		if(start != shapeStart)
+			line.lineTo(shapeStart.x, shapeStart.y);
+		line.curveTo(one.x, one.y, two.x, two.y, end.x, end.y);
+		return new CollisionDetector().detectCollision(p, line);
 	}
 }
