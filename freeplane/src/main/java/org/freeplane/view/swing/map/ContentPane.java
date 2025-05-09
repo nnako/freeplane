@@ -45,9 +45,11 @@ class ContentPane extends JComponent {
 		Graphics2D g2 = (Graphics2D) g;
 		int width = getWidth();
 		int height = getHeight();
-		AffineTransform transform = g2.getTransform();
-		if(height * transform.getScaleY() <= 2 
-				|| width * transform.getScaleX() <= 2) {
+		
+		AffineTransform t = g2.getTransform();
+		double approxScaleX = Math.abs(t.getScaleX()) + Math.abs(t.getShearY());
+		double approxScaleY = Math.abs(t.getShearX()) + Math.abs(t.getScaleY());
+		if (height * approxScaleY <= 2 || width * approxScaleX <= 2) {
 			final NodeView parent = (NodeView) getParent();
 			MainView mainView = parent.getMainView();
 			g.setColor(mainView.getBorderColor());
