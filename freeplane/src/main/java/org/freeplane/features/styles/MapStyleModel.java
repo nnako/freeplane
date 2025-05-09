@@ -471,6 +471,11 @@ public class MapStyleModel implements IExtension {
         conditionalStyleModel.addDifferentConditions(source.conditionalStyleModel);
     }
 
+    void setConditionalStylesIfEmpty(MapStyleModel source) {
+    	if(conditionalStyleModel.getStyleCount() == 0)
+    		conditionalStyleModel.setStyles(new ArrayList<>(source.getConditionalStyleModel().getStyles()));
+    }
+
 	public void setProperty(String key, String value) {
 		if (value != null) {
 			properties.put(key, value);

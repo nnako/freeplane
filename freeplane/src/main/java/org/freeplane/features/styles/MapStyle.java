@@ -749,7 +749,7 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
 		final URL url = uri.toURL();
         loadStyleMapContainer(url).ifPresent(styleMapContainer ->
             {
-				new StyleExchange(styleMapContainer, targetMap).copyMapStyles();
+				new StyleExchange(styleMapContainer, targetMap).copyMapStyles(true);
 				updateFollowProperties(targetMap, uri, shouldFollow, shouldAssociate);
 			});
 	}
@@ -785,7 +785,7 @@ public class MapStyle extends PersistentNodeHook implements IExtension, IMapLife
                 if(shouldUpdate) {
                     loadStyleMapContainer(source.toURL()).ifPresent(styleMapContainer ->
                     {
-                        new StyleExchange(styleMapContainer, targetMap).copyMapStylesNoUndoNoRefresh();
+                        new StyleExchange(styleMapContainer, targetMap).copyMapStylesNoUndoNoRefresh(false);
                         try {
 							Controller.getCurrentController().getViewController().invokeAndWait(
 							    () -> updatedFollowedMaps.put(targetMap, followedMapPath));

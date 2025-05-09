@@ -39,19 +39,22 @@ class StyleExchange {
         makeUndoableAndRefreshView(oldStyleModel);
     }
 
-    void copyMapStyles() {
+    void copyMapStyles(boolean mergeConditionalStyles) {
         final MapStyleModel oldStyleModel =  targetMap.getRootNode().getExtension(MapStyleModel.class);
-        copyMapStylesNoUndoNoRefresh();
+        copyMapStylesNoUndoNoRefresh(mergeConditionalStyles);
         makeUndoableAndRefreshView(oldStyleModel);
     }
 
-	void copyMapStylesNoUndoNoRefresh() {
+	void copyMapStylesNoUndoNoRefresh(boolean mergeConditionalStyles) {
 		final ModeController modeController = Controller.getCurrentModeController();
         final MapStyleModel oldStyleModel = targetMap.getRootNode().removeExtension(MapStyleModel.class);
         modeController.getExtension(MapStyle.class).onCreate(sourceMap);
         final MapStyleModel source = MapStyleModel.getExtension(sourceMap);
         source.addUserStylesFrom(oldStyleModel);
-        source.addConditionalStylesFrom(oldStyleModel);
+        if(mergeConditionalStyles)
+        	source.addConditionalStylesFrom(oldStyleModel);
+        else
+        	source.setConditionalStylesIfEmpty(oldStyleModel);
         source.setNonStyleUserPropertiesFrom(oldStyleModel);
         moveStyle(true);
         MapStyleModel styleModel = targetMap.getRootNode().getExtension(MapStyleModel.class);
