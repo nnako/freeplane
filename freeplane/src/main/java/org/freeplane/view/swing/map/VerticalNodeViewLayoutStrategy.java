@@ -107,7 +107,7 @@ class VerticalNodeViewLayoutStrategy {
         this.minimalGapBetweenChildren = view.getMinimalDistanceBetweenChildren();
         this.extraGapForChildren = calculateExtraGapForChildren(minimalGapBetweenChildren);
         this.baseRelativeDistanceToChildren = view.getBaseDistanceToChildren(- LocationModel.DEFAULT_HGAP_PX);
-        this.foldingMarkReservedSpace = Math.max(1, view.getBaseDistanceToChildren(0) - 2);
+        this.foldingMarkReservedSpace = Math.max(1, view.getBaseDistanceToChildren(0) - 3);
     }
 
     private void layoutChildViews(NodeView view) {
