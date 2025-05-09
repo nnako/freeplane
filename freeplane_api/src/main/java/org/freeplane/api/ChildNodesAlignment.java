@@ -62,10 +62,7 @@ public enum ChildNodesAlignment {
     	return placement.align(value);
     }
 
-    public int reverseAlign(int value) {
-    	return value - align(value);
-    }
-	public Placement placement() {
+    public Placement placement() {
 		return placement;
 	}
 

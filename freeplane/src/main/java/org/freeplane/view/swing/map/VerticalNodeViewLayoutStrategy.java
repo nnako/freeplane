@@ -297,6 +297,11 @@ class VerticalNodeViewLayoutStrategy {
                 }
             }
         }
+        if(childNodesAlignment.placement() != Placement.TOP) {
+			totalSideShiftY += contentSize.height;
+	        if(lastRegularChild != null)
+	            totalSideShiftY += CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(lastRegularChild)/2;
+		}
         if(childNodesAlignment.placement() == Placement.CENTER)
             totalSideShiftY /= 2;
         else if (childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
@@ -304,9 +309,6 @@ class VerticalNodeViewLayoutStrategy {
                 && !isFirstVisibleLaidOutChild()) {
             totalSideShiftY -= calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize);
         }
-        totalSideShiftY += childNodesAlignment.align(contentSize.height);
-        if(lastRegularChild != null)
-            totalSideShiftY += childNodesAlignment.align(CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(lastRegularChild)/2);
         calculateRelativeCoordinatesForContentAndBothSides(laysOutLeftSide);
     }
 
@@ -440,8 +442,6 @@ class VerticalNodeViewLayoutStrategy {
     	if (isFirstVisibleLaidOutChild()) {
     		extraVGap -= upperGap;
     		upperGap = 0;
-    		totalSideShiftY -= childNodesAlignment.placement() == Placement.CENTER ?
-    				additionalCloudHeight : additionalCloudHeight/2;
     	}
 
     	y += vGap + upperGap;
@@ -449,14 +449,14 @@ class VerticalNodeViewLayoutStrategy {
     	int yBegin = calculateInitialYPosition(childShiftY);
     	yCoordinates[index] = yBegin;
 
-    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, availableSpace, y0);
+    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, additionalCloudHeight, availableSpace, y0);
     	updateGapsAndBoundaries(index, child, childRegularHeight, extraVGap, upperGap);
     }
 
 
     private int calculateInitialYPosition(int childShiftY) {
         int yBegin;
-        if (childShiftY < 0 && !allowsCompactLayout) {
+        if (childShiftY < 0 && (!allowsCompactLayout || isFirstVisibleLaidOutChild())) {
             yBegin = y;
             y -= childShiftY;
         } else {
@@ -469,29 +469,37 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private void adjustTotalShiftForAlignment(NodeViewLayoutHelper child, int childShiftY,
-                                        int yBegin, int childRegularHeight,
+                                        int yBegin, int childRegularHeight, int additionalCloudHeight,
                                         int availableSpace, int y0) {
-        if (isFirstVisibleLaidOutChild() && !allowsCompactLayout) {
-            totalSideShiftY += childNodesAlignment.placement() == Placement.CENTER ?
-                childShiftY * 2 : childShiftY;
-        }
+        if (isFirstVisibleLaidOutChild()) {
+        	if(additionalCloudHeight != 0)
+        		totalSideShiftY -= childNodesAlignment.placement() == Placement.CENTER ?
+    				additionalCloudHeight : additionalCloudHeight/2;
+			if (!allowsCompactLayout) {
+			    totalSideShiftY += childNodesAlignment.placement() == Placement.CENTER ?
+			        childShiftY * 2 : childShiftY;
+			}
+		}
 
         if (childNodesAlignment == ChildNodesAlignment.FLOW ||
             childNodesAlignment == ChildNodesAlignment.AUTO) {
             int yContentBegin = getContentTop(child, yBegin);
 
-            final int deltaShift = yContentBegin - (Math.max(bottomContentY, y0 -
-                Math.max(availableSpace, 0)) + vGap) - childShiftY;
+            final int deltaShift = yContentBegin
+            		- (Math.max(bottomContentY, y0 - Math.max(availableSpace, 0)) + vGap)
+            		-  (childShiftY > 0 || !isFirstVisibleLaidOutChild() ? childShiftY : 0);
             if(deltaShift > 0)
                 totalSideShiftY -= 2 * deltaShift;
             totalSideShiftY -= child.getContentHeight() + vGap;
-        } else if (childNodesAlignment.placement() != Placement.TOP) {
-            final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
-            int yEnd = yBegin + childRegularHeight;
-            if(yEnd > yRef) {
-                totalSideShiftY -= (yEnd - yRef);
-            }
-        }
+        } else {
+			if (childNodesAlignment.placement() != Placement.TOP) {
+			    final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
+			    int yEnd = yBegin + childRegularHeight;
+			    if(yEnd > yRef) {
+			        totalSideShiftY -= (yEnd - yRef);
+			    }
+			}
+		}
     }
 
 	private int getContentTop(NodeViewLayoutHelper child, int y) {
