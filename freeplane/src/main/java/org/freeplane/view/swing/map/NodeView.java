@@ -2210,9 +2210,9 @@ public class NodeView extends JComponent implements INodeView {
 	protected void validateTree() {
 		if(! isValid()) {
 			if(automaticallyAlignChildrenWidths())
-				layoutHelper.calculateMinimumChildContentWidth();
+				layoutHelper.calculateMinimumChildContentSize();
 			else
-				layoutHelper.resetMinimumChildContentWidth();
+				layoutHelper.resetMinimumChildContentSize();
 		}
 		super.validateTree();
 	}

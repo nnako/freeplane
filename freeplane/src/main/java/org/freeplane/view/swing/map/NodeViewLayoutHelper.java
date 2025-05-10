@@ -13,26 +13,55 @@ import org.freeplane.api.ChildNodesAlignment;
 import org.freeplane.features.map.NodeModel;
 
 class NodeViewLayoutHelper {
+	static final int UNSET = -1;
 
 	private NodeView view;
 	private int topOverlap;
 	private int bottomOverlap;
 	private StepFunction topBoundary;
 	private StepFunction bottomBoundary;
-	private int minimumChildContentWidth = ContentSizeCalculator.UNSET;
+	private int minimumChildContentSize = UNSET;
 
 	NodeViewLayoutHelper(NodeView view) {
 		this.view = view;
 	}
 
 	Dimension calculateContentSize() {
-		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, getMinimumContentWidth());
-		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
+		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
+		final boolean parentUsesHorizontallayout = parentUsesHorizontalLayout(view);
+		int minimumWidth = getMinimumContentSize();
+		if(parentUsesHorizontallayout) {
+			return new Dimension(Math.max(minimumWidth, contentSize.height), contentSize.width);
+		}
+		else {
+			if(minimumWidth != UNSET) {
+				final int maximumWidth = view.getMainView().getMaximumWidth();
+				if(contentSize.width < minimumWidth && contentSize.width < maximumWidth)
+					contentSize.width = Math.min(minimumWidth, maximumWidth);
+			}
+			return contentSize;
+		}
 	}
 
-	private int getMinimumContentWidth() {
+    void calculateMinimumChildContentSize() {
+    	int min = UNSET;
+    	final boolean usesHorizontalLayout = usesHorizontalLayout();
+    	for (NodeView child : view.getChildrenViews()) {
+    		if(! child.isFree()) {
+				final Dimension preferredSize = child.getMainView().getPreferredSize();
+				min = Math.max(min, usesHorizontalLayout ? preferredSize.height : preferredSize.width);
+			}
+    	}
+    	this.minimumChildContentSize = min;
+    }
+
+    void resetMinimumChildContentSize() {
+    	this.minimumChildContentSize = UNSET;
+    }
+
+    private int getMinimumContentSize() {
 		final NodeViewLayoutHelper parentView = getParentView();
-		return parentView == null ? ContentSizeCalculator.UNSET : parentView.minimumChildContentWidth;
+		return parentView == null ? UNSET : parentView.minimumChildContentSize;
 	}
 
 	int getAdditionalCloudHeight() {
@@ -78,28 +107,28 @@ class NodeViewLayoutHelper {
 
 	int getContentX() {
         Component component = view.getContent();
-        return usesHorizontallayout(view) ? component.getY(): component.getX();
+        return parentUsesHorizontalLayout(view) ? component.getY(): component.getX();
 	}
 
 	int getContentY() {
         Component component = view.getContent();
-        return usesHorizontallayout(view) ? component.getX(): component.getY();
+        return parentUsesHorizontalLayout(view) ? component.getX(): component.getY();
 	}
 
 
     int getContentWidth() {
 		Component component = view.getContent();
-        return usesHorizontallayout(view) ? component.getHeight(): component.getWidth();
+        return parentUsesHorizontalLayout(view) ? component.getHeight(): component.getWidth();
 	}
 
 	int getContentHeight() {
         Component component = view.getContent();
-        return usesHorizontallayout(view) ? component.getWidth() : component.getHeight();
+        return parentUsesHorizontalLayout(view) ? component.getWidth() : component.getHeight();
 	}
 
 	void setContentBounds(int x, int y, int width, int height) {
 		Component component = view.getContent();
-		if (usesHorizontallayout(component))
+		if (parentUsesHorizontalLayout(component))
 			component.setBounds(y, x, height, width);
 		else
 			component.setBounds(x, y, width, height);
@@ -122,11 +151,7 @@ class NodeViewLayoutHelper {
         return view.isFirstGroupNode();
     }
 
-    boolean usesHorizontalLayout() {
-        return view.usesHorizontalLayout();
-    }
-
-	boolean isLeft() {
+ 	boolean isLeft() {
 		return view.isTopOrLeft();
 	}
 
@@ -212,33 +237,33 @@ class NodeViewLayoutHelper {
 	}
 
 	void setSize(int width, int height) {
-		if (usesHorizontallayout(view.getContent()))
+		if (parentUsesHorizontalLayout(view.getContent()))
 			view.setSize(height, width);
 		else
 			view.setSize(width, height);
 	}
 
 	void setLocation(int x, int y) {
-		if (usesHorizontallayout(view))
+		if (parentUsesHorizontalLayout(view))
 			view.setLocation(y, x);
 		else
 			view.setLocation(x, y);
 	}
 
 	private int getX(Component component) {
-		return usesHorizontallayout(component) ? component.getY(): component.getX();
+		return parentUsesHorizontalLayout(component) ? component.getY(): component.getX();
 	}
 
 	private int getY(Component component) {
-		return usesHorizontallayout(component) ? component.getX(): component.getY();
+		return parentUsesHorizontalLayout(component) ? component.getX(): component.getY();
 	}
 
 	private int getWidth(Component component) {
-		return usesHorizontallayout(component) ? component.getHeight(): component.getWidth();
+		return parentUsesHorizontalLayout(component) ? component.getHeight(): component.getWidth();
 	}
 
 	private int getHeight(Component component) {
-		return usesHorizontallayout(component) ? component.getWidth(): component.getHeight();
+		return parentUsesHorizontalLayout(component) ? component.getWidth(): component.getHeight();
 	}
 
 	String describeComponent(int i) {
@@ -249,7 +274,7 @@ class NodeViewLayoutHelper {
 	    return view.getNode().getText();
 	}
 
-	boolean usesHorizontallayout(Component component) {
+	boolean parentUsesHorizontalLayout(Component component) {
 	    NodeView parent;
         if (component == view && view.isRoot()) {
             parent = view;
@@ -258,6 +283,10 @@ class NodeViewLayoutHelper {
         }
 	    return parent.usesHorizontalLayout();
 	}
+
+    boolean usesHorizontalLayout() {
+        return view.usesHorizontalLayout();
+    }
 
     int getMinimumDistanceConsideringHandles() {
         return view.getMinimumDistanceConsideringHandles();
@@ -276,16 +305,4 @@ class NodeViewLayoutHelper {
        return view.isSubtreeVisible();
     }
 
-    void calculateMinimumChildContentWidth() {
-    	int min = ContentSizeCalculator.UNSET;
-    	for (NodeView child : view.getChildrenViews()) {
-    		if(! child.isFree())
-    			min = Math.max(min, child.getMainView().getPreferredSize().width);
-    	}
-    	this.minimumChildContentWidth = min;
-    }
-
-    void resetMinimumChildContentWidth() {
-    	this.minimumChildContentWidth = ContentSizeCalculator.UNSET;
-    }
 }
