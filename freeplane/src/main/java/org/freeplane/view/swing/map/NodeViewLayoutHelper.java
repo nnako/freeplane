@@ -19,14 +19,20 @@ class NodeViewLayoutHelper {
 	private int bottomOverlap;
 	private StepFunction topBoundary;
 	private StepFunction bottomBoundary;
+	private int minimumChildContentWidth = ContentSizeCalculator.UNSET;
 
 	NodeViewLayoutHelper(NodeView view) {
 		this.view = view;
 	}
 
 	Dimension calculateContentSize() {
-		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view);
+		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, getMinimumContentWidth());
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
+	}
+
+	private int getMinimumContentWidth() {
+		final NodeViewLayoutHelper parentView = getParentView();
+		return parentView == null ? ContentSizeCalculator.UNSET : parentView.minimumChildContentWidth;
 	}
 
 	int getAdditionalCloudHeight() {
@@ -268,5 +274,18 @@ class NodeViewLayoutHelper {
 
     boolean isSubtreeVisible() {
        return view.isSubtreeVisible();
+    }
+
+    void calculateMinimumChildContentWidth() {
+    	int min = ContentSizeCalculator.UNSET;
+    	for (NodeView child : view.getChildrenViews()) {
+    		if(! child.isFree())
+    			min = Math.max(min, child.getMainView().getPreferredSize().width);
+    	}
+    	this.minimumChildContentWidth = min;
+    }
+
+    void resetMinimumChildContentWidth() {
+    	this.minimumChildContentWidth = ContentSizeCalculator.UNSET;
     }
 }

@@ -46,17 +46,17 @@ public class NodeViewLayout implements INodeViewLayout{
         }
     }
 
-	public void addLayoutComponent(String name, Component comp) {
+	public void addLayoutComponent(String name, Component c) {
 	}
 
-	public void removeLayoutComponent(Component comp) {
+	public void removeLayoutComponent(Component c) {
 	}
 
-	public Dimension preferredLayoutSize(Container parent) {
-		return ImmediatelyValidatingPreferredSizeCalculator.INSTANCE.preferredLayoutSize(parent);
+	public Dimension preferredLayoutSize(Container c) {
+		return ImmediatelyValidatingPreferredSizeCalculator.INSTANCE.preferredLayoutSize(c);
 	}
 
-	public Dimension minimumLayoutSize(Container parent) {
+	public Dimension minimumLayoutSize(Container c) {
 		return INodeViewLayout.ZERO_DIMENSION;
 	}
 }

@@ -38,11 +38,11 @@ public class OutlineLayout implements INodeViewLayout {
     static INodeViewLayout getInstance() {
         return OutlineLayout.instance;
     }
-    
+
     public void layoutContainer(final Container c) {
  		final NodeView view = (NodeView) c;
  		JComponent content = view.getContent();
-        
+
         if(content == null)
         	return;
         content.setVisible(view.isContentVisible());
@@ -99,7 +99,7 @@ public class OutlineLayout implements INodeViewLayout {
 		}
 	}
 
-	
+
 	public void addLayoutComponent(String name, Component comp) {
 	}
 

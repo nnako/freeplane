@@ -2208,7 +2208,17 @@ public class NodeView extends JComponent implements INodeView {
 
 	@Override
 	protected void validateTree() {
+		if(! isValid()) {
+			if(automaticallyAlignChildrenWidths())
+				layoutHelper.calculateMinimumChildContentWidth();
+			else
+				layoutHelper.resetMinimumChildContentWidth();
+		}
 		super.validateTree();
+	}
+
+	private boolean automaticallyAlignChildrenWidths() {
+		return map.isAutoCompactLayoutEnabled() && ! getChildNodesAlignment().isStacked();
 	}
 
 	public void addContent(JComponent component, int pos) {
