@@ -1,7 +1,7 @@
 <map version="freeplane 1.9.8">
 <!--To view this file, download free mind mapping software Freeplane from https://www.freeplane.org -->
 <node LOCALIZED_TEXT="new_mindmap" FOLDED="false" ID="ID_1723255651" CREATED="1283093380553" MODIFIED="1283093380553" STYLE="oval"><hook NAME="MapStyle">
-    <properties edgeColorConfiguration="#808080ff,#ff0000ff,#0000ffff,#00ff00ff,#ff00ffff,#00ffffff,#7c0000ff,#00007cff,#007c00ff,#7c007cff,#007c7cff,#7c7c00ff" fit_to_viewport="false"/>
+    <properties auto_compact_layout="true" edgeColorConfiguration="#808080ff,#ff0000ff,#0000ffff,#00ff00ff,#ff00ffff,#00ffffff,#7c0000ff,#00007cff,#007c00ff,#7c007cff,#007c7cff,#7c7c00ff" fit_to_viewport="false"/>
 
 <map_styles>
 <stylenode LOCALIZED_TEXT="styles.root_node" STYLE="oval" UNIFORM_SHAPE="true" VGAP_QUANTITY="24 pt">

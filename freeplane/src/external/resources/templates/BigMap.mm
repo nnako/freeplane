@@ -3,7 +3,7 @@
 <node TEXT="New Map" FOLDED="false" ID="ID_107805750" BACKGROUND_COLOR="#0099ff" STYLE="narrow_hexagon" UNIFORM_SHAPE="true" MAX_WIDTH="55.83837 pt" MIN_WIDTH="55.83837 pt" VGAP_QUANTITY="12.75 pt">
 <font SIZE="10"/>
 <hook NAME="MapStyle">
-    <properties show_icon_for_attributes="true" edgeColorConfiguration="#808080ff,#000000ff,#ff0033ff,#009933ff,#3333ffff,#ff6600ff,#cc00ccff,#ffbf00ff,#00ff99ff,#0099ffff,#996600ff,#000000ff,#cc0066ff,#33ff00ff,#ff9999ff,#0000ccff,#cccc00ff,#0099ccff,#006600ff,#ff00ccff,#00cc00ff,#0066ccff,#00ffffff" show_note_icons="true" associatedTemplateLocation="template:/Big%20Map%203.mm" fit_to_viewport="false"/>
+    <properties auto_compact_layout="true" show_icon_for_attributes="true" edgeColorConfiguration="#808080ff,#000000ff,#ff0033ff,#009933ff,#3333ffff,#ff6600ff,#cc00ccff,#ffbf00ff,#00ff99ff,#0099ffff,#996600ff,#000000ff,#cc0066ff,#33ff00ff,#ff9999ff,#0000ccff,#cccc00ff,#0099ccff,#006600ff,#ff00ccff,#00cc00ff,#0066ccff,#00ffffff" show_note_icons="true" associatedTemplateLocation="template:/Big%20Map%203.mm" fit_to_viewport="false"/>
 
 <map_styles>
 <stylenode LOCALIZED_TEXT="styles.root_node" STYLE="oval" UNIFORM_SHAPE="true" VGAP_QUANTITY="24 pt" TEXT_SHORTENED="true">

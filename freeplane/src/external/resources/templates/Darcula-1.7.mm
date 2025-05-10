@@ -3,7 +3,7 @@
 <node LOCALIZED_TEXT="new_mindmap" STYLE="oval">
 <font SIZE="18"/>
 <hook NAME="MapStyle" background="#3c3f41">
-<properties edgeColorConfiguration="#808080ff,#00ddddff,#dddd00ff,#dd0000ff,#00dd00ff,#dd0000ff,#7cddddff,#dddd7cff,#dd7cddff,#7cdd7cff,#dd7c7cff,#7c7cddff"/>
+<properties auto_compact_layout="true" edgeColorConfiguration="#808080ff,#00ddddff,#dddd00ff,#dd0000ff,#00dd00ff,#dd0000ff,#7cddddff,#dddd7cff,#dd7cddff,#7cdd7cff,#dd7c7cff,#7c7cddff"/>
 <map_styles>
 <stylenode LOCALIZED_TEXT="styles.root_node" STYLE="oval" SHAPE_VERTICAL_MARGIN="12.0 pt" SHAPE_HORIZONTAL_MARGIN="6.0 pt" >
 <stylenode LOCALIZED_TEXT="styles.predefined" POSITION="right">
