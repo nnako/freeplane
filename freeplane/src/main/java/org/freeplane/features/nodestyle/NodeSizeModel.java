@@ -44,13 +44,13 @@ public class NodeSizeModel implements IExtension {
 	}
 
 	private Quantity<LengthUnit> minNodeWidth = null;
-	private Quantity<LengthUnit> maxTextWidth = null;
+	private Quantity<LengthUnit> maxNodeWidth = null;
 	
 	public Quantity<LengthUnit> getMaxNodeWidth() {
-    	return maxTextWidth;
+    	return maxNodeWidth;
     }
 	public void setMaxNodeWidth(Quantity<LengthUnit> maxTextWidth) {
-    	this.maxTextWidth = maxTextWidth;
+    	this.maxNodeWidth = maxTextWidth;
     }
 
 	public Quantity<LengthUnit> getMinNodeWidth() {
@@ -78,8 +78,8 @@ public class NodeSizeModel implements IExtension {
     }
 
 	public void copyTo(NodeSizeModel to) {
-	    if(maxTextWidth != null)
-	    	to.setMaxNodeWidth(maxTextWidth);
+	    if(maxNodeWidth != null)
+	    	to.setMaxNodeWidth(maxNodeWidth);
 	    if(minNodeWidth != null)
 	    	to.setMinNodeWidth(minNodeWidth);
     }
