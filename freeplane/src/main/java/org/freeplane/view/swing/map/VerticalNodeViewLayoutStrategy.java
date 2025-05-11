@@ -86,6 +86,8 @@ class VerticalNodeViewLayoutStrategy {
 
 	private int lastMinimumDistanceConsideringHandles;
 
+	private int childCloudHeight;
+
 
 
     public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout, boolean isAutoCompactLayoutEnabled) {
@@ -251,6 +253,7 @@ class VerticalNodeViewLayoutStrategy {
         bottomBoundary = null;
         vGap = 0;
         lastMinimumDistanceConsideringHandles = 0;
+        childCloudHeight = 0;
         visibleLaidOutChildCounter = 0;
         groupStartIndex = new int[level];
         groupStartBoundaries = new StepFunction[level];
@@ -416,7 +419,9 @@ class VerticalNodeViewLayoutStrategy {
     		int childShiftY) {
     	int y0 = y;
     	final int topContentY = getContentTop(child) + y0;
-    	int upperGap = calculateExtraVerticalGap(topContentY - bottomContentY);
+    	int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
+    	int upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
+    	this.childCloudHeight = childCloudHeight;
     	int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
     	if(isAutoCompactLayoutEnabled && ! isFirstVisibleLaidOutChild()) {
     		final int contentAvailableSpace = topContentY - bottomContentY;
