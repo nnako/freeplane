@@ -2218,7 +2218,7 @@ public class NodeView extends JComponent implements INodeView {
 	}
 
 	private boolean automaticallyAlignChildrenWidths() {
-		return map.isAutoCompactLayoutEnabled() && ! getChildNodesAlignment().isStacked();
+		return map.isAutoCompactLayoutEnabled() && ! usesHorizontalLayout() && ! getChildNodesAlignment().isStacked();
 	}
 
 	public void addContent(JComponent component, int pos) {
