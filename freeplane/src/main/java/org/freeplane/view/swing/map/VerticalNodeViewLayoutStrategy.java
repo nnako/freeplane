@@ -305,7 +305,7 @@ class VerticalNodeViewLayoutStrategy {
         }
         if(childNodesAlignment.placement() != Placement.TOP) {
 			totalSideShiftY += contentSize.height;
-	        if(lastRegularChild != null)
+	        if(lastRegularChild != null && !(childNodesAlignment == ChildNodesAlignment.FLOW || childNodesAlignment == ChildNodesAlignment.AUTO))
 	            totalSideShiftY += lastRegularChild.getHeight() - spaceAround - lastRegularChild.getBottomOverlap() - lastRegularChild.getContentY() - lastRegularChild.getContentHeight();
 		}
         if(childNodesAlignment.placement() == Placement.CENTER)
@@ -418,45 +418,41 @@ class VerticalNodeViewLayoutStrategy {
     		int childRegularHeight,
     		int childShiftY) {
     	int y0 = y;
-    	final int topContentY = getContentTop(child) + y0;
+    	final int contentTop = getContentTop(child);
+		final int topContentY = contentTop + y0;
+    	final int spaceBetweenContent = topContentY - bottomContentY;
+    	int lastChildCloudHeight = this.childCloudHeight;
     	int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
     	this.childCloudHeight = childCloudHeight;
     	int availableSpace = 0;
+    	int upperGap = 0;
     	if(! isFirstVisibleLaidOutChild()) {
-    		int upperGap = 0;
+			final int spaceForClouds = (childCloudHeight + lastChildCloudHeight)/2 + (lastChildCloudHeight & 1);
+			final int spaceBetweenContentAndClouds = spaceBetweenContent - spaceForClouds;
 			if (isAutoCompactLayoutEnabled) {
-				availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
-				final int contentAvailableSpace = topContentY - bottomContentY;
-				if(contentAvailableSpace != availableSpace) {
-					upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
-					if (contentAvailableSpace - availableSpace < upperGap) {
-						upperGap = contentAvailableSpace - availableSpace;
-					}
+				availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0, spaceForClouds);
+				if(spaceBetweenContentAndClouds > availableSpace) {
+					upperGap = Math.min(spaceBetweenContentAndClouds - availableSpace, extraGapForChildren);
 				}
-				if (availableSpace != 0) {
-					y -= availableSpace;
-				}
+				y -= availableSpace;
+			} else if(contentTop > childCloudHeight / 2){
+				upperGap = calculateExtraVerticalGap(spaceBetweenContentAndClouds);
 			}
-			else
-				upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
 
         	int missingWidth = lastMinimumDistanceConsideringHandles - vGap - upperGap;
         	if(missingWidth > upperGap)
         		upperGap = missingWidth;
-        	if(availableSpace >= 0)
-        		y += vGap + upperGap;
-        	else
-        		y += Math.max(vGap + upperGap + availableSpace, 0);
+        	y += vGap + upperGap;
     	}
 
     	int yBegin = calculateInitialYPosition(childShiftY);
     	yCoordinates[index] = yBegin;
 
-    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight,availableSpace, y0);
+    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, upperGap, availableSpace, y0);
     	updateGapsAndBoundaries(index, child, childRegularHeight);
     }
 
-    private int calculateAvailableSpaceForCompactLayout(NodeViewLayoutHelper child, int index, int y) {
+    private int calculateAvailableSpaceForCompactLayout(NodeViewLayoutHelper child, int index, int y, int spaceForClouds) {
         if (bottomBoundary != null) {
             StepFunction childTopBoundary;
             if(view.usesHorizontalLayout() != child.usesHorizontalLayout() || child.getChildNodesAlignment().isStacked())
@@ -467,11 +463,11 @@ class VerticalNodeViewLayoutStrategy {
                 childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
                 int topContentY = getContentTop(child) + y;
                 final int distance = childTopBoundary.distance(bottomBoundary);
-                final int contentDistance = topContentY - bottomContentY;
+                final int contentDistance = topContentY - bottomContentY - spaceForClouds;
                 if (distance >= contentDistance)
 					return contentDistance;
 				else
-					return distance - Math.min(contentDistance - distance, extraGapForChildren);
+					return distance;
             }
         }
         return 0;
@@ -492,7 +488,7 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private void adjustTotalShiftForAlignment(NodeViewLayoutHelper child, int childShiftY,
-                                        int yBegin, int childRegularHeight,
+                                        int yBegin, int childRegularHeight, int upper,
                                         int availableSpace, int y0) {
         final Placement placement = childNodesAlignment.placement();
 		if (isFirstVisibleLaidOutChild()) {
@@ -502,19 +498,20 @@ class VerticalNodeViewLayoutStrategy {
 			}
 		}
 
-        if (childNodesAlignment == ChildNodesAlignment.FLOW ||
+        final int contentTop = getContentTop(child);
+		if (childNodesAlignment == ChildNodesAlignment.FLOW ||
             childNodesAlignment == ChildNodesAlignment.AUTO) {
-            int yContentBegin = getContentTop(child) + yBegin;
+            int yContentBegin = contentTop + yBegin;
 
             final int deltaShift = yContentBegin
-            		- (Math.max(bottomContentY, y0 - Math.max(availableSpace, 0)) + vGap)
+            		- (Math.max(yBottom, y0 - Math.max(availableSpace, 0)) + vGap)
             		-  (childShiftY > 0 || !isFirstVisibleLaidOutChild() ? childShiftY : 0);
             if(deltaShift > 0)
                 totalSideShiftY -= 2 * deltaShift;
             totalSideShiftY -= child.getContentHeight() + vGap;
         } else {
 			if (isFirstVisibleLaidOutChild() && (placement == Placement.TOP || placement == Placement.CENTER)) {
-				totalSideShiftY -= getContentTop(child);
+				totalSideShiftY -= contentTop;
 			}
 			if (placement != Placement.TOP){
 			    final int yRef = isFirstVisibleLaidOutChild() ? 0 : yBottom + childShiftY;
@@ -745,9 +742,10 @@ class VerticalNodeViewLayoutStrategy {
                                 int baseY, int cloudHeight,
                                 int spaceAround, int topOverlap) {
         view.setContentBounds(contentX, contentY, contentSize.width, contentSize.height);
-        final int cloudExtra = cloudHeight/2;
+        final int cloudTop = cloudHeight/2;
         int width = contentX + contentSize.width + spaceAround;
-        int height = contentY + contentSize.height + cloudExtra + spaceAround;
+        final int cloudBottom = cloudHeight - cloudTop;
+		int height = contentY + contentSize.height + cloudBottom + spaceAround;
         int heightWithoutOverlap = height;
 
         for (int i = 0; i < childViewCount; i++) {
@@ -765,11 +763,11 @@ class VerticalNodeViewLayoutStrategy {
             if (!free) {
                 heightWithoutOverlap = Math.max(
                     heightWithoutOverlap,
-                    y + child.getHeight() + cloudExtra - child.getBottomOverlap());
+                    y + child.getHeight() + cloudBottom - child.getBottomOverlap());
             }
 
             width = Math.max(width, x + child.getWidth());
-            height = Math.max(height, y + child.getHeight() + cloudExtra);
+            height = Math.max(height, y + child.getHeight() + cloudBottom);
         }
 
         view.setSize(width, height);
@@ -777,7 +775,7 @@ class VerticalNodeViewLayoutStrategy {
         view.setBottomOverlap(height - heightWithoutOverlap);
 
         if(! view.isFree() && isAutoCompactLayoutEnabled)
-            calculateAndSetBoundaries(contentX, contentY, baseY, cloudExtra, spaceAround, width, height);
+            calculateAndSetBoundaries(contentX, contentY, baseY, cloudTop, spaceAround, width, height);
         else {
             view.setTopBoundary(null);
             view.setBottomBoundary(null);
@@ -785,7 +783,7 @@ class VerticalNodeViewLayoutStrategy {
 
     }
 
-    private void calculateAndSetBoundaries(int contentX, int contentY, int baseY, int cloudExtra,
+    private void calculateAndSetBoundaries(int contentX, int contentY, int baseY, int cloudTop,
                                          int spaceAround, int width, int height) {
         NodeViewLayoutHelper parentView = view.getParentView();
         if (parentView == null || !isAutoCompactLayoutEnabled || width <= spaceAround || height <= spaceAround) {
@@ -794,14 +792,14 @@ class VerticalNodeViewLayoutStrategy {
         final int segmentStart = view.isLeft() ? contentX - foldingMarkReservedSpace : contentX;
         final int segmentEnd = view.isRight() ? contentX + contentSize.width + foldingMarkReservedSpace : contentX + contentSize.width;
 
-        StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudExtra, segmentStart, segmentEnd);
-        StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudExtra, segmentStart, segmentEnd);
+        StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudTop, segmentStart, segmentEnd);
+        StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudTop, segmentStart, segmentEnd);
 
         view.setTopBoundary(viewTopBoundary);
         view.setBottomBoundary(viewBottomBoundary);
     }
 
-    private StepFunction calculateBottomBoundary(int contentX, int contentY, int baseY, int cloudExtra,
+    private StepFunction calculateBottomBoundary(int contentX, int contentY, int baseY, int cloudTop,
                                                int segmentStart, int segmentEnd) {
         StepFunction viewBottomBoundary = contentSize.width <= 0 ? null :
             StepFunction.segment(segmentStart, segmentEnd, contentY + contentSize.height);
@@ -818,10 +816,10 @@ class VerticalNodeViewLayoutStrategy {
                 viewBottomBoundary.combine(rightBottomBoundary.translate(contentX, baseY), CombineOperation.MAX);
         }
 
-        return viewBottomBoundary == null ? null : viewBottomBoundary.translate(0, cloudExtra);
+        return viewBottomBoundary == null ? null : viewBottomBoundary.translate(0, cloudTop);
     }
 
-    private StepFunction calculateTopBoundary(int contentY, int cloudExtra, int segmentStart,
+    private StepFunction calculateTopBoundary(int contentY, int cloudTop, int segmentStart,
                                             int segmentEnd) {
         StepFunction viewTopBoundary = contentSize.width <= 0 ? null :
             StepFunction.segment(segmentStart, segmentEnd, contentY);
@@ -836,7 +834,7 @@ class VerticalNodeViewLayoutStrategy {
             }
         }
 
-        return viewTopBoundary == null ? null : viewTopBoundary.translate(0, -cloudExtra);
+        return viewTopBoundary == null ? null : viewTopBoundary.translate(0, -cloudTop);
     }
 
     private boolean isFirstVisibleLaidOutChild() {
