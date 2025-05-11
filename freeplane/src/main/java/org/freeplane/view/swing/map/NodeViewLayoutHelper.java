@@ -26,7 +26,8 @@ class NodeViewLayoutHelper {
 	}
 
 	Dimension calculateContentSize() {
-		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, getMinimumContentWidth());
+		final int minimumContentWidth = view.getCloudModel() == null ? getMinimumContentWidth() : ContentSizeCalculator.UNSET;
+		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, minimumContentWidth);
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
 	}
 
@@ -279,10 +280,16 @@ class NodeViewLayoutHelper {
     void calculateMinimumChildContentWidth() {
     	int min = ContentSizeCalculator.UNSET;
     	for (NodeView child : view.getChildrenViews()) {
-    		if(! child.isFree())
+    		if(! child.isFree() && child.getCloudModel() == null)
     			min = Math.max(min, child.getMainView().getPreferredSize().width);
     	}
-    	this.minimumChildContentWidth = min;
+    	if(minimumChildContentWidth != min) {
+    		this.minimumChildContentWidth = min;
+        	for (NodeView child : view.getChildrenViews()) {
+        		if(! child.isFree() && child.getCloudModel() == null)
+        			child.invalidate();
+        	}
+    	}
     }
 
     void resetMinimumChildContentWidth() {

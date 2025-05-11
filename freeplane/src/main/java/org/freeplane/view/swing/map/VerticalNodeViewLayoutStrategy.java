@@ -774,16 +774,22 @@ class VerticalNodeViewLayoutStrategy {
         view.setTopOverlap(topOverlap);
         view.setBottomOverlap(height - heightWithoutOverlap);
 
-        if(! view.isFree() && isAutoCompactLayoutEnabled)
-            calculateAndSetBoundaries(contentX, contentY, baseY, cloudTop, spaceAround, width, height);
-        else {
+        if(! view.isFree() && isAutoCompactLayoutEnabled) {
+			if (cloudHeight == 0)
+				calculateAndSetBoundaries(contentX, contentY, baseY, spaceAround, width, height);
+			else {
+				final StepFunction topBoundary = StepFunction.segment(spaceAround, width - spaceAround, spaceAround + topOverlap);
+				view.setTopBoundary(topBoundary);
+			    view.setBottomBoundary(topBoundary.translate(0, heightWithoutOverlap - 2 * spaceAround));
+			}
+		} else {
             view.setTopBoundary(null);
             view.setBottomBoundary(null);
         }
 
     }
 
-    private void calculateAndSetBoundaries(int contentX, int contentY, int baseY, int cloudTop,
+    private void calculateAndSetBoundaries(int contentX, int contentY, int baseY,
                                          int spaceAround, int width, int height) {
         NodeViewLayoutHelper parentView = view.getParentView();
         if (parentView == null || !isAutoCompactLayoutEnabled || width <= spaceAround || height <= spaceAround) {
@@ -792,14 +798,14 @@ class VerticalNodeViewLayoutStrategy {
         final int segmentStart = view.isLeft() ? contentX - foldingMarkReservedSpace : contentX;
         final int segmentEnd = view.isRight() ? contentX + contentSize.width + foldingMarkReservedSpace : contentX + contentSize.width;
 
-        StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, cloudTop, segmentStart, segmentEnd);
-        StepFunction viewTopBoundary = calculateTopBoundary(contentY, cloudTop, segmentStart, segmentEnd);
+        StepFunction viewBottomBoundary = calculateBottomBoundary(contentX, contentY, baseY, segmentStart, segmentEnd);
+        StepFunction viewTopBoundary = calculateTopBoundary(contentY, segmentStart, segmentEnd);
 
         view.setTopBoundary(viewTopBoundary);
         view.setBottomBoundary(viewBottomBoundary);
     }
 
-    private StepFunction calculateBottomBoundary(int contentX, int contentY, int baseY, int cloudTop,
+    private StepFunction calculateBottomBoundary(int contentX, int contentY, int baseY,
                                                int segmentStart, int segmentEnd) {
         StepFunction viewBottomBoundary = contentSize.width <= 0 ? null :
             StepFunction.segment(segmentStart, segmentEnd, contentY + contentSize.height);
@@ -816,10 +822,10 @@ class VerticalNodeViewLayoutStrategy {
                 viewBottomBoundary.combine(rightBottomBoundary.translate(contentX, baseY), CombineOperation.MAX);
         }
 
-        return viewBottomBoundary == null ? null : viewBottomBoundary.translate(0, cloudTop);
+        return viewBottomBoundary;
     }
 
-    private StepFunction calculateTopBoundary(int contentY, int cloudTop, int segmentStart,
+    private StepFunction calculateTopBoundary(int contentY, int segmentStart,
                                             int segmentEnd) {
         StepFunction viewTopBoundary = contentSize.width <= 0 ? null :
             StepFunction.segment(segmentStart, segmentEnd, contentY);
@@ -834,7 +840,7 @@ class VerticalNodeViewLayoutStrategy {
             }
         }
 
-        return viewTopBoundary == null ? null : viewTopBoundary.translate(0, -cloudTop);
+        return viewTopBoundary;
     }
 
     private boolean isFirstVisibleLaidOutChild() {
