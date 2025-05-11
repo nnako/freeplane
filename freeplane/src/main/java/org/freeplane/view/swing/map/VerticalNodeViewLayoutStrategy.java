@@ -420,39 +420,61 @@ class VerticalNodeViewLayoutStrategy {
     	int y0 = y;
     	final int topContentY = getContentTop(child) + y0;
     	int childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
-    	int upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
     	this.childCloudHeight = childCloudHeight;
-    	int availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
-    	if(isAutoCompactLayoutEnabled && ! isFirstVisibleLaidOutChild()) {
-    		final int contentAvailableSpace = topContentY - bottomContentY;
-    		if(contentAvailableSpace - availableSpace == 0) {
-				upperGap = 0;
-			} else if (contentAvailableSpace - availableSpace < upperGap) {
-				upperGap = contentAvailableSpace - availableSpace;
+    	int availableSpace = 0;
+    	if(! isFirstVisibleLaidOutChild()) {
+    		int upperGap = 0;
+			if (isAutoCompactLayoutEnabled) {
+				availableSpace = calculateAvailableSpaceForCompactLayout(child, index, y0);
+				final int contentAvailableSpace = topContentY - bottomContentY;
+				if(contentAvailableSpace != availableSpace) {
+					upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
+					if (contentAvailableSpace - availableSpace < upperGap) {
+						upperGap = contentAvailableSpace - availableSpace;
+					}
+				}
+				if (availableSpace != 0) {
+					y -= availableSpace;
+				}
 			}
-    	}
-    	if (availableSpace != 0) {
-    		y -= availableSpace;
-    	}
+			else
+				upperGap = calculateExtraVerticalGap(topContentY - bottomContentY - (childCloudHeight + this.childCloudHeight)/2);
 
-    	if (isFirstVisibleLaidOutChild()) {
-    		upperGap = 0;
-    	}
-    	else {
         	int missingWidth = lastMinimumDistanceConsideringHandles - vGap - upperGap;
         	if(missingWidth > upperGap)
         		upperGap = missingWidth;
+        	if(availableSpace >= 0)
+        		y += vGap + upperGap;
+        	else
+        		y += Math.max(vGap + upperGap + availableSpace, 0);
     	}
 
-    	if(availableSpace >= 0)
-    		y += vGap + upperGap;
-    	else
-    		y += Math.max(vGap + upperGap + availableSpace, 0);
     	int yBegin = calculateInitialYPosition(childShiftY);
     	yCoordinates[index] = yBegin;
 
     	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight,availableSpace, y0);
     	updateGapsAndBoundaries(index, child, childRegularHeight);
+    }
+
+    private int calculateAvailableSpaceForCompactLayout(NodeViewLayoutHelper child, int index, int y) {
+        if (bottomBoundary != null) {
+            StepFunction childTopBoundary;
+            if(view.usesHorizontalLayout() != child.usesHorizontalLayout() || child.getChildNodesAlignment().isStacked())
+                childTopBoundary = StepFunction.segment(spaceAround, child.getWidth() - spaceAround, spaceAround + child.getTopOverlap());
+            else
+                childTopBoundary = child.getTopBoundary();
+            if (childTopBoundary != null) {
+                childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
+                int topContentY = getContentTop(child) + y;
+                final int distance = childTopBoundary.distance(bottomBoundary);
+                final int contentDistance = topContentY - bottomContentY;
+                if (distance >= contentDistance)
+					return contentDistance;
+				else
+					return distance - Math.min(contentDistance - distance, extraGapForChildren);
+            }
+        }
+        return 0;
     }
 
     private int calculateInitialYPosition(int childShiftY) {
@@ -542,29 +564,6 @@ class VerticalNodeViewLayoutStrategy {
             y += calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize);
         }
     }
-
-    private int calculateAvailableSpaceForCompactLayout(NodeViewLayoutHelper child, int index, int y) {
-        if (isAutoCompactLayoutEnabled && bottomBoundary != null) {
-            StepFunction childTopBoundary;
-            if(view.usesHorizontalLayout() != child.usesHorizontalLayout() || child.getChildNodesAlignment().isStacked())
-                childTopBoundary = StepFunction.segment(spaceAround, child.getWidth() - spaceAround, spaceAround + child.getTopOverlap());
-            else
-                childTopBoundary = child.getTopBoundary();
-            if (childTopBoundary != null) {
-                childTopBoundary = childTopBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-                int topContentY = getContentTop(child) + y;
-                final int distance = childTopBoundary.distance(bottomBoundary);
-                final int contentDistance = topContentY - bottomContentY;
-                if (distance >= contentDistance)
-					return contentDistance;
-				else
-					return distance - Math.min(contentDistance - distance, extraGapForChildren);
-            }
-        }
-        return 0;
-    }
-
-
 
     private void assignSummaryChildVerticalPosition(int index,
                                    NodeViewLayoutHelper child,
