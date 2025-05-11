@@ -296,4 +296,8 @@ class NodeViewLayoutHelper {
     void resetMinimumChildContentWidth() {
     	this.minimumChildContentWidth = ContentSizeCalculator.UNSET;
     }
+
+	boolean isAutoCompactLayoutEnabled() {
+		return view.isAutoCompactLayoutEnabled();
+	}
 }

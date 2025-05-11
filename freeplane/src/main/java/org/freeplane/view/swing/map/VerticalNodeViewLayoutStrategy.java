@@ -90,7 +90,7 @@ class VerticalNodeViewLayoutStrategy {
 
 
 
-    public VerticalNodeViewLayoutStrategy(NodeView view, boolean allowsCompactLayout, boolean isAutoCompactLayoutEnabled) {
+    public VerticalNodeViewLayoutStrategy(NodeView view) {
         NodeViewLayoutHelper layoutHelper = view.getLayoutHelper();
         this.view = layoutHelper;
         this.contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(layoutHelper);
@@ -104,9 +104,9 @@ class VerticalNodeViewLayoutStrategy {
         this.yBottomCoordinates = new int[childViewCount];
         this.isChildFreeNode = new boolean[childViewCount];
         this.spaceAround = view.getSpaceAround();
-        this.allowsCompactLayout = allowsCompactLayout;
+        this.allowsCompactLayout = view.allowsCompactLayout();
         this.childNodesAlignment = view.getChildNodesAlignment();
-        this.isAutoCompactLayoutEnabled = isAutoCompactLayoutEnabled && ! childNodesAlignment.isStacked();
+        this.isAutoCompactLayoutEnabled = view.isAutoCompactLayoutEnabled() && ! childNodesAlignment.isStacked();
         this.defaultVGap = view.getMap().getZoomed(LocationModel.DEFAULT_VGAP.toBaseUnits());
         this.minimalGapBetweenChildren = view.getMinimalDistanceBetweenChildren();
         this.extraGapForChildren = calculateExtraGapForChildren(minimalGapBetweenChildren);
@@ -774,8 +774,8 @@ class VerticalNodeViewLayoutStrategy {
         view.setTopOverlap(topOverlap);
         view.setBottomOverlap(height - heightWithoutOverlap);
 
-        if(! view.isFree() && isAutoCompactLayoutEnabled) {
-			if (cloudHeight == 0)
+        if(! view.isFree() && view.isAutoCompactLayoutEnabled()) {
+			if (cloudHeight == 0 && ! childNodesAlignment.isStacked())
 				calculateAndSetBoundaries(contentX, contentY, baseY, spaceAround, width, height);
 			else {
 				final StepFunction topBoundary = StepFunction.segment(spaceAround, width - spaceAround, spaceAround + topOverlap);
@@ -792,7 +792,7 @@ class VerticalNodeViewLayoutStrategy {
     private void calculateAndSetBoundaries(int contentX, int contentY, int baseY,
                                          int spaceAround, int width, int height) {
         NodeViewLayoutHelper parentView = view.getParentView();
-        if (parentView == null || !isAutoCompactLayoutEnabled || width <= spaceAround || height <= spaceAround) {
+        if (parentView == null || width <= spaceAround || height <= spaceAround) {
             return;
         }
         final int segmentStart = view.isLeft() ? contentX - foldingMarkReservedSpace : contentX;
