@@ -130,8 +130,20 @@ public abstract class EdgeView {
             relativeLocation.x = - relativeLocation.x + mainView.getWidth()/2 + end.x;
             relativeLocation.y = - relativeLocation.y + mainView.getHeight()/2 + end.y;
 
-            startConnectorLocation = mainView.getConnectorLocation(relativeLocation, LayoutOrientation.NOT_SET,  ChildNodesAlignment.NOT_SET);
-            start = mainView.getConnectorPoint(relativeLocation, startConnectorLocation);
+            if(source.isAutoCompactLayoutEnabled() && usesHorizontalLayout && ! source.isRoot()) {
+                if(target.isTopOrLeft()){
+                	start = targetMainView.getTopPoint();
+                    startConnectorLocation = ConnectorLocation.TOP;
+                }
+                else{
+                	start = targetMainView.getBottomPoint();
+                    startConnectorLocation = ConnectorLocation.BOTTOM;
+                }
+            }
+            else {
+            	startConnectorLocation = mainView.getConnectorLocation(relativeLocation, LayoutOrientation.NOT_SET,  ChildNodesAlignment.NOT_SET);
+            	start = mainView.getConnectorPoint(relativeLocation, startConnectorLocation);
+            }
         	final boolean needsSpaceForFoldingMark = source.isAutoCompactLayoutEnabled() && !childNodesAlignment.isStacked() && ! source.isRoot();
 			if(needsSpaceForFoldingMark) {
 				switch (startConnectorLocation) {
