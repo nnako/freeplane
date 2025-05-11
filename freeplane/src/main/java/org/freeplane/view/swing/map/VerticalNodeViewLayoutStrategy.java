@@ -555,7 +555,10 @@ class VerticalNodeViewLayoutStrategy {
                 int topContentY = getContentTop(child) + y;
                 final int distance = childTopBoundary.distance(bottomBoundary);
                 final int contentDistance = topContentY - bottomContentY;
-                return Math.min(distance, contentDistance);
+                if (distance >= contentDistance)
+					return contentDistance;
+				else
+					return distance - Math.min(contentDistance - distance, extraGapForChildren);
             }
         }
         return 0;
