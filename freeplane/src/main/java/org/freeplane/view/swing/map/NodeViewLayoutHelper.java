@@ -26,8 +26,7 @@ class NodeViewLayoutHelper {
 	}
 
 	Dimension calculateContentSize() {
-		final int minimumContentWidth =
-				view.getCloudModel() == null && view.getComponentCount() > 1 ? getMinimumContentWidth() : ContentSizeCalculator.UNSET;
+		final int minimumContentWidth = isAligned(view) ? getMinimumContentWidth() : ContentSizeCalculator.UNSET;
 		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, minimumContentWidth);
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
 	}
@@ -281,17 +280,25 @@ class NodeViewLayoutHelper {
     void calculateMinimumChildContentWidth() {
     	int min = ContentSizeCalculator.UNSET;
     	for (NodeView child : view.getChildrenViews()) {
-    		if(! child.isFree() && child.getCloudModel() == null)
+    		if(isConsideredForAlignment(child))
     			min = Math.max(min, child.getMainView().getPreferredSize().width);
     	}
     	if(minimumChildContentWidth != min) {
     		this.minimumChildContentWidth = min;
         	for (NodeView child : view.getChildrenViews()) {
-        		if(! child.isFree() && child.getComponentCount() > 1 && child.getCloudModel() == null)
+        		if(isAligned(child))
         			child.invalidate();
         	}
     	}
     }
+
+	private boolean isAligned(NodeView child) {
+		return isConsideredForAlignment(child) && child.getComponentCount() > 1;
+	}
+
+	private boolean isConsideredForAlignment(NodeView child) {
+		return ! child.isFree() && child.getCloudModel() == null  && ! child.getChildNodesAlignment().isStacked();
+	}
 
     void resetMinimumChildContentWidth() {
     	this.minimumChildContentWidth = ContentSizeCalculator.UNSET;
