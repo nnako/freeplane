@@ -828,10 +828,17 @@ public class MAttributeController extends AttributeController {
 				try {
 					final AttributeRegistryElement element = registry.getElement(name);
 					final String value = model.getValueAt(row, 1).toString();
-					final int index = element.getValues().getIndexOf(value);
+					final SortedComboBoxModel knownValues = element.getValues();
+					final int index = knownValues.getIndexOf(value);
 					if (index == -1) {
-						final IActor valueActor = new SetAttributeValueActor(node, model, row, element.getValues().firstElement());
-						Controller.getCurrentModeController().execute(valueActor, map);
+						if (element.isRestricted() && knownValues.getSize() > 0) {
+							final IActor valueActor = new SetAttributeValueActor(node, model, row, knownValues.firstElement());
+							Controller.getCurrentModeController().execute(valueActor, map);
+						}
+						else {
+							final IActor registryActor = new RegistryAttributeValueActor(element, value, false);
+							Controller.getCurrentModeController().execute(registryActor, map);
+						}
 					}
 				}
 				catch (final NoSuchElementException ex) {
