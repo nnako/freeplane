@@ -32,14 +32,14 @@ findjava() {
 
 	JAVA_SOURCE=
 
-	if [ -n "${JAVACMD}" ] && [ -x "${JAVACMD}" ]; then
+	if [ -n "${FREEPLANE_JAVA_HOME}" ] && [ -x "${FREEPLANE_JAVA_HOME}/bin/java" ]; then
+		JAVACMD="${FREEPLANE_JAVA_HOME}/bin/java"
+		JAVA_SOURCE="\$FREEPLANE_JAVA_HOME"
+	elif [ -n "${JAVACMD}" ] && [ -x "${JAVACMD}" ]; then
 		JAVA_SOURCE="\$JAVACMD"
 	elif [ -n "${JAVA_BINDIR}" ] && [ -x "${JAVA_BINDIR}/java" ]; then
 		JAVACMD="${JAVA_BINDIR}/java"
 		JAVA_SOURCE="\$JAVA_BINDIR"
-	elif [ -n "${FREEPLANE_JAVA_HOME}" ] && [ -x "${FREEPLANE_JAVA_HOME}/bin/java" ]; then
-		JAVACMD="${FREEPLANE_JAVA_HOME}/bin/java"
-		JAVA_SOURCE="\$FREEPLANE_JAVA_HOME"
 	elif [ -n "${JAVA_HOME}" ] && [ -x "${JAVA_HOME}/bin/java" ]; then
 		JAVACMD="${JAVA_HOME}/bin/java"
 		JAVA_SOURCE="\$JAVA_HOME"
