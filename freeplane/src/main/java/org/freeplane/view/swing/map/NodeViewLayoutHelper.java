@@ -282,7 +282,7 @@ class NodeViewLayoutHelper {
     		NodeView child = childrenViews.get(index);
     		final boolean hasChildViews = hasChildViews(child);
     		if(! isConsideredForAlignment(child))
-    		continue;
+    			continue;
 			int sideIndex = child.isTopOrLeft() ? 0 : 1;
 			if(hasChildViews) {
 				final int updatedChildIndex = unfolded[sideIndex];
