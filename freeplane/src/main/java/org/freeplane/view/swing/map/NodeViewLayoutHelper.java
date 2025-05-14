@@ -7,6 +7,7 @@ package org.freeplane.view.swing.map;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.LinkedList;
 
 import org.freeplane.api.ChildrenSides;
 import org.freeplane.api.ChildNodesAlignment;
@@ -19,21 +20,15 @@ class NodeViewLayoutHelper {
 	private int bottomOverlap;
 	private StepFunction topBoundary;
 	private StepFunction bottomBoundary;
-	private int minimumChildContentWidth = ContentSizeCalculator.UNSET;
+	private int minimumContentWidth = ContentSizeCalculator.UNSET;
 
 	NodeViewLayoutHelper(NodeView view) {
 		this.view = view;
 	}
 
 	Dimension calculateContentSize() {
-		final int minimumContentWidth = isAligned(view) ? getMinimumContentWidth() : ContentSizeCalculator.UNSET;
 		Dimension contentSize = ContentSizeCalculator.INSTANCE.calculateContentSize(view, minimumContentWidth);
 		return usesHorizontallayout(view.getContent()) ? new Dimension(contentSize.height, contentSize.width) : contentSize;
-	}
-
-	private int getMinimumContentWidth() {
-		final NodeViewLayoutHelper parentView = getParentView();
-		return parentView == null ? ContentSizeCalculator.UNSET : parentView.minimumChildContentWidth;
 	}
 
 	int getAdditionalCloudHeight() {
@@ -167,7 +162,7 @@ class NodeViewLayoutHelper {
 
 	void setBottomOverlap(int bottomOverlap) {
 		final NodeViewLayoutHelper parentView = getParentView();
-		this.bottomOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  bottomOverlap : 0 ; ;
+		this.bottomOverlap = parentView == null || usesHorizontalLayout() == parentView.usesHorizontalLayout() ?  bottomOverlap : 0 ;
 	}
 
 
@@ -278,22 +273,53 @@ class NodeViewLayoutHelper {
     }
 
     void calculateMinimumChildContentWidth() {
-    	int min = ContentSizeCalculator.UNSET;
-    	for (NodeView child : view.getChildrenViews()) {
-    		if(isConsideredForAlignment(child))
-    			min = Math.max(min, child.getMainView().getPreferredSize().width);
+    	int max[] = {ContentSizeCalculator.UNSET, ContentSizeCalculator.UNSET};
+    	int previousMax[] = {ContentSizeCalculator.UNSET, ContentSizeCalculator.UNSET};
+    	int unfolded[] = {-1, -1};
+    	final LinkedList<NodeView> childrenViews = view.getChildrenViews();
+    	int lastIndex = childrenViews.size();
+    	for (int index = 0; index < lastIndex; index++) {
+    		NodeView child = childrenViews.get(index);
+    		final boolean hasChildViews = hasChildViews(child);
+    		if(! isConsideredForAlignment(child))
+    		continue;
+			int sideIndex = child.isTopOrLeft() ? 0 : 1;
+			if(hasChildViews) {
+				final int updatedChildIndex = unfolded[sideIndex];
+				if(updatedChildIndex >= 0) {
+					final NodeView updated = childrenViews.get(updatedChildIndex);
+					updated.getLayoutHelper().setMinimumContentWidth(Math.max(max[sideIndex], previousMax[sideIndex]));
+				}
+				unfolded[sideIndex] = index;
+				previousMax[sideIndex] = max[sideIndex];
+				max[sideIndex] = ContentSizeCalculator.UNSET;
+			} else {
+				max[sideIndex] = Math.max(max[sideIndex], child.getMainView().getPreferredSize().width);
+				child.getLayoutHelper().setMinimumContentWidth(ContentSizeCalculator.UNSET);
+			}
     	}
-    	if(minimumChildContentWidth != min) {
-    		this.minimumChildContentWidth = min;
-        	for (NodeView child : view.getChildrenViews()) {
-        		if(isAligned(child))
-        			child.invalidate();
-        	}
+    	for(int sideIndex = 0; sideIndex <= 1; sideIndex++) {
+    		final int updatedChildIndex = unfolded[sideIndex];
+    		if(updatedChildIndex >= 0) {
+    			final NodeView updated = childrenViews.get(updatedChildIndex);
+    			updated.getLayoutHelper().setMinimumContentWidth(Math.max(max[sideIndex], previousMax[sideIndex]));
+    		}
     	}
     }
 
+	private void setMinimumContentWidth(int newWidth) {
+		if (minimumContentWidth != newWidth) {
+			minimumContentWidth = newWidth;
+			view.invalidate();
+		}
+	}
+
+	private boolean hasChildViews(NodeView child) {
+		return child.getComponentCount() > 1;
+	}
+
 	private boolean isAligned(NodeView child) {
-		return isConsideredForAlignment(child) && child.getComponentCount() > 1;
+		return isConsideredForAlignment(child) && hasChildViews(child);
 	}
 
 	private boolean isConsideredForAlignment(NodeView child) {
@@ -301,7 +327,8 @@ class NodeViewLayoutHelper {
 	}
 
     void resetMinimumChildContentWidth() {
-    	this.minimumChildContentWidth = ContentSizeCalculator.UNSET;
+    	for (NodeView child : view.getChildrenViews())
+    		child.getLayoutHelper().minimumContentWidth = ContentSizeCalculator.UNSET;
     }
 
 	boolean isAutoCompactLayoutEnabled() {

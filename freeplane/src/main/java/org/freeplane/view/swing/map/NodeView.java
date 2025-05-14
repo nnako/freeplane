@@ -1446,7 +1446,6 @@ public class NodeView extends JComponent implements INodeView {
 			throw new NullPointerException();
 		}
 		final Graphics2D g2 = (Graphics2D) g;
-		final ModeController modeController = getModeController();
 		switch (paintingMode) {
 		case CLOUDS:
 		    if (isSubtreeVisible()) {
