@@ -1,15 +1,11 @@
 package org.freeplane.view.swing.map;
 
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.net.URL;
 import java.security.AccessControlException;
 
@@ -24,59 +20,18 @@ import javax.swing.text.html.StyleSheet;
 import org.freeplane.core.ui.components.JRestrictedSizeScrollPane;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.components.html.SynchronousScaledEditorKit;
-import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.HtmlUtils;
 import org.freeplane.core.util.LogUtils;
-import org.freeplane.features.link.LinkController;
-import org.freeplane.features.mode.Controller;
+import org.freeplane.features.map.NodeModel;
 
 class TextualTooltipRendererFactory {
-	private class LinkMouseListener extends MouseAdapter implements MouseMotionListener{
-	    @Override
-		public void mouseMoved(final MouseEvent ev) {
-	    	final String link = HtmlUtils.getURLOfExistingLink((HTMLDocument) tip.getDocument(), tip.viewToModel(ev.getPoint()));
-	    	boolean followLink = link != null;
-	    	Controller currentController = Controller.getCurrentController();
-	        final int requiredCursor;
-	        if(followLink){
-	    		currentController.getViewController().out(link);
-	    		requiredCursor = Cursor.HAND_CURSOR;
-	        }
-	        else{
-	        	requiredCursor = Cursor.DEFAULT_CURSOR;
-	        }
-	        if (tip.getCursor().getType() != requiredCursor) {
-	        	tip.setCursor(requiredCursor != Cursor.DEFAULT_CURSOR ? new Cursor(requiredCursor) : null);
-	        }
-	    }
-
-	    @Override
-		public void mouseClicked(final MouseEvent ev) {
-	    	if (Compat.isPlainEvent(ev)) {
-	    		final String linkURL = HtmlUtils.getURLOfExistingLink((HTMLDocument) tip.getDocument(), tip.viewToModel(ev.getPoint()));
-	    		if (linkURL != null) {
-	    			try {
-	    				NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
-	    				LinkController.getController().loadURI(nodeView.getNode(), LinkController.createHyperlink(linkURL));
-	    			} catch (Exception e) {
-	    				LogUtils.warn(e);
-	    			}
-	    		}
-	    	}
-	    }
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-        }
-    }
-
 	final private JEditorPane tip;
 	private int maximumWidth;
 	private final String contentType;
 	private final JRestrictedSizeScrollPane scrollPane;
 	private JComponent component;
 	private URL baseUrl;
-	TextualTooltipRendererFactory(GraphicsConfiguration graphicsConfiguration,
+	TextualTooltipRendererFactory(
 	        String contentType, URL baseUrl, String tipText, JComponent component,
 	        Dimension tooltipSize, boolean honorDisplayProperties){
 		this.contentType = contentType;
@@ -97,9 +52,9 @@ class TextualTooltipRendererFactory {
 		}
 		tip.setEditable(false);
 		tip.setMargin(new Insets(0, 0, 0, 0));
-		final LinkMouseListener linkMouseListener = new LinkMouseListener();
-		tip.addMouseListener(linkMouseListener);
-		tip.addMouseMotionListener(linkMouseListener);
+		final LinkOpener linkOpener = new LinkOpener(this::getNode);
+		tip.addMouseListener(linkOpener);
+		tip.addMouseMotionListener(linkOpener);
 
 		scrollPane = new JRestrictedSizeScrollPane(tip);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -121,6 +76,11 @@ class TextualTooltipRendererFactory {
 		});
 		setTipText(tipText);
 
+	}
+
+	private NodeModel getNode() {
+		NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
+		return nodeView.getNode();
 	}
 
     private void setTipText(String tipText) {

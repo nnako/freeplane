@@ -53,6 +53,7 @@ import org.freeplane.features.note.mindmapmode.MNoteController.NoteDocumentListe
 import org.freeplane.features.spellchecker.mindmapmode.SpellCheckerController;
 import org.freeplane.features.text.mindmapmode.FreeplaneToSHTMLPropertyChangeAdapter;
 import org.freeplane.features.text.mindmapmode.MTextController;
+import org.freeplane.view.swing.map.LinkOpener;
 
 import com.lightdev.app.shtm.SHTMLEditorPane;
 import com.lightdev.app.shtm.SHTMLPanel;
@@ -98,6 +99,9 @@ class NotePanel extends JPanel {
 		htmlViewerPanel.setOpaque(true);
 		htmlViewerPanel.setEditable(false);
 		htmlViewerPanel.setEditorKitForContentType(CONTENT_TYPE_TEXT_HTML, ScaledEditorKit.create());
+		final LinkOpener linkOpener = new LinkOpener(noteManager::getNode);
+		htmlViewerPanel.addMouseListener(linkOpener);
+		htmlViewerPanel.addMouseMotionListener(linkOpener);
 		iconViewerPanel = new JLabel();
 		iconViewerPanel.setVerticalAlignment(SwingConstants.TOP);
 

@@ -55,7 +55,7 @@ public class FreeplaneTooltip extends JToolTip {
 		catch (URISyntaxException e) {
 			// fall through
 		}
-		final TextualTooltipRendererFactory tooltipScrollPaneFactory = new TextualTooltipRendererFactory(graphicsConfiguration, contentType, baseUrl, tipText, getComponent(), tooltipSize, honorDisplayProperties);
+		final TextualTooltipRendererFactory tooltipScrollPaneFactory = new TextualTooltipRendererFactory(contentType, baseUrl, tipText, getComponent(), tooltipSize, honorDisplayProperties);
 		add(tooltipScrollPaneFactory.getTooltipRenderer());
 	}
 
