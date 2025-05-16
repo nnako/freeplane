@@ -132,11 +132,11 @@ public abstract class EdgeView {
 
             if(source.isAutoCompactLayoutEnabled() && usesHorizontalLayout && ! source.isRoot()) {
                 if(target.isTopOrLeft()){
-                	start = targetMainView.getTopPoint();
+                	start = mainView.getTopPoint();
                     startConnectorLocation = ConnectorLocation.TOP;
                 }
                 else{
-                	start = targetMainView.getBottomPoint();
+                	start = mainView.getBottomPoint();
                     startConnectorLocation = ConnectorLocation.BOTTOM;
                 }
             }
