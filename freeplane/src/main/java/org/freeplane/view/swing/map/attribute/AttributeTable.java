@@ -38,6 +38,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.EventObject;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,8 +83,10 @@ import javax.swing.table.TableModel;
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.TextWritingDirection;
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.ActionAcceleratorManager;
 import org.freeplane.core.ui.components.TypedListCellRenderer;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.AttributeRegistry;
@@ -97,6 +100,7 @@ import org.freeplane.features.format.IFormattedObject;
 import org.freeplane.features.format.PatternFormat;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.mindmapmode.DeleteAction;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.nodestyle.NodeStyleController;
@@ -129,6 +133,13 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 			final int selectedColumn = table.getSelectedColumn();
 			if(selectedColumn >= 0 && selectedRow >= 0)
 				table.editCellAt(selectedRow, selectedColumn, e);
+		}
+	}
+	private static final class DeleteSelectedCellsAction extends AbstractAction {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			AttributeTable table = (AttributeTable) e.getSource();
+			table.removeSelectedRows();
 		}
 	}
 	private static final class TableHeaderRendererImpl implements TableCellRenderer {
@@ -243,6 +254,9 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 		InputMap focusedComponentInputMap = table.getInputMap(JTable.WHEN_FOCUSED);
 		final Object editKey = ancestorInputMap.get(f2);
 		focusedComponentInputMap.put(enter, editKey);
+		ActionAcceleratorManager acceleratorManager = ResourceController.getResourceController().getAcceleratorManager();
+		KeyStroke delete = acceleratorManager.getAccelerator(DeleteAction.NAME);
+		focusedComponentInputMap.put(delete, "deleteSelectedRows");
 		final ActionMap actionMap = table.getActionMap();
 		if(defaultParentActionMap == null || defaultParentActionMap != actionMap.getParent()) {
 			defaultParentActionMap = actionMap.getParent();
@@ -258,8 +272,9 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 
 			};
 			newDefaultParentActionMap.setParent(defaultParentActionMap);
-			EditCellAction action = new EditCellAction();
-			newDefaultParentActionMap.put(editKey, action);
+			newDefaultParentActionMap.put(ancestorInputMap.get(f2), new EditCellAction());
+			newDefaultParentActionMap.put("deleteSelectedRows", new DeleteSelectedCellsAction());
+
 		}
 		actionMap.setParent(newDefaultParentActionMap);
 	}
@@ -851,19 +866,34 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 			requestFocusInWindow();
 	}
 
-	/**
-	 */
 	public void removeRow(final int row) {
 		if (getModel() instanceof ExtendedAttributeTableModelDecorator) {
+			((ExtendedAttributeTableModelDecorator) getModel()).removeRow(row);
+			selectNextToRemoved(row);
+		}
+	}
+
+	public void removeSelectedRows() {
+		if (getModel() instanceof ExtendedAttributeTableModelDecorator) {
 			final ExtendedAttributeTableModelDecorator model = (ExtendedAttributeTableModelDecorator) getModel();
-			model.removeRow(row);
-			final int rowCount = getRowCount();
-			if (row <= rowCount - 1) {
-				changeSelection(row, getSelectedColumn(), false, false);
-			}
-			else if (rowCount >= 1) {
-				changeSelection(row - 1, getSelectedColumn(), false, false);
-			}
+			final int[] selectedRows = getSelectedRows();
+			if(selectedRows.length == 0)
+				return;
+			Arrays.sort(selectedRows);
+			int lastRow = selectedRows[selectedRows.length - 1];
+			for(int i = selectedRows.length - 1; i >= 0; i--)
+				model.removeRow(selectedRows[i]);
+			selectNextToRemoved(lastRow);
+		}
+	}
+
+	private void selectNextToRemoved(int lastRow) {
+		final int rowCount = getRowCount();
+		if (lastRow <= rowCount - 1) {
+			changeSelection(lastRow, getSelectedColumn(), false, false);
+		}
+		else if (rowCount >= 1) {
+			changeSelection(lastRow - 1, getSelectedColumn(), false, false);
 		}
 	}
 

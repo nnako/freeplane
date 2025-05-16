@@ -31,14 +31,15 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.mode.mindmapmode.MModeController;
 
-class DeleteAction extends AFreeplaneAction {
+public class DeleteAction extends AFreeplaneAction {
+	public static final String NAME = "DeleteAction";
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public DeleteAction() {
-		super("DeleteAction");
+		super(NAME);
 	}
 
 	public void actionPerformed(final ActionEvent e) {
@@ -49,7 +50,7 @@ class DeleteAction extends AFreeplaneAction {
 			}
 		}
 		final Controller controller = Controller.getCurrentController();
-		final int showResult = OptionalDontShowMeAgainDialog.show("really_remove_node", 
+		final int showResult = OptionalDontShowMeAgainDialog.show("really_remove_node",
 		    MModeController.RESOURCES_DELETE_NODES_WITHOUT_QUESTION,
 		    MessageType.ONLY_OK_SELECTION_IS_STORED);
 		if (showResult != JOptionPane.OK_OPTION) {
