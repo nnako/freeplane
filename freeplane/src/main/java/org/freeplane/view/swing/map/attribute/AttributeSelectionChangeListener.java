@@ -43,6 +43,8 @@ class AttributeSelectionChangeListener implements PropertyChangeListener, Attrib
 							final NodeView viewer = (NodeView) newNodeViewInFocus;
 							if (viewer != viewer.getMap().getSelected()) {
 								viewer.getMap().selectAsTheOnlyOneSelected(viewer, false);
+							} else if (selectedTable.getRowCount() == 0) {
+								viewer.getMainView().requestFocusInWindow();
 							}
 						}
 					}
