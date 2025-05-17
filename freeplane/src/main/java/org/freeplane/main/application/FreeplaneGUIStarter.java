@@ -19,7 +19,6 @@
  */
 package org.freeplane.main.application;
 
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
@@ -178,13 +177,9 @@ public class FreeplaneGUIStarter implements FreeplaneStarter {
 			final String lookandfeel;
 			if(systemPropertyLookandfeel == null) {
 				applicationResourceController.addPropertyChangeListener((propertyName, newValue, oldValue) -> {
-					if("lookandfeel".equals(propertyName)) {
+					if("lookandfeel".equals(propertyName)
+							&& ! FrameController.VAQUA_LAF_CLASS_NAME.equals(newValue)) {
 						FrameController.setLookAndFeel(newValue);
-						if(FrameController.VAQUA_LAF_CLASS_NAME.equals(newValue)) {
-							final Component currentRootComponent = UITools.getMenuComponent();
-							Stream.of(SwingUtilities.getRootPane(currentRootComponent).getComponents())
-							.forEach(SwingUtilities::updateComponentTreeUI);
-						}
 						SwingUtilities.updateComponentTreeUI(UITools.getFrame());
 					}
 				});
