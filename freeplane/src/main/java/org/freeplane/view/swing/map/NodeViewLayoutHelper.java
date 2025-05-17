@@ -280,20 +280,26 @@ class NodeViewLayoutHelper {
     	int lastIndex = childrenViews.size();
     	for (int index = 0; index < lastIndex; index++) {
     		NodeView child = childrenViews.get(index);
-    		final boolean hasChildViews = hasChildViews(child);
     		if(! isConsideredForAlignment(child))
     			continue;
 			int sideIndex = child.isTopOrLeft() ? 0 : 1;
-			if(hasChildViews) {
+			final boolean marksSummary = child.getNode().isHiddenSummary();
+			if(marksSummary || hasChildViews(child)) {
 				final int updatedChildIndex = unfolded[sideIndex];
 				if(updatedChildIndex >= 0) {
 					final NodeView updated = childrenViews.get(updatedChildIndex);
 					updated.getLayoutHelper().setMinimumContentWidth(Math.max(max[sideIndex], previousMax[sideIndex]));
 				}
-				unfolded[sideIndex] = index;
-				previousMax[sideIndex] = max[sideIndex];
+				if(marksSummary ) {
+					unfolded[sideIndex] = -1;
+					previousMax[sideIndex] = ContentSizeCalculator.UNSET;
+				} else {
+					unfolded[sideIndex] = index;
+					previousMax[sideIndex] = max[sideIndex];
+				}
 				max[sideIndex] = ContentSizeCalculator.UNSET;
-			} else {
+			}
+			else {
 				max[sideIndex] = Math.max(max[sideIndex], child.getMainView().getPreferredSize().width);
 				child.getLayoutHelper().setMinimumContentWidth(ContentSizeCalculator.UNSET);
 			}
