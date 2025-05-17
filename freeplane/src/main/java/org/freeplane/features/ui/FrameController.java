@@ -638,7 +638,7 @@ abstract public class FrameController implements ViewController {
 							userLibClassLoader.close();
 					}
 					catch (ClassNotFoundException | ClassCastException | InstantiationException e) {
-						LogUtils.warn("Error while setting Look&Feel" + lookAndFeel + ", reverted to default");
+						LogUtils.warn("Error while setting Look&Feel " + lookAndFeel + ", reverted to default");
 						UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 						Controller.getCurrentController().getResourceController().setProperty("lookandfeel", "default");
 					}
