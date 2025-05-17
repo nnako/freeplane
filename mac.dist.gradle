@@ -104,11 +104,9 @@ def defineMacBuildTasks =  { architecture ->
           }
           into "build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app"
         }
-        if(architecture=='intel') {
-          copy {
-              from project('freeplane').configurations.maclib
-              into("build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib")
-          }
+        copy {
+            from project('freeplane').configurations.maclib
+            into("build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib")
         }
 
         copy {
@@ -144,7 +142,7 @@ def defineMacBuildTasks =  { architecture ->
 }
 
   def signJnr= tasks.create ("signJnr_${architecture}", Exec) {
-        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null && architecture=='intel'}
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
     commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
                 "build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib/jnr-*.jar",
                 macAppProperties['macapp.codesign.identity']
@@ -152,7 +150,7 @@ def defineMacBuildTasks =  { architecture ->
 }
 
   def signVappearances= tasks.create ("signVappearances_${architecture}", Exec) {
-        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null && architecture=='intel'}
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
     commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
                 "build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib/vappearances-*.jar",
                 macAppProperties['macapp.codesign.identity']
@@ -160,7 +158,7 @@ def defineMacBuildTasks =  { architecture ->
 }
 
   def signVaqua= tasks.create ("signVaqua_${architecture}", Exec) {
-        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null && architecture=='intel'}
+        onlyIf { Os.isFamily(Os.FAMILY_MAC) && macAppProperties['macapp.codesign.identity'] != null}
     commandLine 'bash', 'codesign/sign-jars-on-mac.sh',
                 "build/macosapp/app-image-${architecture}/Freeplane.app/Contents/app/core/org.freeplane.core/lib/vaqua-*.jar",
                 macAppProperties['macapp.codesign.identity']
