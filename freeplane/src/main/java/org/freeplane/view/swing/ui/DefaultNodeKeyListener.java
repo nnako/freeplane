@@ -1,5 +1,8 @@
 package org.freeplane.view.swing.ui;
 
+import java.awt.AWTEvent;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -24,7 +27,7 @@ import org.freeplane.view.swing.map.NodeView;
  * The KeyListener which belongs to the node and cares for Events like C-D
  * (Delete Node). It forwards the requests to NodeController.
  */
-public class DefaultNodeKeyListener implements KeyListener {
+public class DefaultNodeKeyListener implements KeyListener, InputMethodListener {
 	final private IEditHandler editHandler;
 
 	public DefaultNodeKeyListener(final IEditHandler editHandler) {
@@ -125,17 +128,8 @@ public class DefaultNodeKeyListener implements KeyListener {
 		if ((e.isAltDown() && ! Compat.isMacOsX() || e.isControlDown() || e.isMetaDown()) || AltCodeChecker.isAltCode(e.getKeyChar())) {
 			return;
 		}
-		final String keyTypeActionString = ResourceController.getResourceController().getProperty("key_type_action",
-		    FirstAction.EDIT_CURRENT.toString());
-		final FirstAction keyTypeAction = FirstAction.valueOf(keyTypeActionString);
-		if (!FirstAction.IGNORE.equals(keyTypeAction)) {
-			if (! isActionEvent(e)) {
-				if (editHandler != null) {
-					editHandler.edit(e, keyTypeAction, false);
-				}
-				return;
-			}
-		}
+		if (! isActionEvent(e))
+			startEditing(e);
 	}
 
 	private boolean isActionEvent(final KeyEvent e) {
@@ -145,4 +139,24 @@ public class DefaultNodeKeyListener implements KeyListener {
 	private boolean isControlCharacter(char keyChar) {
 	    return keyChar == KeyEvent.CHAR_UNDEFINED || keyChar <= KeyEvent.VK_SPACE|| keyChar == KeyEvent.VK_DELETE;
     }
+
+	@Override
+	public void inputMethodTextChanged(InputMethodEvent event) {
+		if(event.getCommittedCharacterCount() > 0)
+			startEditing(event);
+	}
+
+	@Override
+	public void caretPositionChanged(InputMethodEvent event) {/**/}
+
+	private void startEditing(AWTEvent event) {
+		final String keyTypeActionString = ResourceController.getResourceController().getProperty("key_type_action",
+				FirstAction.EDIT_CURRENT.toString());
+		final FirstAction keyTypeAction = FirstAction.valueOf(keyTypeActionString);
+		if (!FirstAction.IGNORE.equals(keyTypeAction)) {
+			if (editHandler != null) {
+				editHandler.edit(event, keyTypeAction, false);
+			}
+		}
+	}
 }

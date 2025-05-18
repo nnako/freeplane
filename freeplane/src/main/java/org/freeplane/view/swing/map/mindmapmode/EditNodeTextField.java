@@ -893,7 +893,7 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
 		final EventBuffer eventQueue = MTextController.getController().getEventQueue();
-		KeyEvent firstEvent = eventQueue.getFirstEvent();
+		AWTEvent firstEvent = eventQueue.getFirstEvent();
 
 		final ZoomableLabelUI parentUI = parent.getUI();
 		final Rectangle textR = parentUI.getAvailableTextR(parent);

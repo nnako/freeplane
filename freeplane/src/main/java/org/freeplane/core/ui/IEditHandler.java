@@ -20,9 +20,9 @@
  */
 package org.freeplane.core.ui;
 
-import java.awt.event.KeyEvent;
+import java.awt.AWTEvent;
 
 public interface IEditHandler {
 	public enum FirstAction{EDIT_CURRENT, ADD_SIBLING, ADD_CHILD, IGNORE}
-	void edit(KeyEvent e, FirstAction keyTypeAction, boolean editLong);
+	void edit(AWTEvent e, FirstAction keyTypeAction, boolean editLong);
 }

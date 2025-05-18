@@ -19,11 +19,13 @@
  */
 package org.freeplane.main.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.InputMethodEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Box;
@@ -300,7 +302,7 @@ public class MModeControllerFactory {
 		AttributeController.install(new MAttributeController(modeController));
 		userInputListenerFactory.setNodeKeyListener(new DefaultNodeKeyListener(new IEditHandler() {
 			@Override
-			public void edit(final KeyEvent e, final FirstAction action, final boolean editLong) {
+			public void edit(final AWTEvent e, final FirstAction action, final boolean editLong) {
 				((MTextController) MTextController.getController(modeController)).getEventQueue().activate(e);
 				textController.edit(action, editLong);
 			}

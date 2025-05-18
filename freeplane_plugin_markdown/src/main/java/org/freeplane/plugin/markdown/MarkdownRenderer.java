@@ -1,5 +1,6 @@
 package org.freeplane.plugin.markdown;
 
+import java.awt.AWTEvent;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
@@ -110,8 +111,8 @@ public class MarkdownRenderer extends AbstractContentTransformer implements IEdi
 
     private EditNodeBase createEditor(NodeModel node, IEditControl editControl,
             JEditorPane textEditor) {
-        final KeyEvent firstKeyEvent = MTextController.getController().getEventQueue().getFirstEvent();
-		final EditNodeDialog editNodeDialog = new EditNodeDialog(node, firstKeyEvent, false, editControl, false, textEditor);
+        final AWTEvent firstEvent = MTextController.getController().getEventQueue().getFirstEvent();
+		final EditNodeDialog editNodeDialog = new EditNodeDialog(node, firstEvent, false, editControl, false, textEditor);
 		editNodeDialog.setTitle(TextUtils.getText("markdown_editor"));
 		return editNodeDialog;
     }

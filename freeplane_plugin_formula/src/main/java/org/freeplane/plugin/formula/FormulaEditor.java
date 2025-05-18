@@ -19,13 +19,13 @@
  */
 package org.freeplane.plugin.formula;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -35,6 +35,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.RootPaneContainer;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.resources.ResourceController;
@@ -84,7 +85,7 @@ class FormulaEditor extends EditNodeDialog implements INodeSelector {
 	private MapExplorerController mapExplorer;
 	private EvaluationStatus evaluationStatus;
 
-	FormulaEditor(MapExplorerController mapExplorer, NodeModel nodeModel, KeyEvent firstEvent, IEditControl editControl,
+	FormulaEditor(MapExplorerController mapExplorer, NodeModel nodeModel, AWTEvent firstEvent, IEditControl editControl,
                           boolean enableSplit, JEditorPane textEditor) {
 	    super(nodeModel, firstEvent, true, editControl, enableSplit, textEditor);
 		this.mapExplorer = mapExplorer;
@@ -122,7 +123,7 @@ class FormulaEditor extends EditNodeDialog implements INodeSelector {
 			final Font font = textEditor.getFont();
 			exceptionView.setFont(font.deriveFont(font.getSize2D() * 0.8f));
 			exceptionView.setEditable(false);
-			final JScrollPane scrollPane = new JScrollPane(exceptionView, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			final JScrollPane scrollPane = new JScrollPane(exceptionView, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			UITools.setScrollbarIncrement(scrollPane);
 			final Rectangle availableScreenBounds = UITools.getAvailableScreenBounds(UITools.getCurrentRootComponent());
 			final Dimension maximumSize = new Dimension(availableScreenBounds.width * 3 / 4, Integer.MAX_VALUE);

@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.text.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -323,7 +324,7 @@ public class EditNodeWYSIWYG extends EditNodeBase {
 			}
 			HtmlProcessor.configureUnknownTags(htmlEditorPanel.getDocument());
 			htmlEditorPanel.setCurrentDocumentContent(content);
-			final KeyEvent firstKeyEvent = MTextController.getController().getEventQueue().getFirstEvent();
+			final AWTEvent firstKeyEvent = MTextController.getController().getEventQueue().getFirstEvent();
 			final JTextComponent currentPane = htmlEditorPanel.getEditorPane();
 			if (currentPane == htmlEditorPanel.getMostRecentFocusOwner()) {
 				redispatchKeyEvents(currentPane, firstKeyEvent);

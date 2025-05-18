@@ -1,5 +1,6 @@
 package org.freeplane.plugin.formula;
 
+import java.awt.AWTEvent;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
@@ -106,8 +107,8 @@ class FormulaTextTransformer extends AbstractContentTransformer implements IEdit
     private EditNodeBase createEditor(final NodeModel node,
             final EditNodeBase.IEditControl editControl, JEditorPane textEditor) {
         final MapExplorerController explorer = Controller.getCurrentModeController().getExtension(MapExplorerController.class);
-        final KeyEvent firstKeyEvent = MTextController.getController().getEventQueue().getFirstEvent();
-        final EditNodeDialog editNodeDialog = new FormulaEditor(explorer, node, firstKeyEvent, editControl, false, textEditor);
+        final AWTEvent firstEvent = MTextController.getController().getEventQueue().getFirstEvent();
+        final EditNodeDialog editNodeDialog = new FormulaEditor(explorer, node, firstEvent, editControl, false, textEditor);
         editNodeDialog.setTitle(TextUtils.getText("formula_editor"));
         return editNodeDialog;
     }
@@ -115,8 +116,8 @@ class FormulaTextTransformer extends AbstractContentTransformer implements IEdit
 	private String getEditedText(final NodeModel node, Object nodeProperty, Object content, MTextController textController) {
 		if (nodeProperty instanceof NodeModel || nodeProperty instanceof NodeAttributeTableModel) {
 		    if (! textController.isTextFormattingDisabled(node)) {
-		        final KeyEvent firstKeyEvent = textController.getEventQueue().getFirstEvent();
-	            if (firstKeyEvent != null && firstKeyEvent.getKeyChar() == '='){
+		        final AWTEvent firstEvent = textController.getEventQueue().getFirstEvent();
+	            if (firstEvent instanceof KeyEvent && ((KeyEvent) firstEvent).getKeyChar() == '='){
 	            	return "=";
 	            }
 		    }

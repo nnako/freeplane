@@ -21,6 +21,7 @@ package org.freeplane.core.ui;
 
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.InputMethodListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelListener;
 import java.util.Set;
@@ -42,7 +43,7 @@ public interface IUserInputListenerFactory {
 	IMouseListener getMapMouseListener();
 
 	MouseWheelListener getMapMouseWheelListener();
-	
+
 	MouseWheelListener getNodeMouseWheelListener();
 
 	JPopupMenu getMapPopup();
@@ -57,6 +58,8 @@ public interface IUserInputListenerFactory {
 
 	KeyListener getNodeKeyListener();
 
+	InputMethodListener getNodeInputMethodListener();
+
 	IMouseListener getNodeMouseMotionListener();
 
 	JPopupMenu getNodePopupMenu();
@@ -68,13 +71,13 @@ public interface IUserInputListenerFactory {
 	public void removeMouseWheelEventHandler(final IMouseWheelEventHandler handler);
 
 	void updateMapList();
-	
+
 	public void updateMenus(String menuStructureResource, Set<String> plugins);
 
 	public void rebuildMenu(Entry entry);
 
 	void addUiBuilder(Phase phase, String name, BuilderDestroyerPair builderDestroyerPair);
-	
+
 	public void addBuildPhaseListener(BuildPhaseListener listener);
 
 	Entry getGenericMenuStructure();

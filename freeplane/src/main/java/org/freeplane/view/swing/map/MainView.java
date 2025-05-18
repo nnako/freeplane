@@ -91,13 +91,19 @@ import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.styles.MapViewLayout;
 import org.freeplane.features.text.HighlightedTransformedObject;
 import org.freeplane.features.text.TextController;
+import java.awt.Rectangle;
+import java.text.AttributedString;
+
+import javax.swing.text.AttributeSet; // Or your preferred AttributeSet implementation
+import java.awt.im.InputMethodRequests;
 
 
 /**
  * Base class for all node views.
  */
 public class MainView extends ZoomableLabel {
-    private static final String MOUSE_DRIVEN_NODE_SHIFTS_OPTION_NAME = "mouseDrivenNodeShiftsAreDisabled";
+	static final AttributedString EMPTY_ATTRIBUTED_STRING = new AttributedString("");
+	private static final String MOUSE_DRIVEN_NODE_SHIFTS_OPTION_NAME = "mouseDrivenNodeShiftsAreDisabled";
 	private static final long serialVersionUID = 1L;
     private static MainView lastMouseEventTarget = null;
 
@@ -238,6 +244,14 @@ public class MainView extends ZoomableLabel {
 		setVerticalAlignment(SwingConstants.CENTER);
 		setHorizontalTextPosition(SwingConstants.TRAILING);
 		setVerticalTextPosition(SwingConstants.TOP);
+		enableInputMethods(true);
+	}
+
+
+
+	@Override
+	public InputMethodRequests getInputMethodRequests() {
+		return new InputMethodBuffer(this);
 	}
 
 	protected void convertPointFromMap(final Point p) {
