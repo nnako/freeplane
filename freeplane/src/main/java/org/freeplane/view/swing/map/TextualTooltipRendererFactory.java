@@ -80,7 +80,7 @@ class TextualTooltipRendererFactory {
 
 	private NodeModel getNode() {
 		NodeView nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, component);
-		return nodeView.getNode();
+		return nodeView != null ? nodeView.getNode() : null;
 	}
 
     private void setTipText(String tipText) {
