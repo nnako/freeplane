@@ -56,7 +56,7 @@ public class OutlineLinkView extends EdgeView {
 	@Override
 	protected void createStart() {
 		final MainView startMainView = getSource().getMainView();
-		start = new Point(startMainView.getWidth(), startMainView.getHeight() / 2);
+		start = shapeStart = new Point(startMainView.getWidth(), startMainView.getHeight() / 2);
 		final MainView targetMainView = getTarget().getMainView();
 		end = new Point(targetMainView.getWidth(), targetMainView.getHeight() / 2);
 	}

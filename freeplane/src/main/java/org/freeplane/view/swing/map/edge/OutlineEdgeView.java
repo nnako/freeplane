@@ -44,7 +44,7 @@ public class OutlineEdgeView extends EdgeView {
 
 	@Override
 	protected void createStart() {
-		start = getSource().getMainView().getLeftPoint();
+		start = shapeStart = getSource().getMainView().getLeftPoint();
 		end = getTarget().getMainView().getLeftPoint();
 	}
 

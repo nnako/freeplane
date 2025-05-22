@@ -59,6 +59,7 @@ public class HorizontalEdgeView extends EdgeView {
 	            start.x -= getWidth() / 2;
 	        else if(getStartConnectorLocation() == ConnectorLocation.LEFT)
                 start.x += getWidth() / 2;
+	        shapeStart = start;
 	        return;
 	    }
 
