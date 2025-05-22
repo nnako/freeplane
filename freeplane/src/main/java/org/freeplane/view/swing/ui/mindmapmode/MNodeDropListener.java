@@ -212,6 +212,8 @@ public class MNodeDropListener implements DropTargetListener {
 		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && ! containsTags) {
 			return false;
 		}
+		if (!event.isLocalTransfer())
+			return true;
 		if(containsTags) {
 			try {
 				NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
@@ -224,9 +226,6 @@ public class MNodeDropListener implements DropTargetListener {
 				return false;
 			}
 		}
-
-		if (!event.isLocalTransfer())
-			return true;
 
 		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
 			 return dropAction != DnDConstants.ACTION_LINK;
@@ -389,12 +388,16 @@ public class MNodeDropListener implements DropTargetListener {
 		nodeFolder.reset();
 	}
 
-	private int getDropAction(final DropTargetDropEvent dtde) throws UnsupportedFlavorException, IOException {
+	private int getDropAction(final DropTargetDropEvent dtde) {
 		int dropAction = dtde.getDropAction();
 		final Transferable t = dtde.getTransferable();
-		if (t.isDataFlavorSupported(MindMapNodesSelection.dropActionFlavor)) {
-			dropAction = (Integer) t.getTransferData(MindMapNodesSelection.dropActionFlavor);
+		if (t.isDataFlavorSupported(MindMapNodesSelection.dropCopyActionFlavor)) {
+			dropAction = DnDConstants.ACTION_COPY;
 		}
+		else if (t.isDataFlavorSupported(MindMapNodesSelection.dropLinkActionFlavor)) {
+			dropAction = DnDConstants.ACTION_LINK;
+		}
+
 		return dropAction;
 	}
 

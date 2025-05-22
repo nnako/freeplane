@@ -24,35 +24,53 @@ import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.features.map.NodeModel;
 
 public class MindMapNodesSelection implements Transferable, ClipboardOwner {
-	public static DataFlavor dropActionFlavor = null;
-	public static DataFlavor fileListFlavor = null;
-	public static DataFlavor htmlFlavor = null;
-	public static DataFlavor mindMapNodesFlavor = null;
-	public static DataFlavor mindMapNodeObjectsFlavor = null;
-	public static DataFlavor mindMapNodeSingleObjectsFlavor = null;
+	public static final DataFlavor dropCopyActionFlavor;
+	public static final DataFlavor dropLinkActionFlavor;
+	public static final DataFlavor fileListFlavor;
+	public static final DataFlavor htmlFlavor;
+	public static final DataFlavor mindMapNodesFlavor;
+	public static final DataFlavor mindMapNodeObjectsFlavor;
+	public static final DataFlavor mindMapNodeSingleObjectsFlavor;
 	static {
+		DataFlavor mindMapNodesFlavorInit = null;
+		DataFlavor mindMapNodeObjectsFlavorInit = null;
+		DataFlavor mindMapNodeSingleObjectsFlavorInit = null;
+		DataFlavor htmlFlavorInit = null;
+		DataFlavor fileListFlavorInit = null;
+		DataFlavor dropCopyActionFlavorInit = null;
+		DataFlavor dropLinkActionFlavorInit = null;
 		try {
-			MindMapNodesSelection.mindMapNodesFlavor = new DataFlavor("text/freeplane-nodes; class=java.lang.String");
-			MindMapNodesSelection.mindMapNodeObjectsFlavor = new DataFlavor("application/freeplane-nodes; class=java.util.Collection");
-			MindMapNodesSelection.mindMapNodeSingleObjectsFlavor = new DataFlavor("application/freeplane-single-nodes; class=java.util.Collection");
-			MindMapNodesSelection.htmlFlavor = new DataFlavor("text/html; class=java.lang.String");
-			MindMapNodesSelection.fileListFlavor = new DataFlavor("application/x-java-file-list; class=java.util.List");
-			MindMapNodesSelection.dropActionFlavor = new DataFlavor("application/freeplane-drop-action; class=java.lang.Integer");
+			mindMapNodesFlavorInit = new DataFlavor("text/freeplane-nodes; class=java.lang.String");
+			mindMapNodeObjectsFlavorInit = new DataFlavor("application/freeplane-nodes; class=java.util.Collection");
+			mindMapNodeSingleObjectsFlavorInit = new DataFlavor("application/freeplane-single-nodes; class=java.util.Collection");
+			htmlFlavorInit = new DataFlavor("text/html; class=java.lang.String");
+			fileListFlavorInit = new DataFlavor("application/x-java-file-list; class=java.util.List");
+			dropCopyActionFlavorInit = new DataFlavor("application/freeplane-drop-copy-action; class=java.lang.Integer");
+			dropLinkActionFlavorInit = new DataFlavor("application/freeplane-drop-link-action; class=java.lang.Integer");
 		}
 		catch (final Exception e) {
 			LogUtils.severe(e);
 		}
+		mindMapNodesFlavor = mindMapNodesFlavorInit;
+		mindMapNodeObjectsFlavor = mindMapNodeObjectsFlavorInit;
+		mindMapNodeSingleObjectsFlavor = mindMapNodeSingleObjectsFlavorInit;
+		htmlFlavor = htmlFlavorInit;
+		fileListFlavor = fileListFlavorInit;
+		dropCopyActionFlavor = dropCopyActionFlavorInit;
+		dropLinkActionFlavor = dropLinkActionFlavorInit;
 	}
 	final private String htmlContent;
 	final private String nodesContent;
 	final private String stringContent;
-	private Integer dropActionContent;
+	private int dropActionContent;
 	private Collection<NodeModel> nodes;
 	private boolean selectionContainsSingleNodes;
 
@@ -61,13 +79,14 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 		this.nodesContent = nodesContent;
 		this.stringContent = stringContent;
 		this.htmlContent = htmlContent;
-		this.dropActionContent = null;
+		this.dropActionContent = DnDConstants.ACTION_MOVE;
 	}
 
 	public MindMapNodesSelection(final String nodesContent) {
 	    this(nodesContent, null, null);
     }
 
+	@Override
 	public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException {
 		if (flavor.equals(DataFlavor.stringFlavor)) {
 			return stringContent;
@@ -75,7 +94,8 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 		if (flavor.equals(MindMapNodesSelection.mindMapNodesFlavor)) {
 			return nodesContent;
 		}
-		if (flavor.equals(MindMapNodesSelection.dropActionFlavor)) {
+		if (flavor.equals(MindMapNodesSelection.dropCopyActionFlavor)
+				|| flavor.equals(MindMapNodesSelection.dropLinkActionFlavor)) {
 			return dropActionContent;
 		}
 		if (flavor.equals(MindMapNodesSelection.htmlFlavor) && htmlContent != null) {
@@ -92,13 +112,17 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 				|| flavor.equals(MindMapNodesSelection.mindMapNodeSingleObjectsFlavor) && selectionContainsSingleNodes);
 	}
 
+	@Override
 	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { DataFlavor.stringFlavor, MindMapNodesSelection.mindMapNodesFlavor,
+		return Stream.of(DataFlavor.stringFlavor, MindMapNodesSelection.mindMapNodesFlavor,
 		        MindMapNodesSelection.htmlFlavor,
-		        MindMapNodesSelection.dropActionFlavor,
-		        MindMapNodesSelection.mindMapNodeObjectsFlavor , MindMapNodesSelection.mindMapNodeSingleObjectsFlavor };
+		        MindMapNodesSelection.dropCopyActionFlavor, MindMapNodesSelection.dropLinkActionFlavor,
+		        MindMapNodesSelection.mindMapNodeObjectsFlavor , MindMapNodesSelection.mindMapNodeSingleObjectsFlavor)
+				.filter(this::isDataFlavorSupported)
+				.toArray(DataFlavor[]::new);
 	}
 
+	@Override
 	public boolean isDataFlavorSupported(final DataFlavor flavor) {
 		if (flavor.equals(DataFlavor.stringFlavor) && stringContent != null) {
 			return true;
@@ -106,7 +130,10 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 		if (flavor.equals(MindMapNodesSelection.mindMapNodesFlavor) && nodesContent != null) {
 			return true;
 		}
-		if (flavor.equals(MindMapNodesSelection.dropActionFlavor) && dropActionContent != null) {
+		if (flavor.equals(MindMapNodesSelection.dropCopyActionFlavor) && dropActionContent == DnDConstants.ACTION_COPY) {
+			return true;
+		}
+		if (flavor.equals(MindMapNodesSelection.dropLinkActionFlavor) && dropActionContent == DnDConstants.ACTION_LINK) {
 			return true;
 		}
 		if (flavor.equals(MindMapNodesSelection.htmlFlavor) && htmlContent != null) {
@@ -118,6 +145,7 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 		return false;
 	}
 
+	@Override
 	public void lostOwnership(final Clipboard clipboard, final Transferable contents) {
 	}
 
