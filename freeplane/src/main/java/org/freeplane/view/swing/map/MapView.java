@@ -1996,42 +1996,42 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
     private NodeView suggestNewSelectedAncestor(SelectionDirection direction,
     		final NodeView oldSelected) {
-        NodeView newSelectedParent = null;
-        {
-            NodeView parentView = oldSelected.getParentView();
-            ChildNodesAlignment childNodesAlignment = parentView.getChildNodesAlignment();
-            LayoutOrientation layoutOrientation = parentView.layoutOrientation();
-            if (direction == SelectionDirection.DOWN) {
-                newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
-                        layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
-                        ? LayoutOrientation.TOP_TO_BOTTOM
-                                :  LayoutOrientation.LEFT_TO_RIGHT,
-                                layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
-                                ? oldSelected.isTopOrLeft() : true);
-            } else if (direction == SelectionDirection.UP) {
-                newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
-                        layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
-                        ? LayoutOrientation.TOP_TO_BOTTOM
-                                : LayoutOrientation.LEFT_TO_RIGHT,
-                                layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
-                                ? oldSelected.isTopOrLeft() :false);
-            } else if (direction == SelectionDirection.RIGHT) {
-                newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
-                        layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
-                        ? LayoutOrientation.LEFT_TO_RIGHT
-                                :  LayoutOrientation.TOP_TO_BOTTOM,
-                                layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
-                                ? oldSelected.isTopOrLeft() : true);
-            } else if (direction == SelectionDirection.LEFT) {
-                newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
-                        layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
-                        ? LayoutOrientation.LEFT_TO_RIGHT
-                                :  LayoutOrientation.TOP_TO_BOTTOM,
-                                layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
-                                ? oldSelected.isTopOrLeft() : false);
-            }
-        }
-        return newSelectedParent;
+    	NodeView newSelectedParent = null;
+    	NodeView parentView = oldSelected.getParentView();
+    	if(parentView == null)
+    		return null;
+    	ChildNodesAlignment childNodesAlignment = parentView.getChildNodesAlignment();
+    	LayoutOrientation layoutOrientation = parentView.layoutOrientation();
+    	if (direction == SelectionDirection.DOWN) {
+    		newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
+    				layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
+    				? LayoutOrientation.TOP_TO_BOTTOM
+    						:  LayoutOrientation.LEFT_TO_RIGHT,
+    						layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
+    						? oldSelected.isTopOrLeft() : true);
+    	} else if (direction == SelectionDirection.UP) {
+    		newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
+    				layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+    				? LayoutOrientation.TOP_TO_BOTTOM
+    						: LayoutOrientation.LEFT_TO_RIGHT,
+    						layoutOrientation == LayoutOrientation.TOP_TO_BOTTOM && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+    						? oldSelected.isTopOrLeft() :false);
+    	} else if (direction == SelectionDirection.RIGHT) {
+    		newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
+    				layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
+    				? LayoutOrientation.LEFT_TO_RIGHT
+    						:  LayoutOrientation.TOP_TO_BOTTOM,
+    						layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
+    						? oldSelected.isTopOrLeft() : true);
+    	} else if (direction == SelectionDirection.LEFT) {
+    		newSelectedParent = oldSelected.getVisibleSummarizedOrParentView(
+    				layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+    				? LayoutOrientation.LEFT_TO_RIGHT
+    						:  LayoutOrientation.TOP_TO_BOTTOM,
+    						layoutOrientation == LayoutOrientation.LEFT_TO_RIGHT && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+    						? oldSelected.isTopOrLeft() : false);
+    	}
+    	return newSelectedParent;
     }
 
     private boolean canHaveSummary(final NodeView node, SelectionDirection direction) {
@@ -2042,7 +2042,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
     private NodeView suggestNewSelectedSummary(SelectionDirection direction, final NodeView node) {
-        if(isOutlineLayoutSet() || isRoot(node))
+        if(node == null || isOutlineLayoutSet() || isRoot(node))
             return null;
         final int currentSummaryLevel = SummaryNode.getSummaryLevel(currentRootView.getNode(), node.getNode());
         int level = currentSummaryLevel;
