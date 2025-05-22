@@ -242,9 +242,11 @@ public class TagCategories {
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-            int indentation = getIndentationLevel(line);
-
             String lineTags = line.trim();
+            if(lineTags.isEmpty())
+            	continue;
+
+            int indentation = getIndentationLevel(line);
             for(int lineTagIndex = 0; lineTagIndex < lineTags.length();) {
                 int lineTagEnd = lineTags.indexOf(tagCategorySeparator, lineTagIndex);
                 String lineTag = lineTagEnd >= 0 ? lineTags.substring(lineTagIndex, lineTagEnd) : lineTags.substring(lineTagIndex);
