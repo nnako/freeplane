@@ -448,7 +448,7 @@ class VerticalNodeViewLayoutStrategy {
     	int yBegin = calculateInitialYPosition(childShiftY);
     	yCoordinates[index] = yBegin;
 
-    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, upperGap, availableSpace, y0);
+    	adjustTotalShiftForAlignment(child, childShiftY, yBegin, childRegularHeight, availableSpace, y0);
     	updateGapsAndBoundaries(index, child, childRegularHeight);
     }
 
@@ -488,8 +488,8 @@ class VerticalNodeViewLayoutStrategy {
     }
 
     private void adjustTotalShiftForAlignment(NodeViewLayoutHelper child, int childShiftY,
-                                        int yBegin, int childRegularHeight, int upper,
-                                        int availableSpace, int y0) {
+                                        int yBegin, int childRegularHeight, int availableSpace,
+                                        int y0) {
         final Placement placement = childNodesAlignment.placement();
 		if (isFirstVisibleLaidOutChild()) {
 			if (!allowsCompactLayout && childShiftY != 0) {
@@ -661,8 +661,10 @@ class VerticalNodeViewLayoutStrategy {
                         child.getHeight() - spaceAround + child.getTopOverlap());
             else
                 childBottomBoundary = child.getBottomBoundary();
-            childBottomBoundary = childBottomBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
-            bottomBoundary = bottomBoundary == null ? childBottomBoundary : childBottomBoundary.combine(bottomBoundary, combineOperation);
+            childBottomBoundary = childBottomBoundary == null ? null : childBottomBoundary.translate(xCoordinates[index], y - child.getTopOverlap());
+            bottomBoundary = bottomBoundary == null ? childBottomBoundary
+            		: childBottomBoundary == null ? bottomBoundary
+            				: childBottomBoundary.combine(bottomBoundary, combineOperation);
         }
     }
 
@@ -774,7 +776,7 @@ class VerticalNodeViewLayoutStrategy {
         view.setTopOverlap(topOverlap);
         view.setBottomOverlap(height - heightWithoutOverlap);
 
-        if(! view.isFree() && view.isAutoCompactLayoutEnabled()) {
+        if(! view.isFree() && view.isAutoCompactLayoutEnabled() && width > 2 * spaceAround) {
 			if (cloudHeight == 0 && ! childNodesAlignment.isStacked())
 				calculateAndSetBoundaries(contentX, contentY, baseY, spaceAround, width, height);
 			else {
