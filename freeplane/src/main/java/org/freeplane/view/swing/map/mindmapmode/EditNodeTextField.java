@@ -369,7 +369,8 @@ public class EditNodeTextField extends EditNodeBase {
 		        FocusEvent fe = (FocusEvent) event;
 
 		        // If focus is moving away from the text editor
-		        if (fe.getID() == FocusEvent.FOCUS_GAINED && ! fe.isTemporary()
+		        if (textfield != null
+		        		&& fe.getID() == FocusEvent.FOCUS_GAINED && ! fe.isTemporary()
 		        		&& fe.getComponent() != textfield
 		        		&& fe.getOppositeComponent() != textfield
 		        		&& fe.getOppositeComponent() != null) {
