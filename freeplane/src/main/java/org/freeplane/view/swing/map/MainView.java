@@ -81,6 +81,7 @@ import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.NodeLinks;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.NodeModel.Side;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.nodelocation.LocationModel;
@@ -727,7 +728,7 @@ public class MainView extends ZoomableLabel {
 			return "";
 		final ModeController modeController = nodeView.getMap().getModeController();
 		final NodeModel node = nodeView.getNode();
-		return modeController.createToolTip(node, this);
+		return modeController.createToolTip(node, this, TooltipTrigger.NODE);
     }
 
 	@Override
@@ -735,7 +736,18 @@ public class MainView extends ZoomableLabel {
 	    final String toolTipText = super.getToolTipText(event);
 	    if(toolTipText != null)
 	    	return toolTipText;
-	    return createToolTipText();
+	    final boolean isClickableLink = isClickableLink(event.getPoint());
+	    if(isClickableLink) {
+	    	final NodeView nodeView = getNodeView();
+	    	if(nodeView ==  null)
+	    		return "";
+			final ModeController modeController = nodeView.getMap().getModeController();
+	    	final NodeModel linkedNode = modeController.getExtension(LinkController.class).getLinkedNode(nodeView.getNode());
+	    	if(linkedNode != null)
+	    		return modeController.createToolTip(linkedNode, this, TooltipTrigger.LINK);
+
+	    }
+		return createToolTipText();
     }
 
 	@Override

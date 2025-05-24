@@ -49,6 +49,7 @@ import org.freeplane.features.commandsearch.CommandSearchAction;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IExtensionCopier;
 import org.freeplane.features.map.ITooltipProvider;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
@@ -424,7 +425,7 @@ public class ModeController extends AController implements FreeplaneActions{
 	public boolean canEdit() {
 		return false;
 	}
-	public String createToolTip(final NodeModel node, Component view) {
+	public String createToolTip(final NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
 		final MapModel map = node.getMap();
 		final Color background = getExtension(MapStyle.class).getBackground(map);
 		final Color textColor = UITools.getTextColorForBackground(background);
@@ -441,7 +442,7 @@ public class ModeController extends AController implements FreeplaneActions{
 		final StringBuilder text = new StringBuilder("<html><head>"+style+"</head><body>");
 		boolean tooltipSet = false;
 		for (final ITooltipProvider provider : toolTipProviders.values()) {
-			String value = provider.getTooltip(this, node, view);
+			String value = provider.getTooltip(this, node, view, tooltipTrigger);
 			if (value == null) {
 				continue;
 			}

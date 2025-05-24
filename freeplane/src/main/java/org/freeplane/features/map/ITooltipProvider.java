@@ -28,5 +28,6 @@ import org.freeplane.features.mode.ModeController;
  * 06.06.2009
  */
 public interface ITooltipProvider {
-	String getTooltip(ModeController modeController, NodeModel node, Component view);
+	enum TooltipTrigger {NODE, LINK}
+	String getTooltip(ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger);
 }

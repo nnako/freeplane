@@ -36,6 +36,7 @@ import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.ITooltipProvider;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.styles.IStyle;
@@ -91,7 +92,7 @@ public class NoteController implements IExtension {
 		registerNoteTooltipProvider(modeController);
 		registerStateIconProvider();
 	}
-	
+
 	public String getNoteContentType(NodeModel node) {
 	    Collection<IStyle> collection = LogicalStyleController.getController(modeController).getStyles(node, StyleOption.FOR_UNSELECTED_NODE);
 	    final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
@@ -107,7 +108,7 @@ public class NoteController implements IExtension {
 	                return contentType;
 	            }
 	        }
-	    } 
+	    }
 	    return TextController.CONTENT_TYPE_HTML;
 	}
 
@@ -126,11 +127,12 @@ public class NoteController implements IExtension {
 	private void registerNoteTooltipProvider(ModeController modeController) {
 		modeController.addToolTipProvider(NOTE_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(final ModeController modeController, NodeModel node, Component view){
-				return getTooltip(modeController, node, (MainView)view);
+			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger){
+				return getTooltip(modeController, node, (MainView)view, tooltipTrigger);
 			}
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view) {
-				if(showNotesInMap(node.getMap()) && ! TextController.getController(modeController).isMinimized(node)){
+
+			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
+				if( tooltipTrigger == TooltipTrigger.LINK || showNotesInMap(node.getMap()) && ! TextController.getController(modeController).isMinimized(node)){
 					return null;
 				}
 				final String data = NoteModel.getNoteText(node);
@@ -153,7 +155,7 @@ public class NoteController implements IExtension {
 				}
 				catch (Exception e) {
 					text = TextUtils.format("MainView.errorUpdateText", data, e.getLocalizedMessage());
-				}				
+				}
 				if (!HtmlUtils.isHtml(text)) {
 					text = HtmlUtils.plainToHTML(text);
 				}

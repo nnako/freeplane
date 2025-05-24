@@ -47,6 +47,7 @@ import org.freeplane.features.map.ITooltipProvider;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.mode.CombinedPropertyChain;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.IPropertyHandler;
@@ -123,14 +124,14 @@ public class IconController implements IExtension {
     private void registerTooltipProvider() {
         modeController.addToolTipProvider(TAG_TOOLTIP, new ITooltipProvider() {
             @Override
-            public String getTooltip(ModeController modeController, NodeModel node, Component view) {
+            public String getTooltip(ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
                 List<Tag> tags = getTags(node);
                 if (tags.isEmpty()) {
                     return null;
                 }
                 final MapStyle mapStyle = modeController.getExtension(MapStyle.class);
                 TagLocation tagLocation = mapStyle.tagLocation(node.getMap());
-                final boolean showTooltip = tagLocation == TagLocation.NEVER
+                final boolean showTooltip = tooltipTrigger == TooltipTrigger.LINK ||  tagLocation == TagLocation.NEVER
                 		|| ! MapView.showsTagsOnMinimizedNodes() && ShortenedTextModel.isShortened(node);
                 if(! showTooltip)
                     return null;

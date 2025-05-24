@@ -287,6 +287,7 @@ public class NodeTooltipManager implements IExtension{
         }
 		if(insideComponent == component){
 			mouseOverComponent = true;
+			mouseEvent = event;
 			return;
 		}
 		hideTipWindow();

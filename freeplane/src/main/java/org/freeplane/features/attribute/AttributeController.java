@@ -171,7 +171,7 @@ public class AttributeController implements IExtension {
 	private void registerTooltipProvider() {
 		modeController.addToolTipProvider(ATTRIBUTE_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(ModeController modeController, NodeModel node, Component view) {
+			public String getTooltip(ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
 				final NodeAttributeTableModel attributes = NodeAttributeTableModel.getModel(node);
 				final int rowCount = attributes.getRowCount();
 				if (rowCount == 0) {
@@ -179,7 +179,7 @@ public class AttributeController implements IExtension {
 				}
 				final AttributeRegistry registry = AttributeRegistry.getRegistry(node.getMap());
 				final TextController textController = TextController.getController(modeController);
-				if (registry.getAttributeViewType().equals(AttributeTableLayoutModel.SHOW_ALL)
+				if (tooltipTrigger == TooltipTrigger.NODE && registry.getAttributeViewType().equals(AttributeTableLayoutModel.SHOW_ALL)
 						&& ! textController.isMinimized(node)) {
 					return null;
 				}

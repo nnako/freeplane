@@ -194,7 +194,9 @@ public class ReminderHook extends PersistentNodeHook implements IExtension {
 	private void registerTooltipProvider() {
 		modeController.addToolTipProvider(REMINDER_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(ModeController modeController, NodeModel node, Component view) {
+			public String getTooltip(ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
+				if(tooltipTrigger == TooltipTrigger.LINK)
+					return null;
 				final ReminderExtension model = ReminderExtension.getExtension(node);
 				if(model == null)
 					return null;

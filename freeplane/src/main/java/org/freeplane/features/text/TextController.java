@@ -375,13 +375,13 @@ public class TextController implements IExtension {
 	private void registerDetailsTooltip() {
 		modeController.addToolTipProvider(DETAILS_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(final ModeController modeController, NodeModel node, Component view) {
-				return getTooltip(modeController, node, (MainView) view);
+			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
+				return getTooltip(modeController, node, (MainView) view, tooltipTrigger);
 			}
 
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view) {
+			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
 				final DetailModel details = DetailModel.getDetail(node);
-				if (details == null || details.getTextOr("").isEmpty() || !(details.isHidden() || ShortenedTextModel.isShortened(node))) {
+				if (details == null || details.getTextOr("").isEmpty() || !(tooltipTrigger == TooltipTrigger.LINK || details.isHidden() || ShortenedTextModel.isShortened(node))) {
 					return null;
 				}
 				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
@@ -424,12 +424,12 @@ public class TextController implements IExtension {
 	private void registerNodeTextTooltip() {
 		modeController.addToolTipProvider(NODE_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(final ModeController modeController, NodeModel node, Component view) {
-				return getTooltip(modeController, node, (MainView) view);
+			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
+				return getTooltip(modeController, node, (MainView) view, tooltipTrigger);
 			}
 
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view) {
-				if (!ShortenedTextModel.isShortened(node)) {
+			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
+				if (tooltipTrigger != TooltipTrigger.LINK && !ShortenedTextModel.isShortened(node)) {
 					return null;
 				}
 				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
@@ -446,7 +446,7 @@ public class TextController implements IExtension {
 				try {
 					final Object transformed = TextController.getController().getTransformedObjectNoFormattingNoThrow(node, node, data);
 					text = HtmlUtils.objectToHtml(transformed);
-					if (text.equals(getShortText(text)))
+					if (tooltipTrigger != TooltipTrigger.LINK && text.equals(getShortText(text)))
 						return null;
 				}
 				catch (Exception e) {

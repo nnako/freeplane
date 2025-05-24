@@ -454,6 +454,23 @@ public class LinkController extends SelectionController implements IExtension {
         return getProperty(connector, ConnectorModel::getArrows, this::getStandardConnectorArrows);
     }
 
+ 	public NodeModel getLinkedNode(final NodeModel node) {
+		final Hyperlink link = NodeLinks.getLink(node);
+		if (link == null) {
+			return null;
+		}
+		final String adaptedText = link.toString();
+		if (adaptedText.startsWith("#")) {
+			final MapExplorerController explorer = modeController.getExtension(MapExplorerController.class);
+			final String reference = adaptedText.substring(1);
+			final NodeModel dest = explorer.getNodeAt(node, reference);
+			if (dest != null) {
+				return dest;
+			}
+		}
+		return null;
+	}
+
  	public String getLinkShortText(final NodeModel node) {
 		final Hyperlink link = NodeLinks.getLink(node);
 		if (link == null) {

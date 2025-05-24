@@ -30,6 +30,7 @@ import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.INodeSelectionListener;
 import org.freeplane.features.map.ITooltipProvider;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 
@@ -45,7 +46,7 @@ public class CreationModificationDatePresenter {
 		final ModeController modeController = Controller.getCurrentModeController();
 		modeController.addToolTipProvider(CREATION_TOOLTIP, new ITooltipProvider() {
 			@Override
-			public String getTooltip(ModeController modeController, NodeModel node, Component view) {
+			public String getTooltip(ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
 				if (!(node.getHistoryInformation().isSet() && ResourceController.getResourceController()
 				    .getBooleanProperty(SHOW_CREATION_MODIFICATION_IN_TOOLTIP_PROPERTY)))
 					return null;
