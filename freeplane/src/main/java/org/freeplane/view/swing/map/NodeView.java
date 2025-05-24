@@ -31,6 +31,7 @@ import java.awt.Stroke;
 import java.awt.Window;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -1770,6 +1771,7 @@ public class NodeView extends JComponent implements INodeView {
 			mainView.addMouseMotionListener(userInputListenerFactory.getNodeMouseMotionListener());
 			mainView.addMouseWheelListener(userInputListenerFactory.getNodeMouseWheelListener());
 			mainView.addKeyListener(userInputListenerFactory.getNodeKeyListener());
+			mainView.addInputMethodListener(userInputListenerFactory.getNodeInputMethodListener());
 			DragGestureListener nodeDragListener = userInputListenerFactory.getNodeDragListener();
 			if(nodeDragListener instanceof MNodeDragListener)
 				((MNodeDragListener)nodeDragListener).addDragListener(mainView);

@@ -36,6 +36,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.InputMethodEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -883,7 +884,7 @@ class TagEditor {
                 return ! keyEvent.isControlDown() && ! keyEvent.isMetaDown()
                         && (keyEvent.getKeyChar() != KeyEvent.CHAR_UNDEFINED || keyEvent.getKeyCode() == KeyEvent.VK_F2);
             } else
-                   return false;
+                   return anEvent instanceof InputMethodEvent;
             }
 
             @Override

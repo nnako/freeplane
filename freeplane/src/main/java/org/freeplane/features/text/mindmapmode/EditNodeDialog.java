@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.text.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -247,10 +248,10 @@ public class EditNodeDialog extends EditNodeBase {
 	}
 
 	/** Private variable to hold the last value of the "Enter confirms" state. */
-	final private KeyEvent firstEvent;
+	final private AWTEvent firstEvent;
 	private String title;
 
-	public EditNodeDialog(NodeModel node, KeyEvent firstEvent, boolean editorBlocks,
+	public EditNodeDialog(NodeModel node, AWTEvent firstEvent, boolean editorBlocks,
 	        IEditControl editControl,
 	                      boolean enableSplit, JEditorPane textEditor) {
         super(node, textEditor.getText(), editorBlocks, editControl);

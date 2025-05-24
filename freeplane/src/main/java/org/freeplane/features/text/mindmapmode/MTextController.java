@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.text.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -28,6 +29,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -979,13 +982,14 @@ public class MTextController extends TextController {
         }
     }
 
-    private class EditEventDispatcher implements KeyEventDispatcher, INodeSelectionListener {
+    private class EditEventDispatcher implements KeyEventDispatcher, INodeSelectionListener, InputMethodListener {
 		private final boolean editInDialog;
 		private final boolean parentFolded;
 		private final NodeModel prevSelectedModel;
 		private final NodeModel nodeModel;
 		private final ModeController modeController;
         private final KeyEvent initialKeyEvent;
+		private Component selectedComponent;
 
 		private EditEventDispatcher(ModeController modeController, NodeModel nodeModel, NodeModel prevSelectedModel,
 		                            boolean parentFolded, boolean editInDialog, KeyEvent initialKeyEvent) {
@@ -1018,16 +1022,20 @@ public class MTextController extends TextController {
 		            || initialKeyEvent.getKeyCode() == e.getKeyCode())) {
 		        return false;
 		    }
+			return startEditing(e);
+		}
+
+		private boolean startEditing(AWTEvent e) {
 			uninstall();
 			Component selectedComponent = Controller.getCurrentController().getMapViewManager().getSelectedComponent();
-			if(e.getComponent() != selectedComponent)
-			    return false;
-			if (isMenuEvent(e)) {
+			if(e.getSource() != selectedComponent || isMenuEvent(e)) {
 				return false;
 			}
-			eventQueue.activate(e);
-			edit(nodeModel, prevSelectedModel, true, parentFolded, editInDialog);
-			return true;
+			else {
+				eventQueue.activate(e);
+				edit(nodeModel, prevSelectedModel, true, parentFolded, editInDialog);
+				return true;
+			}
 		}
 
 		private boolean isNavigationKey(int keyCode) {
@@ -1038,26 +1046,32 @@ public class MTextController extends TextController {
 			return (keyCode & ~0xf) == 0x80;
 		}
 
-		private boolean isMenuEvent(KeyEvent e) {
-		    if(editInDialog)
+		private boolean isMenuEvent(AWTEvent e) {
+		    if(editInDialog || ! (e instanceof KeyEvent))
 		        return false;
 		    InputMapUIResource defaultInputMap = (InputMapUIResource) UIManager.getDefaults().get("TextField.focusInputMap");
-		    if(DefaultEditorKit.pasteAction.equals(defaultInputMap.get(KeyStroke.getKeyStrokeForEvent(e))))
+		    KeyEvent ke = (KeyEvent) e;
+		    if(DefaultEditorKit.pasteAction.equals(defaultInputMap.get(KeyStroke.getKeyStrokeForEvent(ke))))
 		        return false;
-			return ResourceController.getResourceController().getAcceleratorManager().canProcessKeyEvent(e);
+			return ResourceController.getResourceController().getAcceleratorManager().canProcessKeyEvent(ke);
 		}
 
 		public void uninstall() {
 			KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(this);
 			MapController mapController = modeController.getMapController();
 			mapController.removeNodeSelectionListener(this);
+			if(selectedComponent != null)
+				selectedComponent.removeInputMethodListener(this);
 			keyEventDispatcher = null;
+			selectedComponent = null;
 		}
 
 		public void install() {
 			KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 			MapController mapController = modeController.getMapController();
 			mapController.addNodeSelectionListener(this);
+			selectedComponent = modeController.getController().getMapViewManager().getSelectedComponent();
+			selectedComponent.addInputMethodListener(this);
 		}
 
 		@Override
@@ -1069,6 +1083,15 @@ public class MTextController extends TextController {
 		public void onSelect(NodeModel node) {
 		    uninstall();
 		}
+
+		@Override
+		public void inputMethodTextChanged(InputMethodEvent event) {
+			if(event.getCommittedCharacterCount() != 0)
+				startEditing(event);
+		}
+
+		@Override
+		public void caretPositionChanged(InputMethodEvent event) {/**/}
 	}
 
     public void edit(final NodeModel nodeModel, final NodeModel prevSelectedModel, final boolean isNewNode,

@@ -22,6 +22,7 @@ package org.freeplane.view.swing.ui;
 import java.awt.Component;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelListener;
@@ -51,8 +52,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-
-import net.infonode.docking.View;
 
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
@@ -91,6 +90,8 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.features.ui.ViewController;
 import org.freeplane.view.swing.map.MapView;
+
+import net.infonode.docking.View;
 
 public class UserInputListenerFactory implements IUserInputListenerFactory {
 	private final class ActionEnabler implements IMapSelectionListener, IFreeplanePropertyListener {
@@ -152,7 +153,7 @@ public class UserInputListenerFactory implements IUserInputListenerFactory {
 	final private Set<IMouseWheelEventHandler> mRegisteredMouseWheelEventHandler = new LinkedHashSet<IMouseWheelEventHandler>();
 	private DragGestureListener nodeDragListener;
 	private DropTargetListener nodeDropTargetListener;
-	private KeyListener nodeKeyListener;
+	private DefaultNodeKeyListener nodeKeyListener;
 	private IMouseListener nodeMotionListener;
 	private IMouseListener nodeMouseMotionListener;
 	private MouseWheelListener nodeMouseWheelListener;
@@ -300,6 +301,13 @@ public class UserInputListenerFactory implements IUserInputListenerFactory {
 		}
 		return nodeKeyListener;
 	}
+	@Override
+	public InputMethodListener getNodeInputMethodListener() {
+		if (nodeKeyListener == null) {
+			nodeKeyListener = new DefaultNodeKeyListener(null);
+		}
+		return nodeKeyListener;
+	}
 
 	public IMouseListener getNodeMotionListener() {
 		return nodeMotionListener;
@@ -377,7 +385,7 @@ public class UserInputListenerFactory implements IUserInputListenerFactory {
 		this.nodeDropTargetListener = nodeDropTargetListener;
 	}
 
-	public void setNodeKeyListener(final KeyListener nodeKeyListener) {
+	public void setNodeKeyListener(final DefaultNodeKeyListener nodeKeyListener) {
 		if (this.nodeKeyListener != null) {
 			throw new RuntimeException("already set");
 		}

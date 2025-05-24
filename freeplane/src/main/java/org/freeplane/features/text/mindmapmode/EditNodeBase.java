@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.text.mindmapmode;
 
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -30,6 +31,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -313,19 +315,21 @@ abstract public class EditNodeBase {
 		return textFieldListener;
 	}
 
-	protected void redispatchKeyEvents(final JTextComponent textComponent, final KeyEvent firstKeyEvent) {
+	protected void redispatchKeyEvents(final JTextComponent textComponent, final AWTEvent firstEvent) {
 		final EventBuffer keyEventDispatcher = MTextController.getController().getEventQueue();
 		if (textComponent.hasFocus()) {
 			keyEventDispatcher.deactivate();
 			return;
 		}
-		keyEventDispatcher.activate();
+		keyEventDispatcher.activate(null);
 		keyEventDispatcher.setTextComponent(textComponent);
-		if (firstKeyEvent == null) {
+		if (firstEvent == null) {
 			return;
 		}
-		if (firstKeyEvent.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
-			switch (firstKeyEvent.getKeyCode()) {
+		if(firstEvent instanceof KeyEvent) {
+			KeyEvent keyEvent = (KeyEvent) firstEvent;
+			if (keyEvent.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
+				switch (keyEvent.getKeyCode()) {
 				case KeyEvent.VK_HOME:
 					final int modelIdx = textComponent.viewToModel(new Point(0, 0));
 					if (modelIdx >= 0) // modelIdx is -1 for LaTeX formulas!
@@ -336,11 +340,13 @@ abstract public class EditNodeBase {
 					textComponent.setCaretPosition(textComponent.getDocument().getLength());
 					//					firstKeyEvent.consume();
 					break;
+				}
+				return;
 			}
+
 		}
-		else {
+		if(!(firstEvent instanceof MouseEvent))
 			textComponent.selectAll();
-		}
 	}
 
 	/**
