@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.DefaultComboBoxModel;
+
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.UITools;
 
@@ -28,10 +30,32 @@ public class CommandSearchAction extends AFreeplaneAction {
     private static final long serialVersionUID = 1L;
     static final String KEY = "CommandSearchAction";
     private CommandSearchDialog commandSearchDialog;
+    private DefaultComboBoxModel<String> sharedSearchHistory;
 
-    public CommandSearchAction()
+    @SuppressWarnings("serial")
+	public CommandSearchAction()
     {
         super(KEY);
+        sharedSearchHistory = new DefaultComboBoxModel<String>() {
+        	private boolean removalInProgress = false;
+			@Override
+			public void removeElementAt(int index) {
+				boolean removalInProgress = this.removalInProgress;
+				this.removalInProgress = true;
+				try {
+					super.removeElementAt(index);
+				}
+				finally {
+					this.removalInProgress = removalInProgress;
+				}
+			}
+			@Override
+			public void setSelectedItem(Object anObject) {
+				if(! removalInProgress)
+					super.setSelectedItem(anObject);
+			}
+
+        };
     }
 
     @Override
@@ -44,7 +68,7 @@ public class CommandSearchAction extends AFreeplaneAction {
     }
 
     private void createDialog() {
-        commandSearchDialog = new CommandSearchDialog(UITools.getCurrentFrame());
+        commandSearchDialog = new CommandSearchDialog(UITools.getCurrentFrame(), sharedSearchHistory);
         commandSearchDialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {

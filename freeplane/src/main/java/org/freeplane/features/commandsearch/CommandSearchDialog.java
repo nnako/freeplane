@@ -22,6 +22,7 @@ import static org.freeplane.features.commandsearch.SearchItem.normalizeText;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Event;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,22 +39,31 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
+import javax.swing.InputMap;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
+import javax.swing.AbstractAction;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.resources.WindowConfigurationStorage;
@@ -135,6 +145,7 @@ public class CommandSearchDialog extends JDialog
     private final JCheckBox searchMenus;
     private final JCheckBox searchPrefs;
     private final JCheckBox searchIcons;
+    private final JComboBox<String> inputWithHistory;
     private final JTextField input;
     private final JList<SearchItem> resultList;
     private final JCheckBox closeAfterExecute;
@@ -148,7 +159,8 @@ public class CommandSearchDialog extends JDialog
 
     private final ModeController modeController;
 
-    CommandSearchDialog(Frame parent)
+    @SuppressWarnings("serial")
+	CommandSearchDialog(Frame parent, DefaultComboBoxModel<String> sharedSearchHistory)
     {
         super(parent, TextUtils.getText("CommandSearchAction.text"), false);
 
@@ -164,20 +176,44 @@ public class CommandSearchDialog extends JDialog
         iconIndexer = new IconIndexer();
 
         Handler handler = new Handler();
-        input = new JTextField("") {
 
-            @Override
-            public void copy() {
-                if(getSelectionStart() < getSelectionEnd())
-                    super.copy();
-                else {
-                    copySelectedItemToClipboard();
-                }
-            }
+        inputWithHistory = new JComboBox<String>() {
 
+			@Override
+			public Object getSelectedItem() {
+				return input != null && ! isPopupVisible() ? input.getText() : super.getSelectedItem();
+			}
         };
+        inputWithHistory.setEditable(true);
+        inputWithHistory.setModel(sharedSearchHistory);
+
+
+        // Override the editor to provide custom copy functionality
+        inputWithHistory.setEditor(new BasicComboBoxEditor() {
+            @Override
+            protected JTextField createEditorComponent() {
+                JTextField textField = new JTextField("") {
+                    @Override
+                    public void copy() {
+                        if(getSelectionStart() < getSelectionEnd())
+                            super.copy();
+                        else {
+                            copySelectedItemToClipboard();
+                        }
+                    }
+                };
+                textField.setBorder(null);
+                return textField;
+            }
+        });
+
+        // Get reference to the actual editor component
+        input = (JTextField) inputWithHistory.getEditor().getEditorComponent();
         input.setColumns(40);
         input.addKeyListener(handler);
+
+        reconfigureComboBoxInputMapsToRespondOnlyToShiftKeys();
+
         resultList = new SingleSelectionList();
         resultList.setModel(new UpdateableListModel<SearchItem>(Collections.emptyList()));
         resultList.setFocusable(false);
@@ -207,7 +243,7 @@ public class CommandSearchDialog extends JDialog
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 ResourceController.getResourceController().setProperty("cmdsearch_whole_words", searchWholeWords.isSelected());
-                updateMatches(input.getText());
+                updateMatches();
                 input.requestFocusInWindow();
             }
         });
@@ -217,8 +253,8 @@ public class CommandSearchDialog extends JDialog
         whatbox.add(scopePanel);
         searchWholeWords.setAlignmentX(Component.CENTER_ALIGNMENT);
         whatbox.add(searchWholeWords);
-        input.setAlignmentX(Component.CENTER_ALIGNMENT);
-        whatbox.add(input);
+        inputWithHistory.setAlignmentX(Component.CENTER_ALIGNMENT);
+        whatbox.add(inputWithHistory);
         initScopeFromPrefs();
 
         panel.add(whatbox, BorderLayout.NORTH);
@@ -232,7 +268,7 @@ public class CommandSearchDialog extends JDialog
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 ResourceController.getResourceController().setProperty("cmdsearch_close_after_execute", closeAfterExecute.isSelected());
-                updateMatches(input.getText());
+                updateMatches();
                 input.requestFocusInWindow();
             }
         });
@@ -270,6 +306,44 @@ public class CommandSearchDialog extends JDialog
 		});
 
         setVisible(true);
+        updateMatches();
+    }
+
+    private void reconfigureComboBoxInputMapsToRespondOnlyToShiftKeys() {
+        JComponent[] components = {inputWithHistory, input};
+        for(JComponent component : components) {
+            int[] maps = {JComponent.WHEN_FOCUSED, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT};
+            for(int map : maps) {
+                moveActionToShift(component, map, KeyEvent.VK_DOWN);
+                moveActionToShift(component, map, KeyEvent.VK_UP);
+                moveActionToShift(component, map, KeyEvent.VK_ENTER);
+            }
+        }
+    }
+
+    private void moveActionToShift(JComponent component, int mapIndex, int keyCode) {
+        final KeyStroke originalKeyStroke = KeyStroke.getKeyStroke(keyCode, 0);
+        InputMap map = component.getInputMap(mapIndex);
+		Object actionKey = map.get(originalKeyStroke);
+        if (actionKey != null) {
+            final KeyStroke replacement = KeyStroke.getKeyStroke(keyCode, InputEvent.SHIFT_DOWN_MASK);
+			map.put(replacement, actionKey);
+			final ActionMap actionMap = component.getActionMap();
+			final Action action = actionMap.get(actionKey);
+			if(action != null) {
+				@SuppressWarnings("serial")
+				Action replacementAction = new AbstractAction(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if((e.getModifiers() & Event.SHIFT_MASK) != 0 || inputWithHistory.isPopupVisible()
+								|| resultList.getModel().getSize() == 0)
+							action.actionPerformed(e);
+					}
+				};
+				map.put(originalKeyStroke, replacementAction);
+				actionMap.put(replacementAction, replacementAction);
+			}
+        }
     }
 
     @Override
@@ -292,7 +366,7 @@ public class CommandSearchDialog extends JDialog
             public void actionPerformed(ActionEvent e) {
                 boolean selected = searchPrefs.isSelected();
 				scope.setEnabled(selected);
-                updateMatches(input.getText());
+                updateMatches();
                 input.requestFocusInWindow();
             }
         });
@@ -309,62 +383,84 @@ public class CommandSearchDialog extends JDialog
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-        updateMatches(input.getText());
+        updateMatches();
     }
     @Override
 	public void removeUpdate(DocumentEvent e) {
-        updateMatches(input.getText());
+        updateMatches();
     }
     @Override
 	public void insertUpdate(DocumentEvent e) {
-        updateMatches(input.getText());
+        updateMatches();
     }
 
-    private void updateMatches(final String searchInput)
+    private void addTextToSearchHistory() {
+    	String searchText = input.getText();
+        if (searchText != null && !searchText.trim().isEmpty()) {
+            String trimmedText = searchText.trim();
+            DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) inputWithHistory.getModel();
+
+
+            int index = model.getIndexOf(trimmedText);
+            if(index == 0)
+            	return;
+            model.insertElementAt(trimmedText, 0);
+			if ( index != -1 ) {
+			    model.removeElementAt(index + 1);
+			    return;
+			}
+            while (model.getSize() > 20) {
+                model.removeElementAt(model.getSize() - 1);
+            }
+        }
+    }
+
+    private void updateMatches()
     {
+    	final String searchInput = input.getText();
         String trimmedInput = searchInput.trim();
-
-        //PseudoDamerauLevenshtein pairwiseAlignment = new PseudoDamerauLevenshtein();
-        List<SearchItem> matches = new ArrayList<>();
         boolean shouldSearchWholeWords =  ResourceController.getResourceController().getBooleanProperty("cmdsearch_whole_words");
-        ItemChecker textChecker = new ItemChecker(shouldSearchWholeWords);
+        if(trimmedInput.length() >= 1
+        		&& (
+        				searchInput.endsWith(" ")
+        				|| shouldSearchWholeWords)
+        		|| (searchInput.length() >= 3 && searchInput.codePoints().limit(3).count() == 3)
+        		|| ! searchInput.codePoints().allMatch(Character::isAlphabetic)
+        		) {
 
-		if(trimmedInput.length() >= 1
-		        && (
-		        searchInput.endsWith(" ")
-		        || shouldSearchWholeWords)
-		        || (searchInput.length() >= 3 && searchInput.codePoints().limit(3).count() == 3)
-                || ! searchInput.codePoints().allMatch(Character::isAlphabetic)
-                ) {
-            final String[] searchTerms =  normalizeText(trimmedInput).split("\\s+");
-            if (searchMenus.isSelected())
-            {
-            	textChecker.findMatchingItems(menuStructureIndexer.getMenuItems(), searchTerms, matches::add);
-            }
-            if (searchPrefs.isSelected())
-            {
-            	textChecker.findMatchingItems(preferencesIndexer.getPrefs(), searchTerms, matches::add);
-            }
-            if (searchIcons.isSelected())
-            {
-            	textChecker.findMatchingItems(iconIndexer.getIconItems(), searchTerms, matches::add);
-            }
+        	//PseudoDamerauLevenshtein pairwiseAlignment = new PseudoDamerauLevenshtein();
+        	List<SearchItem> matches = new ArrayList<>();
+        	ItemChecker textChecker = new ItemChecker(shouldSearchWholeWords);
 
-            Collections.sort(matches);
-        }
-        int itemLimit = ResourceController.getResourceController().getIntProperty("cmdsearch_item_limit");
-        if(matches.size() > itemLimit) {
-            matches = matches.subList(0, itemLimit);
-            matches.add(new InformationItem(LIMIT_EXCEEDED_MESSAGE, WARNING_ICON, LIMIT_EXCEEDED_RANK));
-        }
-        UpdateableListModel<SearchItem> model = new UpdateableListModel<>(matches);
+        	final String[] searchTerms =  normalizeText(trimmedInput).split("\\s+");
+        	if (searchMenus.isSelected())
+        	{
+        		textChecker.findMatchingItems(menuStructureIndexer.getMenuItems(), searchTerms, matches::add);
+        	}
+        	if (searchPrefs.isSelected())
+        	{
+        		textChecker.findMatchingItems(preferencesIndexer.getPrefs(), searchTerms, matches::add);
+        	}
+        	if (searchIcons.isSelected())
+        	{
+        		textChecker.findMatchingItems(iconIndexer.getIconItems(), searchTerms, matches::add);
+        	}
 
-        SearchItem selectedItem = resultList.getSelectedValue();
-        resultList.setModel(model);
-        if (resultList.getModel().getSize() > 0) {
-            resultList.setSelectedValue(selectedItem, true);
-            if(resultList.getSelectedIndex() == -1)
-                resultList.setSelectedIndex(0);
+        	Collections.sort(matches);
+        	int itemLimit = ResourceController.getResourceController().getIntProperty("cmdsearch_item_limit");
+        	if(matches.size() > itemLimit) {
+        		matches = matches.subList(0, itemLimit);
+        		matches.add(new InformationItem(LIMIT_EXCEEDED_MESSAGE, WARNING_ICON, LIMIT_EXCEEDED_RANK));
+        	}
+        	UpdateableListModel<SearchItem> model = new UpdateableListModel<>(matches);
+
+        	SearchItem selectedItem = resultList.getSelectedValue();
+        	resultList.setModel(model);
+        	if (resultList.getModel().getSize() > 0) {
+        		resultList.setSelectedValue(selectedItem, true);
+        		if(resultList.getSelectedIndex() == -1)
+        			resultList.setSelectedIndex(0);
+        	}
         }
     }
 
@@ -395,6 +491,8 @@ public class CommandSearchDialog extends JDialog
     {
         ListModel<SearchItem> data = resultList.getModel();
         SearchItem item = (data.getElementAt(index));
+
+        addTextToSearchHistory();
 
         if(shouldAssignAccelerator(event)) {
             item.assignNewAccelerator();
@@ -428,90 +526,95 @@ public class CommandSearchDialog extends JDialog
         }
     }
 
-    class Handler implements MouseListener, KeyListener {
+	class Handler implements MouseListener, KeyListener {
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2)
-        {
-            int index = resultList.locationToIndex(e.getPoint());
-            executeItem(e, index);
-            return;
-        }
-    }
+    	@Override
+    	public void mouseClicked(MouseEvent e) {
+    		if (e.getClickCount() == 2)
+    		{
+    			int index = resultList.locationToIndex(e.getPoint());
+    			executeItem(e, index);
+    			return;
+    		}
+    	}
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
+    	@Override
+    	public void mousePressed(MouseEvent e) {
+    	}
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
+    	@Override
+    	public void mouseReleased(MouseEvent e) {
+    	}
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
+    	@Override
+    	public void mouseEntered(MouseEvent e) {
+    	}
 
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    	@Override
+    	public void mouseExited(MouseEvent e) {
+    	}
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    	@Override
+    	public void keyTyped(KeyEvent e) {
+    	}
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
+    	@Override
+    	public void keyReleased(KeyEvent e) {
+    	}
 
-    @Override
-    public void keyPressed(KeyEvent e) {
+    	@Override
+    	public void keyPressed(KeyEvent e) {
 
-        final boolean wrapAround = false;
 
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-        {
-            dispose();
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_DOWN && e.getSource() == input)
-        {
-            if (resultList.getModel().getSize() > 0) {
-                int selectedIndex = resultList.getSelectedIndex();
-                int newIndex = selectedIndex + 1;
-                if (newIndex >= resultList.getModel().getSize())
-                {
-                    newIndex = wrapAround ? (0) : (resultList.getModel().getSize() - 1);
-                }
-                resultList.setSelectedIndex(newIndex);
-                resultList.ensureIndexIsVisible(newIndex);
-            }
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_UP && e.getSource() == input)
-        {
-            if (resultList.getModel().getSize() > 0) {
-                int selectedIndex = resultList.getSelectedIndex();
-                if (selectedIndex == -1)
-                {
-                    resultList.setSelectedIndex(0);
-                }
-                else if (selectedIndex == 0 && wrapAround)
-                {
-                    resultList.setSelectedIndex(resultList.getModel().getSize() - 1);
-                }
-                else
-                {
-                    resultList.setSelectedIndex(selectedIndex - 1);
-                }
-                resultList.ensureIndexIsVisible(resultList.getSelectedIndex());
-            }
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_ENTER)
-        {
-            if (resultList.getSelectedIndex() >= 0)
-            {
-                executeItem(e, resultList.getSelectedIndex());
-            }
-        }
-    }
+    		if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+    		{
+    			if(inputWithHistory.isPopupVisible())
+    				inputWithHistory.hidePopup();
+    			else
+    				dispose();
+    		} else if(! inputWithHistory.isPopupVisible()){
+
+    			final boolean wrapAround = false;
+    			if (e.getKeyCode() == KeyEvent.VK_DOWN && e.getSource() == input)
+    			{
+    				if (resultList.getModel().getSize() > 0) {
+    					int selectedIndex = resultList.getSelectedIndex();
+    					int newIndex = selectedIndex + 1;
+    					if (newIndex >= resultList.getModel().getSize())
+    					{
+    						newIndex = wrapAround ? (0) : (resultList.getModel().getSize() - 1);
+    					}
+    					resultList.setSelectedIndex(newIndex);
+    					resultList.ensureIndexIsVisible(newIndex);
+    				}
+    			}
+    			else if (e.getKeyCode() == KeyEvent.VK_UP && e.getSource() == input)
+    			{
+    				if (resultList.getModel().getSize() > 0) {
+    					int selectedIndex = resultList.getSelectedIndex();
+    					if (selectedIndex == -1)
+    					{
+    						resultList.setSelectedIndex(0);
+    					}
+    					else if (selectedIndex == 0 && wrapAround)
+    					{
+    						resultList.setSelectedIndex(resultList.getModel().getSize() - 1);
+    					}
+    					else
+    					{
+    						resultList.setSelectedIndex(selectedIndex - 1);
+    					}
+    					resultList.ensureIndexIsVisible(resultList.getSelectedIndex());
+    				}
+    			}
+    			else if (e.getKeyCode() == KeyEvent.VK_ENTER)
+    			{
+    				if (resultList.getSelectedIndex() >= 0)
+    				{
+    					executeItem(e, resultList.getSelectedIndex());
+    				}
+    			}
+    		}
+    	}
     }
 }
