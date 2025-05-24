@@ -25,7 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.StringUtils;

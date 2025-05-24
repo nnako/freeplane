@@ -42,7 +42,7 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 

@@ -3,7 +3,7 @@ package org.freeplane.view.swing.features.filepreview;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 
 import org.freeplane.core.ui.LabelAndMnemonicSetter;
 import org.freeplane.core.ui.components.JFreeplaneCustomizableFileChooser;

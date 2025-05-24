@@ -2,7 +2,7 @@ package org.freeplane.view.swing.features.filepreview;
 
 import java.io.File;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 
 import org.freeplane.core.ui.components.BitmapImagePreview;
 import org.freeplane.view.swing.features.filepreview.ViewerController.FactoryFileFilter;

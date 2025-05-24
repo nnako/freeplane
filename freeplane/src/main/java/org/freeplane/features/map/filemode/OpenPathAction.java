@@ -23,7 +23,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.UITools;

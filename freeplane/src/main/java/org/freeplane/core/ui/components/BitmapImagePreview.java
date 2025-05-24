@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.border.MatteBorder;
 
 import org.freeplane.core.resources.ResourceController;

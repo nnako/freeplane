@@ -24,7 +24,7 @@ import java.io.FileInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.CaseSensitiveFileNameExtensionFilter;

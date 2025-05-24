@@ -48,6 +48,8 @@ import org.freeplane.api.TextWritingDirection
 
 import org.freeplane.api.Script
 
+import org.freeplane.api.swing.JFileChooser
+
 import org.freeplane.core.resources.ResourceController
 import org.freeplane.core.ui.components.UITools
 import org.freeplane.core.util.FreeplaneVersion
@@ -420,6 +422,8 @@ makeApi(utils, FreeplaneScriptBaseClass.class)
 makeApi(utils, UITools.class)
 makeApi(utils, UITools.Defaults.class)
 makeApi(utils, UITools.InsertEolAction.class)
+//org.freeplane.api.swing
+makeApi(utils, JFileChooser.class)
 //org.freeplane.core.util
 makeApi(utils, LogUtils.class)
 makeApi(utils, HtmlUtils.class)

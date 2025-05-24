@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.JTextArea;
 
 import org.freeplane.core.ui.components.UITools;

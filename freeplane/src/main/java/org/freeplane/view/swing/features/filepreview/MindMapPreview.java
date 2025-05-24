@@ -4,7 +4,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.net.URI;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.BitmapImagePreview;

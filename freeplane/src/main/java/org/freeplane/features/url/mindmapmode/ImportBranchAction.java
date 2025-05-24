@@ -22,7 +22,7 @@ package org.freeplane.features.url.mindmapmode;
 import java.awt.event.ActionEvent;
 import java.net.URL;
 
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.freeplane.core.extension.IExtension;

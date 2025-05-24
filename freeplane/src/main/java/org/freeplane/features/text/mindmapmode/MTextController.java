@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
+import org.freeplane.api.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
