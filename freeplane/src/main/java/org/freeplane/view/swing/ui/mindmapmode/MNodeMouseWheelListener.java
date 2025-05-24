@@ -35,7 +35,7 @@ public class MNodeMouseWheelListener extends DefaultNodeMouseWheelListener {
 		final MapView map = (MapView) SwingUtilities.getAncestorOfClass(MapView.class, view);
 		if(map.usesLayoutSpecificMaxNodeWidth())
 			return;
-		final int wheelRotation = e.getWheelRotation();
+		final double wheelRotation = e.getPreciseWheelRotation();
 		final NodeView nodeView = view.getNodeView();
 		if(! nodeView.isSelected())
 			MouseEventActor.INSTANCE.withMouseEvent( () ->

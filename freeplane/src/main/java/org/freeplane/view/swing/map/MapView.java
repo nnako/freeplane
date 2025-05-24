@@ -3314,7 +3314,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     public float calculateNewZoom(MouseWheelEvent e) {
         float oldZoom = getZoom();
         float zoomFactor = 1f + ResourceController.getResourceController().getIntProperty(MAP_VIEW_ZOOM_STEP_PROPERTY) / 100f;
-        float zoom = e.getWheelRotation() > 0 ? (oldZoom / zoomFactor) : (oldZoom * zoomFactor);
+        float zoom = e.getPreciseWheelRotation() > 0 ? (oldZoom / zoomFactor) : (oldZoom * zoomFactor);
         double x = Math.round(Math.log(zoom) / Math.log(zoomFactor));
         zoom = (float) Math.pow(zoomFactor, x);
         zoom = Math.max(Math.min(zoom, 32f), 0.03f);

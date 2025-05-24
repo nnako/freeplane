@@ -211,7 +211,7 @@ public class FoldingController implements IMouseWheelEventHandler, IExtension {
             final IMapSelection selection = controller.getSelection();
             final NodeModel node = selection.getSelected();
             Filter filter = FilterController.getFilter(node.getMap());
-            if (e.getWheelRotation() > 0) {
+            if (e.getPreciseWheelRotation() > 0) {
                 new FoldLevelChanger(selection, filter).unfoldOneStage(node);
             }
             else {
