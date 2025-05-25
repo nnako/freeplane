@@ -545,10 +545,16 @@
 			<Entry name="GotoNodeAction" />
 			<Entry name="JumpInAction"  accelerator="shift ESCAPE"/>
 			<Entry name="JumpOutAction"  accelerator="control ESCAPE"/>
-			<Entry name="FreeSelectNodeAction.LEFT" />
-			<Entry name="FreeSelectNodeAction.UP" />
-			<Entry name="FreeSelectNodeAction.RIGHT" />
-			<Entry name="FreeSelectNodeAction.DOWN" />
+			<Entry name="node_selector" >
+	            <Entry name="FreeSelectNodeAction.LEFT" />
+	            <Entry name="FreeSelectNodeAction.UP"  />
+	            <Entry name="FreeSelectNodeAction.RIGHT" />
+	            <Entry name="FreeSelectNodeAction.DOWN"  />
+	            <Entry name="FreeSelectNodeAction.CONTINIOUS_LEFT" />
+	            <Entry name="FreeSelectNodeAction.CONTINIOUS_UP"  />
+	            <Entry name="FreeSelectNodeAction.CONTINIOUS_RIGHT" />
+	            <Entry name="FreeSelectNodeAction.CONTINIOUS_DOWN" />
+	        </Entry>
 			<Entry name="NextNodeAction.BACK" accelerator="control alt LEFT" />
 			<Entry name="NextNodeAction.FORWARD" accelerator="control alt RIGHT" />
 			<Entry name="NextNodeAction.BACK_N_FOLD" accelerator="control shift LEFT" />

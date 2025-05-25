@@ -35,10 +35,22 @@ public class FreeSelectNodeAction extends AFreeplaneAction {
                 mapView.selectLeft(false);
             }
         },
+        CONTINIOUS_LEFT {
+            @Override
+            void select(MapView mapView) {
+                mapView.selectLeft(true);
+            }
+        },
         UP {
             @Override
             void select(MapView mapView) {
                 mapView.selectUp(false);
+            }
+        },
+        CONTINIOUS_UP {
+            @Override
+            void select(MapView mapView) {
+                mapView.selectUp(true);
             }
         },
         RIGHT {
@@ -47,10 +59,22 @@ public class FreeSelectNodeAction extends AFreeplaneAction {
                 mapView.selectRight(false);
             }
         },
+        CONTINIOUS_RIGHT {
+            @Override
+            void select(MapView mapView) {
+                mapView.selectRight(true);
+            }
+        },
         DOWN {
             @Override
             void select(MapView mapView) {
                 mapView.selectDown(false);
+            }
+        },
+        CONTINIOUS_DOWN {
+            @Override
+            void select(MapView mapView) {
+                mapView.selectDown(true);
             }
         };
 
