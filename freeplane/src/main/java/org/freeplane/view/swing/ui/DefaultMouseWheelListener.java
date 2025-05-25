@@ -62,13 +62,13 @@ public class DefaultMouseWheelListener implements MouseWheelListener {
 		}
 		else {
 			JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, mapView);
-			final Point location = new Point(e.getX(), e.getY());
-			UITools.convertPointToAncestor(mapView, location, scrollPane);
-			final MouseWheelEvent mapWheelEvent = new MouseWheelEvent(scrollPane, e.getID(), e.getWhen(), e.getModifiers() | e.getModifiersEx(),
-					location.x, location.y, e.getXOnScreen(), e.getYOnScreen(),
-					e.getClickCount(), Compat.isPopupTrigger(e), e.getScrollType(),
-					e.getScrollAmount(), e.getWheelRotation(), e.getPreciseWheelRotation());
 			if(scrollPane != null) {
+				final Point location = new Point(e.getX(), e.getY());
+				UITools.convertPointToAncestor(mapView, location, scrollPane);
+				final MouseWheelEvent mapWheelEvent = new MouseWheelEvent(scrollPane, e.getID(), e.getWhen(), e.getModifiers() | e.getModifiersEx(),
+						location.x, location.y, e.getXOnScreen(), e.getYOnScreen(),
+						e.getClickCount(), Compat.isPopupTrigger(e), e.getScrollType(),
+						e.getScrollAmount(), e.getWheelRotation(), e.getPreciseWheelRotation());
 				for (MouseWheelListener l : scrollPane.getMouseWheelListeners())
 					l.mouseWheelMoved(mapWheelEvent);
 			}
