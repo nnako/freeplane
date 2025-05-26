@@ -33,7 +33,7 @@ dependencies {
             'com.jgoodies:jgoodies-forms:1.9.0',
             'com.jgoodies:jgoodies-common:1.8.1'
 
-	lib  ('org.freeplane.lightdev:simplyhtml:0.19.10') {
+	lib  ('org.freeplane.lightdev:simplyhtml:0.19.11') {
 		exclude module: 'javahelp'
 		exclude module: 'mnemonicsetter'
 	}
@@ -249,7 +249,7 @@ task copyLauncherImages(type: Copy) {
         include('Freeplane_frame_icon_32x32.png')
         rename('Freeplane_frame_icon_32x32.png', 'freeplane.png')
     }
-    
+
     from('src/editor/resources/images/') {
         include('Freeplane_frame_icon_256x256.png')
         rename('Freeplane_frame_icon_256x256.png', 'freeplane256.png')
