@@ -191,7 +191,9 @@ public class MFileManager extends UrlManager implements IMapViewChangeListener {
 		backupDir.mkdir();
 		if (backupDir.exists()) {
 			final File backupFile = MFileManager.renameBackupFiles(backupDir, file, backupFileNumber, mode, false);
-			if (!backupFile.exists()) {
+			if(backupFile == null)
+				LogUtils.severe("Can't create backup for " + file);
+			else if (!backupFile.exists()) {
 				performBackup(file, backupFile);
 			}
 		}
