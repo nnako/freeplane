@@ -12,6 +12,7 @@ import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.map.IMapSelection.NodePosition;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.NodeRelativePath;
 import org.freeplane.features.ui.ViewController;
 
 class MapScroller {
@@ -59,11 +60,23 @@ class MapScroller {
 	MapScroller(MapView map) {
 		this.map = map;
 		this.anchorContentLocation = null;
+		this.anchor = map.getRoot();
 	}
 
 	void anchorToNode(final NodeView view, final float horizontalPoint, final float verticalPoint) {
 		if (view != null && view.getMainView() != null) {
-			setAnchorView(view);
+			if(scrollingDirective == ScrollingDirective.DONE || view.isRoot()) {
+				anchor = view;
+			}
+			else if (! anchor.isRoot()){
+				final NodeModel lastAnchor = anchor.getNode();
+				final NodeModel newAnchor = view.getNode();
+				final NodeRelativePath nodeRelativePath = new NodeRelativePath(lastAnchor, newAnchor);
+				final NodeModel commonAncestor = nodeRelativePath.commonAncestor();
+				final NodeView newAnchorView = view.getMap().getNodeView(commonAncestor);
+				if(newAnchorView  != null)
+					anchor = newAnchorView;
+			}
 			anchorHorizontalPoint = horizontalPoint;
 			anchorVerticalPoint = verticalPoint;
 			this.anchorContentLocation = getAnchorCenterPoint();
@@ -220,10 +233,6 @@ class MapScroller {
 		this.anchorContentLocation = getAnchorCenterPoint();
 	}
 
-	void setAnchorView(final NodeView view) {
-		anchor = view;
-	}
-
 	private Point getAnchorCenterPoint() {
 		if (! map.isDisplayable()) {
 			return null;
@@ -281,6 +290,7 @@ class MapScroller {
 			    .getHeight()
 			        + VERT_SPACE2));
 		}
+		scrollingDirective = ScrollingDirective.DONE;
 	}
 
 	void scrollToRootNode() {
@@ -314,7 +324,7 @@ class MapScroller {
 			scrollNodeToVisible(scrolledNode, extraWidth);
 		scrolledNode = null;
 		scrollingDirective = ScrollingDirective.DONE;
-		setAnchorView(map.getRoot());
+		anchor = map.getRoot();
 		anchorHorizontalPoint = anchorVerticalPoint = 0.5f;
 		this.anchorContentLocation = getAnchorCenterPoint();
 	}

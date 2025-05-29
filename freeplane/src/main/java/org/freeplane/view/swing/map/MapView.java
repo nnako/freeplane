@@ -819,7 +819,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		this.modeController = modeController;
         setLayout(new MindMapLayout());
 		rootsHistory = new ArrayList<>();
-		mapScroller = new MapScroller(this);
 		setAutoscrolls(true);
         final IUserInputListenerFactory userInputListenerFactory = getModeController().getUserInputListenerFactory();
         addMouseListener(userInputListenerFactory.getMapMouseListener());
@@ -858,7 +857,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		    putClientProperty(SPOTLIGHT_ENABLED, Boolean.TRUE);
 		nodeViewFolder = new NodeViewFolder(true);
 		setMap(viewedMap);
-        mapScroller.setAnchorView(currentRootView);
+		mapScroller = new MapScroller(this);
 	}
 
     private NodeModel getSearchRoot() {

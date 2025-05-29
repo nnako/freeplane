@@ -1269,7 +1269,7 @@ public class NodeView extends JComponent implements INodeView {
 		boolean wasFolded = isFolded;
 		this.isFolded = fold;
 		if(wasFolded != fold || force) {
-	        map.preserveRootNodeLocationOnScreen();
+	        map.preserveNodeLocationOnScreen(this);
 			fireFoldingChanged();
 		}
 		map.foldingWasSet(this);
