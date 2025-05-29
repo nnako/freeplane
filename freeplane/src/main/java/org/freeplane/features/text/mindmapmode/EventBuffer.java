@@ -26,7 +26,6 @@ import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.InputEvent;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
@@ -137,8 +136,14 @@ public class EventBuffer implements KeyEventDispatcher, FocusListener, InputMeth
 	public void activate(AWTEvent e) {
 		if(!isActive) {
 			final KeyboardFocusManager currentKeyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+			if(e != null) {
+				focusOwner = (Component)e.getSource();
+				if(! focusOwner.isFocusOwner())
+					focusOwner.requestFocus();
+			}
+			else
+				focusOwner = currentKeyboardFocusManager.getFocusOwner();
 			currentKeyboardFocusManager.addKeyEventDispatcher(this);
-			focusOwner = currentKeyboardFocusManager.getFocusOwner();
 			focusOwner.addInputMethodListener(this);
 			isActive = true;
 
