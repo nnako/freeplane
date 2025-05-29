@@ -733,7 +733,7 @@ public class MainView extends ZoomableLabel {
 
 	@Override
     public String getToolTipText(MouseEvent event) {
-	    final String toolTipText = super.getToolTipText(event);
+	    final String toolTipText = super.getToolTipText();
 	    if(toolTipText != null)
 	    	return toolTipText;
 	    final boolean isClickableLink = isClickableLink(event.getPoint());
