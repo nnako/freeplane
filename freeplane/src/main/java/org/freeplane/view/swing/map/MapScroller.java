@@ -68,7 +68,7 @@ class MapScroller {
 			if(scrollingDirective == ScrollingDirective.DONE || view.isRoot()) {
 				anchor = view;
 			}
-			else if (! anchor.isRoot()){
+			else if (! (anchor.isRoot() || anchor == view || anchor.isAncestorOf(view))){
 				final NodeModel lastAnchor = anchor.getNode();
 				final NodeModel newAnchor = view.getNode();
 				final NodeRelativePath nodeRelativePath = new NodeRelativePath(lastAnchor, newAnchor);
