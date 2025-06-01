@@ -397,7 +397,7 @@ public class EditNodeTextField extends EditNodeBase {
 				return;
 			}
 			Window myWindow = SwingUtilities.getWindowAncestor(e.getComponent());
-			if (oppositeComponent != null && SwingUtilities.getWindowAncestor(oppositeComponent)
+			if (myWindow != null && oppositeComponent != null && SwingUtilities.getWindowAncestor(oppositeComponent)
 					!= myWindow) {
 				myWindow.addWindowFocusListener(new WindowFocusListener() {
 
