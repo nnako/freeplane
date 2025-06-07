@@ -683,16 +683,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
         filterOptionPanel.add(applyToVisibleBox, constraints);
 		filterOptionPanel.add(reapplyFilterBtn, constraints);
 		filterOptionPanel.add(selectFilteredNodesBtn, constraints);
-		filterOptionPanel.add(filterSelectedBtn, constraints);
 
 		constraints.gridwidth = 1;
 
 		constraints.gridy = 0;
-		filterOptionPanel.add(undoBtn, constraints);
-		filterOptionPanel.add(redoBtn, constraints);
-		constraints.gridy = 1;
+		filterOptionPanel.add(filterSelectedBtn, constraints);
 		filterOptionPanel.add(noFilteringBtn, constraints);
 		filterOptionPanel.add(btnEdit, constraints);
+		constraints.gridy = 1;
+		filterOptionPanel.add(undoBtn, constraints);
+		filterOptionPanel.add(redoBtn, constraints);
 
 
 		final DefaultConditionRenderer toolbarConditionRenderer = new DefaultConditionRenderer(TextUtils.getText("filter_no_filtering"), false);
