@@ -21,14 +21,14 @@ dependencies {
 	mergedViewerDependencies 'org.freeplane.dpolivaev.mnemonicsetter:mnemonicsetter:0.6'
 	lib 'com.formdev:svgSalamander:1.1.4'
 	lib 'com.github.robtimus:data-url:2.0.1'
-	lib 'com.formdev:flatlaf:3.5.4'
+	lib 'com.formdev:flatlaf:3.6'
 	lib 'com.twelvemonkeys.imageio:imageio-jpeg:3.12.0'
 
     lib project(':JOrtho_0.4_freeplane')
     api project(':freeplane_api')
 
     lib 'commons-lang:commons-lang:2.6',
-            'commons-io:commons-io:2.18.0',
+            'commons-io:commons-io:2.19.0',
             'commons-codec:commons-codec:1.18.0',
             'com.jgoodies:jgoodies-forms:1.9.0',
             'com.jgoodies:jgoodies-common:1.8.1'

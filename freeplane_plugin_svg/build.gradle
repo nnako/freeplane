@@ -1,13 +1,13 @@
 dependencies {
     implementation project(':freeplane')
 
-	lib 'org.apache.xmlgraphics:batik-transcoder:1.18'
-	lib 'org.apache.xmlgraphics:batik-swing:1.18'
-	lib 'org.apache.xmlgraphics:batik-codec:1.18'
-	lib ('org.apache.xmlgraphics:fop-core:2.10') {transitive = false}
-	lib ('org.apache.xmlgraphics:fop-util:2.10') {transitive = false}
-	lib ('org.apache.xmlgraphics:fop-events:2.10') {transitive = false}
-	lib ('org.apache.pdfbox:fontbox:2.0.27') {transitive = false}
+	lib 'org.apache.xmlgraphics:batik-transcoder:1.19'
+	lib 'org.apache.xmlgraphics:batik-swing:1.19'
+	lib 'org.apache.xmlgraphics:batik-codec:1.19'
+	lib ('org.apache.xmlgraphics:fop-core:2.11') {transitive = false}
+	lib ('org.apache.xmlgraphics:fop-util:2.11') {transitive = false}
+	lib ('org.apache.xmlgraphics:fop-events:2.11') {transitive = false}
+	lib ('org.apache.pdfbox:fontbox:3.0.3') {transitive = false}
 }
 
 configurations.all {
