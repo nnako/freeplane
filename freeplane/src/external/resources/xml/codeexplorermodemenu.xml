@@ -249,13 +249,14 @@
 			</Entry>
 		</Entry>
 		<Entry name="filter">
-			<Entry name="SelectFilteredElementAction.NODE" />
-			<Entry name="SelectFilteredElementAction.NODE_AND_CONNECTOR" />
-			<Entry name="SelectFilteredElementAction.CONNECTOR" />
             <Entry name="ShowAncestorsAction" />
-			<Entry name="ShowDescendantsAction" />
-			<Entry name="HideMatchingNodesAction" />
-			<Entry builder="separator" />
+            <Entry name="ShowDescendantsAction" />
+            <Entry name="HideMatchingNodesAction" />
+            <Entry builder="separator" />
+            <Entry name="SelectFilteredElementAction.NODE" />
+            <Entry name="SelectFilteredElementAction.NODE_AND_CONNECTOR" />
+            <Entry name="SelectFilteredElementAction.CONNECTOR" />
+            <Entry builder="separator" />
 			<Entry name="UndoFilterAction" />
 			<Entry name="RedoFilterAction" />
 			<Entry name="ApplyToVisibleAction" />

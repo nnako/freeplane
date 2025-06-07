@@ -665,12 +665,16 @@ public class FilterController implements IExtension, IMapViewChangeListener {
 		constraints.gridy =1;
 		constraints.gridwidth =1;
 
-        filterOptionPanel.add(applyToNodesBox, constraints);
-        filterOptionPanel.add(applyToNodesAndConnectorsBox, constraints);
-        filterOptionPanel.add(applyToConnectorsBox, constraints);
 		filterOptionPanel.add(showAncestorsBox, constraints);
 		filterOptionPanel.add(showDescendantsBox, constraints);
 		filterOptionPanel.add(hideMatchingNodesBox, constraints);
+		constraints.weightx = 1;
+		filterOptionPanel.add(new JUnitPanel(), constraints);
+
+		constraints.weightx = 0;
+        filterOptionPanel.add(applyToNodesBox, constraints);
+        filterOptionPanel.add(applyToNodesAndConnectorsBox, constraints);
+        filterOptionPanel.add(applyToConnectorsBox, constraints);
 
 		constraints.weightx = 1;
 		filterOptionPanel.add(new JUnitPanel(), constraints);
