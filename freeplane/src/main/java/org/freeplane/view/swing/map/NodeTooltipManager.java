@@ -180,7 +180,7 @@ public class NodeTooltipManager implements IExtension{
 		mouseInsideTooltipListener = new MouseInsideListener(tipPopup);
 		final Rectangle desktopBounds = UITools.getAvailableScreenBounds(insideComponent);
 		final Dimension popupPreferredSize = tipPopup.getPreferredSize();
-		final Point desiredLocation = preferredToolTipLocation != null ? preferredToolTipLocation : new Point(0, insideComponent.getHeight());
+		final Point desiredLocation = preferredToolTipLocation != null ? preferredToolTipLocation : new Point(0, insideComponent.getHeight() - 1);
 		final Point onScreenLocation = new Point(desiredLocation);
 		SwingUtilities.convertPointToScreen(onScreenLocation, insideComponent);
 		int popupAllowedHeight =  desktopBounds.y + desktopBounds.height - onScreenLocation.y;
@@ -190,8 +190,10 @@ public class NodeTooltipManager implements IExtension{
 				Math.min(popupAllowedHeight, popupPreferredSize.height));
 			tipPopup.setPreferredSize(popupSize);
 			tipPopup.show(insideComponent, desiredLocation.x, desiredLocation.y);
-			focusOwner.requestFocusInWindow();
-			exitTimer.start();
+			SwingUtilities.invokeLater(() -> {
+				focusOwner.requestFocus();
+				exitTimer.start();
+			});
 		}
 	}
 

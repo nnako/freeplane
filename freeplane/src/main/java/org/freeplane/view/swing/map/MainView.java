@@ -1103,9 +1103,9 @@ public class MainView extends ZoomableLabel {
 	public Point getToolTipLocation(MouseEvent event) {
 		Container parent = getParent();
 		if(parent instanceof NodeView)
-			return new Point(0, getHeight());
+			return new Point(0, getHeight() - 1);
 		else
-			return new Point(-getX(), parent.getHeight() - getY());
+			return new Point(-getX(), parent.getHeight() - 1 - getY());
 	}
 
 }
