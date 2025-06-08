@@ -1,7 +1,7 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 repositories {
-    maven { url "https://josm.openstreetmap.de/nexus/content/groups/public/" }
+    maven { url "https://josm.openstreetmap.de/repository/releases/" }
     maven { url "https://repo.spring.io/plugins-release/"}
 }
 
