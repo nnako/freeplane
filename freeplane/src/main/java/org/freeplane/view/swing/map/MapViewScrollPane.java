@@ -99,6 +99,9 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
         private Timer timer;
 
 		private ScalableComponent backgroundComponent;
+		private boolean scrollsRectangleToVisible;
+		private Point targetViewPosition;
+		private int scrollingDelay = 0;
 
         public void setBackgroundComponent(ScalableComponent backgroundComponent) {
             this.backgroundComponent = backgroundComponent;
@@ -113,7 +116,7 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
         	boolean isTooWide = contentRectangle.width >= width;
 			boolean isTooHigh = contentRectangle.height >= height;
 			if(isTooWide && isTooHigh) {
-        		super.scrollRectToVisible(contentRectangle);
+        		scrollRectToVisibleWithoutAdjustment(contentRectangle);
         		return;
         	}
             // Start with a copy of the original rectangle.
@@ -208,9 +211,30 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
                 candidateRect.height = contentRectangle.height + topInset + bottomInset;
             }
 
-            super.scrollRectToVisible(candidateRect);
+            scrollRectToVisibleWithoutAdjustment(candidateRect);
         }
-        private int positionAdjustment(int parentWidth, int childWidth, int childAt)    {
+
+		private void scrollRectToVisibleWithoutAdjustment(final Rectangle contentRectangle) {
+			boolean scrollsRectangleToVisible = this.scrollsRectangleToVisible;
+			try {
+				super.scrollRectToVisible(contentRectangle);
+			}
+			finally {
+				this.scrollsRectangleToVisible =scrollsRectangleToVisible;
+			}
+		}
+
+
+
+        @Override
+		public Point getViewPosition() {
+        	if(targetViewPosition != null && scrollsRectangleToVisible)
+        		return targetViewPosition;
+        	else
+        		return super.getViewPosition();
+		}
+
+		private int positionAdjustment(int parentWidth, int childWidth, int childAt)    {
 
             //   +-----+
             //   | --- |     No Change
@@ -253,10 +277,9 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
         @Override
 		public void setViewPosition(Point p) {
 			if(! layoutInProgress) {
-				Integer scrollingDelay = (Integer) getClientProperty(ViewController.SLOW_SCROLLING);
-				if(scrollingDelay != null && scrollingDelay != 0){
-					putClientProperty(ViewController.SLOW_SCROLLING, null);
+				if(scrollingDelay != 0){
 					slowSetViewPosition(p, scrollingDelay);
+					targetViewPosition = p;
 				} else {
 					stopTimer();
 					layoutInProgress = true;
@@ -312,8 +335,15 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 	        int slowDy = calcScrollIncrement(dy);
 	        viewPosition.translate(slowDx, slowDy);
 	        super.setViewPosition(viewPosition);
-	        if(slowDx == dx && slowDy == dy)
-	            return;
+	        if(slowDx == dx && slowDy == dy) {
+	        	targetViewPosition = null;
+	        	scrollingDelay = 0;
+				MapView view = (MapView)getView();
+				if (view != null) {
+					view.setAnchorContentLocation();
+				}
+				return;
+			}
 	        timer = new Timer(delay, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -342,6 +372,9 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
             }
 			return dx;
         }
+		void startSlowScrolling(int scrollingDelay) {
+			this.scrollingDelay = scrollingDelay;
+		}
 	}
 	/**
 	 *

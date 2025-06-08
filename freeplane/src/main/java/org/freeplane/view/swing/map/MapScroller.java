@@ -13,7 +13,7 @@ import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.map.IMapSelection.NodePosition;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeRelativePath;
-import org.freeplane.features.ui.ViewController;
+import org.freeplane.view.swing.map.MapViewScrollPane.MapViewPort;
 
 class MapScroller {
 
@@ -123,9 +123,12 @@ class MapScroller {
     }
 
     void scrollNodeToCenter(NodeView node) {
-        scrollNode(node, ScrollingDirective.SCROLL_NODE_TO_CENTER,
-                ResourceController.getResourceController().getBooleanProperty("slow_scroll_selected_node"));
+        scrollNode(node, ScrollingDirective.SCROLL_NODE_TO_CENTER, shouldScrollSlowly());
     }
+
+	private boolean shouldScrollSlowly() {
+		return ResourceController.getResourceController().getBooleanProperty("slow_scroll_selected_node");
+	}
 
 
 	private void scrollNode(final NodeView node, ScrollingDirective scrollingDirective, boolean slowScroll) {
@@ -133,8 +136,11 @@ class MapScroller {
 			this.slowScroll = slowScroll;
 			scrolledNode = node;
 			this.scrollingDirective = scrollingDirective;
-			if (map.isDisplayable() && map.frameLayoutCompleted() && map.isValid())
-				scrollNodeNow(slowScroll);
+			if (map.isDisplayable() && map.frameLayoutCompleted() && map.isValid()) {
+				if(slowScroll)
+					startSlowScrolling();
+				scrollNodeNow();
+			}
 		}
 	}
 
@@ -219,10 +225,7 @@ class MapScroller {
 		return rect;
 	}
 
-	private void scrollNodeNow(boolean slowScroll) {
-		final JViewport viewPort = (JViewport) map.getParent();
-		if(slowScroll)
-			viewPort.putClientProperty(ViewController.SLOW_SCROLLING, 20);
+	private void scrollNodeNow() {
 		final Rectangle rect = calculateOptimalVisibleRectangle();
 		map.scrollRectToVisible(rect);
 		scrolledNode = null;
@@ -231,6 +234,11 @@ class MapScroller {
 		if(! anchor.equals(map.getRoot()))
 			this.anchor = map.getRoot();
 		this.anchorContentLocation = getAnchorCenterPoint();
+	}
+
+	private void startSlowScrolling() {
+		final MapViewPort viewPort = (MapViewPort) map.getParent();
+		viewPort.startSlowScrolling(20);
 	}
 
 	private Point getAnchorCenterPoint() {
@@ -372,6 +380,8 @@ class MapScroller {
 			}
 		}
 		keepShowingSelectedAfterScroll();
+		if(shouldScrollSlowly())
+			startSlowScrolling();
 		node.scrollRectToVisible(requiredRectangle);
 		showSelectedAfterScroll();
 	}
