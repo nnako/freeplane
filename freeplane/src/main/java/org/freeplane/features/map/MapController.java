@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -396,7 +397,7 @@ implements IExtension, NodeChangeAnnouncer{
 
 
 	void scrollNodeTreeAfterUnfold(final NodeModel node) {
-	    scrollNodeTree(node, "scrollOnUnfold");
+	    scrollNodeTree(node, "scrollOnUnfold", Controller.getCurrentController().getSelection()::scrollNodeTreeToVisible);
 	}
 
 	private void scrollNodeToVisibleLater(final NodeModel node) {
@@ -404,15 +405,16 @@ implements IExtension, NodeChangeAnnouncer{
 	}
 
 	public void scrollNodeTreeAfterSelect(final NodeModel node) {
-	    scrollNodeTree(node, "scrollOnSelect");
+	    scrollNodeTree(node, "center_selected_node", Controller.getCurrentController().getSelection()::scrollNodeToCenter);
+	    scrollNodeTree(node, "scrollOnSelect", Controller.getCurrentController().getSelection()::scrollNodeTreeToVisible);
 	}
 
-	private void scrollNodeTree(final NodeModel node, String propertyName) {
+	private void scrollNodeTree(final NodeModel node, String propertyName, Consumer<NodeModel> scroller) {
     ResourceController resourceController = ResourceController.getResourceController();
     	if (resourceController.getBooleanProperty(propertyName)
     			&& !(MouseEventActor.INSTANCE.isActive()
     			&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
-        	SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeTreeToVisible(node));
+        	SwingUtilities.invokeLater(() -> scroller.accept(node));
     	}
     	else
     		scrollNodeToVisibleLater(node);

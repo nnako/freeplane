@@ -76,7 +76,9 @@ public interface IMapSelection {
 
     public void makeTheSearchRoot(final NodeModel node);
 
-	public void scrollNodeToVisible(NodeModel selected);
+	public void scrollNodeToVisible(NodeModel node);
+
+	public void scrollNodeToCenter(NodeModel node);
 
 	public void selectAsTheOnlyOneSelected(final NodeModel node);
 

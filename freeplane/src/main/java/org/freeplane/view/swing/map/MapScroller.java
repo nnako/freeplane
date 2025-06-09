@@ -352,7 +352,8 @@ class MapScroller {
 	}
 
 	void scrollNodeTreeToVisible(NodeView node) {
-		final Rectangle visibleRect = map.getVisibleRect();
+		MapViewPort viewport = (MapViewPort) map.getParent();
+		final Rectangle visibleRect = viewport.getViewRect();
 		Rectangle requiredRectangle = new Rectangle(node.getSize());
 		int margin = 30;
 		int spaceToCut = node.getSpaceAround() - margin;
