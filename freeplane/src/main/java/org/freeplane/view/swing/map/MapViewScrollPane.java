@@ -278,8 +278,8 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 		public void setViewPosition(Point p) {
 			if(! layoutInProgress) {
 				if(scrollingDelay != 0){
-					slowSetViewPosition(p, scrollingDelay);
 					targetViewPosition = p;
+					SwingUtilities.invokeLater(this::slowSetViewPosition);
 				} else {
 					stopTimer();
 					layoutInProgress = true;
@@ -326,15 +326,24 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 	        }
         }
 
-		private void slowSetViewPosition(final Point p, final int delay) {
+		private void slowSetViewPosition() {
 			stopTimer();
-			final Point viewPosition = getViewPosition();
-	        int dx = p.x - viewPosition.x;
-	        int dy = p.y - viewPosition.y;
+			final Point currentViewPosition = super.getViewPosition();
+			if(targetViewPosition == null)
+				return;
+	        int dx = targetViewPosition.x - currentViewPosition.x;
+	        int dy = targetViewPosition.y - currentViewPosition.y;
 	        int slowDx = calcScrollIncrement(dx);
 	        int slowDy = calcScrollIncrement(dy);
-	        viewPosition.translate(slowDx, slowDy);
-	        super.setViewPosition(viewPosition);
+	        currentViewPosition.translate(slowDx, slowDy);
+	   		boolean layoutWasInProgress = layoutInProgress;
+     		layoutInProgress = true;
+     		try {
+     			super.setViewPosition(currentViewPosition);
+     		}
+     		finally {
+				layoutInProgress = layoutWasInProgress;
+			}
 	        if(slowDx == dx && slowDy == dy) {
 	        	targetViewPosition = null;
 	        	scrollingDelay = 0;
@@ -344,11 +353,11 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 				}
 				return;
 			}
-	        timer = new Timer(delay, new ActionListener() {
+	        timer = new Timer(scrollingDelay, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					timer = null;
-					MapViewPort.this.slowSetViewPosition(p, delay);
+					MapViewPort.this.slowSetViewPosition();
 				}
 			});
 	        timer.setRepeats(false);
@@ -363,10 +372,12 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 		}
 
 		private int calcScrollIncrement(int dx) {
+			if(scrollingDelay == 0)
+				return dx;
 			int v = ResourceController.getResourceController().getIntProperty("scrolling_speed");
 			final int absDx = Math.abs(dx);
 			final double sqrtDx = Math.sqrt(absDx);
-			final int slowDX = (int) Math.max(absDx * sqrtDx / 20, 20 * sqrtDx) * v / 100;
+			final int slowDX = (int) Math.max(absDx * sqrtDx / scrollingDelay, scrollingDelay * sqrtDx) * v / 100;
 			if (Math.abs(dx) > 2 && slowDX < Math.abs(dx)) {
 	            dx = slowDX * Integer.signum(dx);
             }
