@@ -397,7 +397,11 @@ implements IExtension, NodeChangeAnnouncer{
 
 
 	void scrollNodeTreeAfterUnfold(final NodeModel node) {
-	    scrollNodeTree(node, "scrollOnUnfold", Controller.getCurrentController().getSelection()::scrollNodeTreeToVisible);
+	    if (shouldAutoscroll("scrollOnUnfold")) {
+			SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeTreeToVisible(node));
+		}
+		else
+			scrollNodeToVisibleLater(node);
 	}
 
 	private void scrollNodeToVisibleLater(final NodeModel node) {
@@ -405,19 +409,29 @@ implements IExtension, NodeChangeAnnouncer{
 	}
 
 	public void scrollNodeTreeAfterSelect(final NodeModel node) {
-	    scrollNodeTree(node, "center_selected_node", Controller.getCurrentController().getSelection()::scrollNodeToCenter);
-	    scrollNodeTree(node, "scrollOnSelect", Controller.getCurrentController().getSelection()::scrollNodeTreeToVisible);
+		final boolean shouldCenterNode = shouldAutoscroll("center_selected_node");
+		final boolean shouldScrollSubtree = shouldAutoscroll("scrollOnSelect");
+		SwingUtilities.invokeLater(() -> {
+			final IMapSelection selection = Controller.getCurrentController().getSelection();
+			if (shouldCenterNode) {
+				selection.scrollNodeToCenter(node);
+				if (shouldScrollSubtree)
+					selection.scrollNodeTreeToVisible(node);
+			}
+			else if (shouldScrollSubtree) {
+				selection.scrollNodeTreeToVisible(node);
+			}
+			else
+				selection.scrollNodeTreeToVisible(node);
+		});
 	}
 
-	private void scrollNodeTree(final NodeModel node, String propertyName, Consumer<NodeModel> scroller) {
-    ResourceController resourceController = ResourceController.getResourceController();
-    	if (resourceController.getBooleanProperty(propertyName)
-    			&& !(MouseEventActor.INSTANCE.isActive()
-    			&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"))) {
-        	SwingUtilities.invokeLater(() -> scroller.accept(node));
-    	}
-    	else
-    		scrollNodeToVisibleLater(node);
+	private boolean shouldAutoscroll(String propertyName) {
+		ResourceController resourceController = ResourceController.getResourceController();
+		final boolean shouldAutoscroll = resourceController.getBooleanProperty(propertyName)
+				&& !(MouseEventActor.INSTANCE.isActive()
+						&& resourceController.getBooleanProperty("autoscroll_disabled_for_mouse_interaction"));
+		return shouldAutoscroll;
 	}
 
 	public void setFolded(final NodeModel node, final boolean fold, Filter filter) {
