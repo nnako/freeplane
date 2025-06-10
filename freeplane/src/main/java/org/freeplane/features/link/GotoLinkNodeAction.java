@@ -25,6 +25,7 @@ import javax.swing.Action;
 
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.text.TextController;
@@ -32,15 +33,11 @@ import org.freeplane.features.text.TextController;
 /** Follow a graphical link (AKA connector) action. */
 class GotoLinkNodeAction extends AFreeplaneAction {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private final LinkController linkController;
 	private final NodeModel target;
-
-	public GotoLinkNodeAction(final LinkController linkController, String actionName, final NodeModel target) {
-	    this(linkController, target);
-	}
 
 	public GotoLinkNodeAction(final LinkController linkController, final NodeModel target) {
 		super("GotoLinkNodeAction");
@@ -68,9 +65,12 @@ class GotoLinkNodeAction extends AFreeplaneAction {
 		}
     }
 
+	@Override
 	public void actionPerformed(final ActionEvent e) {
-		linkController.onDeselect(Controller.getCurrentModeController().getMapController().getSelectedNode());
-		Controller.getCurrentModeController().getMapController().select(target);
+		final MapController mapController = Controller.getCurrentModeController().getMapController();
+		linkController.onDeselect(mapController.getSelectedNode());
+		mapController.select(target);
+		mapController.scrollNodeTreeAfterSelect(target);
 		linkController.onSelect(target);
 	}
 }

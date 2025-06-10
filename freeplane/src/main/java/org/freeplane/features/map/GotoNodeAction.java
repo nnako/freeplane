@@ -61,7 +61,9 @@ public class GotoNodeAction extends AFreeplaneAction {
                 : "at(" + reference + ")");
         if(dest == null)
             return;
-        controller.getModeController().getMapController().displayNode(dest);
+        final MapController mapController = controller.getModeController().getMapController();
+		mapController.displayNode(dest);
         selection.selectAsTheOnlyOneSelected(dest);
+        mapController.scrollNodeTreeAfterSelect(dest);
     }
 }
