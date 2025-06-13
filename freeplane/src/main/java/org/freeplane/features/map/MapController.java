@@ -422,7 +422,7 @@ implements IExtension, NodeChangeAnnouncer{
 				selection.scrollNodeTreeToVisible(node);
 			}
 			else
-				selection.scrollNodeTreeToVisible(node);
+				selection.scrollNodeToVisible(node);
 		});
 	}
 
