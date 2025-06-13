@@ -35,6 +35,8 @@ public class EmojiIcon extends MindIcon {
 
     public EmojiIcon(final String emoji, final String entity, final String file, final String description, int order) {
 		super(entityName(entity), file, description, order);
+		if(areResourcesAvailable)
+			initializeUrl();
         this.emoji = emoji;
 	}
 

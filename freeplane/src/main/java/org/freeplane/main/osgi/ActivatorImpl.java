@@ -189,6 +189,8 @@ class ActivatorImpl implements BundleActivator {
 	}
 
 	private void startFramework(final BundleContext context) {
+		SecurityManager securityManager = System.getSecurityManager();
+		System.setSecurityManager(null);
         registerClasspathUrlHandler(context, ResourceController.FREEPLANE_RESOURCE_URL_PROTOCOL, new Handler());
         registerClasspathUrlHandler(context, DataHandler.PROTOCOL, new DataHandler());
 		if (null == System.getProperty("org.freeplane.core.dir.lib", null)) {
@@ -220,13 +222,14 @@ class ActivatorImpl implements BundleActivator {
 		else if (singleInstanceManager.isMasterPresent()) {
 			starter.setDontLoadLastMaps();
 		}
-		loadPlugins(context);
 		final Controller controller = starter.createController();
 		controller.getViewController().invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				starter.createModeControllers(controller);
 		        LoadAcceleratorPresetsAction.install(controller.getModeController(MModeController.MODENAME));
+		        System.setSecurityManager(securityManager);
+				loadPlugins(context);
 				installControllerExtensions(context, controller, options);
 				if ("true".equals(System.getProperty("org.freeplane.exit_on_start", null))) {
 					controller.fireStartupFinished();

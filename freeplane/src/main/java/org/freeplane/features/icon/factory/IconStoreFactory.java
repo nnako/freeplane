@@ -103,7 +103,9 @@ public class IconStoreFactory {
 
     private MindIcon createMindIcon(final String name) {
         final String translationKeyLabel = name.indexOf('/') > 0 ? "" : ("icon_" + name);
-        return new MindIcon(name, name + ".svg", translationKeyLabel, order++);
+        MindIcon mindIcon = new MindIcon(name, name + ".svg", translationKeyLabel, order++);
+        mindIcon.initializeUrl();
+		return mindIcon;
     }
 
 	private IconStore createIcons() {

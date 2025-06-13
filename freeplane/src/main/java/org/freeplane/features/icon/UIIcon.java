@@ -106,12 +106,15 @@ public class UIIcon implements IconDescription, NamedIcon {
 	}
 
 	public URL getUrl() {
-		if (resourceURL != null) {
-			return resourceURL;
-		}
-		final String path = getPath();
-		resourceURL = RESOURCE_CONTROLLER.getIconResource(path);
+		initializeUrl();
 		return resourceURL;
+	}
+
+	public void initializeUrl() {
+		if (resourceURL == null) {
+			final String path = getPath();
+			resourceURL = RESOURCE_CONTROLLER.getIconResource(path);
+		}
 	}
 
 	protected void setUrl(URL url) {
