@@ -116,7 +116,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		}
 		final ZoomableLabel zLabel = (ZoomableLabel) label;
 		final float zoom = zLabel.getZoom();
-		final float scale = zoom == 1f ? 1f : zoom * 0.97f;
+		final float scale = zoom == 1f ? 1f : zoom * 0.99f;
 		if (isPainting) {
 			final Insets insets = zLabel.getInsets();
 			final int width = zLabel.getWidth();
