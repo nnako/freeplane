@@ -90,13 +90,13 @@ public class EventBuffer implements KeyEventDispatcher, FocusListener, InputMeth
 			try{
 				for (int i = 0; i < events.size(); i++) {
 					final AWTEvent event = events.get(i);
-					if(event.getSource().equals(textComponent))
-						dispatchedEvent = event;
-					else if(event instanceof KeyEvent)
+					if(event instanceof KeyEvent)
 					{
 						KeyEvent ke = (KeyEvent) event;
 						dispatchedEvent = new KeyEvent(textComponent, ke.getID(), ke.getWhen(), ke.getModifiers(), ke.getKeyCode(), ke.getKeyChar(), ke.getKeyLocation());
 					}
+					else if(event.getSource().equals(textComponent))
+						dispatchedEvent = event;
 					else if(event instanceof InputMethodEvent)
 					{
 						InputMethodEvent ime = (InputMethodEvent) event;
