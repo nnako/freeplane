@@ -30,7 +30,7 @@ import org.freeplane.view.swing.map.MapViewScrollPane.ViewportReservedAreaSuppli
 import org.freeplane.view.swing.map.overview.resizable.ResizablePanelBorder;
 import org.freeplane.view.swing.map.overview.resizable.ResizePanelMouseHandler;
 
-public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener, ViewportReservedAreaSupplier {
+public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener {
     private static final long serialVersionUID = 8664710783654626093L;
 
     private final static String MAP_OVERVIEW_VISIBLE_PROPERTY = "mapOverviewVisible";
@@ -267,8 +267,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         bounds.setLocation(location);
     }
 
-	@Override
-	public Rectangle getReservedArea() {
+	public Rectangle getMapOverviewReservedArea() {
 		if (isMapOverviewVisible) {
 			return mapOverviewPanel.getBounds();
 		} else

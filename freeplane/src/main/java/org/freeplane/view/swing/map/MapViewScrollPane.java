@@ -57,9 +57,12 @@ import org.freeplane.view.swing.features.filepreview.ScalableComponent;
 public class MapViewScrollPane extends JScrollPane implements IFreeplanePropertyListener {
 	private static final Dimension INVISIBLE = new Dimension(0,  0);
 	public static final Rectangle EMPTY_RECTANGLE = new Rectangle();
+
+	@FunctionalInterface
 	public interface ViewportReservedAreaSupplier {
 		Rectangle getReservedArea();
 	}
+
 	@SuppressWarnings("serial")
     static class MapViewPort extends JViewport{
 		private List<ViewportReservedAreaSupplier> reservedAreaSuppliers = new ArrayList<>();
