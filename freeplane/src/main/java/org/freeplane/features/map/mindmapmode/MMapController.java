@@ -230,9 +230,8 @@ public class MMapController extends MapController {
         if(ResourceController.getResourceController().getBooleanProperty("copyFormatToNewNodeIncludesIcons")) {
             getMModeController().copyExtensions(Keys.ICONS, source, target);
         }
+        nodeRefresh(target);
     }
-
-
 
     @Override
     protected MapClipboardController createMapClipboardController() {
