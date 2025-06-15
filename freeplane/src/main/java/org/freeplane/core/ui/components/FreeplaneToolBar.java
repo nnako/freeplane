@@ -176,8 +176,11 @@ public class FreeplaneToolBar extends JToolBar {
 	}
 
 	private void configureToolbarButton(AbstractButton abstractButton) {
-		configureToolbarButtonText(abstractButton);
-		configureToolbarButtonSize(abstractButton);
+		if(reducesButtonSize) {
+			configureToolbarButtonText(abstractButton);
+			configureToolbarButtonSize(abstractButton);
+		}
+
 		if(disablesFocus) {
             abstractButton.setRequestFocusEnabled(false);
             abstractButton.setFocusable(false);
@@ -198,8 +201,6 @@ public class FreeplaneToolBar extends JToolBar {
 	}
 
 	private void configureToolbarButtonSize(final AbstractButton abstractButton) {
-		if(! reducesButtonSize)
-			return;
 		if (Compat.isMacOsX()) {
 			abstractButton.putClientProperty("JButton.buttonType", "segmentedGradient");
 			abstractButton.putClientProperty("JButton.segmentPosition", "middle");

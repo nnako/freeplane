@@ -40,6 +40,7 @@ import org.freeplane.core.ui.components.FocusRequestor;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.MapModel;
 
 public class BookmarksToolbarBuilder {
@@ -69,17 +70,17 @@ public class BookmarksToolbarBuilder {
 		button.setText(bookmark.getDescriptor().getName());
 		button.addActionListener(action -> bookmark.open());
 		button.putClientProperty("bookmark", bookmark);
-		button.putClientProperty("toolbar", toolbar);
 
-		// Set up drag source
+		if (bookmark.getDescriptor().opensAsRoot()) {
+			button.setIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon());
+		}
+
 		DragSource dragSource = DragSource.getDefaultDragSource();
 		dragSource.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE,
 			new BookmarkDragGestureListener(button));
 
-		// Set up drop target
 		DropTarget dropTarget = new DropTarget(button, DnDConstants.ACTION_MOVE, new BookmarkDropTargetListener(toolbar));
 
-		// Right-click menu
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
