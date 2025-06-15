@@ -37,6 +37,6 @@ public class NodeBookmark {
 			mapViewManager.displayOnCurrentView(node);
 		final IMapSelection selection = controller.getSelection();
 		selection.selectAsTheOnlyOneSelected(node);
-		selection.scrollNodeTreeToVisible(node);
+		selection.scrollNodeTreeToVisible(node, false);
 	}
 }

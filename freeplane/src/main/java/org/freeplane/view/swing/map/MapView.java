@@ -231,25 +231,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 	private class MapSelection implements IMapSelection {
 		@Override
-		public void centerNode(final NodeModel node) {
-			final boolean slowScroll = false;
-			centerNode(node, slowScroll);
-		}
-
-		@Override
-		public void centerNodeSlowly(final NodeModel node) {
-			final boolean slowScroll = true;
-			centerNode(node, slowScroll);
-		}
-
-		private void centerNode(final NodeModel node, final boolean slowScroll) {
-			final NodeView nodeView = getNodeView(node);
-			if (nodeView != null) {
-				mapScroller.scrollNode(nodeView, NodePosition.CENTER, slowScroll);
-			}
-		}
-
-		@Override
 		public void moveNodeTo(final NodeModel node, final NodePosition position) {
 			final boolean slowScroll = false;
 			moveNodeTo(node, position, slowScroll);
@@ -345,9 +326,14 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		@Override
 		public void scrollNodeTreeToVisible(final NodeModel  node) {
+			scrollNodeTreeToVisible(node, mapScroller.shouldScrollSlowly());
+		}
+
+		@Override
+		public void scrollNodeTreeToVisible(final NodeModel  node, boolean slow) {
 			final NodeView nodeView = getNodeView(node);
 			if(nodeView != null)
-				mapScroller.scrollNodeTreeToVisible(nodeView);
+				mapScroller.scrollNodeTreeToVisible(nodeView, slow);
 		}
 
 
@@ -371,7 +357,12 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 
 		@Override
 		public void scrollNodeToCenter(final NodeModel node) {
-			mapScroller.scrollNodeToCenter(getNodeView(node));
+			scrollNodeToCenter(node, mapScroller.shouldScrollSlowly());
+		}
+
+		@Override
+		public void scrollNodeToCenter(final NodeModel node, boolean slow) {
+			mapScroller.scrollNodeToCenter(getNodeView(node), slow);
 		}
 
 		@Override
@@ -695,7 +686,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
                         if(wasFolded && ! selectedNode.isFolded() && selection.size() == 1
                                 && (resourceController.getBooleanProperty("scrollOnUnfold") || resourceController.getBooleanProperty("scrollOnSelect")))
                             SwingUtilities.invokeLater(() ->
-                                mapScroller.scrollNodeTreeToVisible(selectedNode));
+                                mapScroller.scrollNodeTreeToVisible(selectedNode, mapScroller.shouldScrollSlowly()));
                         else
                             scrollNodeToVisible(selectedNode);
                     }

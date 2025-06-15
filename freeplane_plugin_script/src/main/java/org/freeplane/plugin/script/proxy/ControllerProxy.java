@@ -58,7 +58,7 @@ class ControllerProxy implements Proxy.Controller {
 	@Override
 	public void centerOnNode(final Node center) {
 		final NodeModel nodeModel = ((NodeProxy) center).getDelegate();
-		Controller.getCurrentController().getSelection().centerNode(nodeModel);
+		Controller.getCurrentController().getSelection().scrollNodeToCenter(nodeModel, false);
 	}
 
 	@Override
@@ -83,8 +83,8 @@ class ControllerProxy implements Proxy.Controller {
 		IMapSelection selection = Controller.getCurrentController().getSelection();
 		return selection != null ? new NodeProxy(selection.getSelected(), scriptContext) : null;
 	}
-	
-	
+
+
 
 	@Override
 	public Node getViewRoot() {
