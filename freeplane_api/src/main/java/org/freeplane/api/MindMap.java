@@ -89,16 +89,16 @@ public interface MindMap extends MindMapRO {
 	 * @param condition filter the map using this lamda.
 	 * @since 1.2 */
 	public void filter(final boolean showAncestors, final boolean showDescendants, final NodeCondition condition);
-	
+
 	/**
 	 * Hides nodes matching given condition.
-	 * 
+	 *
 	 * @see #filter(boolean, boolean, NodeCondition)
-	 * 
+	 *
 	 * @param hideAncestors whether to hide ancestors or not.
 	 * @param hideDescendants whether to hide descendant or not.
 	 * @param condition filter the map using this lamda.
-	 * @since 1.8.1 
+	 * @since 1.8.1
 	 */
     public void hide(final boolean hideAncestors, final boolean hideDescendants, final NodeCondition condition);
 	/** alias for {@link #filter(boolean, boolean, NodeCondition)}
@@ -135,15 +135,15 @@ public interface MindMap extends MindMapRO {
 	 * Each formula not having valid result in the cache is evaluated.
 	 *  @since 1.7.2 */
 	void evaluateOutdatedFormulas();
-	
+
 	void addListener(NodeChangeListener listener);
-	
+
 	void removeListener(NodeChangeListener listener);
 
 	List<NodeChangeListener> getListeners();
-	
+
     /**
-     * 
+     *
      * Copies a style from another mind map into this mind map.
      *
      * @since 1.9.8
@@ -153,7 +153,7 @@ public interface MindMap extends MindMapRO {
     /**
      *
      * Copies a style and its conditional style rules from another mind map into this mind map.
-     * 
+     *
      * @since 1.9.8
      */
     void copyConditionalStylesFrom(MindMap source, String styleName);
@@ -278,5 +278,13 @@ public interface MindMap extends MindMapRO {
 	 * </pre>
 	 * @param uri Associated-Template URI or {@code null} to remove it
 	 * @since 1.11.11 */
-	void setAssociatedTemplate(URI uri);
+	       void setAssociatedTemplate(URI uri);
+
+       /** Sets the bookmarks for this mind map.
+        * This replaces all existing bookmarks.
+        * Each bookmark in the list should reference a node that exists in this map.
+        * @param bookmarks the list of bookmarks to set for this map
+        * @throws IllegalArgumentException if any bookmark references a node not in this map
+        * @since 1.12.12 */
+       void setBookmarks(List<NodeBookmark> bookmarks);
 }

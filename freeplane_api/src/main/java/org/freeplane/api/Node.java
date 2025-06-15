@@ -419,4 +419,25 @@ public interface Node extends NodeRO {
 	/**@since 1.12.1 */
 	@Override
     Tags getTags();
+
+	/** Creates a bookmark for this node with the given name and type.
+	 * Bookmarks allow quick navigation to important nodes in the map.
+	 * <p>
+	 * Examples:
+	 * <pre>
+	 * // Create a bookmark that opens as a regular selection
+	 * node.bookmark("Important Node", BookmarkType.SELECT)
+	 *
+	 * // Create a bookmark that opens this node as the root view
+	 * node.bookmark("View From Here", BookmarkType.ROOT)
+	 * </pre>
+	 * @param name the display name for the bookmark
+	 * @param bookmarkType the type of bookmark - SELECT for normal navigation, ROOT to open as root view
+	 * @since 1.12.12 */
+    void bookmark(String name, BookmarkType bookmarkType);
+
+	/** Removes the bookmark for this node if one exists.
+	 * Has no effect if the node is not bookmarked.
+	 * @since 1.12.12 */
+    void removeBookmark();
 }

@@ -5,8 +5,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
-/** The map a node belongs to: <code>node.map</code> - read-only. 
- * 
+/** The map a node belongs to: <code>node.map</code> - read-only.
+ *
  * @since 1.7.10
  * */
 public interface MindMapRO {
@@ -63,5 +63,12 @@ public interface MindMapRO {
 	 /** @return Associated-Template URI as File, with User- or Standard-Templates Directory resolved if necessary, or {@code null} if no template is associated with the mind map
 	  * @see MindMap#setAssociatedTemplate(URI)
 	  * @since 1.11.11 */
-	File getAssociatedTemplateFile();
+	       File getAssociatedTemplateFile();
+
+       /** Returns all bookmarks defined in this mind map.
+        * Bookmarks provide quick access to important nodes in the map.
+        * The returned list includes the automatically created root bookmark.
+        * @return a list of all bookmarks in this map
+        * @since 1.12.12 */
+       List<NodeBookmark> getBookmarks();
 }

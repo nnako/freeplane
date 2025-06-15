@@ -46,7 +46,7 @@ public class MapBookmarks implements IExtension {
 	}
 
 	boolean remove(String id) {
-		if (id == null || map.getRootNode().getID().equals(id)) {
+		if (id == null) {
 			return false;
 		}
 		if (bookmarks.remove(id) != null) {
@@ -152,8 +152,11 @@ public class MapBookmarks implements IExtension {
 		return bookmarks.containsKey(id);
 	}
 
-	public void clear() {
+	public boolean clear() {
+		if(bookmarks.isEmpty())
+			return false;
 		bookmarks.clear();
 		nodeIDs.clear();
+		return true;
 	}
 }

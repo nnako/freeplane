@@ -45,6 +45,12 @@ public class BookmarksController implements IExtension{
 			fireBookmarksChanged(map);
 	}
 
+	public void removeAllBookmarks(MapModel map) {
+		if(getBookmarks(map).clear())
+			fireBookmarksChanged(map);
+
+	}
+
 	public void moveBookmark(NodeModel node, int index) {
 		final MapModel map = node.getMap();
 		if(getBookmarks(map).move(node.getID(), index))

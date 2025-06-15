@@ -95,17 +95,16 @@ public class BookmarksToolbarBuilder {
 
 	private void showBookmarkPopupMenu(MouseEvent e, NodeBookmark bookmark, JButton button) {
 		JPopupMenu popup = new JPopupMenu();
-		final boolean isRootNode = bookmark.getNode().isRoot();
-		if(! isRootNode) {
-			JMenuItem removeItem = TranslatedElementFactory.createMenuItem("delete");
-			removeItem.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					bookmarksController.removeBookmark(bookmark.getNode());
-				}
-			});
-			popup.add(removeItem);
-		}
+
+		JMenuItem removeItem = TranslatedElementFactory.createMenuItem("delete");
+		removeItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				bookmarksController.removeBookmark(bookmark.getNode());
+			}
+		});
+		popup.add(removeItem);
+
 		JMenuItem renameItem = TranslatedElementFactory.createMenuItem("rename");
 		renameItem.addActionListener(new ActionListener() {
 			@Override
@@ -123,7 +122,8 @@ public class BookmarksToolbarBuilder {
 				toggleOpenAsRoot(bookmark);
 			}
 		});
-		if(isRootNode)
+
+		if(bookmark.getNode().isRoot())
 			openAsRootItem.setEnabled(false);
 		popup.add(openAsRootItem);
 

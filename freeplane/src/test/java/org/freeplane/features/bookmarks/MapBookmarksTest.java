@@ -134,15 +134,6 @@ public class MapBookmarksTest {
 	}
 
 	@Test
-	public void shouldNotRemoveRootBookmark() {
-		boolean result = mapBookmarks.remove("root");
-
-		assertThat(result).isFalse();
-		assertThat(mapBookmarks.size()).isEqualTo(1);
-		assertThat(mapBookmarks.contains("root")).isTrue();
-	}
-
-	@Test
 	public void shouldReturnFalseWhenRemovingNonExistentBookmark() {
 		boolean result = mapBookmarks.remove("nonexistent");
 

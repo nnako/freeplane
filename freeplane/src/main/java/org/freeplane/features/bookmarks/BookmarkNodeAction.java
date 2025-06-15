@@ -52,6 +52,8 @@ class BookmarkNodeAction extends AFreeplaneAction {
 		FocusRequestor.requestFocus(nameInput);
 		JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("opens_as_root");
 		opensAsRootCheckBox.setSelected(currentOpensAsRoot);
+		if(node.isRoot())
+			opensAsRootCheckBox.setEnabled(false);
 
 		Box components = Box.createVerticalBox();
 		components.add(nameLabel);
@@ -59,7 +61,7 @@ class BookmarkNodeAction extends AFreeplaneAction {
 		components.add(opensAsRootCheckBox);
 
 		Object[] options;
-		if (existingBookmark != null && !node.isRoot()) {
+		if (existingBookmark != null) {
 			options = new Object[] {
 				TextUtils.getText("icon_button_ok"),
 				TextUtils.getText("delete"),
