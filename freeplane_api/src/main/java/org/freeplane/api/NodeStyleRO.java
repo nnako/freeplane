@@ -56,8 +56,16 @@ public interface NodeStyleRO {
     /** @since 1.2.20 */
     int getMaxNodeWidth();
 
-    /** @since 1.3.8 */
+    /** @since 1.3.8
+	 * @deprecated since 1.12.12 - use @{link #isNumbering()} instead */
+	@Deprecated
     boolean isNumberingEnabled();
+
+	/** @since 1.12.12 */
+	boolean isNumbering();
+
+	/** @since 1.12.12 */
+	boolean isNumberingSet();
 
     /** @since 1.9.12 */
     String getCss();

@@ -52,8 +52,13 @@ public interface NodeStyle extends NodeStyleRO {
      * @since 1.5.6 */
     void setMaxNodeWidth(String width);
 
-    /** @since 1.3.8 */
+    /** @since 1.3.8
+	 * @deprecated since 1.12.12 - use @{link #setNumbering()} instead */
+	@Deprecated
     void setNumberingEnabled(boolean enabled);
+
+	/** since  1.12.12 */
+	void setNumbering(Boolean enabled);
 
     /** @since 1.9.12 */
     void setCss(String css);
