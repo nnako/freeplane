@@ -58,13 +58,31 @@ class BookmarkNodeAction extends AFreeplaneAction {
 		components.add(nameInput);
 		components.add(opensAsRootCheckBox);
 
-		if(JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
+		Object[] options;
+		if (existingBookmark != null && !node.isRoot()) {
+			options = new Object[] {
+				TextUtils.getText("icon_button_ok"),
+				TextUtils.getText("delete"),
+				TextUtils.getText("cancel")
+			};
+		} else {
+			options = new Object[] {
+				TextUtils.getText("icon_button_ok"),
+				TextUtils.getText("cancel")
+			};
+		}
+
+		int result = JOptionPane.showOptionDialog(
 				KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner(),
 				components,
 				title,
-				JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE)) {
+				JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options,
+				options[0]);
 
+		if (result == 0) {
 			final String bookmarkName = nameInput.getText().trim();
 			if (!bookmarkName.isEmpty()) {
 				if (existingBookmark != null) {
@@ -73,6 +91,8 @@ class BookmarkNodeAction extends AFreeplaneAction {
 				final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, opensAsRootCheckBox.isSelected());
 				bookmarksController.addBookmark(node, descriptor);
 			}
+		} else if (result == 1 && existingBookmark != null && !node.isRoot()) {
+			bookmarksController.removeBookmark(node);
 		}
 	}
 }
