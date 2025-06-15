@@ -64,6 +64,7 @@ import org.freeplane.features.attribute.mindmapmode.MAttributeController;
 import org.freeplane.features.attribute.mindmapmode.RemoveAllAttributesAction;
 import org.freeplane.features.attribute.mindmapmode.RemoveFirstAttributeAction;
 import org.freeplane.features.attribute.mindmapmode.RemoveLastAttributeAction;
+import org.freeplane.features.bookmarks.BookmarksController;
 import org.freeplane.features.clipboard.ClipboardControllers;
 import org.freeplane.features.clipboard.mindmapmode.MClipboardControllers;
 import org.freeplane.features.cloud.CloudController;
@@ -179,6 +180,7 @@ public class MModeControllerFactory {
 		tabs.addTab("", ResourceController.getResourceController().getIcon("/images/panelTabs/attributeTab.svg?useAccentColor=true"),
 		        createAttributesPanel(), TextUtils.getText("attributes_and_tags"));
         HierarchicalIcons.install(modeController);
+        modeController.addExtension(BookmarksController.class, new BookmarksController(modeController));
 		new AutomaticLayoutController();
 		new BlinkingNodeHook();
 		SummaryNode.install();

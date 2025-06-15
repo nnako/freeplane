@@ -83,6 +83,7 @@ import org.freeplane.core.util.ColorUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.ModelessAttributeController;
+import org.freeplane.features.bookmarks.MapBookmarks;
 import org.freeplane.features.edge.EdgeColorsConfigurationFactory;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.highlight.NodeHighlighter;
@@ -127,6 +128,7 @@ import org.freeplane.view.swing.map.NodeView.PreferredChild;
 import org.freeplane.view.swing.map.link.ConnectorView;
 import org.freeplane.view.swing.map.link.EdgeLinkView;
 import org.freeplane.view.swing.map.link.ILinkView;
+import org.freeplane.view.swing.map.overview.MapViewPane;
 
 /**
  * This class represents the view of a whole MindMap (in analogy to class
@@ -1504,6 +1506,11 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		final Object property = event.getProperty();
 		if (property.equals(MapStyle.RESOURCES_BACKGROUND_COLOR)) {
 			setBackground(requiredBackground());
+			return;
+		}
+		if(property.equals(MapBookmarks.class)) {
+			final MapViewPane mapViewPane = (MapViewPane) SwingUtilities.getAncestorOfClass(MapViewPane.class, this);
+			mapViewPane.updateBookmarksToolbar();
 			return;
 		}
 		if (property.equals(MapStyle.MAP_STYLES)){

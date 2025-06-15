@@ -331,6 +331,7 @@
 				<Entry name="SetBooleanPropertyAction.show_creation_modification_in_status" />
 				<Entry name="ToggleScrollbarsAction" />
 				<Entry name="ToggleMapOverviewAction" />
+				<Entry name="ToggleBookmarksToolbarAction" />
 				<Entry name="ShowFormatPanel"/>
 			</Entry>
 			<Entry name="menu_viewmode" >
@@ -688,6 +689,7 @@
 		<Entry name="ToggleStatusAction" />
 		<Entry name="ToggleScrollbarsAction" />
 		<Entry name="ToggleMapOverviewAction" />
+		<Entry name="ToggleBookmarksToolbarAction" />
 		<Entry builder="separator" />
 		<Entry name="ShowFormatPanel" />
 		<Entry name="ShowHideNoteAction" accelerator="control GREATER" />

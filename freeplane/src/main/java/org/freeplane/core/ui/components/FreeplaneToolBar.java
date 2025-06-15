@@ -57,6 +57,7 @@ public class FreeplaneToolBar extends JToolBar {
 	 */
 	private static final long serialVersionUID = 1L;
 	private boolean disablesFocus;
+	private boolean reducesButtonSize;
 
 	public FreeplaneToolBar(int orientation) {
 		this(null, orientation);
@@ -65,6 +66,7 @@ public class FreeplaneToolBar extends JToolBar {
 	public FreeplaneToolBar(final String name, final int orientation) {
 		super(name, orientation);
 		this.disablesFocus = true;
+		this.reducesButtonSize = true;
 		this.setMargin(FreeplaneToolBar.nullInsets);
 		setFloatable(false);
 		setRollover(true);
@@ -92,6 +94,10 @@ public class FreeplaneToolBar extends JToolBar {
 	}
 	public void setDisablesFocus(boolean disablesFocus) {
 		this.disablesFocus = disablesFocus;
+	}
+
+	public void setReducesButtonSize(boolean reducesButtonSize) {
+		this.reducesButtonSize = reducesButtonSize;
 	}
 
 	@Override
@@ -192,6 +198,8 @@ public class FreeplaneToolBar extends JToolBar {
 	}
 
 	private void configureToolbarButtonSize(final AbstractButton abstractButton) {
+		if(! reducesButtonSize)
+			return;
 		if (Compat.isMacOsX()) {
 			abstractButton.putClientProperty("JButton.buttonType", "segmentedGradient");
 			abstractButton.putClientProperty("JButton.segmentPosition", "middle");

@@ -2,8 +2,8 @@ package org.freeplane.view.swing.map.overview;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -12,6 +12,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
 
@@ -19,14 +20,16 @@ import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.features.bookmarks.BookmarksController;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.mode.Controller;
+import org.freeplane.features.mode.mindmapmode.MModeController;
 import org.freeplane.features.ui.ViewController;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewScrollPane;
-import org.freeplane.view.swing.map.MapViewScrollPane.ViewportReservedAreaSupplier;
 import org.freeplane.view.swing.map.overview.resizable.ResizablePanelBorder;
 import org.freeplane.view.swing.map.overview.resizable.ResizePanelMouseHandler;
 
@@ -35,6 +38,9 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
     private final static String MAP_OVERVIEW_VISIBLE_PROPERTY = "mapOverviewVisible";
     private final static String MAP_OVERVIEW_VISIBLE_FS_PROPERTY = "mapOverviewVisible.fullscreen";
+
+    private final static String BOOKMARKS_TOOLBAR_VISIBLE_PROPERTY = "bookmarksToolbarVisible";
+    private final static String BOOKMARKS_TOOLBAR_VISIBLE_FS_PROPERTY = "bookmarksToolbarVisible.fullscreen";
 
     private final static String MAP_OVERVIEW_PROPERTY_PREFIX = "map_overview_";
     private final static String MAP_OVERVIEW_ATTACH_POINT_PROPERTY = MAP_OVERVIEW_PROPERTY_PREFIX + "attach_point";
@@ -51,10 +57,13 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
     private final JScrollPane mapViewScrollPane;
     private final JPanel mapOverviewPanel;
-    private final MapOverviewImage mapOverviewImage;
-    private final MapView mapView;
     private boolean isMapOverviewVisible;
+    private boolean isBookmarksToolbarVisible;
+    private final MapOverviewImage mapOverviewImage;
 
+	private final FreeplaneToolBar bookmarksToolbar;
+
+	private final MapView mapView;
 
     public MapViewPane(JScrollPane mapViewScrollPane) {
         this.mapViewScrollPane = mapViewScrollPane;
@@ -63,19 +72,16 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
             private static final long serialVersionUID = 3702408082745761647L;
 
             @Override
+			public void addLayoutComponent(Component comp, Object constraints) {
+            	if(constraints != null)
+            		super.addLayoutComponent(comp, constraints);
+			}
+
+			@Override
             public void layoutContainer(Container parent) {
-                synchronized (parent.getTreeLock()) {
-                    Insets insets = parent.getInsets();
-                    int width = parent.getWidth();
-                    int height = parent.getHeight();
-                    int top = insets.top;
-                    int bottom = height - insets.bottom;
-                    int left = insets.left;
-                    int right = width - insets.right;
-                    mapViewScrollPane.setBounds(left, top, right - left, bottom - top);
-                    mapViewScrollPane.validate();
-                    mapOverviewPanel.setBounds(calculateMapOverviewBounds());
-                }
+            	super.layoutContainer(parent);
+                mapViewScrollPane.validate();
+                mapOverviewPanel.setBounds(calculateMapOverviewBounds());
             }
         });
         mapOverviewImage = new MapOverviewImage(mapView, mapViewScrollPane);
@@ -95,8 +101,22 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         final ViewController viewController = Controller.getCurrentController().getViewController();
         isMapOverviewVisible = viewController.isMapOverviewVisible();
         mapOverviewPanel.setVisible(isMapOverviewVisible);
-        add(mapOverviewPanel, BorderLayout.EAST);
-        add(mapViewScrollPane);
+        final boolean isMindMapEditor = mapView.getModeController().getModeName().equals(MModeController.MODENAME);
+        if(isMindMapEditor) {
+        	isBookmarksToolbarVisible = isMindMapEditor
+        			&& viewController.isBookmarksToolbarVisible();
+        	bookmarksToolbar = new FreeplaneToolBar(SwingConstants.VERTICAL);
+        	bookmarksToolbar.setReducesButtonSize(false);
+        	updateBookmarksToolbar();
+        	bookmarksToolbar.setVisible(isBookmarksToolbarVisible);
+        	add(bookmarksToolbar, BorderLayout.SOUTH);
+        }
+        else {
+        	isBookmarksToolbarVisible = false;
+        	bookmarksToolbar = null;
+        }
+        add(mapOverviewPanel);
+        add(mapViewScrollPane, BorderLayout.CENTER);
 
         mapView.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
@@ -105,7 +125,14 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         });
     }
 
-    @Override
+	public void updateBookmarksToolbar() {
+		if(bookmarksToolbar != null) {
+			BookmarksController bookmarksController = mapView.getModeController().getExtension(BookmarksController.class);
+			bookmarksController.updateBookmarksToolbar(bookmarksToolbar, mapView.getMap());
+		}
+	}
+
+	@Override
     public void mapChanged(MapChangeEvent event) {
         if (event.getMap() != mapView.getMap()) {
             return;
@@ -150,7 +177,18 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
                 mapOverviewPanel.setVisible(isMapOverviewVisible);
                 updateMapOverview();
             }
-        } else if (propertyName.startsWith(MAP_OVERVIEW_PROPERTY_PREFIX)) {
+        }
+        if (bookmarksToolbar != null && (ViewController.FULLSCREEN_ENABLED_PROPERTY.equals(propertyName)
+                || BOOKMARKS_TOOLBAR_VISIBLE_PROPERTY.equals(propertyName)
+                || BOOKMARKS_TOOLBAR_VISIBLE_FS_PROPERTY.equals(propertyName))) {
+            final ViewController viewController = Controller.getCurrentController().getViewController();
+            if (isBookmarksToolbarVisible != viewController.isBookmarksToolbarVisible()) {
+                isBookmarksToolbarVisible = ! isBookmarksToolbarVisible;
+                bookmarksToolbar.setVisible(isBookmarksToolbarVisible);
+                updateBookmarksToolbar();
+            }
+        }
+        if (propertyName.startsWith(MAP_OVERVIEW_PROPERTY_PREFIX)) {
             if (MAP_OVERVIEW_ATTACH_POINT_PROPERTY.equals(propertyName)) {
                 Rectangle mapOverviewBounds = mapOverviewPanel.getBounds();
                 convertOriginByAttachPoint(mapOverviewBounds);
@@ -272,6 +310,10 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 			return mapOverviewPanel.getBounds();
 		} else
 			return MapViewScrollPane.EMPTY_RECTANGLE;
+	}
+
+	public JScrollPane getMapViewScrollPane() {
+		return mapViewScrollPane;
 	}
 
 }
