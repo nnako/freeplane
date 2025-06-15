@@ -61,8 +61,8 @@ public abstract class FreeplaneScriptBaseClass extends Script {
 	/**
 	 * <p>Accessor for Freeplane's configuration: In scripts available as "global variable" {@code config}</p>
      *
-     * <p>In utility scripts and addon classes "global variable" {@code config} is not available and can be accessed as
-     * in the following example:</p>
+     * <p>When compiling classes outside of Freeplane, e.g. for add-on development, "global variable" {@code config} is
+     * not available and can be accessed by instantiating ConfigProperties as in the following example:</p>
      * <pre>
      * import org.freeplane.plugin.script.FreeplaneScriptBaseClass.ConfigProperties
      *
