@@ -38,7 +38,10 @@ public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHan
 		}
 
 		if (XML_BOOKMARKS.equals(tag)) {
-			return MapBookmarks.of((MapModel) parent);
+			final MapModel map = (MapModel) parent;
+			final MapBookmarks mapBookmarks = new MapBookmarks(map);
+			map.addExtension(mapBookmarks);
+			return mapBookmarks;
 		}
 
 		if (XML_BOOKMARK.equals(tag)) {
@@ -58,15 +61,6 @@ public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHan
 		String nodeId = dom.getAttribute(XML_NODE_ID, null);
 		String name = dom.getAttribute(XML_NAME, null);
 		String opensAsRootStr = dom.getAttribute(XML_OPENS_AS_ROOT, "false");
-
-		if (nodeId == null || name == null) {
-			return;
-		}
-
-		if (map.getNodeForID(nodeId) == null) {
-			return;
-		}
-
 		boolean opensAsRoot = Boolean.parseBoolean(opensAsRootStr);
 		NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(name, opensAsRoot);
 
