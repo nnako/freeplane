@@ -544,6 +544,7 @@
 			<Entry builder="separator" />
 			<Entry name="MoveToRootAction" accelerator="ESCAPE" />
 			<Entry name="GotoNodeAction" />
+			<Entry name="BookmarkNodeAction" />
 			<Entry name="JumpInAction"  accelerator="shift ESCAPE"/>
 			<Entry name="JumpOutAction"  accelerator="control ESCAPE"/>
 			<Entry name="node_selector" >
@@ -775,6 +776,7 @@
 		<Entry name="AlwaysUnfoldedNodeAction" usedBy = "EDITOR" />
 		<Entry name="FreeNodeAction" usedBy = "EDITOR" />
 		<Entry builder="separator" />
+		        <Entry name="BookmarkNodeAction" />
 				<Entry name="goto" processOnPopup="true">
 					<Entry builder="link_actions" />
 					<Entry builder="clone_actions" />

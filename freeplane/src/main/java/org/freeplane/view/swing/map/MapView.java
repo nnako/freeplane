@@ -1508,11 +1508,6 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			setBackground(requiredBackground());
 			return;
 		}
-		if(property.equals(MapBookmarks.class)) {
-			final MapViewPane mapViewPane = (MapViewPane) SwingUtilities.getAncestorOfClass(MapViewPane.class, this);
-			mapViewPane.updateBookmarksToolbar();
-			return;
-		}
 		if (property.equals(MapStyle.MAP_STYLES)){
 	        updateContentStyle();
 	        getRoot().resetLayoutPropertiesRecursively();

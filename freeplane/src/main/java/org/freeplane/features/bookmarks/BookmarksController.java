@@ -30,25 +30,29 @@ public class BookmarksController implements IExtension{
 		readManager.addElementHandler("bookmarks", bookmarksBuilder);
 		readManager.addElementHandler("bookmark", bookmarksBuilder);
 		writeManager.addExtensionElementWriter(MapBookmarks.class, bookmarksBuilder);
+		modeController.addAction(new BookmarkNodeAction(modeController));
 	}
 
 	public void addBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
-		if(getBookmarks(node.getMap()).add(node.getID(), descriptor))
-			fireBookmarksChanged();
+		final MapModel map = node.getMap();
+		if(getBookmarks(map).add(node.getID(), descriptor))
+			fireBookmarksChanged(map);
 	}
 
 	public void removeBookmark(NodeModel node) {
-		if(getBookmarks(node.getMap()).remove(node.getID()))
-			fireBookmarksChanged();
+		final MapModel map = node.getMap();
+		if(getBookmarks(map).remove(node.getID()))
+			fireBookmarksChanged(map);
 	}
 
 	public void moveBookmark(NodeModel node, int index) {
-		if(getBookmarks(node.getMap()).move(node.getID(), index))
-			fireBookmarksChanged();
+		final MapModel map = node.getMap();
+		if(getBookmarks(map).move(node.getID(), index))
+			fireBookmarksChanged(map);
 	}
 
-	private void fireBookmarksChanged() {
-		modeController.getMapController().fireMapChanged(new MapChangeEvent(this, MapBookmarks.class, null, null));
+	private void fireBookmarksChanged(MapModel map) {
+		modeController.getMapController().fireMapChanged(new MapChangeEvent(this, map, MapBookmarks.class, null, null));
 	}
 
 	public MapBookmarks getBookmarks(MapModel map) {

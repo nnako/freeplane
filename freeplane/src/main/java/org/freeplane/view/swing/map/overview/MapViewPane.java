@@ -23,6 +23,7 @@ import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.BookmarksController;
+import org.freeplane.features.bookmarks.MapBookmarks;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.mode.Controller;
@@ -125,7 +126,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         });
     }
 
-	public void updateBookmarksToolbar() {
+	private void updateBookmarksToolbar() {
 		if(bookmarksToolbar != null) {
 			BookmarksController bookmarksController = mapView.getModeController().getExtension(BookmarksController.class);
 			bookmarksController.updateBookmarksToolbar(bookmarksToolbar, mapView.getMap());
@@ -137,6 +138,10 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         if (event.getMap() != mapView.getMap()) {
             return;
         }
+		if(event.getProperty().equals(MapBookmarks.class)) {
+			updateBookmarksToolbar();
+			return;
+		}
         updateMapOverview();
     }
 
