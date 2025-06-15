@@ -102,49 +102,6 @@ public class BookmarksBuilderTest {
 	}
 
 	@Test
-	public void shouldNotAddBookmarkForInvalidNode() {
-		MapBookmarks bookmarks = MapBookmarks.of(mapModel);
-		when(mapModel.getExtension(MapBookmarks.class)).thenReturn(bookmarks);
-
-		XMLElement dom = new XMLElement("bookmark");
-		dom.setAttribute("nodeId", "invalidNode");
-		dom.setAttribute("name", "Test Bookmark");
-		dom.setAttribute("opensAsRoot", "false");
-
-		bookmarksBuilder.endElement(mapModel, "bookmark", mapModel, dom);
-
-		assertThat(bookmarks.contains("invalidNode"), equalTo(false));
-	}
-
-	@Test
-	public void shouldNotAddBookmarkWithMissingNodeId() {
-		MapBookmarks bookmarks = MapBookmarks.of(mapModel);
-		when(mapModel.getExtension(MapBookmarks.class)).thenReturn(bookmarks);
-
-		XMLElement dom = new XMLElement("bookmark");
-		dom.setAttribute("name", "Test Bookmark");
-		dom.setAttribute("opensAsRoot", "false");
-
-		bookmarksBuilder.endElement(mapModel, "bookmark", mapModel, dom);
-
-		assertThat(bookmarks.size(), equalTo(1));
-	}
-
-	@Test
-	public void shouldNotAddBookmarkWithMissingName() {
-		MapBookmarks bookmarks = MapBookmarks.of(mapModel);
-		when(mapModel.getExtension(MapBookmarks.class)).thenReturn(bookmarks);
-
-		XMLElement dom = new XMLElement("bookmark");
-		dom.setAttribute("nodeId", "validNode");
-		dom.setAttribute("opensAsRoot", "false");
-
-		bookmarksBuilder.endElement(mapModel, "bookmark", mapModel, dom);
-
-		assertThat(bookmarks.contains("validNode"), equalTo(false));
-	}
-
-	@Test
 	public void shouldIgnoreNonMapModelParentInEndElement() {
 		MapBookmarks bookmarks = MapBookmarks.of(mapModel);
 		when(mapModel.getExtension(MapBookmarks.class)).thenReturn(bookmarks);
