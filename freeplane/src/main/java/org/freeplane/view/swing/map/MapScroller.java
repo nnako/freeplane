@@ -122,11 +122,11 @@ class MapScroller {
         scrollNode(nodeView, ScrollingDirective.of(position), slowScroll);
     }
 
-    void scrollNodeToCenter(NodeView node) {
-        scrollNode(node, ScrollingDirective.SCROLL_NODE_TO_CENTER, shouldScrollSlowly());
+    void scrollNodeToCenter(NodeView node, boolean slow) {
+        scrollNode(node, ScrollingDirective.SCROLL_NODE_TO_CENTER, slow);
     }
 
-	private boolean shouldScrollSlowly() {
+	boolean shouldScrollSlowly() {
 		return ResourceController.getResourceController().getBooleanProperty("slow_scroll_selected_node");
 	}
 
@@ -351,7 +351,7 @@ class MapScroller {
 			anchorContentLocation = getAnchorCenterPoint();
 	}
 
-	void scrollNodeTreeToVisible(NodeView node) {
+	void scrollNodeTreeToVisible(NodeView node, boolean slow) {
 		MapViewPort viewport = (MapViewPort) map.getParent();
 		final Rectangle visibleRect = viewport.getViewRect();
 		Rectangle requiredRectangle = new Rectangle(node.getSize());
@@ -381,7 +381,7 @@ class MapScroller {
 			}
 		}
 		keepShowingSelectedAfterScroll();
-		if(shouldScrollSlowly())
+		if(slow)
 			startSlowScrolling();
 		node.scrollRectToVisible(requiredRectangle);
 		showSelectedAfterScroll();

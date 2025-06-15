@@ -331,6 +331,7 @@
 				<Entry name="SetBooleanPropertyAction.show_creation_modification_in_status" />
 				<Entry name="ToggleScrollbarsAction" />
 				<Entry name="ToggleMapOverviewAction" />
+				<Entry name="ToggleBookmarksToolbarAction" />
 				<Entry name="ShowFormatPanel"/>
 			</Entry>
 			<Entry name="menu_viewmode" >
@@ -543,6 +544,7 @@
 			<Entry builder="separator" />
 			<Entry name="MoveToRootAction" accelerator="ESCAPE" />
 			<Entry name="GotoNodeAction" />
+			<Entry name="BookmarkNodeAction" />
 			<Entry name="JumpInAction"  accelerator="shift ESCAPE"/>
 			<Entry name="JumpOutAction"  accelerator="control ESCAPE"/>
 			<Entry name="node_selector" >
@@ -688,6 +690,7 @@
 		<Entry name="ToggleStatusAction" />
 		<Entry name="ToggleScrollbarsAction" />
 		<Entry name="ToggleMapOverviewAction" />
+		<Entry name="ToggleBookmarksToolbarAction" />
 		<Entry builder="separator" />
 		<Entry name="ShowFormatPanel" />
 		<Entry name="ShowHideNoteAction" accelerator="control GREATER" />
@@ -773,6 +776,7 @@
 		<Entry name="AlwaysUnfoldedNodeAction" usedBy = "EDITOR" />
 		<Entry name="FreeNodeAction" usedBy = "EDITOR" />
 		<Entry builder="separator" />
+		        <Entry name="BookmarkNodeAction" />
 				<Entry name="goto" processOnPopup="true">
 					<Entry builder="link_actions" />
 					<Entry builder="clone_actions" />

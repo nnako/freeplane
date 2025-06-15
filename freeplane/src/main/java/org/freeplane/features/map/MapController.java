@@ -636,7 +636,7 @@ implements IExtension, NodeChangeAnnouncer{
 
 
 	public void centerNode(final NodeModel node) {
-		Controller.getCurrentController().getSelection().centerNode(node);
+		Controller.getCurrentController().getSelection().scrollNodeToCenter(node);
 	}
 
 	public List<NodeModel> childrenFolded(final NodeModel node) {

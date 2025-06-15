@@ -544,6 +544,11 @@ public interface NodeRO {
 	/**@since 1.11.3 */
 	String getBranchAsTextOutline();
 
-	/**@since 1.12.1 */
-	TagsRO getTags();
+	       /**@since 1.12.1 */
+       TagsRO getTags();
+
+       /** Returns the bookmark for this node, if one exists.
+        * @return the bookmark for this node, or null if this node is not bookmarked
+        * @since 1.12.12 */
+       NodeBookmark getBookmark();
 }

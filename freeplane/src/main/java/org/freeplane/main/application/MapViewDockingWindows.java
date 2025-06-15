@@ -69,6 +69,7 @@ import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.url.mindmapmode.DroppedMindMapOpener;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.map.overview.MapViewPane;
 import org.freeplane.view.swing.ui.DefaultMapMouseListener;
 
 import net.infonode.docking.AbstractTabWindow;
@@ -474,7 +475,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	}
 
 	static Component getContainedMapView(View dockedWindow) {
-	    JScrollPane scrollPane = (JScrollPane) ((Container) dockedWindow.getComponent()).getComponent(1);
+	    JScrollPane scrollPane = ((MapViewPane) dockedWindow.getComponent()).getMapViewScrollPane();
 	    Component view = scrollPane.getViewport().getView();
         return view;
     }

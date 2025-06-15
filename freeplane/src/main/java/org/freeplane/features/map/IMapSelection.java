@@ -35,11 +35,6 @@ public interface IMapSelection {
 		CENTER, LEFT, RIGHT, TOP, BOTTOM,
 		TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
 	}
-
-	public void centerNode(final NodeModel node);
-
-	public void centerNodeSlowly(final NodeModel node);
-
 	public void moveNodeTo(final NodeModel node, NodePosition position);
 
 	public void slowlyMoveNodeTo(final NodeModel node, NodePosition position);
@@ -70,15 +65,19 @@ public interface IMapSelection {
 
     public void preserveNodeLocationOnScreen(final NodeModel node, float horizontalPoint, float verticalPoint);
 
-	public void scrollNodeTreeToVisible(final NodeModel  node);
-
     public void makeTheSelected(final NodeModel node);
 
     public void makeTheSearchRoot(final NodeModel node);
 
 	public void scrollNodeToVisible(NodeModel node);
 
+	public void scrollNodeToCenter(NodeModel node, boolean slow);
+
 	public void scrollNodeToCenter(NodeModel node);
+
+	public void scrollNodeTreeToVisible(final NodeModel  node, boolean slow);
+
+	public void scrollNodeTreeToVisible(final NodeModel  node);
 
 	public void selectAsTheOnlyOneSelected(final NodeModel node);
 

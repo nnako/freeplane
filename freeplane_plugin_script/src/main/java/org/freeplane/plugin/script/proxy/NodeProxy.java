@@ -36,6 +36,9 @@ import org.freeplane.api.Reminder;
 import org.freeplane.api.Side;
 import org.freeplane.api.Tags;
 import org.freeplane.core.undo.IActor;
+import org.freeplane.features.bookmarks.BookmarksController;
+import org.freeplane.features.bookmarks.NodeBookmarkDescriptor;
+import org.freeplane.features.bookmarks.MapBookmarks;
 import org.freeplane.core.util.HtmlUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
@@ -1337,4 +1340,37 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
     public Tags getTags() {
         return new TagsProxy(getDelegate(), getScriptContext());
     }
+
+	// Node: R/W
+	@Override
+	public void bookmark(String name, org.freeplane.api.BookmarkType bookmarkType) {
+		final BookmarksController bookmarksController = getBookmarksController();
+		final NodeModel node = getDelegate();
+		boolean opensAsRoot = (bookmarkType == org.freeplane.api.BookmarkType.ROOT);
+		final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(name, opensAsRoot);
+		bookmarksController.addBookmark(node, descriptor);
+	}
+
+	// Node: R/W
+	@Override
+	public void removeBookmark() {
+		final BookmarksController bookmarksController = getBookmarksController();
+		final NodeModel node = getDelegate();
+		bookmarksController.removeBookmark(node);
+	}
+
+	private BookmarksController getBookmarksController() {
+		return getModeController().getExtension(BookmarksController.class);
+	}
+
+	// NodeRO: R
+	@Override
+	public org.freeplane.api.NodeBookmark getBookmark() {
+		final BookmarksController bookmarksController = getBookmarksController();
+		final MapModel map = getDelegate().getMap();
+		final MapBookmarks mapBookmarks = bookmarksController.getBookmarks(map);
+		final String nodeId = getDelegate().getID();
+		final org.freeplane.features.bookmarks.NodeBookmark coreBookmark = mapBookmarks.getBookmark(nodeId);
+		return coreBookmark != null ? new NodeBookmarkProxy(coreBookmark, getScriptContext()) : null;
+	}
 }

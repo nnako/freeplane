@@ -1,11 +1,23 @@
 package org.freeplane.plugin.script.proxy;
 
-import groovy.lang.Closure;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.freeplane.api.ConditionalStyles;
 import org.freeplane.api.NodeChangeListener;
 import org.freeplane.api.NodeCondition;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.ColorUtils;
+import org.freeplane.features.bookmarks.BookmarksController;
+import org.freeplane.features.bookmarks.MapBookmarks;
+import org.freeplane.features.bookmarks.NodeBookmarkDescriptor;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.filter.condition.ICondition;
@@ -28,14 +40,7 @@ import org.freeplane.plugin.script.proxy.Proxy.Map;
 import org.freeplane.plugin.script.proxy.Proxy.MindMap;
 import org.freeplane.plugin.script.proxy.Proxy.Node;
 
-import java.awt.*;
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
+import groovy.lang.Closure;
 
 public class MapProxy extends AbstractProxy<MapModel> implements MindMap, Map {
 	public MapProxy(final MapModel map, final ScriptContext scriptContext) {
@@ -297,7 +302,7 @@ public class MapProxy extends AbstractProxy<MapModel> implements MindMap, Map {
         final ICondition condition = ProxyUtils.createCondition(closure, getScriptContext());
         setFilter(true, showAncestors, showDescendants, condition);
     }
-    
+
 	private void setFilter(boolean hideMatches, final boolean showAncestors, final boolean showDescendants, final ICondition condition) {
 		final FilterController filterController = FilterController.getCurrentFilterController();
 		if (condition == null) {
@@ -487,5 +492,36 @@ public class MapProxy extends AbstractProxy<MapModel> implements MindMap, Map {
 			}
 		}
 		mapStyleController.setProperty(mapModel, locationProperty, templateNormalizedLocation);
+	}
+
+	// MapRO: R
+	@Override
+	public List<org.freeplane.api.NodeBookmark> getBookmarks() {
+		final BookmarksController bookmarksController = getModeController().getExtension(BookmarksController.class);
+		final MapBookmarks mapBookmarks = bookmarksController.getBookmarks(getDelegate());
+		final List<org.freeplane.features.bookmarks.NodeBookmark> coreBookmarks = mapBookmarks.getBookmarks();
+		final List<org.freeplane.api.NodeBookmark> result = new ArrayList<>(coreBookmarks.size());
+		for (org.freeplane.features.bookmarks.NodeBookmark coreBookmark : coreBookmarks) {
+			result.add(new NodeBookmarkProxy(coreBookmark, getScriptContext()));
+		}
+		return result;
+	}
+
+	// Map: R/W
+	@Override
+	public void setBookmarks(List<org.freeplane.api.NodeBookmark> bookmarks) {
+		final BookmarksController bookmarksController = getModeController().getExtension(BookmarksController.class);
+		final MapModel map = getDelegate();
+		bookmarksController.removeAllBookmarks(map);
+			// Add new bookmarks
+		for (org.freeplane.api.NodeBookmark bookmark : bookmarks) {
+			final NodeModel node = ((NodeProxy) bookmark.getNode()).getDelegate();
+			if (!node.getMap().equals(map)) {
+				throw new IllegalArgumentException("Bookmark references a node from a different map");
+			}
+			final boolean opensAsRoot = bookmark.getBookmarkType() == org.freeplane.api.BookmarkType.ROOT || node.isRoot();
+			final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmark.getName(), opensAsRoot);
+			bookmarksController.addBookmark(node, descriptor);
+		}
 	}
 }

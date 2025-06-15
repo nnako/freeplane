@@ -121,6 +121,10 @@ public interface ViewController {
 
 	public void setMapOverviewVisible(boolean b);
 
+	public boolean isBookmarksToolbarVisible();
+
+	public void setBookmarksToolbarVisible(boolean b);
+
 	public boolean areScrollbarsVisible();
 
 	public void setScrollbarsVisible(boolean b);
