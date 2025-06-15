@@ -73,7 +73,7 @@ public class NodeTooltipManager implements IExtension{
 	private JToolTip tip;
 	final private ComponentMouseListener componentMouseListener;
 	private WeakReference<Component> focusOwnerRef;
-	private boolean mouseOverComponent;
+	private MouseInsideListener mouseInsideContentListener;
 	private MouseInsideListener mouseInsideTooltipListener;
     private Point preferredToolTipLocation;
 
@@ -137,7 +137,6 @@ public class NodeTooltipManager implements IExtension{
 		exitTimer = new Timer(150, new ExitTimerAction());
 		exitTimer.setRepeats(false);
 		componentMouseListener = new ComponentMouseListener();
-		mouseOverComponent = false;
 	}
 
 	/**
@@ -214,7 +213,9 @@ public class NodeTooltipManager implements IExtension{
 			if(component != null)
 				component.requestFocusInWindow();
 			tipPopup = null;
-			mouseInsideTooltipListener = null;
+			mouseInsideTooltipListener.disconnect();
+			mouseInsideContentListener.disconnect();
+			mouseInsideTooltipListener = mouseInsideContentListener = null;
 			tip = null;
 			focusOwnerRef = null;
 			enterTimer.stop();
@@ -263,8 +264,6 @@ public class NodeTooltipManager implements IExtension{
 		}
 		@Override
         public void mouseExited(MouseEvent event) {
-			if(insideComponent == event.getComponent())
-				mouseOverComponent = false;
 		}
 
 		@Override
@@ -288,7 +287,6 @@ public class NodeTooltipManager implements IExtension{
             return;
         }
 		if(insideComponent == component){
-			mouseOverComponent = true;
 			mouseEvent = event;
 			return;
 		}
@@ -296,6 +294,8 @@ public class NodeTooltipManager implements IExtension{
 		if(ResourceController.getResourceController().getBooleanProperty(RESOURCES_SHOW_NODE_TOOLTIPS)
 		        || null == SwingUtilities.getAncestorOfClass(NodeView.class, component)) {
 		    insideComponent = component;
+			mouseInsideContentListener = new MouseInsideListener(insideComponent instanceof MainView ? ((MainView)insideComponent).getNodeView().getContent() : insideComponent);
+			mouseInsideContentListener.mouseEntered(event);
 		    preferredToolTipLocation = component.getToolTipLocation(event);
 		    mouseEvent = event;
             enterTimer.restart();
@@ -303,7 +303,7 @@ public class NodeTooltipManager implements IExtension{
 	}
 
 	protected boolean isMouseOverComponent() {
-		return mouseOverComponent;
+		return mouseInsideContentListener.isMouseInside();
 	}
 
 
