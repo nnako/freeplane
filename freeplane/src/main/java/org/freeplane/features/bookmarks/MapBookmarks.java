@@ -39,15 +39,10 @@ public class MapBookmarks implements IExtension {
 		this.bookmarks = new HashMap<String, NodeBookmarkDescriptor>();
 	}
 
-	boolean add(String id, NodeBookmarkDescriptor bookmark) {
-		if (id == null || bookmark == null) {
-			return false;
-		}
+	void add(String id, NodeBookmarkDescriptor bookmark) {
 		if (bookmarks.put(id, bookmark) == null) {
 			nodeIDs.add(id);
-			return true;
 		}
-		return false;
 	}
 
 	boolean remove(String id) {

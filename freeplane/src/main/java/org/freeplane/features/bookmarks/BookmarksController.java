@@ -5,8 +5,6 @@
  */
 package org.freeplane.features.bookmarks;
 
-import javax.swing.JButton;
-
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
@@ -19,10 +17,12 @@ import org.freeplane.features.mode.ModeController;
 
 public class BookmarksController implements IExtension{
 	private final ModeController modeController;
+	private final BookmarksToolbarBuilder toolbarBuilder;
 
 	public BookmarksController(ModeController modeController) {
 		super();
 		this.modeController = modeController;
+		this.toolbarBuilder = new BookmarksToolbarBuilder(this);
 		final MapController mapController = modeController.getMapController();
 		final ReadManager readManager = mapController.getReadManager();
 		final WriteManager writeManager = mapController.getWriteManager();
@@ -35,8 +35,8 @@ public class BookmarksController implements IExtension{
 
 	public void addBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
 		final MapModel map = node.getMap();
-		if(getBookmarks(map).add(node.getID(), descriptor))
-			fireBookmarksChanged(map);
+		getBookmarks(map).add(node.getID(), descriptor);
+		fireBookmarksChanged(map);
 	}
 
 	public void removeBookmark(NodeModel node) {
@@ -60,14 +60,7 @@ public class BookmarksController implements IExtension{
 	}
 
 	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
-		toolbar.removeAll();
-		MapBookmarks bookmarks = getBookmarks(map);
-		for (NodeBookmark bookmark : bookmarks.getBookmarks()) {
-			final JButton button = new JButton();
-			button.setText(bookmark.getDescriptor().getName());
-			button.addActionListener(action -> bookmark.open());
-			toolbar.add(button);
-		}
+		toolbarBuilder.updateBookmarksToolbar(toolbar, map);
 	}
 
 }
