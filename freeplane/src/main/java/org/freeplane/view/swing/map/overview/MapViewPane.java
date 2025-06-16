@@ -26,6 +26,8 @@ import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.MapChangeEvent;
+import org.freeplane.features.map.NodeDeletionEvent;
+import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.mindmapmode.MModeController;
 import org.freeplane.features.ui.ViewController;
@@ -65,6 +67,8 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 	private final FreeplaneToolBar bookmarksToolbar;
 
 	private final MapView mapView;
+
+	private boolean bookmarksUpdateScheduled;
 
     public MapViewPane(JScrollPane mapViewScrollPane) {
         this.mapViewScrollPane = mapViewScrollPane;
@@ -130,6 +134,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 		if(bookmarksToolbar != null) {
 			BookmarksController bookmarksController = mapView.getModeController().getExtension(BookmarksController.class);
 			bookmarksController.updateBookmarksToolbar(bookmarksToolbar, mapView.getMap());
+			bookmarksUpdateScheduled = false;
 		}
 	}
 
@@ -139,13 +144,32 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
             return;
         }
 		if(event.getProperty().equals(MapBookmarks.class)) {
-			updateBookmarksToolbar();
+			updateBookmarksToolbarLater();
 			return;
 		}
-        updateMapOverview();
-    }
+		updateMapOverview();
+	}
 
-    private void updateMapOverview() {
+	private void updateBookmarksToolbarLater() {
+		if(bookmarksToolbar != null && ! bookmarksUpdateScheduled) {
+			bookmarksUpdateScheduled = true;
+			SwingUtilities.invokeLater(this::updateBookmarksToolbar);
+		}
+	}
+
+
+
+    @Override
+	public void onNodeDeleted(NodeDeletionEvent nodeDeletionEvent) {
+    	updateBookmarksToolbarLater();
+	}
+
+	@Override
+	public void onNodeInserted(NodeModel parent, NodeModel child, int newIndex) {
+		updateBookmarksToolbarLater();
+	}
+
+	private void updateMapOverview() {
         if (mapOverviewPanel.isVisible()) {
             mapOverviewImage.resetImage();
             SwingUtilities.invokeLater(mapOverviewPanel::repaint);

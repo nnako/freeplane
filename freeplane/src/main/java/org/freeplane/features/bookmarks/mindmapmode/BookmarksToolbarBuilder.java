@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
@@ -51,12 +52,12 @@ public class BookmarksToolbarBuilder {
 		this.bookmarksController = bookmarksController;
 	}
 
-			public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
+	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
 		toolbar.removeAll();
 		toolbar.putClientProperty("bookmarksMap", map);
 
-		MapBookmarks bookmarks = bookmarksController.getBookmarks(map);
-		for (NodeBookmark bookmark : bookmarks.getBookmarks()) {
+		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
+		for (NodeBookmark bookmark : bookmarks) {
 			final JButton button = createBookmarkButton(bookmark, toolbar);
 			toolbar.add(button);
 		}

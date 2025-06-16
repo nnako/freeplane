@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.freeplane.core.extension.IExtension;
@@ -159,4 +160,24 @@ public class MapBookmarks implements IExtension {
 		nodeIDs.clear();
 		return true;
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(bookmarks, map, nodeIDs);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MapBookmarks other = (MapBookmarks) obj;
+		return Objects.equals(bookmarks, other.bookmarks) && Objects.equals(map, other.map)
+		        && Objects.equals(nodeIDs, other.nodeIDs);
+	}
+
+
 }
