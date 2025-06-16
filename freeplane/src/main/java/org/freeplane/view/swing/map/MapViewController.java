@@ -55,6 +55,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+import org.freeplane.api.TextWritingDirection;
 import org.freeplane.core.awt.GraphicsHints;
 import org.freeplane.core.extension.Configurable;
 import org.freeplane.core.resources.IFreeplanePropertyListener;
@@ -1014,7 +1015,7 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 			} else {
 				frameTitle = (workspaceTitle.isEmpty() ? "" : workspaceTitle + " - ") + modeName;
 			}
-			controller.getViewController().setTitle(frameTitle);
+			controller.getViewController().setTitle(TextWritingDirection.LEFT_TO_RIGHT.embedded(frameTitle));
 		}
 		else {
 			controller.getViewController().setTitle("");

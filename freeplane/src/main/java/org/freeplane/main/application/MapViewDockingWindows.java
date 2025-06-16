@@ -58,6 +58,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import org.apache.commons.codec.binary.Base64;
+import org.freeplane.api.TextWritingDirection;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.FileOpener;
 import org.freeplane.core.ui.components.UITools;
@@ -258,7 +259,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
                     } else {
                         mapView.putClientProperty(CUSTOMIZED_TAB_NAME_PROPERTY, newName);
                     }
-                	addTitleProvider(window); //TODO: revisar
+                	addTitleProvider(window);
                     setTitle();
                 });
 				menu.add(renameItem);
@@ -490,7 +491,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
         File file = ((MapView)pNewMap).getMap().getFile();
         TitledTabStateProperties tabProperties = getContainingDockedWindow(pNewMap)
                 .getWindowProperties().getTabProperties().getTitledTabProperties().getNormalProperties();
-        tabProperties.setToolTipText(file != null ? file.getAbsolutePath() :  null);
+        tabProperties.setToolTipText(file != null ? TextWritingDirection.LEFT_TO_RIGHT.embedded(file.getAbsolutePath()) :  null);
     }
 
 	@Override

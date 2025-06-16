@@ -38,6 +38,7 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
+import org.freeplane.api.TextWritingDirection;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.IUserInputListenerFactory;
@@ -499,9 +500,6 @@ public class LastOpenedList implements IMapViewChangeListener, IMapChangeListene
 
 	private void createOpenMapItemName(AFreeplaneAction openMapAction, final String restorable) {
 		final int separatorIndex = restorable.indexOf(':');
-		if(separatorIndex == -1)
-			openMapAction.putValue(Action.NAME, restorable);
-
 		String key = restorable.substring(0, separatorIndex);
 		String filePath = restorable.substring(separatorIndex);
 		String keyName = TextUtils.getText("open_as" + key, key);
@@ -521,7 +519,7 @@ public class LastOpenedList implements IMapViewChangeListener, IMapChangeListene
 			String folderPath = filePath.substring(0, fileSeparatorIndex);
 			actionName = fileName + " (" + folderPath + ")";
 		}
-		openMapAction.putValue(Action.NAME, actionName);
+		openMapAction.putValue(Action.NAME, TextWritingDirection.LEFT_TO_RIGHT.embedded(actionName));
 
     }
 
