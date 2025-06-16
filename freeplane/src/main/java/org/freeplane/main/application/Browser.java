@@ -23,7 +23,7 @@ public class Browser {
 
                 if ("file".equalsIgnoreCase(uri.getScheme())) {
 					if (desktop.isSupported(Desktop.Action.OPEN)) {
-					    desktop.open(new File(uri.getPath()));
+					    desktop.open(new File(uri));
 					    return;
 					}
 				}
