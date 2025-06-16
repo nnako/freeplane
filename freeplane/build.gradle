@@ -123,6 +123,7 @@ ext.bundleExports = """\
                     org.freeplane.features.cloud,
                     org.freeplane.features.cloud.mindmapmode,
                     org.freeplane.features.commandsearch,
+                    org.freeplane.features.bookmarks.mindmapmode,
                     org.freeplane.features.edge,
                     org.freeplane.features.edge.mindmapmode,
                     org.freeplane.features.encrypt,
