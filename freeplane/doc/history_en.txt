@@ -1,6 +1,8 @@
 ==============================
 1.12.12
 ==============================
+Node bookmarks (Navigate->Bookmark node, pop-up->Bookmark node)
+Bookmark ordering by drag and drop
 Improve auto-scroll
 Bug fixes
 
