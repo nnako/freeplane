@@ -861,10 +861,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
     public void setMap(final MapModel viewedMap) {
-        if(this.viewedMap != null)
-            this.viewedMap.removeMapChangeListener(this);
+    	final MapModel lastViewedMap = this.viewedMap;
+        if(lastViewedMap != null)
+            lastViewedMap.removeMapChangeListener(this);
         Point rootLocationOnScreen = isShowing() ? getRoot().getMainView().getLocationOnScreen() : null;
         this.viewedMap = viewedMap;
+        if(lastViewedMap != null && lastViewedMap != viewedMap)
+        	modeController.getMapController().fireMapChanged(new MapChangeEvent(this, lastViewedMap, MapView.class, this, null, false));
         setName(viewedMap.getTitle());
         final NoteController noteController = NoteController.getController(getModeController());
         showNotes= noteController != null && noteController.showNotesInMap(getMap());
@@ -883,6 +886,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         iconLocation = mapStyle.iconLocation(viewedMap);
         rootsHistory.clear();
         filter = Filter.createTransparentFilter();
+        if(lastViewedMap != viewedMap)
+        	modeController.getMapController().fireMapChanged(new MapChangeEvent(this, viewedMap, MapView.class, null, this, false));
+
         viewedMap.addMapChangeListener(this);
 
         if(rootLocationOnScreen != null) {

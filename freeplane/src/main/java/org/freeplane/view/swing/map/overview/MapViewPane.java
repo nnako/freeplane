@@ -126,7 +126,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         mapView.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 updateMapOverview();
-            };
+            }
         });
     }
 
@@ -140,12 +140,17 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
 	@Override
     public void mapChanged(MapChangeEvent event) {
-        if (event.getMap() != mapView.getMap()) {
-            return;
-        }
 		if(event.getProperty().equals(MapBookmarks.class)) {
 			updateBookmarksToolbarLater();
 			return;
+		}
+		if(event.getProperty().equals(MapView.class)) {
+			if (event.getOldValue() == mapView) {
+				event.getMap().removeMapChangeListener(this);
+				mapView.getMap().addMapChangeListener(this);
+			}
+			else
+				return;
 		}
 		updateMapOverview();
 	}
@@ -184,14 +189,14 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
     @Override
     public void addNotify() {
         super.addNotify();
-        Controller.getCurrentModeController().getMapController().addMapChangeListener(this);
+        mapView.getMap().addMapChangeListener(this);
         ResourceController.getResourceController().addPropertyChangeListener(this);
     }
 
     @Override
     public void removeNotify() {
         super.removeNotify();
-        Controller.getCurrentModeController().getMapController().removeMapChangeListener(this);
+        mapView.getMap().removeMapChangeListener(this);
         ResourceController.getResourceController().removePropertyChangeListener(this);
     }
 
