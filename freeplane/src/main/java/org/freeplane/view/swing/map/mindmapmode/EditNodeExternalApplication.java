@@ -52,9 +52,7 @@ class EditNodeExternalApplication extends EditNodeBase {
 					}
 					final String htmlEditingCommand = ResourceController.getResourceController().getProperty(
 					    "html_editing_command");
-					final String expandedHtmlEditingCommand = new MessageFormat(htmlEditingCommand)
-					    .format(new String[] { temporaryFile.toString() });
-					Controller.exec(expandedHtmlEditingCommand, true);
+					Controller.exec(new String[] {htmlEditingCommand, temporaryFile.getAbsolutePath()}, true);
 					final String content = FileUtils.readFile(temporaryFile);
 					if (content == null) {
 						getEditControl().cancel();

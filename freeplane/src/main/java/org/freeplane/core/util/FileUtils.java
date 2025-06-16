@@ -236,7 +236,7 @@ public class FileUtils {
 		final String osNameStart = System.getProperty("os.name").substring(0, 3);
 		if (osNameStart.equals("Win")) {
 			try {
-				Controller.exec("attrib " + (hidden ? "+" : "-") + "H \"" + file.getAbsolutePath() + "\"");
+				Controller.exec(new String[] { "attrib", (hidden ? "+" : "-") + "H", file.getAbsolutePath()});
 				if (!synchronously) {
 					return;
 				}
