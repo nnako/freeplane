@@ -3,7 +3,7 @@
  *
  * author dimitry
  */
-package org.freeplane.features.bookmarks;
+package org.freeplane.features.bookmarks.mindmapmode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,6 +15,9 @@ import static org.mockito.Mockito.any;
 import java.util.List;
 
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
 import org.junit.Before;

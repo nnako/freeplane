@@ -15,9 +15,9 @@ import org.freeplane.api.NodeChangeListener;
 import org.freeplane.api.NodeCondition;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.util.ColorUtils;
-import org.freeplane.features.bookmarks.BookmarksController;
-import org.freeplane.features.bookmarks.MapBookmarks;
-import org.freeplane.features.bookmarks.NodeBookmarkDescriptor;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.filter.FilterController;
 import org.freeplane.features.filter.condition.ICondition;
@@ -499,9 +499,9 @@ public class MapProxy extends AbstractProxy<MapModel> implements MindMap, Map {
 	public List<org.freeplane.api.NodeBookmark> getBookmarks() {
 		final BookmarksController bookmarksController = getModeController().getExtension(BookmarksController.class);
 		final MapBookmarks mapBookmarks = bookmarksController.getBookmarks(getDelegate());
-		final List<org.freeplane.features.bookmarks.NodeBookmark> coreBookmarks = mapBookmarks.getBookmarks();
+		final List<org.freeplane.features.bookmarks.mindmapmode.NodeBookmark> coreBookmarks = mapBookmarks.getBookmarks();
 		final List<org.freeplane.api.NodeBookmark> result = new ArrayList<>(coreBookmarks.size());
-		for (org.freeplane.features.bookmarks.NodeBookmark coreBookmark : coreBookmarks) {
+		for (org.freeplane.features.bookmarks.mindmapmode.NodeBookmark coreBookmark : coreBookmarks) {
 			result.add(new NodeBookmarkProxy(coreBookmark, getScriptContext()));
 		}
 		return result;

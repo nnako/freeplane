@@ -83,7 +83,7 @@ import org.freeplane.core.util.ColorUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.ModelessAttributeController;
-import org.freeplane.features.bookmarks.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
 import org.freeplane.features.edge.EdgeColorsConfigurationFactory;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.highlight.NodeHighlighter;
@@ -128,7 +128,6 @@ import org.freeplane.view.swing.map.NodeView.PreferredChild;
 import org.freeplane.view.swing.map.link.ConnectorView;
 import org.freeplane.view.swing.map.link.EdgeLinkView;
 import org.freeplane.view.swing.map.link.ILinkView;
-import org.freeplane.view.swing.map.overview.MapViewPane;
 
 /**
  * This class represents the view of a whole MindMap (in analogy to class

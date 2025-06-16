@@ -3,7 +3,7 @@
  *
  * author dimitry
  */
-package org.freeplane.features.bookmarks;
+package org.freeplane.features.bookmarks.mindmapmode;
 
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;

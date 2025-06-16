@@ -6,10 +6,10 @@ import org.freeplane.api.NodeBookmark;
 import org.freeplane.plugin.script.ScriptContext;
 
 class NodeBookmarkProxy implements NodeBookmark {
-	private final org.freeplane.features.bookmarks.NodeBookmark coreBookmark;
+	private final org.freeplane.features.bookmarks.mindmapmode.NodeBookmark coreBookmark;
 	private final ScriptContext scriptContext;
 
-	public NodeBookmarkProxy(org.freeplane.features.bookmarks.NodeBookmark coreBookmark, ScriptContext scriptContext) {
+	public NodeBookmarkProxy(org.freeplane.features.bookmarks.mindmapmode.NodeBookmark coreBookmark, ScriptContext scriptContext) {
 		this.coreBookmark = coreBookmark;
 		this.scriptContext = scriptContext;
 	}

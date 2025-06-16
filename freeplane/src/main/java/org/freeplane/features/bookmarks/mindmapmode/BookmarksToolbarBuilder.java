@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks;
+package org.freeplane.features.bookmarks.mindmapmode;
 
 import java.awt.Color;
 import java.awt.Component;

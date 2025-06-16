@@ -3,7 +3,7 @@
  *
  * author dimitry
  */
-package org.freeplane.features.bookmarks;
+package org.freeplane.features.bookmarks.mindmapmode;
 
 import java.util.Objects;
 

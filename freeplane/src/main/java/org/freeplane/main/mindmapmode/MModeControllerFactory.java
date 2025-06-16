@@ -64,7 +64,7 @@ import org.freeplane.features.attribute.mindmapmode.MAttributeController;
 import org.freeplane.features.attribute.mindmapmode.RemoveAllAttributesAction;
 import org.freeplane.features.attribute.mindmapmode.RemoveFirstAttributeAction;
 import org.freeplane.features.attribute.mindmapmode.RemoveLastAttributeAction;
-import org.freeplane.features.bookmarks.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.clipboard.ClipboardControllers;
 import org.freeplane.features.clipboard.mindmapmode.MClipboardControllers;
 import org.freeplane.features.cloud.CloudController;

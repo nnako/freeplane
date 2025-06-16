@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks;
+package org.freeplane.features.bookmarks.mindmapmode;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -13,6 +13,9 @@ import java.io.IOException;
 
 import org.freeplane.core.io.ITreeWriter;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksBuilder;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.n3.nanoxml.XMLElement;

@@ -36,12 +36,12 @@ import org.freeplane.api.Reminder;
 import org.freeplane.api.Side;
 import org.freeplane.api.Tags;
 import org.freeplane.core.undo.IActor;
-import org.freeplane.features.bookmarks.BookmarksController;
-import org.freeplane.features.bookmarks.NodeBookmarkDescriptor;
-import org.freeplane.features.bookmarks.MapBookmarks;
 import org.freeplane.core.util.HtmlUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
 import org.freeplane.features.encrypt.Base64Coding;
 import org.freeplane.features.encrypt.PasswordStrategy;
 import org.freeplane.features.explorer.AccessedNodes;
@@ -1370,7 +1370,7 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 		final MapModel map = getDelegate().getMap();
 		final MapBookmarks mapBookmarks = bookmarksController.getBookmarks(map);
 		final String nodeId = getDelegate().getID();
-		final org.freeplane.features.bookmarks.NodeBookmark coreBookmark = mapBookmarks.getBookmark(nodeId);
+		final org.freeplane.features.bookmarks.mindmapmode.NodeBookmark coreBookmark = mapBookmarks.getBookmark(nodeId);
 		return coreBookmark != null ? new NodeBookmarkProxy(coreBookmark, getScriptContext()) : null;
 	}
 }
