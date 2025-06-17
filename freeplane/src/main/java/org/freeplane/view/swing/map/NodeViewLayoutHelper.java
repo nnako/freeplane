@@ -300,7 +300,8 @@ class NodeViewLayoutHelper {
 				max[sideIndex] = ContentSizeCalculator.UNSET;
 			}
 			else {
-				max[sideIndex] = Math.max(max[sideIndex], child.getMainView().getPreferredSize().width);
+				if(child.isContentVisible())
+					max[sideIndex] = Math.max(max[sideIndex], child.getMainView().getPreferredSize().width);
 				child.getLayoutHelper().setMinimumContentWidth(ContentSizeCalculator.UNSET);
 			}
     	}
@@ -322,10 +323,6 @@ class NodeViewLayoutHelper {
 
 	private boolean hasChildViews(NodeView child) {
 		return child.getComponentCount() > 1;
-	}
-
-	private boolean isAligned(NodeView child) {
-		return isConsideredForAlignment(child) && hasChildViews(child);
 	}
 
 	private boolean isConsideredForAlignment(NodeView child) {
