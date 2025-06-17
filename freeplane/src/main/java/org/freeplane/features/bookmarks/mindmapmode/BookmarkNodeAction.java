@@ -50,7 +50,7 @@ class BookmarkNodeAction extends AFreeplaneAction {
 		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark_name");
 		final JTextField nameInput = new JTextField(currentName, 40);
 		FocusRequestor.requestFocus(nameInput);
-		JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("opens_as_root");
+		JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
 		opensAsRootCheckBox.setSelected(currentOpensAsRoot);
 		if(node.isRoot())
 			opensAsRootCheckBox.setEnabled(false);

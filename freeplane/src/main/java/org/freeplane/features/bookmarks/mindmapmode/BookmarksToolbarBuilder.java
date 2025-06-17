@@ -138,7 +138,7 @@ public class BookmarksToolbarBuilder {
 		});
 		popup.add(renameItem);
 
-		JCheckBoxMenuItem openAsRootItem = TranslatedElementFactory.createCheckboxMenuItem("opens_as_root");
+		JCheckBoxMenuItem openAsRootItem = TranslatedElementFactory.createCheckboxMenuItem("bookmark.opens_as_root");
 		openAsRootItem.setSelected(bookmark.getDescriptor().opensAsRoot());
 		openAsRootItem.addActionListener(new ActionListener() {
 			@Override
@@ -162,7 +162,7 @@ public class BookmarksToolbarBuilder {
 		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark_name");
 		final JTextField nameInput = new JTextField(currentName, 40);
 		FocusRequestor.requestFocus(nameInput);
-		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("opens_as_root");
+		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
 		opensAsRootCheckBox.setSelected(currentOpensAsRoot);
 
 		Box components = Box.createVerticalBox();
