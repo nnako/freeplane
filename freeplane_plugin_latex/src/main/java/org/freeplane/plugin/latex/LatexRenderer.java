@@ -1,14 +1,17 @@
 package org.freeplane.plugin.latex;
 
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.KeyEvent;
 import java.util.function.Supplier;
 
+import javax.swing.Icon;
 import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.JRestrictedSizeScrollPane;
@@ -51,15 +54,24 @@ public class LatexRenderer extends AbstractContentTransformer implements IEditBa
 
 	@Override
 	public Object transformContent(NodeModel node,
-			Object nodeProperty, Object content, TextController textController, Mode mode)
+			Object nodeProperty, Object content, TextController textController, Mode mode, Component component)
 			throws TransformationException {
         if(mode == Mode.TEXT)
             return content;
 		final String latext = getText(node, nodeProperty, content, Target.VIEW, textController);
 		if (latext == null)
 			return content;
+		int iconWithGapWidth = 0;
+		if(component instanceof JLabel) {
+			final JLabel label = (JLabel)component;
+			if (label.getVerticalTextPosition() != SwingConstants.BOTTOM) {
+				final Icon icon = label.getIcon();
+				int iconWidth = icon != null ? icon.getIconWidth() : 0;
+				iconWithGapWidth = iconWidth > 0 ? iconWidth + label.getIconTextGap() : 0;
+			}
+		}
 		final NodeStyleController ncs = NodeStyleController.getController(textController.getModeController());
-		int widthWithInsets = ncs.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE).toBaseUnitsRounded();
+		int widthWithInsets = ncs.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE).toBaseUnitsRounded() - iconWithGapWidth;
 		final int maxWidth = Math.max(0, widthWithInsets - 4);
 		TeXText teXt = new TeXText(latext);
 		int fontSize = Math.round(ncs.getFontSize(node, StyleOption.FOR_UNSELECTED_NODE) * UITools.FONT_SCALE_FACTOR);
@@ -69,7 +81,7 @@ public class LatexRenderer extends AbstractContentTransformer implements IEditBa
 		return new LatexRenderIcon(icon);
 	}
 
-	private static enum Target { VIEW, EDITOR };
+	private static enum Target { VIEW, EDITOR }
 
     @Override
     public EditNodeBase createEditor(final NodeModel node, Object nodeProperty,

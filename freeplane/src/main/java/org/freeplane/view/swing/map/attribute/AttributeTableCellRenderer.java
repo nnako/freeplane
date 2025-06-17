@@ -95,7 +95,7 @@ class AttributeTableCellRenderer extends DefaultTableCellRenderer {
 			try {
 				// evaluate values only
 				final TextController textController = TextController.getController(attributeTable.getModeController());
-				Object transformedObject = textController.getTransformedObject(attributeTableModel.getNode(), attributeTableModel.getNodeAttributeModel(), value);
+				Object transformedObject = textController.getTransformedObject(attributeTableModel.getNode(), attributeTableModel.getNodeAttributeModel(), value, rendererComponent);
 				text = transformedObject.toString();
 				if (color == null && transformedObject instanceof HighlightedTransformedObject && TextController.isMarkTransformedTextSet()) {
 					color = HighlightedTransformedObject.OK_COLOR;

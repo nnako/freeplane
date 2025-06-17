@@ -220,7 +220,7 @@ class NodeViewFactory {
 					if(text != null) {
 						try {
 							TextController textController = map.getModeController().getExtension(TextController.class);
-							final Object transformedContent = textController.getTransformedObject(model, note, text);
+							final Object transformedContent = textController.getTransformedObject(model, note, text, noteView);
 							newIcon = textController.getIcon(transformedContent);
 							newText = newIcon == null ? transformedContent.toString() : "";
 						}
@@ -293,7 +293,7 @@ class NodeViewFactory {
 				String text;
 				try {
 					TextController textController = map.getModeController().getExtension(TextController.class);
-					final Object transformedContent = textController.getTransformedObject(node, detailText, detailTextText);
+					final Object transformedContent = textController.getTransformedObject(node, detailText, detailTextText, detailContent);
 					Icon icon = textController.getIcon(transformedContent);
 					detailContent.setTextRenderingIcon(icon);
 					text = icon == null ? transformedContent.toString() : "";

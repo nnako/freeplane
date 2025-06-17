@@ -1,6 +1,7 @@
 package org.freeplane.plugin.formula;
 
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
@@ -39,11 +40,11 @@ class FormulaTextTransformer extends AbstractContentTransformer implements IEdit
 
     @Override
 	public Object transformContent(final NodeModel node, Object nodeProperty, final Object obj,
-                                   TextController textController, Mode mode) {
+                                   TextController textController, Mode mode, Component component) {
         if (obj instanceof FormattedFormula) {
             final FormattedFormula formattedFormula = (FormattedFormula) obj;
             final Object evaluationResult = transformContent(node, nodeProperty, formattedFormula.getObject(),
-                textController, mode);
+                textController, mode, component);
             return new FormattedObject(evaluationResult, formattedFormula.getPattern());
         }
         final String text = getViewedText(node, nodeProperty, obj, textController);

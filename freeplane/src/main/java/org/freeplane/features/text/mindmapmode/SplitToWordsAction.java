@@ -21,7 +21,7 @@ import org.freeplane.features.text.TransformationException;
 
 @SuppressWarnings("serial")
 public class SplitToWordsAction extends AMultipleNodeAction{
-	
+
 	static class PatternMaker {
 		static final Pattern ESCAPED_CHARACTERS = Pattern.compile("[\\[\\]\\-\\&\\\\\\^]");
 		static final Pattern WHITE_SPACE = Pattern.compile("\\s+");
@@ -31,7 +31,7 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 		}
 
 	}
-	
+
 	static{
 		ResourceController.getResourceController().setDefaultProperty("SplitToWordsAction.auxiliaryWordList", TextUtils.getText("defaultAuxiliaryWordList"));
 	}
@@ -52,7 +52,7 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 	public static String createActionKey(int nodeNumberInLine) {
 		return SplitToWordsAction.class.getSimpleName() + "." + nodeNumberInLine;
 	}
-	
+
 	private static String charactersAcceptedInWord;
 	private static String numberRegularExpression;
 	private static String wordRegularExpression;
@@ -62,8 +62,8 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 	private boolean leaveOriginalNodeEmpty;
 	private boolean saveOriginalTextAsDetails;
     private boolean capitalizeWords;
-	
-	
+
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		compileWordPattern();
@@ -93,7 +93,7 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 
 	@Override
 	protected void actionPerformed(ActionEvent e, NodeModel node) {
-		
+
 		final ModeController modeController = Controller.getCurrentModeController();
 		MTextController textController = (MTextController) modeController.getExtension(TextController.class);
 		final MMapController mapController = (MMapController) modeController.getMapController();
@@ -104,11 +104,11 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 			return;
 		}
 		String plainText = HtmlUtils.htmlToPlain(details).trim();
-		
-		
+
+
 		int nodeCountInLine;
 		boolean newNode;
-		
+
 		if(leaveOriginalNodeEmpty){
 			nodeCountInLine = 0;
 			newNode = true;
@@ -118,7 +118,7 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 			nodeCountInLine = -1;
 			newNode = false;
 		}
-		
+
 		NodeModel currentNode = node;
 		final Matcher matcher = compiledWordPattern.matcher(plainText);
 		while (matcher.find()){
@@ -140,9 +140,9 @@ public class SplitToWordsAction extends AMultipleNodeAction{
 			}
 			else
 				currentText = currentNode.getText() + ' ';
-			
+
 			boolean auxiliaryWord = auxiliaryWords.contains(word.toLowerCase());
-			
+
 			if (! auxiliaryWord) {
 				textController.setNodeText(currentNode, currentText + capitalize(word));
 				newNode = true;

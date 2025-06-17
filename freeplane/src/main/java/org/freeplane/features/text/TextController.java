@@ -145,12 +145,12 @@ public class TextController implements IExtension {
 		return nodeModel.getText();
 	}
 
-    public Object getTransformedObject(final NodeModel node, Object nodeProperty, Object content)
+    public Object getTransformedObject(final NodeModel node, Object nodeProperty, Object content, Component component)
             throws TransformationException{
-        return getTransformedObject(node, nodeProperty, content, Mode.VIEW);
+        return getTransformedObject(node, nodeProperty, content, Mode.VIEW, component);
     }
 
-	private Object getTransformedObject(final NodeModel node, Object nodeProperty, Object content, Mode mode)
+	private Object getTransformedObject(final NodeModel node, Object nodeProperty, Object content, Mode mode, Component component)
 	        throws TransformationException {
 		if (content instanceof String) {
 			String string = (String) content;
@@ -165,7 +165,7 @@ public class TextController implements IExtension {
 		for (IContentTransformer textTransformer : getTextTransformers()) {
 			try {
 				Object in = content;
-				content = textTransformer.transformContent(node, nodeProperty, in, this, mode);
+				content = textTransformer.transformContent(node, nodeProperty, in, this, mode, component);
 				markTransformation = markTransformation || textTransformer.markTransformation() && !in.equals(content);
 			}
 			catch (RuntimeException e) {
@@ -209,7 +209,7 @@ public class TextController implements IExtension {
 
 	private Object getTransformedObjectNoFormattingNoThrow(final NodeModel node, Object nodeProperty, Object data, Mode mode) {
 		try {
-			Object transformedObject = getTransformedObject(node, nodeProperty, data, mode);
+			Object transformedObject = getTransformedObject(node, nodeProperty, data, mode, null);
 			if (transformedObject instanceof HighlightedTransformedObject)
 				transformedObject =  ((HighlightedTransformedObject) transformedObject).getObject();
 			if (transformedObject instanceof IFormattedObject)
@@ -223,8 +223,11 @@ public class TextController implements IExtension {
 	}
 
 	public Object getTransformedObject(NodeModel node) throws TransformationException {
+		return getTransformedObject(node, null);
+	}
+	public Object getTransformedObject(NodeModel node, Component component) throws TransformationException {
 		final Object userObject = node.getUserObject();
-		return getTransformedObject(node, node, userObject);
+		return getTransformedObject(node, node, userObject, component);
 	}
 
 	public Object getTransformedObjectNoThrow(NodeModel node) {
@@ -235,7 +238,7 @@ public class TextController implements IExtension {
 	/** convenience method for getTransformedText().toString. */
 	public String getTransformedText(final NodeModel node, Object nodeProperty, Object data)
 	        throws TransformationException {
-		Object transformed = getTransformedObject(node, nodeProperty, data);
+		Object transformed = getTransformedObject(node, nodeProperty, data, null);
 		if(transformed instanceof Icon)
 			return data.toString();
 		else

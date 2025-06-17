@@ -1,5 +1,6 @@
 package org.freeplane.features.text;
 
+import java.awt.Component;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -18,7 +19,7 @@ class FormatContentTransformer extends AbstractContentTransformer {
 		this.textController = textController;
 	}
 
-	public Object transformContent(final NodeModel node, Object nodeProperty, Object obj, TextController textController, Mode mode) {
+	public Object transformContent(final NodeModel node, Object nodeProperty, Object obj, TextController textController, Mode mode, Component component) {
 		if (obj == null || node == null || node != nodeProperty)
 			return obj;
 		final String format = textController.getNodeFormat(node);

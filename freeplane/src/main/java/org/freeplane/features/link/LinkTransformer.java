@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.link;
 
+import java.awt.Component;
 import java.net.URI;
 
 import javax.swing.Icon;
@@ -48,7 +49,7 @@ public class LinkTransformer extends AbstractContentTransformer {
     }
 
 	@Override
-	public Object transformContent(NodeModel node, Object nodeProperty, Object content, TextController textController, Mode mode) {
+	public Object transformContent(NodeModel node, Object nodeProperty, Object content, TextController textController, Mode mode, Component component) {
 		if(PatternFormat.IDENTITY_PATTERN.equals(textController.getNodeFormat(node)))
 			return content;
 		if(! ( content instanceof Hyperlink ||  content instanceof URI))

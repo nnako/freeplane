@@ -1,6 +1,7 @@
 package org.freeplane.plugin.markdown;
 
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
@@ -58,7 +59,7 @@ public class MarkdownRenderer extends AbstractContentTransformer implements IEdi
 
 	@Override
 	public Object transformContent(NodeModel node,
-			Object nodeProperty, Object content, TextController textController, Mode mode)
+			Object nodeProperty, Object content, TextController textController, Mode mode, Component component)
 			throws TransformationException {
 	    if(mode == Mode.TEXT)
 	        return content;

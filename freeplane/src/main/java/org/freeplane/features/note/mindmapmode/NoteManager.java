@@ -164,7 +164,7 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 		if (note != null) {
 			try {
 			    TextController textController = TextController.getController();
-				final Object transformedContent = textController.getTransformedObject(node, NoteModel.getNote(node), note);
+				final Object transformedContent = textController.getTransformedObject(node, NoteModel.getNote(node), note, null);
 				Icon icon = textController.getIcon(transformedContent);
 				if(icon != null)
 					notePanel.setViewedImage(icon, noteStyleAccessor.getHorizontalAlignment());

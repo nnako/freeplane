@@ -19,6 +19,7 @@
  */
 package org.freeplane.features.text.mindmapmode;
 
+import java.awt.Component;
 import java.util.function.Supplier;
 
 import javax.swing.JEditorPane;
@@ -35,7 +36,7 @@ import org.freeplane.features.text.mindmapmode.EditNodeBase.IEditControl;
  * Decorator for IContentTransformer implementations that enables to switch
  * on/off depending on prefs option at transformation time
  * (we do this at transformation in order to not require a restart).
- * 
+ *
  * @author Felix Natter
  *
  */
@@ -43,13 +44,13 @@ public class ConditionalContentTransformer implements IContentTransformer, IEdit
 
 	private final IContentTransformer target;
 	private final String prefsConditionKey;
-	
+
 	public ConditionalContentTransformer(IContentTransformer target, final String prefsConditionKey)
 	{
 		this.target = target;
 		this.prefsConditionKey = prefsConditionKey;
 	}
-	
+
 	@Override
 	public int compareTo(IContentTransformer o) {
 		return target.compareTo(o);
@@ -57,10 +58,10 @@ public class ConditionalContentTransformer implements IContentTransformer, IEdit
 
 	@Override
 	public Object transformContent(NodeModel node,
-			Object nodeProperty, Object content, TextController textController, Mode mode)
+			Object nodeProperty, Object content, TextController textController, Mode mode, Component component)
 			throws TransformationException {
 		if (isTransformationActive())
-			return target.transformContent(node, nodeProperty, content, textController, mode);
+			return target.transformContent(node, nodeProperty, content, textController, mode, component);
 		else
 			return content;
 	}
@@ -68,8 +69,8 @@ public class ConditionalContentTransformer implements IContentTransformer, IEdit
 	private boolean isTransformationActive() {
 		return ResourceController.getResourceController().getBooleanProperty(prefsConditionKey);
 	}
-	
-	
+
+
 
 	@Override
 	public boolean isFormula(Object content) {
