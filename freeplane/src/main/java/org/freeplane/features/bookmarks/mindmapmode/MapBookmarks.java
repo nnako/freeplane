@@ -179,5 +179,10 @@ public class MapBookmarks implements IExtension {
 		        && Objects.equals(nodeIDs, other.nodeIDs);
 	}
 
+	public boolean opensAsRoot(NodeModel node) {
+		final NodeBookmarkDescriptor descriptor = bookmarks.get(node.getID());
+		return descriptor != null && descriptor.opensAsRoot();
+	}
+
 
 }

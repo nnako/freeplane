@@ -51,6 +51,9 @@ public class MapBookmarksTest {
 
 		when(mapModel.getRootNode()).thenReturn(rootNode);
 		when(rootNode.getID()).thenReturn("root");
+		when(node1.getID()).thenReturn("node1");
+		when(node2.getID()).thenReturn("node2");
+		when(node3.getID()).thenReturn("node3");
 		when(mapModel.getNodeForID("root")).thenReturn(rootNode);
 		when(mapModel.getNodeForID("node1")).thenReturn(node1);
 		when(mapModel.getNodeForID("node2")).thenReturn(node2);
@@ -410,11 +413,39 @@ public class MapBookmarksTest {
 
 	@Test
 	public void shouldReturnExistingInstanceFromFactory() {
-		MapBookmarks existing = mapBookmarks;
+		MapBookmarks existing = MapBookmarks.of(mapModel);
 		when(mapModel.getExtension(MapBookmarks.class)).thenReturn(existing);
+		MapBookmarks result = MapBookmarks.of(mapModel);
+		assertThat(result).isSameAs(existing);
+	}
 
-		MapBookmarks retrieved = MapBookmarks.of(mapModel);
+	@Test
+	public void shouldReturnTrueWhenNodeOpensAsRoot() {
+		mapBookmarks.add("node2", bookmark2);
+		
+		boolean result = mapBookmarks.opensAsRoot(node2);
+		
+		assertThat(result).isTrue();
+	}
 
-		assertThat(retrieved).isEqualTo(existing);
+	@Test
+	public void shouldReturnFalseWhenNodeDoesNotOpenAsRoot() {
+		mapBookmarks.add("node1", bookmark1);
+		
+		boolean result = mapBookmarks.opensAsRoot(node1);
+		
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	public void shouldReturnFalseWhenNodeHasNoBookmark() {
+		boolean result = mapBookmarks.opensAsRoot(node1);
+		
+		assertThat(result).isFalse();
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowNullPointerExceptionWhenNodeIsNull() {
+		mapBookmarks.opensAsRoot(null);
 	}
 }
