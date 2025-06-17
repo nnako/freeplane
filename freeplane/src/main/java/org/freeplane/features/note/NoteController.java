@@ -128,17 +128,13 @@ public class NoteController implements IExtension {
 		modeController.addToolTipProvider(NOTE_TOOLTIP, new ITooltipProvider() {
 			@Override
 			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger){
-				return getTooltip(modeController, node, (MainView)view, tooltipTrigger);
-			}
-
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
 				if( tooltipTrigger == TooltipTrigger.LINK || showNotesInMap(node.getMap()) && ! TextController.getController(modeController).isMinimized(node)){
 					return null;
 				}
 				final String data = NoteModel.getNoteText(node);
 				if (data == null)
 					return null;
-				float zoom = view.getNodeView().getMap().getZoom();
+				float zoom = (view instanceof MainView) ?  ((MainView)view).getNodeView().getMap().getZoom() : 1f;
 				final String rule = new NoteStyleAccessor(modeController, node, zoom, true).getNoteCSSStyle();
 				final StringBuilder tooltipBodyBegin = new StringBuilder("<body><div style=\"");
 				tooltipBodyBegin.append(rule);

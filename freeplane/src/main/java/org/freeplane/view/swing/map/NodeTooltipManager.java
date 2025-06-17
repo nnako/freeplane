@@ -42,6 +42,8 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 
 public class NodeTooltipManager implements IExtension{
+	public static final String TOOLTIP_LOCATION_ABOVE = "above";
+	public static final String TOOLTIP_LOCATION_PROPERTY = "tooltipLocation";
 	private static final String TOOL_TIP_MANAGER = "toolTipManager.";
 	private static final String TOOL_TIP_MANAGER_INITIAL_DELAY = "toolTipManager.initialDelay";
 	private static final String RESOURCES_SHOW_NODE_TOOLTIPS = "show_node_tooltips";
@@ -179,10 +181,33 @@ public class NodeTooltipManager implements IExtension{
 		mouseInsideTooltipListener = new MouseInsideListener(tipPopup);
 		final Rectangle desktopBounds = UITools.getAvailableScreenBounds(insideComponent);
 		final Dimension popupPreferredSize = tipPopup.getPreferredSize();
-		final Point desiredLocation = preferredToolTipLocation != null ? preferredToolTipLocation : new Point(0, insideComponent.getHeight() - 1);
-		final Point onScreenLocation = new Point(desiredLocation);
-		SwingUtilities.convertPointToScreen(onScreenLocation, insideComponent);
-		int popupAllowedHeight =  desktopBounds.y + desktopBounds.height - onScreenLocation.y;
+
+		Point desiredLocation;
+		int popupAllowedHeight;
+
+		if (preferredToolTipLocation != null) {
+			desiredLocation = preferredToolTipLocation;
+			final Point onScreenLocation = new Point(desiredLocation);
+			SwingUtilities.convertPointToScreen(onScreenLocation, insideComponent);
+			popupAllowedHeight = desktopBounds.y + desktopBounds.height - onScreenLocation.y;
+		} else {
+			// Check if tooltip should be shown above based on client property
+			Object tooltipLocationProperty = insideComponent.getClientProperty(TOOLTIP_LOCATION_PROPERTY);
+			boolean showAbove = TOOLTIP_LOCATION_ABOVE.equals(tooltipLocationProperty);
+
+			if (showAbove) {
+				desiredLocation = new Point(0, -popupPreferredSize.height);
+				final Point onScreenLocation = new Point(desiredLocation);
+				SwingUtilities.convertPointToScreen(onScreenLocation, insideComponent);
+				popupAllowedHeight = onScreenLocation.y - desktopBounds.y;
+			} else {
+				desiredLocation = new Point(0, insideComponent.getHeight() - 1);
+				final Point onScreenLocation = new Point(desiredLocation);
+				SwingUtilities.convertPointToScreen(onScreenLocation, insideComponent);
+				popupAllowedHeight = desktopBounds.y + desktopBounds.height - onScreenLocation.y;
+			}
+		}
+
 		if(popupAllowedHeight > 0) {
 			Dimension popupSize = new Dimension(
 				popupPreferredSize.width,

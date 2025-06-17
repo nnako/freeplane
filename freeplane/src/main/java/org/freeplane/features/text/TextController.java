@@ -376,31 +376,12 @@ public class TextController implements IExtension {
 		modeController.addToolTipProvider(DETAILS_TOOLTIP, new ITooltipProvider() {
 			@Override
 			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
-				return getTooltip(modeController, node, (MainView) view, tooltipTrigger);
-			}
-
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
 				final DetailModel details = DetailModel.getDetail(node);
 				if (details == null || details.getTextOr("").isEmpty() || !(tooltipTrigger == TooltipTrigger.LINK || details.isHidden() || ShortenedTextModel.isShortened(node))) {
 					return null;
 				}
-				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
-				final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
-				final NodeModel detailStyleNode = model.getStyleNodeSafe(MapStyleModel.DETAILS_STYLE);
-				Font detailFont = style.getFont(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
-				Color detailBackground = style.getBackgroundColor(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
-				Color detailForeground = style.getColor(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
-				final int alignment = style.getHorizontalTextAlignment(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE).swingConstant;
-				float zoom = view.getNodeView().getMap().getZoom();
-				final StringBuilder htmlBodyStyle = new StringBuilder("<body><div style=\"")
-				    .append(new CssRuleBuilder()
-				        .withHTMLFont(detailFont)
-				        .withColor(detailForeground)
-				        .withBackground(detailBackground)
-				        .withAlignment(alignment)
-				        .withMaxWidthAsPt(zoom, NodeSizeModel.getMaxNodeWidth(detailStyleNode),
-				            style.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE)))
-				    .append("\">");
+				final String htmlBodyStyle = (view instanceof MainView)
+						? getTooltipHtmlStyle(modeController, node, (MainView) view) : "";
 				String data = details.getText();
 				String text;
 				try {
@@ -414,9 +395,29 @@ public class TextController implements IExtension {
 					text = HtmlUtils.plainToHTML(text);
 				}
 
-				final String tooltipText = text.replaceFirst("<body>", htmlBodyStyle.toString())
+				final String tooltipText = htmlBodyStyle.isEmpty() ? text : text.replaceFirst("<body>", "<body><div style=\"" + htmlBodyStyle + "\">")
 				    .replaceFirst("</body>", "</div></body>");
 				return tooltipText;
+			}
+
+			private String getTooltipHtmlStyle(final ModeController modeController, NodeModel node, MainView view) {
+				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
+				final MapStyleModel model = MapStyleModel.getExtension(node.getMap());
+				final NodeModel detailStyleNode = model.getStyleNodeSafe(MapStyleModel.DETAILS_STYLE);
+				Font detailFont = style.getFont(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+				Color detailBackground = style.getBackgroundColor(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+				Color detailForeground = style.getColor(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE);
+				final int alignment = style.getHorizontalTextAlignment(detailStyleNode, StyleOption.FOR_UNSELECTED_NODE).swingConstant;
+				float zoom = view.getNodeView().getMap().getZoom();
+				final String htmlBodyStyle = new StringBuilder()
+				    .append(new CssRuleBuilder()
+				        .withHTMLFont(detailFont)
+				        .withColor(detailForeground)
+				        .withBackground(detailBackground)
+				        .withAlignment(alignment)
+				        .withMaxWidthAsPt(zoom, NodeSizeModel.getMaxNodeWidth(detailStyleNode),
+				        style.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE))).toString();
+				return htmlBodyStyle;
 			}
 		});
 	}
@@ -425,22 +426,11 @@ public class TextController implements IExtension {
 		modeController.addToolTipProvider(NODE_TOOLTIP, new ITooltipProvider() {
 			@Override
 			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
-				return getTooltip(modeController, node, (MainView) view, tooltipTrigger);
-			}
-
-			private String getTooltip(final ModeController modeController, NodeModel node, MainView view, TooltipTrigger tooltipTrigger) {
 				if (tooltipTrigger != TooltipTrigger.LINK && !ShortenedTextModel.isShortened(node)) {
 					return null;
 				}
-				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
-				final Font font = style.getFont(node, StyleOption.FOR_UNSELECTED_NODE);
-				float zoom = view.getNodeView().getMap().getZoom();
-				final StringBuilder htmlBodyStyle = new StringBuilder("<body><div style=\"")
-				    .append(new CssRuleBuilder().withHTMLFont(font)
-				        .withColor(view.getUnselectedForeground())
-				        .withBackground(view.getNodeView().getTextBackground())
-				        .withAlignment(view.getHorizontalAlignment())
-				        .withMaxWidthAsPt(zoom, style.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE)));
+				final String htmlBodyStyle = (view instanceof MainView)
+						? getTooltipHtmlStyle(modeController, node, (MainView) view) : "";
 				final Object data = node.getUserObject();
 				String text;
 				try {
@@ -451,15 +441,30 @@ public class TextController implements IExtension {
 				}
 				catch (Exception e) {
 					text = TextUtils.format("MainView.errorUpdateText", data, e.getLocalizedMessage());
-					htmlBodyStyle.append("color:red;");
 				}
-				htmlBodyStyle.append("\">");
 				if (!HtmlUtils.isHtml(text)) {
 					text = HtmlUtils.plainToHTML(text);
 				}
-				final String tooltipText = text.replaceFirst("<body>", htmlBodyStyle.toString())
+				final String tooltipText = htmlBodyStyle.isEmpty() ? text
+						: text.replaceFirst("<body>",
+						"<body><div style=\"" + htmlBodyStyle.toString() + "\">")
 				    .replaceFirst("</body>", "</div></body>");
 				return tooltipText;
+			}
+
+			private String getTooltipHtmlStyle(final ModeController modeController, NodeModel node,
+			        MainView view) {
+				final NodeStyleController style = modeController.getExtension(NodeStyleController.class);
+				final Font font = style.getFont(node, StyleOption.FOR_UNSELECTED_NODE);
+				float zoom = view.getNodeView().getMap().getZoom();
+				final String htmlBodyStyle = new StringBuilder()
+				    .append(new CssRuleBuilder().withHTMLFont(font)
+				        .withColor(view.getUnselectedForeground())
+				        .withBackground(view.getNodeView().getTextBackground())
+				        .withAlignment(view.getHorizontalAlignment())
+				        .withMaxWidthAsPt(zoom, style.getMaxWidth(node, StyleOption.FOR_UNSELECTED_NODE)))
+				        .toString();
+				return htmlBodyStyle;
 			}
 		});
 	}

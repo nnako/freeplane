@@ -21,6 +21,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -35,6 +37,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.components.FocusRequestor;
@@ -43,13 +46,20 @@ import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.IMapSelection;
+import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.MapModel;
+import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.ModeController;
+import org.freeplane.view.swing.map.FreeplaneTooltip;
+import org.freeplane.view.swing.map.NodeTooltipManager;
 
 public class BookmarksToolbarBuilder {
-	private final BookmarksController bookmarksController;
 	private static final DataFlavor BOOKMARK_FLAVOR = new DataFlavor(NodeBookmark.class, "NodeBookmark");
+	private final BookmarksController bookmarksController;
+	private final ModeController modeController;
 
-	public BookmarksToolbarBuilder(BookmarksController bookmarksController) {
+	public BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
+		this.modeController = modeController;
 		this.bookmarksController = bookmarksController;
 	}
 
@@ -68,16 +78,48 @@ public class BookmarksToolbarBuilder {
 
 	@SuppressWarnings("unused")
 	private JButton createBookmarkButton(NodeBookmark bookmark, FreeplaneToolBar toolbar, IMapSelection selection) {
-		final JButton button = new JButton();
+		final NodeModel node = bookmark.getNode();
+		@SuppressWarnings("serial")
+		final JButton button = new JButton() {
+			@Override
+		    public JToolTip createToolTip() {
+				FreeplaneTooltip tip = new FreeplaneTooltip(this.getGraphicsConfiguration(), FreeplaneTooltip.TEXT_HTML, false);
+		        tip.setComponent(this);
+		        tip.setComponentOrientation(getComponentOrientation());
+		        tip.setBorder(BorderFactory.createEmptyBorder());
+				final URL url = node.getMap().getURL();
+				if (url != null) {
+					tip.setBase(url);
+				}
+				else {
+					try {
+			            tip.setBase(new URL("file: "));
+		            }
+		            catch (MalformedURLException e) {
+		            }
+				}
+		        return tip;
+		    }
+
+			@Override
+			public String getToolTipText() {
+				return modeController.createToolTip(node, this, TooltipTrigger.LINK);
+			}
+
+		};
 		button.setText(bookmark.getDescriptor().getName());
 		button.addActionListener(action -> bookmark.open());
 		button.putClientProperty("bookmark", bookmark);
+		button.putClientProperty(NodeTooltipManager.TOOLTIP_LOCATION_PROPERTY, NodeTooltipManager.TOOLTIP_LOCATION_ABOVE);
+		NodeTooltipManager toolTipManager = NodeTooltipManager.getSharedInstance(modeController);
+		toolTipManager.registerComponent(button);
+
 
 		if (bookmark.getDescriptor().opensAsRoot()) {
 			button.setIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon());
 		}
 
-		final boolean isVisible = bookmark.getNode().isVisible(selection.getFilter());
+		final boolean isVisible = node.isVisible(selection.getFilter());
 		button.setEnabled(isVisible);
 
 		DragSource dragSource = DragSource.getDefaultDragSource();

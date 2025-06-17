@@ -24,7 +24,7 @@ public class BookmarksController implements IExtension{
 	public BookmarksController(ModeController modeController) {
 		super();
 		this.modeController = modeController;
-		this.toolbarBuilder = new BookmarksToolbarBuilder(this);
+		this.toolbarBuilder = new BookmarksToolbarBuilder(modeController, this);
 		final MapController mapController = modeController.getMapController();
 		final ReadManager readManager = mapController.getReadManager();
 		final WriteManager writeManager = mapController.getWriteManager();
