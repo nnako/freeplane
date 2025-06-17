@@ -9,10 +9,12 @@ import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 
 public class BookmarksController implements IExtension{
@@ -66,7 +68,8 @@ public class BookmarksController implements IExtension{
 	}
 
 	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
-		toolbarBuilder.updateBookmarksToolbar(toolbar, map);
+		final IMapSelection selection = Controller.getCurrentController().getSelection();
+		toolbarBuilder.updateBookmarksToolbar(toolbar, map, selection);
 	}
 
 }

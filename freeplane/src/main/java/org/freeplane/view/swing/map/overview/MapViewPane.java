@@ -24,6 +24,7 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.NodeDeletionEvent;
@@ -140,11 +141,12 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
 	@Override
     public void mapChanged(MapChangeEvent event) {
-		if(event.getProperty().equals(MapBookmarks.class)) {
+		final Object property = event.getProperty();
+		if(property.equals(MapBookmarks.class) || property.equals(Filter.class)) {
 			updateBookmarksToolbarLater();
 			return;
 		}
-		if(event.getProperty().equals(MapView.class)) {
+		if(property.equals(MapView.class)) {
 			if (event.getOldValue() == mapView) {
 				event.getMap().removeMapChangeListener(this);
 				mapView.getMap().addMapChangeListener(this);

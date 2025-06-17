@@ -42,6 +42,7 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.icon.factory.IconStoreFactory;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapModel;
 
 public class BookmarksToolbarBuilder {
@@ -52,13 +53,13 @@ public class BookmarksToolbarBuilder {
 		this.bookmarksController = bookmarksController;
 	}
 
-	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
+	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
 		toolbar.removeAll();
 		toolbar.putClientProperty("bookmarksMap", map);
 
 		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
 		for (NodeBookmark bookmark : bookmarks) {
-			final JButton button = createBookmarkButton(bookmark, toolbar);
+			final JButton button = createBookmarkButton(bookmark, toolbar, selection);
 			toolbar.add(button);
 		}
 		toolbar.revalidate();
@@ -66,7 +67,7 @@ public class BookmarksToolbarBuilder {
 	}
 
 	@SuppressWarnings("unused")
-	private JButton createBookmarkButton(NodeBookmark bookmark, FreeplaneToolBar toolbar) {
+	private JButton createBookmarkButton(NodeBookmark bookmark, FreeplaneToolBar toolbar, IMapSelection selection) {
 		final JButton button = new JButton();
 		button.setText(bookmark.getDescriptor().getName());
 		button.addActionListener(action -> bookmark.open());
@@ -75,6 +76,8 @@ public class BookmarksToolbarBuilder {
 		if (bookmark.getDescriptor().opensAsRoot()) {
 			button.setIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon());
 		}
+
+		button.setEnabled(selection.isVisible(bookmark.getNode()));
 
 		DragSource dragSource = DragSource.getDefaultDragSource();
 		dragSource.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE,
