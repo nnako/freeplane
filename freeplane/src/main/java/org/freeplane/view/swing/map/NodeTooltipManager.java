@@ -22,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolTip;
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
@@ -336,7 +337,7 @@ public class NodeTooltipManager implements IExtension{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (insideComponent != null){
-				if (isMouseOverComponent() && !editorActive()) {
+				if (isMouseOverComponent() && !editorActive() && ! isPopupMenuOpen()) {
 					// Lazy lookup
 					if (toolTipText == null && mouseEvent != null) {
 						toolTipText = insideComponent.getToolTipText(mouseEvent);
@@ -348,6 +349,11 @@ public class NodeTooltipManager implements IExtension{
 				}
 				hideTipWindow();
 			}
+		}
+
+		private boolean isPopupMenuOpen() {
+			boolean popupOpen = MenuSelectionManager.defaultManager().getSelectedPath().length > 0;
+			return popupOpen;
 		}
 
 		private boolean editorActive() {
