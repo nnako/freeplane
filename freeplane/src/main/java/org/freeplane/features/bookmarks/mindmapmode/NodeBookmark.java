@@ -43,31 +43,6 @@ public class NodeBookmark {
 	}
 
 	public void open() {
-		if(descriptor.opensAsRoot()) {
-			open(true);
-		}
-		else {
-			setViewRoot();
-			open(false);
-		}
-	}
-
-	private void setViewRoot() {
-		final Controller controller = Controller.getCurrentController();
-		final IMapViewManager mapViewManager = controller.getMapViewManager();
-		if(descriptor.opensAsRoot()) {
-			mapViewManager.setViewRoot(node);
-			return;
-		}
-		final IMapSelection selection = controller.getSelection();
-		MapBookmarks mapBookmarks = node.getMap().getExtension(MapBookmarks.class);
-		for(NodeModel node = this.node; selection.getSelectionRoot() != node; node = node.getParentNode()) {
-			if(node.isRoot() || mapBookmarks.opensAsRoot(node)) {
-				mapViewManager.setViewRoot(node);
-				return;
-			}
-
-		}
-
+		open(descriptor.opensAsRoot());
 	}
 }
