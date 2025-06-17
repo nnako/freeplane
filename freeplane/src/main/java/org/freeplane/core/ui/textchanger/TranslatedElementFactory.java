@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -65,6 +66,15 @@ public class TranslatedElementFactory {
     public static JMenuItem createMenuItem(String labelKey) {
         final String text = TextUtils.getRawText(labelKey);
         final JMenuItem component = new JMenuItem();
+        LabelAndMnemonicSetter.setLabelAndMnemonic(component, text);
+        TranslatedElement.TEXT.setKey(component, labelKey);
+        createTooltip(component, labelKey + ".tooltip");
+        return component;
+    }
+
+    public static JCheckBoxMenuItem createCheckboxMenuItem(String labelKey) {
+        final String text = TextUtils.getRawText(labelKey);
+        final JCheckBoxMenuItem component = new JCheckBoxMenuItem();
         LabelAndMnemonicSetter.setLabelAndMnemonic(component, text);
         TranslatedElement.TEXT.setKey(component, labelKey);
         createTooltip(component, labelKey + ".tooltip");

@@ -28,16 +28,28 @@ public class NodeBookmark {
 		return descriptor;
 	}
 
-	public void open() {
+	public void open(boolean asRoot) {
 		final Controller controller = Controller.getCurrentController();
-		setViewRoot();
-		if(! descriptor.opensAsRoot()) {
-			final IMapViewManager mapViewManager = controller.getMapViewManager();
-			mapViewManager.displayOnCurrentView(node);
-		}
+		final IMapViewManager mapViewManager = controller.getMapViewManager();
 		final IMapSelection selection = controller.getSelection();
+		if(asRoot)
+			mapViewManager.setViewRoot(node);
+		else if(! selection.isVisible(node))
+			return;
+		else
+			mapViewManager.displayOnCurrentView(node);
 		selection.selectAsTheOnlyOneSelected(node);
 		selection.scrollNodeTreeToVisible(node, false);
+	}
+
+	public void open() {
+		if(descriptor.opensAsRoot()) {
+			open(true);
+		}
+		else {
+			setViewRoot();
+			open(false);
+		}
 	}
 
 	private void setViewRoot() {

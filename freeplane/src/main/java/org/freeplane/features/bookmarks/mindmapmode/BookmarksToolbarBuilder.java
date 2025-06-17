@@ -97,6 +97,26 @@ public class BookmarksToolbarBuilder {
 	private void showBookmarkPopupMenu(MouseEvent e, NodeBookmark bookmark, JButton button) {
 		JPopupMenu popup = new JPopupMenu();
 
+		JMenuItem selectItem = TranslatedElementFactory.createMenuItem("bookmark.goto_node");
+		selectItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				bookmark.open(false);
+			}
+		});
+		popup.add(selectItem);
+
+		JMenuItem openAsRootDirectItem = TranslatedElementFactory.createMenuItem("bookmark.open_as_root");
+		openAsRootDirectItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				bookmark.open(true);
+			}
+		});
+		popup.add(openAsRootDirectItem);
+
+		popup.addSeparator();
+
 		JMenuItem removeItem = TranslatedElementFactory.createMenuItem("delete");
 		removeItem.addActionListener(new ActionListener() {
 			@Override
@@ -115,7 +135,7 @@ public class BookmarksToolbarBuilder {
 		});
 		popup.add(renameItem);
 
-		JCheckBoxMenuItem openAsRootItem = new JCheckBoxMenuItem(TextUtils.getText("opens_as_root"));
+		JCheckBoxMenuItem openAsRootItem = TranslatedElementFactory.createCheckboxMenuItem("opens_as_root");
 		openAsRootItem.setSelected(bookmark.getDescriptor().opensAsRoot());
 		openAsRootItem.addActionListener(new ActionListener() {
 			@Override
