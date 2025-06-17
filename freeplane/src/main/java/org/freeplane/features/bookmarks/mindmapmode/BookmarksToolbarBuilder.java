@@ -77,7 +77,8 @@ public class BookmarksToolbarBuilder {
 			button.setIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon());
 		}
 
-		button.setEnabled(selection.isVisible(bookmark.getNode()));
+		final boolean isVisible = bookmark.getNode().isVisible(selection.getFilter());
+		button.setEnabled(isVisible);
 
 		DragSource dragSource = DragSource.getDefaultDragSource();
 		dragSource.createDefaultDragGestureRecognizer(button, DnDConstants.ACTION_MOVE,
