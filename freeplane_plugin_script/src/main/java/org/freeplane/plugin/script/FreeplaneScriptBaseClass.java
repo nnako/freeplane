@@ -52,6 +52,11 @@ import groovy.lang.Script;
  * <li><b>menuUtils:</b> see {@link org.freeplane.core.util.MenuUtils MenuUtils}</li>
  * <li><b>config:</b> see {@link ConfigProperties}</li>
  * </ul>
+ * <p>In case you compile groovy source code for packaging it as a jar with a Freeplane add-on, these global objects
+ * are not available. To make them available, add the following import to your source code:</p>
+ * <pre>
+ * import static org.freeplane.plugin.script.GroovyStaticImports.*
+ * </pre>
  * The following classes may also be useful in scripting:
  * <ul>
  * <li>{@link org.freeplane.core.util.FreeplaneVersion FreeplaneVersion}</li>
@@ -60,14 +65,10 @@ import groovy.lang.Script;
 public abstract class FreeplaneScriptBaseClass extends Script {
 	/**
 	 * <p>Accessor for Freeplane's configuration: In scripts available as "global variable" {@code config}</p>
-     *
-     * <p>When compiling classes outside of Freeplane, e.g. for add-on development, "global variable" {@code config} is
-     * not available and can be accessed by instantiating ConfigProperties as in the following example:</p>
+     * <p>In case you compile groovy source code for packaging it as a jar with a Freeplane add-on, global variable
+     * {@code config} is not available. To make it available, add the following import:</p>
      * <pre>
-     * import org.freeplane.plugin.script.FreeplaneScriptBaseClass.ConfigProperties
-     *
-     * def config = new ConfigProperties()
-     * def installationDir = config.installationBaseDir
+     * import static org.freeplane.plugin.script.GroovyStaticImports.*
      * </pre>
 	 */
 	public static class ConfigProperties {
