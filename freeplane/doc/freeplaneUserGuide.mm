@@ -1,5 +1,7 @@
 <map version="freeplane 1.12.1">
 <!--To view this file, download free mind mapping software Freeplane from https://www.freeplane.org -->
+<bookmarks/>
+<bookmark nodeId="ID_1723255651" name="Root" opensAsRoot="true"/>
 <attribute_registry>
     <attribute_name VISIBLE="true" NAME="See also"/>
     <attribute_name VISIBLE="true" NAME="a2"/>
@@ -31,7 +33,7 @@
             </conjunct_condition>
         </conditional_style>
     </conditional_styles>
-    <properties show_icon_for_attributes="false" show_notes_in_map="false" show_note_icons="true" fit_to_viewport="false;" show_tags="UNDER_NODES"/>
+    <properties show_icon_for_attributes="false" show_notes_in_map="false" auto_compact_layout="false" show_tags="UNDER_NODES" show_note_icons="true" fit_to_viewport="false;" show_icons="BESIDE_NODES" showTagCategories="false"/>
     <tags categories="category#fe5334ff&#xa; categorized tag#f94600ff&#xa;" category_separator="::" tagcolor1="example tag#f2ff59ff" tagcolor2="other tag#48ffaeff"/>
 
 <map_styles>
@@ -308,12 +310,12 @@
 <edge STYLE="hide_edge"/>
 </node>
 <node TEXT="Filter bar" ID="ID_1939718780" HGAP_QUANTITY="-711 px">
-<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1939718780" STARTINCLINATION="31.38461 pt;-6.46154 pt;" ENDINCLINATION="31.38461 pt;-6.46154 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1939718780" STARTINCLINATION="31.38461 pt;-3.69231 pt;" ENDINCLINATION="31.38461 pt;-3.69231 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <font NAME="SansSerif" BOLD="true" ITALIC="true"/>
 <edge STYLE="hide_edge"/>
 </node>
 <node TEXT="F-bar" ID="ID_1406478692" HGAP_QUANTITY="-688 px">
-<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1406478692" STARTINCLINATION="34.15384 pt;-14.76923 pt;" ENDINCLINATION="34.15384 pt;-14.76923 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1406478692" STARTINCLINATION="34.15384 pt;-12 pt;" ENDINCLINATION="34.15384 pt;-12 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <font NAME="SansSerif" BOLD="true" ITALIC="true"/>
 <edge STYLE="hide_edge"/>
 </node>
@@ -323,7 +325,7 @@
 <edge STYLE="hide_edge"/>
 </node>
 <node TEXT="Properties Panel" ID="ID_303482588" HGAP_QUANTITY="-146 px" VSHIFT_QUANTITY="30 px">
-<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_303482588" STARTINCLINATION="14.76923 pt;-17.53846 pt;" ENDINCLINATION="14.76923 pt;-17.53846 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_303482588" STARTINCLINATION="14.76923 pt;-14.76923 pt;" ENDINCLINATION="14.76923 pt;-14.76923 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <font NAME="SansSerif" BOLD="true" ITALIC="true"/>
 <edge STYLE="hide_edge"/>
 </node>
@@ -345,7 +347,7 @@
 <font BOLD="true" ITALIC="true"/>
 <hook URI="Images/doc/BackgroundContextMenu.png" SIZE="1.0" NAME="ExternalObject"/>
 <node TEXT="Open/close&#xa;Tool panel" ID="ID_724121688" HGAP_QUANTITY="56 px">
-<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_724121688" STARTINCLINATION="71.07692 pt;-135.6923 pt;" ENDINCLINATION="71.07692 pt;-135.6923 pt;" STARTARROW="DEFAULT" ENDARROW="NONE"/>
+<arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_724121688" STARTINCLINATION="71.07692 pt;-132.92307 pt;" ENDINCLINATION="71.07692 pt;-132.92307 pt;" STARTARROW="DEFAULT" ENDARROW="NONE"/>
 <edge STYLE="hide_edge"/>
 <font BOLD="true" ITALIC="true"/>
 </node>
@@ -440,7 +442,7 @@
     <conditional_style ACTIVE="true" STYLE_REF="TitlesContent" LAST="false"/>
 </hook>
 <node TEXT="(relative) parent" STYLE_REF="ConsumerTopic" FOLDED="true" ID="ID_687495618" VSHIFT_QUANTITY="20 px">
-<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1105307139" MIDDLE_LABEL="descendancy" STARTINCLINATION="18.46154 pt;-29.53846 pt;" ENDINCLINATION="-23.07692 pt;-29.53846 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_1105307139" MIDDLE_LABEL="descendancy" STARTINCLINATION="18.46154 pt;-26.76923 pt;" ENDINCLINATION="-20.30769 pt;-26.76923 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <node TEXT="child" STYLE_REF="ConsumerTopic" ID="ID_1105307139">
 <edge STYLE="bezier"/>
 </node>
@@ -3719,7 +3721,7 @@
     <conditional_style ACTIVE="true" STYLE_REF="BeginnerTopic" LAST="false"/>
 </hook>
 <node TEXT="a" FOLDED="true" ID="ID_1328399304" HGAP_QUANTITY="25 px" STYLE="as_parent">
-<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_581303769" MIDDLE_LABEL="label" STARTINCLINATION="6.46154 pt;-13.84615 pt;" ENDINCLINATION="-17.53846 pt;-62.76923 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
+<arrowlink SHAPE="CUBIC_CURVE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_581303769" MIDDLE_LABEL="label" STARTINCLINATION="6.46154 pt;-11.07692 pt;" ENDINCLINATION="-14.76923 pt;-60 pt;" STARTARROW="NONE" ENDARROW="DEFAULT"/>
 <edge STYLE="hide_edge"/>
 <node TEXT="b" FOLDED="true" ID="ID_273400211">
 <arrowlink SHAPE="LINE" COLOR="#000000" WIDTH="2" TRANSPARENCY="80" FONT_SIZE="12" FONT_FAMILY="SansSerif" DESTINATION="ID_273400211" MIDDLE_LABEL="connector&#xa;without&#xa;begin" STARTINCLINATION="13.84615 pt;63.69231 pt;" ENDINCLINATION="13.84615 pt;63.69231 pt;" STARTARROW="NONE" ENDARROW="NONE"/>
@@ -4310,6 +4312,85 @@ node alias can not be a number</pre>
     <conditional_style ACTIVE="true" STYLE_REF="TitlesContent" LAST="false"/>
 </hook>
 </node>
+</node>
+</node>
+<node TEXT="Bookmarks" STYLE_REF="Beginner" FOLDED="true" POSITION="bottom_or_right" ID="ID_119795604" NUMBERED="true">
+<node TEXT="Purpose" STYLE_REF="Beginner" ID="ID_653805814"><richcontent TYPE="DETAILS">
+<html>
+      <body>
+        <p>Bookmarks combine the functionality of both sheets and traditional bookmarks by letting you jump to specific sections of the map and optionally use them as a temporary root.</p>
+      </body>
+    </html></richcontent>
+</node>
+<node TEXT="How to Create a Bookmark" STYLE_REF="Beginner" ID="ID_842000119"><richcontent TYPE="DETAILS">
+<html>
+        <body>
+          <p>You can bookmark a node in two ways:</p>
+          <p>From the context menu:</p>
+          <ol>
+            <li>Right-click on the node.</li>
+            <li>Select Bookmark node.</li>
+            <li>Enter a name and optionally check Opens as root.</li>
+            <li>Click OK.</li>
+          </ol>
+          <p>From the main menu:</p>
+          <ul>
+            <li>Use Navigate → Bookmark node when a node is selected.</li>
+          </ul>
+        </body>
+      </html></richcontent>
+</node>
+<node TEXT="Using and Managing Bookmarks" STYLE_REF="Beginner" ID="ID_1919255990"><richcontent TYPE="DETAILS">
+<html>
+        <body>
+          <p>Bookmarks appear as buttons in the bookmark bar (if visible).</p>
+          <p>Clicking a bookmark:</p>
+          <ul>
+            <li>Navigates to the node.</li>
+            <li>Opens it as visible root if Opens as root is set.</li>
+          </ul>
+          <p>Right-clicking a bookmark opens a popup menu:</p>
+          <ul>
+            <li>Go to node – select the node in context</li>
+            <li>Open as root – open the node as temporary root</li>
+            <li>Delete – remove the bookmark</li>
+            <li>Rename – change its label</li>
+            <li>Opens as root – toggle default opening mode</li>
+          </ul>
+          <p>The popup menu allows manual override of the saved behavior.</p>
+        </body>
+      </html></richcontent>
+</node>
+<node TEXT="Display and Interaction" STYLE_REF="Beginner" ID="ID_978514635"><richcontent TYPE="DETAILS">
+<html>
+        <body>
+          <p>General features of the bookmark system:</p>
+          <ul>
+            <li>Bookmarks are saved with the map and always reference nodes from the same file.</li>
+            <li>The bookmark bar can be toggled via:</li>
+            <ul>
+              <li>View → Controls → Bookmarks</li>
+              <li>Map background right-click → Controls → Bookmarks</li>
+            </ul>
+            <li>You can reorder bookmarks via drag and drop.</li>
+            <li>Tooltips show the content of the bookmarked node.</li>
+          </ul>
+        </body>
+      </html></richcontent>
+</node>
+<node TEXT="Filtered Nodes and Access Limitations" STYLE_REF="Beginner" ID="ID_233583181"><richcontent TYPE="DETAILS">
+<html>
+      <body>
+        <p>Some limitations apply when filters are active:</p>
+        <ul>
+          <li>If the bookmarked node is hidden by a filter, its bookmark button is disabled and cannot be clicked.</li>
+        </ul>
+        <p>However, the bookmark popup menu still works:</p>
+        <ul>
+          <li>You can right-click the disabled button and use Go to node or Open as root even if the node is currently hidden.</li>
+        </ul>
+      </body>
+    </html></richcontent>
 </node>
 </node>
 <node TEXT="Formatting &amp; styling" STYLE_REF="Advanced" FOLDED="true" POSITION="bottom_or_right" ID="ID_1778719162" NUMBERED="true">
