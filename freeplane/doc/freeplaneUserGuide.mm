@@ -4357,7 +4357,7 @@ node alias can not be a number</pre>
             <li>Rename – change its label</li>
             <li>Opens as root – toggle default opening mode</li>
           </ul>
-          <p>The popup menu allows manual override of the saved behavior.</p>
+          <p>The popup menu allows manual selection of the opening mode</p>
         </body>
       </html></richcontent>
 </node>
