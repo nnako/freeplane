@@ -163,7 +163,7 @@ public class BookmarksToolbarBuilder {
 
 		popup.addSeparator();
 
-		JMenuItem removeItem = TranslatedElementFactory.createMenuItem("delete");
+		JMenuItem removeItem = TranslatedElementFactory.createMenuItem("bookmark.delete");
 		removeItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -172,7 +172,7 @@ public class BookmarksToolbarBuilder {
 		});
 		popup.add(removeItem);
 
-		JMenuItem renameItem = TranslatedElementFactory.createMenuItem("rename");
+		JMenuItem renameItem = TranslatedElementFactory.createMenuItem("bookmark.rename");
 		renameItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -201,18 +201,13 @@ public class BookmarksToolbarBuilder {
 		final String currentName = bookmark.getDescriptor().getName();
 		final boolean currentOpensAsRoot = bookmark.getDescriptor().opensAsRoot();
 
-		final String title = TextUtils.getText("rename");
-		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark_name");
+		final String title = TextUtils.getText("bookmark.rename");
 		final JTextField nameInput = new JTextField(currentName, 40);
-
-		Box components = Box.createVerticalBox();
-		components.add(nameLabel);
-		components.add(nameInput);
-		components.add(opensAsRootCheckBox);
+		FocusRequestor.requestFocus(nameInput);
 
 		if(JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
 				KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner(),
-				components,
+				nameInput,
 				title,
 				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE)) {
