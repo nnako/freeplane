@@ -225,7 +225,6 @@ def addField(Map<String, Map<String, Object>> memberMap, Field field, Class claz
     propertyMap['enumConstant'] = field.isEnumConstant()
     propertyMap['return_type'] = field.getType()
     propertyMap['name'] = field.getName()
-    propertyMap['value'] = clazz.getProperties().get(field.getName())
 }
 
 def formatFieldKey(Field field){
@@ -233,7 +232,7 @@ def formatFieldKey(Field field){
 }
 
 def formatField(Map att){
-    return "<html><body><b>${formatReturnType(att['return_type'] )}.${att['name']}</b> =   ${att['value']}</body></html>".toString()
+    return "<html><body><b>${formatReturnType(att['return_type'] )}.${att['name']}</b></body></html>".toString()
 }
 
 def formatProperty(String property, String type, String mode) {
