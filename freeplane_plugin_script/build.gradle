@@ -47,14 +47,14 @@ javadoc {
       .include('**/Proxy.java')
       .include('**/Convertible.java')
       .include('**/FreeplaneScriptBaseClass.java')
-      .include('**/ScriptUtils.java') +
+      .include('**/ScriptUtils.java')
+      .include('**/GroovyStaticImports.java') +
 		fileTree(dir: '../freeplane_api/src/main/java')
 		  .include('**/api/*.java') +
 		fileTree(dir: '../freeplane/src/main/java')
 		  .include('**/UITools.java')
 		  .include('**/TextUtils.java')
           .include('**/FreeplaneVersion.java')
-          .include('**/GroovyStaticImports.java')
 		  .include('**/HtmlUtils.java')
 		  .include('**/LogUtils.java')
 		  .include('**/MenuUtils.java') +
