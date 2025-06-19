@@ -53,10 +53,12 @@ javadoc {
 		fileTree(dir: '../freeplane/src/main/java')
 		  .include('**/UITools.java')
 		  .include('**/TextUtils.java')
-		  .include('**/FreeplaneVersion.java')
+          .include('**/FreeplaneVersion.java')
+          .include('**/GroovyStaticImports.java')
 		  .include('**/HtmlUtils.java')
 		  .include('**/LogUtils.java')
-		  .include('**/MenuUtils.java') + fileTree(dir: '../freeplane_framework/src/main/java')
+		  .include('**/MenuUtils.java') +
+	    fileTree(dir: '../freeplane_framework/src/main/java')
 		  .include('**/Launcher.java')
 
 
