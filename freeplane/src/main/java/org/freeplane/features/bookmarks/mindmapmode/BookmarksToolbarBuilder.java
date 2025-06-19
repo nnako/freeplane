@@ -204,9 +204,6 @@ public class BookmarksToolbarBuilder {
 		final String title = TextUtils.getText("rename");
 		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark_name");
 		final JTextField nameInput = new JTextField(currentName, 40);
-		FocusRequestor.requestFocus(nameInput);
-		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
-		opensAsRootCheckBox.setSelected(currentOpensAsRoot);
 
 		Box components = Box.createVerticalBox();
 		components.add(nameLabel);
@@ -222,7 +219,7 @@ public class BookmarksToolbarBuilder {
 
 			final String bookmarkName = nameInput.getText().trim();
 			if (!bookmarkName.isEmpty()) {
-				final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, opensAsRootCheckBox.isSelected());
+				final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, currentOpensAsRoot);
 				bookmarksController.addBookmark(bookmark.getNode(), descriptor);
 			}
 		}
