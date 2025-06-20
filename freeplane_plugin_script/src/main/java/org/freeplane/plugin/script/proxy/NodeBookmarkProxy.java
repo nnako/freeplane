@@ -28,4 +28,15 @@ class NodeBookmarkProxy implements NodeBookmark {
 	public BookmarkType getBookmarkType() {
 		return coreBookmark.getDescriptor().opensAsRoot() ? BookmarkType.ROOT : BookmarkType.SELECT;
 	}
+	
+	@Override
+	public void open() {
+		coreBookmark.open();
+	}
+	
+	@Override
+	public void open(BookmarkType mode) {
+		boolean openAsRoot = (mode == BookmarkType.ROOT);
+		coreBookmark.open(openAsRoot);
+	}
 } 

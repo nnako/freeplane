@@ -31,4 +31,24 @@ public interface NodeBookmark {
 	 * @see BookmarkType
 	 */
 	BookmarkType getBookmarkType();
+
+	/**
+	 * Opens this bookmark using its default behavior.
+	 * The behavior is determined by the bookmark's type:
+	 * - SELECT type: navigates to the node and selects it
+	 * - ROOT type: opens the node as the root of the view
+	 * @see #getBookmarkType()
+	 * @see #open(BookmarkType)
+	 */
+	void open();
+
+	/**
+	 * Opens this bookmark with the specified mode, overriding the bookmark's default type.
+	 * @param mode the bookmark type to use when opening:
+	 *             SELECT to navigate to and select the node,
+	 *             ROOT to open the node as the root of the view
+	 * @see BookmarkType
+	 * @see #open()
+	 */
+	void open(BookmarkType mode);
 }
