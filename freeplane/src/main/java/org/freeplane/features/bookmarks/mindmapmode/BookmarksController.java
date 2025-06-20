@@ -32,7 +32,7 @@ public class BookmarksController implements IExtension{
 		readManager.addElementHandler("bookmarks", bookmarksBuilder);
 		readManager.addElementHandler("bookmark", bookmarksBuilder);
 		writeManager.addExtensionElementWriter(MapBookmarks.class, bookmarksBuilder);
-		modeController.addAction(new BookmarkNodeAction(modeController));
+		modeController.addAction(new BookmarkNodeAction(modeController, this));
 	}
 
 	public void addBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
