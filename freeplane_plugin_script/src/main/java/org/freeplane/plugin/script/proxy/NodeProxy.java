@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.typehandling.NumberMath;
 import org.freeplane.api.Attributes;
+import org.freeplane.api.BookmarkType;
 import org.freeplane.api.ChildNodesLayout;
 import org.freeplane.api.Cloud;
 import org.freeplane.api.ConditionalStyles;
@@ -26,6 +27,7 @@ import org.freeplane.api.DependencyLookup;
 import org.freeplane.api.LayoutOrientation;
 import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Node;
+import org.freeplane.api.NodeBookmark;
 import org.freeplane.api.NodeCondition;
 import org.freeplane.api.NodeGeometry;
 import org.freeplane.api.NodeRO;
@@ -1343,10 +1345,10 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 
 	// Node: R/W
 	@Override
-	public void bookmark(String name, org.freeplane.api.BookmarkType bookmarkType) {
+	public void setBookmark(String name, BookmarkType bookmarkType) {
 		final BookmarksController bookmarksController = getBookmarksController();
 		final NodeModel node = getDelegate();
-		boolean opensAsRoot = (bookmarkType == org.freeplane.api.BookmarkType.ROOT);
+		boolean opensAsRoot = (bookmarkType == BookmarkType.ROOT);
 		final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(name, opensAsRoot);
 		bookmarksController.addBookmark(node, descriptor);
 	}
@@ -1365,7 +1367,7 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 
 	// NodeRO: R
 	@Override
-	public org.freeplane.api.NodeBookmark getBookmark() {
+	public NodeBookmark getBookmark() {
 		final BookmarksController bookmarksController = getBookmarksController();
 		final MapModel map = getDelegate().getMap();
 		final MapBookmarks mapBookmarks = bookmarksController.getBookmarks(map);
