@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.freeplane.api.BookmarkType;
 import org.freeplane.api.ConditionalStyles;
 import org.freeplane.api.NodeChangeListener;
 import org.freeplane.api.NodeCondition;
@@ -519,7 +520,7 @@ public class MapProxy extends AbstractProxy<MapModel> implements MindMap, Map {
 			if (!node.getMap().equals(map)) {
 				throw new IllegalArgumentException("Bookmark references a node from a different map");
 			}
-			final boolean opensAsRoot = bookmark.getBookmarkType() == org.freeplane.api.BookmarkType.ROOT || node.isRoot();
+			final boolean opensAsRoot = bookmark.getType() == BookmarkType.ROOT || node.isRoot();
 			final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmark.getName(), opensAsRoot);
 			bookmarksController.addBookmark(node, descriptor);
 		}

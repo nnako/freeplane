@@ -437,6 +437,24 @@ public interface Node extends NodeRO {
 	 * @since 1.12.12 */
     void setBookmark(String name, BookmarkType bookmarkType);
 
+	/** Sets a bookmark for this node with the given name and type.
+	 * Convenience overload that accepts bookmark type as a string for easier scripting.
+	 * If a bookmark already exists for this node, it will be replaced.
+	 * <p>
+	 * Examples:
+	 * <pre>
+	 * // Create a bookmark that opens as a regular selection
+	 * node.setBookmark("Important Node", "SELECT")
+	 *
+	 * // Create a bookmark that opens this node as the root view
+	 * node.setBookmark("View From Here", "ROOT")
+	 * </pre>
+	 * @param name the display name for the bookmark
+	 * @param bookmarkType the type of bookmark as string - "SELECT" or "ROOT" (case insensitive)
+	 * @throws IllegalArgumentException if bookmarkType is not a valid BookmarkType value
+	 * @since 1.12.12 */
+    void setBookmark(String name, String bookmarkType);
+
 	/** Removes the bookmark for this node if one exists.
 	 * Has no effect if the node is not bookmarked.
 	 * @since 1.12.12 */

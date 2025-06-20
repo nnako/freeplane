@@ -1,5 +1,7 @@
 package org.freeplane.plugin.script.proxy;
 
+import java.util.Arrays;
+
 import org.freeplane.api.BookmarkType;
 import org.freeplane.api.Node;
 import org.freeplane.api.NodeBookmark;
@@ -25,7 +27,7 @@ class NodeBookmarkProxy implements NodeBookmark {
 	}
 
 	@Override
-	public BookmarkType getBookmarkType() {
+	public BookmarkType getType() {
 		return coreBookmark.getDescriptor().opensAsRoot() ? BookmarkType.ROOT : BookmarkType.SELECT;
 	}
 	
@@ -38,5 +40,16 @@ class NodeBookmarkProxy implements NodeBookmark {
 	public void open(BookmarkType mode) {
 		boolean openAsRoot = (mode == BookmarkType.ROOT);
 		coreBookmark.open(openAsRoot);
+	}
+	
+	@Override
+	public void open(String mode) {
+		try {
+			BookmarkType enumMode = BookmarkType.valueOf(mode.toUpperCase());
+			open(enumMode);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid bookmark mode: '" + mode + 
+				"'. Valid values are: " + Arrays.toString(BookmarkType.values()) + " (case insensitive)", e);
+		}
 	}
 } 

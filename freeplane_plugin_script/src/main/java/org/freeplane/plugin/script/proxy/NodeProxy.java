@@ -1355,6 +1355,18 @@ class NodeProxy extends AbstractProxy<NodeModel> implements Proxy.Node {
 
 	// Node: R/W
 	@Override
+	public void setBookmark(String name, String bookmarkType) {
+		try {
+			BookmarkType enumType = BookmarkType.valueOf(bookmarkType.toUpperCase());
+			setBookmark(name, enumType);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid bookmark type: '" + bookmarkType + 
+				"'. Valid values are: " + Arrays.toString(BookmarkType.values()) + " (case insensitive)", e);
+		}
+	}
+
+	// Node: R/W
+	@Override
 	public void removeBookmark() {
 		final BookmarksController bookmarksController = getBookmarksController();
 		final NodeModel node = getDelegate();
