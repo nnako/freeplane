@@ -712,11 +712,12 @@ public class UITools {
 			int windowY = resourceController.getIntProperty("appwindow_y", 0);
 			final GraphicsConfiguration graphicsConfiguration = findGraphicsConfiguration(windowX, windowY);
 			final int userDefinedScreenResolution;
+			final int userDefinedDisplayScale = resourceController.getIntProperty("display_scale");
 			if(graphicsConfiguration != null) {
 				if(Compat.isWindowsOS() && ! Compat.isJavaVersionLessThan(Compat.JAVA_VERSION_15) || Compat.isMacOsX()) {
 					if (OptionPanelBuilder.hidePropertyByDefault(MONITOR_SIZE_INCHES_PROPERTY)) {
 						int screenResolution = Toolkit.getDefaultToolkit().getScreenResolution();
-						return screenResolution / 72f;
+						return (screenResolution * userDefinedDisplayScale) / (72f * 100f);
 					}
 				}
 				final Rectangle screenBounds = graphicsConfiguration.getBounds();
@@ -738,7 +739,7 @@ public class UITools {
 				userDefinedScreenResolution = resourceController.getIntProperty("user_defined_screen_resolution", 96);
 				resourceController.setDefaultProperty(MONITOR_SIZE_INCHES_PROPERTY, Double.toString(0));
 			}
-			return userDefinedScreenResolution  / 72f;
+			return (userDefinedScreenResolution * userDefinedDisplayScale)  / (72f * 100f);
     }
 
 	private static GraphicsConfiguration findGraphicsConfiguration(int windowX, int windowY) {
