@@ -8,16 +8,15 @@ package org.freeplane.features.bookmarks.mindmapmode;
 import java.io.IOException;
 
 import org.freeplane.core.extension.IExtension;
-import org.freeplane.core.io.IElementDOMHandler;
+import org.freeplane.core.io.IElementHandler;
 import org.freeplane.core.io.IExtensionElementWriter;
 import org.freeplane.core.io.ITreeWriter;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
-import org.freeplane.features.edge.EdgeModel;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.n3.nanoxml.XMLElement;
 
-public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHandler {
+public class BookmarksBuilder implements IExtensionElementWriter, IElementHandler {
 
 	private static final String XML_BOOKMARKS = "bookmarks";
 	private static final String XML_BOOKMARK = "bookmark";
@@ -26,46 +25,32 @@ public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHan
 	private static final String XML_OPENS_AS_ROOT = "opensAsRoot";
 
 	public void registerBy(final ReadManager reader, final WriteManager writer) {
-		reader.addElementHandler("edge", this);
-		writer.addExtensionElementWriter(EdgeModel.class, this);
+		reader.addElementHandler(XML_BOOKMARKS, this);
+		reader.addElementHandler(XML_BOOKMARK, this);
+		writer.addExtensionElementWriter(MapBookmarks.class, this);
 	}
 
 
 	@Override
 	public Object createElement(Object parent, String tag, XMLElement attributes) {
-		if (!(parent instanceof MapModel)) {
-			return null;
-		}
-
-		if (XML_BOOKMARKS.equals(tag)) {
+		if (XML_BOOKMARKS.equals(tag) && parent instanceof MapModel) {
 			final MapModel map = (MapModel) parent;
 			final MapBookmarks mapBookmarks = new MapBookmarks(map);
 			map.addExtension(mapBookmarks);
 			return mapBookmarks;
 		}
 
-		if (XML_BOOKMARK.equals(tag)) {
-			return parent;
+		if (attributes != null && XML_BOOKMARK.equals(tag) && parent instanceof MapBookmarks) {
+			MapBookmarks bookmarks = (MapBookmarks) parent;
+			String nodeId = attributes.getAttribute(XML_NODE_ID, null);
+			String name = attributes.getAttribute(XML_NAME, null);
+			String opensAsRootStr = attributes.getAttribute(XML_OPENS_AS_ROOT, "false");
+			boolean opensAsRoot = Boolean.parseBoolean(opensAsRootStr);
+			NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(name, opensAsRoot);
+			bookmarks.add(nodeId, descriptor);
 		}
 
 		return null;
-	}
-
-	@Override
-	public void endElement(Object parent, String tag, Object userObject, XMLElement dom) {
-		if (!(parent instanceof MapModel) || !XML_BOOKMARK.equals(tag)) {
-			return;
-		}
-
-		MapModel map = (MapModel) parent;
-		String nodeId = dom.getAttribute(XML_NODE_ID, null);
-		String name = dom.getAttribute(XML_NAME, null);
-		String opensAsRootStr = dom.getAttribute(XML_OPENS_AS_ROOT, "false");
-		boolean opensAsRoot = Boolean.parseBoolean(opensAsRootStr);
-		NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(name, opensAsRoot);
-
-		MapBookmarks bookmarks = MapBookmarks.of(map);
-		bookmarks.add(nodeId, descriptor);
 	}
 
 	@Override
@@ -79,7 +64,6 @@ public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHan
 		MapModel map = (MapModel) element;
 
 		XMLElement bookmarksElement = new XMLElement(XML_BOOKMARKS);
-		writer.addElement(null, bookmarksElement);
 
 		for (NodeBookmark bookmark : bookmarks.getBookmarks()) {
 			if (map.getNodeForID(bookmark.getNode().getID()) != null) {
@@ -87,8 +71,9 @@ public class BookmarksBuilder implements IExtensionElementWriter, IElementDOMHan
 				bookmarkElement.setAttribute(XML_NODE_ID, bookmark.getNode().getID());
 				bookmarkElement.setAttribute(XML_NAME, bookmark.getDescriptor().getName());
 				bookmarkElement.setAttribute(XML_OPENS_AS_ROOT, Boolean.toString(bookmark.getDescriptor().opensAsRoot()));
-				writer.addElement(null, bookmarkElement);
+				bookmarksElement.addChild(bookmarkElement);
 			}
 		}
+		writer.addElement(null, bookmarksElement);
 	}
 }
