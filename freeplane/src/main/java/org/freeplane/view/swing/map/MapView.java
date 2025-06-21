@@ -683,13 +683,14 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
                         ResourceController resourceController = ResourceController.getResourceController();
                         if(wasFolded && ! selectedNode.isFolded() && selection.size() == 1
                                 && (resourceController.getBooleanProperty("scrollOnUnfold") || resourceController.getBooleanProperty("scrollOnSelect")))
-                            SwingUtilities.invokeLater(() ->
-                                mapScroller.scrollNodeTreeToVisible(selectedNode, mapScroller.shouldScrollSlowly()));
+                                mapScroller.scrollNodeTreeToVisible(selectedNode, mapScroller.shouldScrollSlowly());
                         else
                             scrollNodeToVisible(selectedNode);
                     }
 
                 }
+                if(isValid())
+                	revalidate();
             }
         }
 
@@ -2677,6 +2678,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	}
 
 	public void selectAsTheOnlyOneSelected(final NodeView newSelected, final boolean requestFocus) {
+		newSelected.invalidate();
 		if (requestFocus && ! newSelected.focused()) {
 			newSelected.requestFocusInWindow();
 		}
@@ -2957,7 +2959,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
 	void scrollViewAfterLayout() {
-		if(isDisplayable()) {
+		if(isDisplayable() && ! selection.selectionChanged) {
 			if(scrollsViewAfterLayout ) {
 				scrollsViewAfterLayout  = false;
 				mapScroller.scrollView();

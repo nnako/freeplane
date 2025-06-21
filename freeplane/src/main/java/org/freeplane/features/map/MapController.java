@@ -397,33 +397,27 @@ implements IExtension, NodeChangeAnnouncer{
 
 
 	void scrollNodeTreeAfterUnfold(final NodeModel node) {
-	    if (shouldAutoscroll("scrollOnUnfold")) {
-			SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeTreeToVisible(node));
-		}
-		else
-			scrollNodeToVisibleLater(node);
-	}
-
-	private void scrollNodeToVisibleLater(final NodeModel node) {
-    	SwingUtilities.invokeLater(() -> Controller.getCurrentController().getSelection().scrollNodeToVisible(node));
+	    final IMapSelection selection = Controller.getCurrentController().getSelection();
+		if (shouldAutoscroll("scrollOnUnfold")) {
+			selection.scrollNodeTreeToVisible(node);
+		} else
+			selection.scrollNodeToVisible(node);
 	}
 
 	public void scrollNodeTreeAfterSelect(final NodeModel node) {
 		final boolean shouldCenterNode = shouldAutoscroll("center_selected_node");
 		final boolean shouldScrollSubtree = shouldAutoscroll("scrollOnSelect");
-		SwingUtilities.invokeLater(() -> {
-			final IMapSelection selection = Controller.getCurrentController().getSelection();
-			if (shouldCenterNode) {
-				selection.scrollNodeToCenter(node);
-				if (shouldScrollSubtree)
-					selection.scrollNodeTreeToVisible(node);
-			}
-			else if (shouldScrollSubtree) {
+		final IMapSelection selection = Controller.getCurrentController().getSelection();
+		if (shouldCenterNode) {
+			selection.scrollNodeToCenter(node);
+			if (shouldScrollSubtree)
 				selection.scrollNodeTreeToVisible(node);
-			}
-			else
-				selection.scrollNodeToVisible(node);
-		});
+		}
+		else if (shouldScrollSubtree) {
+			selection.scrollNodeTreeToVisible(node);
+		}
+		else
+			selection.scrollNodeToVisible(node);
 	}
 
 	private boolean shouldAutoscroll(String propertyName) {
@@ -466,8 +460,10 @@ implements IExtension, NodeChangeAnnouncer{
         boolean unfolded = toggleFolded(filter, childNodes);
         if(unfolded)
             scrollNodeTreeAfterUnfold(node);
-        else
-        	scrollNodeToVisibleLater(node);
+		else {
+			final NodeModel node1 = node;
+			Controller.getCurrentController().getSelection().scrollNodeToVisible(node1);
+		}
     }
 
     public void toggleFoldedAndScroll(final NodeModel node, Filter filter){
@@ -475,7 +471,7 @@ implements IExtension, NodeChangeAnnouncer{
             unfoldAndScroll(node, filter);
 		else {
 			fold(node);
-			scrollNodeToVisibleLater(node);
+			Controller.getCurrentController().getSelection().scrollNodeToVisible(node);
 		}
     }
 

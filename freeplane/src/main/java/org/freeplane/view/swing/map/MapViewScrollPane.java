@@ -349,27 +349,29 @@ public class MapViewScrollPane extends JScrollPane implements IFreeplaneProperty
 			final Point currentViewPosition = super.getViewPosition();
 			if(targetViewPosition == null)
 				return;
-	        int dx = targetViewPosition.x - currentViewPosition.x;
-	        int dy = targetViewPosition.y - currentViewPosition.y;
-	        int slowDx = calcScrollIncrement(dx);
-	        int slowDy = calcScrollIncrement(dy);
-	        currentViewPosition.translate(slowDx, slowDy);
-	   		boolean layoutWasInProgress = layoutInProgress;
-     		layoutInProgress = true;
-     		try {
-     			super.setViewPosition(currentViewPosition);
-     		}
-     		finally {
-				layoutInProgress = layoutWasInProgress;
-			}
-	        if(slowDx == dx && slowDy == dy) {
-	        	targetViewPosition = null;
-	        	scrollingDelay = 0;
-				MapView view = (MapView)getView();
-				if (view != null) {
-					view.setAnchorContentLocation();
+			if(isValid()) {
+				int dx = targetViewPosition.x - currentViewPosition.x;
+				int dy = targetViewPosition.y - currentViewPosition.y;
+				int slowDx = calcScrollIncrement(dx);
+				int slowDy = calcScrollIncrement(dy);
+				currentViewPosition.translate(slowDx, slowDy);
+				boolean layoutWasInProgress = layoutInProgress;
+				layoutInProgress = true;
+				try {
+					super.setViewPosition(currentViewPosition);
 				}
-				return;
+				finally {
+					layoutInProgress = layoutWasInProgress;
+				}
+				if(slowDx == dx && slowDy == dy) {
+					targetViewPosition = null;
+					scrollingDelay = 0;
+					MapView view = (MapView)getView();
+					if (view != null) {
+						view.setAnchorContentLocation();
+					}
+					return;
+				}
 			}
 	        timer = new Timer(scrollingDelay, new ActionListener() {
 				@Override
