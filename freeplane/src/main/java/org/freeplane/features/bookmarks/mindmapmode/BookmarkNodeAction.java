@@ -188,7 +188,8 @@ class BookmarkNodeAction extends AFreeplaneAction {
 
 	private void addMultipleBookmarks(final IMapSelection selection, final MapBookmarks bookmarks, final BookmarkDialogComponents dialogComponents) {
 		final boolean userWantsOpenAsRoot = dialogComponents.getOpensAsRootCheckBox().isSelected();
-		final boolean shouldOverwriteNames = dialogComponents.getOverwriteNamesCheckBox().isSelected();
+		final JCheckBox overwriteNamesCheckBox = dialogComponents.getOverwriteNamesCheckBox();
+		final boolean shouldOverwriteNames = overwriteNamesCheckBox != null && overwriteNamesCheckBox.isSelected();
 
 		for (NodeModel node : selection.getOrderedSelection()) {
 			final String bookmarkName = getBookmarkName(node, bookmarks, shouldOverwriteNames);
