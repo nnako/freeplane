@@ -1,6 +1,6 @@
 # License information for icons in this directory
 
-- files: node-bookmark.svg, node-bookmark-actions.svg
+- files: node-bookmark.svg, node-bookmark-root.svg, node-bookmark-actions.svg
   source: https://openmoji.org
   author: Jonas Roßner, OpenMoji.org
   license: CC BY-SA 4.0
