@@ -303,6 +303,7 @@ class MapScroller {
 			        + VERT_SPACE2));
 		}
 		scrollingDirective = ScrollingDirective.DONE;
+		scrolledNode = null;
 	}
 
 	void scrollToRootNode() {
@@ -315,6 +316,7 @@ class MapScroller {
 		final Point oldAnchorContentLocation = anchorContentLocation;
 		final Point newAnchorContentLocation = getAnchorCenterPoint();
 		if(oldAnchorContentLocation != null && (slowScroll ||
+				scrollingDirective == ScrollingDirective.DONE ||
 				scrollingDirective == ScrollingDirective.MAKE_NODE_VISIBLE ||
 				scrollingDirective == ScrollingDirective.ANCHOR)) {
 			final int deltaX = newAnchorContentLocation.x - oldAnchorContentLocation.x;
