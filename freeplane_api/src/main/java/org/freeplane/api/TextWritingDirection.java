@@ -6,6 +6,7 @@
 package org.freeplane.api;
 
 import java.awt.ComponentOrientation;
+import java.io.File;
 
 public enum TextWritingDirection {
     LEFT_TO_RIGHT(ComponentOrientation.LEFT_TO_RIGHT, '\u202d', '\u202a', '\u2066', '\u200e' ),
@@ -13,6 +14,9 @@ public enum TextWritingDirection {
 
     private final static char popDirection = '\u202c';
     private final static char popIsolation = '\u2069';
+
+    private final static String separator = File.separator;
+    private final static String separatorReplacement = LEFT_TO_RIGHT.isolated(File.separator);
 
     public final ComponentOrientation componentOrientation;
     private final char embedded;
@@ -37,6 +41,10 @@ public enum TextWritingDirection {
     }
     public String embedded(String text) {
         return addControlCharacters(text, embedded, popDirection);
+    }
+
+    public String isolatePathSeparators(String path) {
+    	return embedded(path.replace(separator, separatorReplacement));
     }
 
     public String isolated(String text) {

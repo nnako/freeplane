@@ -1015,7 +1015,7 @@ public class MapViewController implements IMapViewManager , IMapViewChangeListen
 			} else {
 				frameTitle = (workspaceTitle.isEmpty() ? "" : workspaceTitle + " - ") + modeName;
 			}
-			controller.getViewController().setTitle(TextWritingDirection.LEFT_TO_RIGHT.embedded(frameTitle));
+			controller.getViewController().setTitle(TextWritingDirection.LEFT_TO_RIGHT.isolatePathSeparators(frameTitle));
 		}
 		else {
 			controller.getViewController().setTitle("");

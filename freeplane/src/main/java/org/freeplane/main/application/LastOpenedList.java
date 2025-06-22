@@ -527,7 +527,7 @@ public class LastOpenedList implements IMapViewChangeListener, IMapChangeListene
 			String folderPath = filePath.substring(0, fileSeparatorIndex);
 			actionName = fileName + " (" + folderPath + ")";
 		}
-		openMapAction.putValue(Action.NAME, TextWritingDirection.LEFT_TO_RIGHT.embedded(actionName));
+		openMapAction.putValue(Action.NAME, TextWritingDirection.LEFT_TO_RIGHT.isolatePathSeparators(actionName));
 
     }
 

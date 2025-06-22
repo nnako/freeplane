@@ -491,7 +491,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
         File file = ((MapView)pNewMap).getMap().getFile();
         TitledTabStateProperties tabProperties = getContainingDockedWindow(pNewMap)
                 .getWindowProperties().getTabProperties().getTitledTabProperties().getNormalProperties();
-        tabProperties.setToolTipText(file != null ? TextWritingDirection.LEFT_TO_RIGHT.embedded(file.getAbsolutePath()) :  null);
+        tabProperties.setToolTipText(file != null ? TextWritingDirection.LEFT_TO_RIGHT.isolatePathSeparators(file.getAbsolutePath()) :  null);
     }
 
 	@Override
