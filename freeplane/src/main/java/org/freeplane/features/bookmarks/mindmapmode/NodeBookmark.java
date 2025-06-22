@@ -43,6 +43,16 @@ public class NodeBookmark {
 	}
 
 	public void open() {
-		open(descriptor.opensAsRoot());
+		open(opensAsRoot());
 	}
+
+	public String getName() {
+		return descriptor.getName();
+	}
+
+	public boolean opensAsRoot() {
+		return descriptor.opensAsRoot();
+	}
+
+
 }

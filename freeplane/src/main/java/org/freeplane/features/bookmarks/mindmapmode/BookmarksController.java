@@ -5,19 +5,30 @@
  */
 package org.freeplane.features.bookmarks.mindmapmode;
 
+import java.util.List;
+
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
+import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.icon.IStateIconProvider;
+import org.freeplane.features.icon.IconController;
+import org.freeplane.features.icon.UIIcon;
+import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
+import org.freeplane.features.map.NodeChangeEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 
 public class BookmarksController implements IExtension{
+	public static final String SHOW_BOOKMARK_ICONS = "show_bookmark_icons";
+	private static final UIIcon bookmarkIcon= IconStoreFactory.ICON_STORE.getUIIcon("node-bookmark.svg");
+	private static final UIIcon bookmarkAsRootIcon= IconStoreFactory.ICON_STORE.getUIIcon("node-bookmark-root.svg");
 	private final ModeController modeController;
 	private final BookmarksToolbarBuilder toolbarBuilder;
 
@@ -33,23 +44,47 @@ public class BookmarksController implements IExtension{
 		readManager.addElementHandler("bookmark", bookmarksBuilder);
 		writeManager.addExtensionElementWriter(MapBookmarks.class, bookmarksBuilder);
 		modeController.addAction(new BookmarkNodeAction(modeController, this));
+		modeController.getExtension(IconController.class).addStateIconProvider(new IStateIconProvider() {
+			@Override
+			public UIIcon getStateIcon(NodeModel node) {
+				final boolean showIcon = ResourceController.getResourceController().getBooleanProperty(SHOW_BOOKMARK_ICONS);
+				if(! showIcon)
+					return null;
+				final NodeBookmark bookmark = getBookmarks(node.getMap()).getBookmark(node.getID());
+				return bookmark == null ? null
+						: bookmark.opensAsRoot() ? bookmarkAsRootIcon
+						: bookmarkIcon;
+			}
+
+			@Override
+			public boolean mustIncludeInIconRegistry() {
+				return true;
+			}
+		});
 	}
 
 	public void addBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
 		final MapModel map = node.getMap();
 		getBookmarks(map).add(node.getID(), descriptor);
 		fireBookmarksChanged(map);
+		fireBookmarkChanged(node);
 	}
 
 	public void removeBookmark(NodeModel node) {
 		final MapModel map = node.getMap();
-		if(getBookmarks(map).remove(node.getID()))
+		if(getBookmarks(map).remove(node.getID())) {
 			fireBookmarksChanged(map);
+			fireBookmarkChanged(node);
+		}
 	}
 
 	public void removeAllBookmarks(MapModel map) {
-		if(getBookmarks(map).clear())
+		final MapBookmarks bookmarks = getBookmarks(map);
+		final List<String> nodeIDs = bookmarks.getNodeIDs();
+		if(bookmarks.clear()) {
 			fireBookmarksChanged(map);
+			nodeIDs.stream().map(map::getNodeForID).forEach(this::fireBookmarkChanged);
+		}
 
 	}
 
@@ -61,6 +96,10 @@ public class BookmarksController implements IExtension{
 
 	private void fireBookmarksChanged(MapModel map) {
 		modeController.getMapController().fireMapChanged(new MapChangeEvent(this, map, MapBookmarks.class, null, null));
+	}
+
+	private void fireBookmarkChanged(NodeModel node) {
+		modeController.getMapController().nodeRefresh(new NodeChangeEvent(node, NodeBookmark.class, null, null, false, false));
 	}
 
 	public MapBookmarks getBookmarks(MapModel map) {

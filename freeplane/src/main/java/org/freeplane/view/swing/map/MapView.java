@@ -83,6 +83,7 @@ import org.freeplane.core.util.ColorUtils;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.ModelessAttributeController;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.edge.EdgeColorsConfigurationFactory;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.highlight.NodeHighlighter;
@@ -1042,6 +1043,11 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 					final MapView mapView = (MapView) c;
 					if (propertyName.equals(SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY)) {
 						MapView.showsTagsOnMinimizedNodes = TreeXmlReader.xmlToBoolean(newValue);
+						mapView.updateIconsRecursively();
+						mapView.repaint();
+						continue;
+					}
+					if (propertyName.equals(BookmarksController.SHOW_BOOKMARK_ICONS)) {
 						mapView.updateIconsRecursively();
 						mapView.repaint();
 						continue;
