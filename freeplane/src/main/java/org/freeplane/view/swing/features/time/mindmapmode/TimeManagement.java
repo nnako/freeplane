@@ -312,7 +312,7 @@ class TimeManagement implements PropertyChangeListener, IMapSelectionListener {
 			}
 	    }
 		private void remindLaterReminder(){
-			Date nextTime = periodPanel.calculateNextTime(calendar.getTime());
+			Date nextTime = periodPanel.calculateNextTime(new Date());
 			updateCalendar(nextTime.getTime());
 			addReminder();
 		}
