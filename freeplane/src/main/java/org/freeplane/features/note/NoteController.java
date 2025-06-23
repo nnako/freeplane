@@ -128,7 +128,7 @@ public class NoteController implements IExtension {
 		modeController.addToolTipProvider(NOTE_TOOLTIP, new ITooltipProvider() {
 			@Override
 			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger){
-				if( tooltipTrigger == TooltipTrigger.LINK || showNotesInMap(node.getMap()) && ! TextController.getController(modeController).isMinimized(node)){
+				if( ! (providesTooltip(node, tooltipTrigger))){
 					return null;
 				}
 				final String data = NoteModel.getNoteText(node);
@@ -158,6 +158,11 @@ public class NoteController implements IExtension {
 				final String tooltipText = text.replaceFirst("<body>",
 					tooltipBodyBegin.toString()).replaceFirst("</body>", "</div></body>");
 				return tooltipText;
+			}
+
+			private boolean providesTooltip(NodeModel node, TooltipTrigger tooltipTrigger) {
+				return tooltipTrigger == TooltipTrigger.LINK || ! showNotesInMap(node.getMap())
+						 || TextController.getController(modeController).isMinimized(node);
 			}
 		});
 	}

@@ -380,7 +380,7 @@ public class TextController implements IExtension {
 			@Override
 			public String getTooltip(final ModeController modeController, NodeModel node, Component view, TooltipTrigger tooltipTrigger) {
 				final DetailModel details = DetailModel.getDetail(node);
-				if (details == null || details.getTextOr("").isEmpty() || !(tooltipTrigger == TooltipTrigger.LINK || details.isHidden() || ShortenedTextModel.isShortened(node))) {
+				if (!providesTooltip(node, details, tooltipTrigger)) {
 					return null;
 				}
 				final String htmlBodyStyle = (view instanceof MainView)
@@ -401,6 +401,15 @@ public class TextController implements IExtension {
 				final String tooltipText = htmlBodyStyle.isEmpty() ? text : text.replaceFirst("<body>", "<body><div style=\"" + htmlBodyStyle + "\">")
 				    .replaceFirst("</body>", "</div></body>");
 				return tooltipText;
+			}
+
+			private boolean providesTooltip(NodeModel node, final DetailModel details,
+			        TooltipTrigger tooltipTrigger) {
+				return details != null
+						&& ! details.getTextOr("").isEmpty()
+						&& (tooltipTrigger == TooltipTrigger.LINK
+							|| details.isHidden() ||
+							ShortenedTextModel.isShortened(node));
 			}
 
 			private String getTooltipHtmlStyle(final ModeController modeController, NodeModel node, MainView view) {
