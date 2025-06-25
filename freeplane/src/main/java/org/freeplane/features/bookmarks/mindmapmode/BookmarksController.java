@@ -65,7 +65,7 @@ public class BookmarksController implements IExtension{
 
 	public void addBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
 		final MapModel map = node.getMap();
-		getBookmarks(map).add(node.getID(), descriptor);
+		getBookmarks(map).add(node.createID(), descriptor);
 		fireBookmarksChanged(map);
 		fireBookmarkChanged(node);
 	}
