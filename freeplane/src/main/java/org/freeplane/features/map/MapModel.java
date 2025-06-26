@@ -116,6 +116,18 @@ public class MapModel {
 		}
 	}
 
+	public void fireNodeDeletionEvent(final NodeDeletionEvent event) {
+		for (final IMapChangeListener listener : listeners) {
+			listener.onNodeDeleted(event);
+		}
+	}
+
+	public void fireNodeInsertionEvent(NodeModel parent, NodeModel child, int newIndex) {
+		for (final IMapChangeListener listener : listeners) {
+			listener.onNodeInserted(parent, child, newIndex);
+		}
+	}
+
 	public String generateNodeID(final String proposedID) {
 		if (proposedID != null && !"".equals(proposedID) && getNodeForID(proposedID) == null) {
 			return proposedID;

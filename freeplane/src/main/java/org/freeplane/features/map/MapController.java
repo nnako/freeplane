@@ -753,13 +753,17 @@ implements IExtension, NodeChangeAnnouncer{
 		final IMapChangeListener[] list = mapChangeListeners.toArray(new IMapChangeListener[]{});
 		nodeDeletionEvent.parent.fireNodeRemoved(list, nodeDeletionEvent);
 		NodeModel node = nodeDeletionEvent.node;
-		node.getMap().unregistryNodes(node);
+		final MapModel map = node.getMap();
+		map.fireNodeDeletionEvent(nodeDeletionEvent);
+		map.unregistryNodes(node);
 	}
 
 	protected void fireNodeInserted(final NodeModel parent, final NodeModel child, final int index) {
 	    sortMapChangeListeners();
-		parent.getMap().registryNodeRecursive(child);
+		final MapModel map = parent.getMap();
+		map.registryNodeRecursive(child);
 		final IMapChangeListener[] list = mapChangeListeners.toArray(new IMapChangeListener[]{});
+		map.fireNodeInsertionEvent(parent, child, index);
 		parent.fireNodeInserted(list, child, index);
 	}
 
