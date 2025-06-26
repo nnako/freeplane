@@ -15,13 +15,16 @@ import java.util.stream.Collectors;
 
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.Controller;
 
 public class MapBookmarks implements IExtension {
 	private MapModel map;
 	private List<String> nodeIDs;
 	private Map<String, NodeBookmarkDescriptor> bookmarks;
+	private Map<String, String> selectedNodesBySelectionRoot;
 
 	public static MapBookmarks of(MapModel map) {
 		MapBookmarks bookmarks = map.getExtension(MapBookmarks.class);
@@ -36,8 +39,9 @@ public class MapBookmarks implements IExtension {
 	MapBookmarks(MapModel map) {
 		super();
 		this.map = map;
-		this.nodeIDs = new ArrayList<String>();
-		this.bookmarks = new HashMap<String, NodeBookmarkDescriptor>();
+		this.nodeIDs = new ArrayList<>();
+		this.bookmarks = new HashMap<>();
+		this.selectedNodesBySelectionRoot = new HashMap<>();
 	}
 
 	void add(String id, NodeBookmarkDescriptor bookmark) {
@@ -182,6 +186,22 @@ public class MapBookmarks implements IExtension {
 	public boolean opensAsRoot(NodeModel node) {
 		final NodeBookmarkDescriptor descriptor = bookmarks.get(node.getID());
 		return descriptor != null && descriptor.opensAsRoot();
+	}
+
+	public void onSelect(NodeModel node) {
+		final IMapSelection selection = Controller.getCurrentController().getSelection();
+		final String rootId = selection.getSelectionRoot().getID();
+		final String nodeId = node.getID();
+		selectedNodesBySelectionRoot.put(rootId, nodeId);
+	}
+
+	NodeModel getSelectedNodeForRoot(NodeModel node) {
+		final String rootId = node.getID();
+		final String selectedNodeId = selectedNodesBySelectionRoot.getOrDefault(rootId, rootId);
+		if(selectedNodeId.equals(rootId))
+			return node;
+		final NodeModel selectedNode = map.getNodeForID(selectedNodeId);
+		return selectedNode != null ? selectedNode : node;
 	}
 
 

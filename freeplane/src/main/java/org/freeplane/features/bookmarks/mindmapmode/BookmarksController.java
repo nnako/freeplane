@@ -17,6 +17,7 @@ import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.UIIcon;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.IMapSelection;
+import org.freeplane.features.map.INodeSelectionListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
@@ -60,6 +61,14 @@ public class BookmarksController implements IExtension{
 			public boolean mustIncludeInIconRegistry() {
 				return true;
 			}
+		});
+		modeController.getMapController().addNodeSelectionListener(new INodeSelectionListener() {
+
+			@Override
+			public void onSelect(NodeModel node) {
+				node.getMap().getExtension(MapBookmarks.class).onSelect(node);
+			}
+
 		});
 	}
 

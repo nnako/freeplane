@@ -32,13 +32,27 @@ public class NodeBookmark {
 		final Controller controller = Controller.getCurrentController();
 		final IMapViewManager mapViewManager = controller.getMapViewManager();
 		final IMapSelection selection = controller.getSelection();
+		final NodeModel selectedNode;
 		if(asRoot) {
-			mapViewManager.setViewRoot(node);
+			final MapBookmarks bookmarks = selection.getMap().getExtension(MapBookmarks.class);
+			final NodeModel lastSelectedNode = bookmarks.getSelectedNodeForRoot(node);
+
+			if (selection.getSelectionRoot() != node) {
+				mapViewManager.setViewRoot(node);
+				selectedNode = lastSelectedNode;
+			}
+			else
+				selectedNode = node;
+		}
+		else
+			selectedNode = node;
+		if(selectedNode.isRoot()){
 			selection.selectRoot();
-		} else {
-			controller.getModeController().getMapController().displayNode(node);
-			selection.selectAsTheOnlyOneSelected(node);
-			selection.scrollNodeTreeToVisible(node, false);
+		}
+		else {
+			controller.getModeController().getMapController().displayNode(selectedNode);
+			selection.selectAsTheOnlyOneSelected(selectedNode);
+			selection.scrollNodeTreeToVisible(selectedNode, false);
 		}
 	}
 
