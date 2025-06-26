@@ -56,6 +56,7 @@ public class BookmarksToolbarBuilder {
 	private static final DataFlavor BOOKMARK_FLAVOR = new DataFlavor(NodeBookmark.class, "NodeBookmark");
 	private static final Icon BOOKMARK_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmarkAsRoot.svg").getIcon();
 	private static final Icon SELECTED_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon();
+	private static final Icon SELECTED_SUBTREE_ICON = IconStoreFactory.ICON_STORE.getUIIcon("selectedSubtreeBookmark.svg").getIcon();
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 
@@ -123,7 +124,7 @@ public class BookmarksToolbarBuilder {
 				@Override
 				public void paintIcon(Component c, Graphics g, int x, int y) {
 					Icon icon;
-					if(Controller.getCurrentController().getSelection().getSelectionRoot() == bookmark.getNode())
+					if(Controller.getCurrentController().getSelection().getSelectionRoot() == node)
 						icon = SELECTED_ROOT_ICON;
 					else
 						icon = BOOKMARK_ROOT_ICON;
@@ -141,6 +142,35 @@ public class BookmarksToolbarBuilder {
 				}
 
 			});
+		}
+		else {
+			button.setIcon(new Icon() {
+
+				@Override
+				public void paintIcon(Component c, Graphics g, int x, int y) {
+					if(isBookmarkSubtreeSelected(node))
+						SELECTED_SUBTREE_ICON.paintIcon(c, g, x, y);
+				}
+
+				private boolean isBookmarkSubtreeSelected(final NodeModel node) {
+					final IMapSelection selection = Controller.getCurrentController().getSelection();
+					final NodeModel selected = selection.getSelected();
+					final boolean isActive = selected == node || selected.isDescendantOf(node);
+					return isActive;
+				}
+
+				@Override
+				public int getIconWidth() {
+					return SELECTED_SUBTREE_ICON.getIconWidth();
+				}
+
+				@Override
+				public int getIconHeight() {
+					return SELECTED_SUBTREE_ICON.getIconHeight();
+				}
+
+			});
+
 		}
 
 		final boolean isVisible = node.isVisible(selection.getFilter());

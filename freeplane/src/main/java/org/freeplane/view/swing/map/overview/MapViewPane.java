@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -26,6 +27,7 @@ import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
+import org.freeplane.features.map.INodeSelectionListener;
 import org.freeplane.features.map.MapChangeEvent;
 import org.freeplane.features.map.NodeDeletionEvent;
 import org.freeplane.features.map.NodeModel;
@@ -38,7 +40,7 @@ import org.freeplane.view.swing.map.MapViewScrollPane;
 import org.freeplane.view.swing.map.overview.resizable.ResizablePanelBorder;
 import org.freeplane.view.swing.map.overview.resizable.ResizePanelMouseHandler;
 
-public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener {
+public class MapViewPane extends JPanel implements IFreeplanePropertyListener, IMapChangeListener, INodeSelectionListener {
     private static final long serialVersionUID = 8664710783654626093L;
 
     private final static String MAP_OVERVIEW_VISIBLE_PROPERTY = "mapOverviewVisible";
@@ -180,6 +182,15 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 		updateBookmarksToolbarLater();
 	}
 
+
+
+	@Override
+	public void onSelect(NodeModel node) {
+		if(bookmarksToolbar != null && node.getMap() == mapView.getMap()) {
+			bookmarksToolbar.repaint();
+		}
+	}
+
 	private void updateMapOverview() {
         if (mapOverviewPanel.isVisible()) {
             mapOverviewImage.resetImage();
@@ -196,6 +207,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
     public void addNotify() {
         super.addNotify();
         mapView.getMap().addMapChangeListener(this);
+        mapView.getModeController().getMapController().addNodeSelectionListener(this);
         ResourceController.getResourceController().addPropertyChangeListener(this);
     }
 
@@ -203,6 +215,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
     public void removeNotify() {
         super.removeNotify();
         mapView.getMap().removeMapChangeListener(this);
+        mapView.getModeController().getMapController().removeNodeSelectionListener(this);
         ResourceController.getResourceController().removePropertyChangeListener(this);
     }
 
