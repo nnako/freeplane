@@ -142,8 +142,6 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
 	@Override
     public void mapChanged(MapChangeEvent event) {
-		if(event.getMap() != mapView.getMap())
-			return;
 		final Object property = event.getProperty();
 		if(property.equals(MapBookmarks.class) || property.equals(Filter.class)) {
 			updateBookmarksToolbarLater();
