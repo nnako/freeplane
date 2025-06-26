@@ -2,6 +2,7 @@ package org.freeplane.features.bookmarks.mindmapmode;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -26,19 +27,16 @@ import java.net.URL;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-
-import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 
 import org.freeplane.core.ui.components.FocusRequestor;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
@@ -49,12 +47,15 @@ import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.FreeplaneTooltip;
 import org.freeplane.view.swing.map.NodeTooltipManager;
 
 public class BookmarksToolbarBuilder {
 	private static final DataFlavor BOOKMARK_FLAVOR = new DataFlavor(NodeBookmark.class, "NodeBookmark");
+	private static final Icon BOOKMARK_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmarkAsRoot.svg").getIcon();
+	private static final Icon SELECTED_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon();
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 
@@ -107,7 +108,8 @@ public class BookmarksToolbarBuilder {
 			}
 
 		};
-		button.setText(bookmark.getDescriptor().getName());
+		final NodeBookmarkDescriptor descriptor = bookmark.getDescriptor();
+		button.setText(descriptor.getName());
 		button.addActionListener(action -> bookmark.open());
 		button.putClientProperty("bookmark", bookmark);
 		button.putClientProperty(NodeTooltipManager.TOOLTIP_LOCATION_PROPERTY, NodeTooltipManager.TOOLTIP_LOCATION_ABOVE);
@@ -115,8 +117,30 @@ public class BookmarksToolbarBuilder {
 		toolTipManager.registerComponent(button);
 
 
-		if (bookmark.getDescriptor().opensAsRoot()) {
-			button.setIcon(IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon());
+		if (descriptor.opensAsRoot()) {
+			button.setIcon(new Icon() {
+
+				@Override
+				public void paintIcon(Component c, Graphics g, int x, int y) {
+					Icon icon;
+					if(Controller.getCurrentController().getSelection().getSelectionRoot() == bookmark.getNode())
+						icon = SELECTED_ROOT_ICON;
+					else
+						icon = BOOKMARK_ROOT_ICON;
+					icon.paintIcon(c, g, x, y);
+				}
+
+				@Override
+				public int getIconWidth() {
+					return SELECTED_ROOT_ICON.getIconWidth();
+				}
+
+				@Override
+				public int getIconHeight() {
+					return SELECTED_ROOT_ICON.getIconHeight();
+				}
+
+			});
 		}
 
 		final boolean isVisible = node.isVisible(selection.getFilter());

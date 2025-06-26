@@ -31,6 +31,7 @@ import org.freeplane.features.map.NodeDeletionEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.mindmapmode.MModeController;
+import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.features.ui.ViewController;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.MapViewScrollPane;
@@ -141,6 +142,8 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 
 	@Override
     public void mapChanged(MapChangeEvent event) {
+		if(event.getMap() != mapView.getMap())
+			return;
 		final Object property = event.getProperty();
 		if(property.equals(MapBookmarks.class) || property.equals(Filter.class)) {
 			updateBookmarksToolbarLater();
@@ -154,6 +157,9 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 			else
 				return;
 		}
+		if (bookmarksToolbar != null
+				&& property.equals(IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT))
+			bookmarksToolbar.repaint();
 		updateMapOverview();
 	}
 
