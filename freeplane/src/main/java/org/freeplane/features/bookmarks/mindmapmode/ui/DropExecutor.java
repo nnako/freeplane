@@ -6,25 +6,31 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 
 class DropExecutor {
-	private final BookmarkMover bookmarkMover;
 	private final BookmarksController bookmarksController;
+	private final FreeplaneToolBar toolbar;
 
 	DropExecutor(FreeplaneToolBar toolbar, BookmarksController bookmarksController) {
-		this.bookmarkMover = new BookmarkMover(toolbar, bookmarksController);
+		this.toolbar = toolbar;
 		this.bookmarksController = bookmarksController;
 	}
 
 	void moveBookmark(int sourceIndex, int targetIndex) {
-		bookmarkMover.moveBookmark(sourceIndex, targetIndex);
+		MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+		MapBookmarks bookmarks = bookmarksController.getBookmarks(map);
+		NodeBookmark bookmarkToMove = bookmarks.getBookmarks().get(sourceIndex);
+		SwingUtilities.invokeLater(() -> bookmarksController.moveBookmark(bookmarkToMove
+		        .getNode(), targetIndex));
 	}
 
 	boolean createBookmarkFromNode(Transferable transferable, NodeBookmark targetBookmark, boolean dropAfter, JButton targetButton) {
@@ -36,7 +42,7 @@ class DropExecutor {
 
 			MapModel map = getMapFromButton(targetButton);
 			int insertionIndex = calculateInsertionIndex(targetBookmark, dropAfter, map);
-			
+
 			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
 
 		} catch (Exception e) {
@@ -50,7 +56,7 @@ class DropExecutor {
 		Collection<NodeModel> draggedNodesCollection = (Collection<NodeModel>) transferable
 		        .getTransferData(MindMapNodesSelection.mindMapNodeObjectsFlavor);
 		List<NodeModel> draggedNodes = new ArrayList<>(draggedNodesCollection);
-		
+
 		return draggedNodes.size() == 1 ? draggedNodes.get(0) : null;
 	}
 
@@ -64,4 +70,4 @@ class DropExecutor {
 		int targetIndex = bookmarksController.findBookmarkPosition(currentBookmarks, targetBookmark);
 		return dropAfter ? targetIndex + 1 : targetIndex;
 	}
-} 
+}
