@@ -33,7 +33,7 @@ class BookmarkButton extends JButton {
 	}
 
 	private FreeplaneTooltip createBookmarkTooltip() {
-		FreeplaneTooltip tip = new FreeplaneTooltip(null, FreeplaneTooltip.TEXT_HTML, false);
+		FreeplaneTooltip tip = new FreeplaneTooltip(getGraphicsConfiguration(), FreeplaneTooltip.TEXT_HTML, false);
 		tip.setBorder(BorderFactory.createEmptyBorder());
 		final URL url = node.getMap().getURL();
 		if (url != null) {
@@ -50,4 +50,4 @@ class BookmarkButton extends JButton {
 	NodeModel getNode() {
 		return node;
 	}
-} 
+}
