@@ -39,19 +39,19 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.FreeplaneTooltip;
 import org.freeplane.view.swing.map.NodeTooltipManager;
 
-public class BookmarksToolbarBuilder {
+class BookmarksToolbarBuilder {
 	private static final Icon BOOKMARK_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmarkAsRoot.svg").getIcon();
 	private static final Icon SELECTED_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon();
 	private static final Icon SELECTED_SUBTREE_ICON = IconStoreFactory.ICON_STORE.getUIIcon("selectedSubtreeBookmark.svg").getIcon();
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 
-	public BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
+	BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
 		this.modeController = modeController;
 		this.bookmarksController = bookmarksController;
 	}
 
-	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
+	void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
 		toolbar.removeAll();
 		toolbar.putClientProperty("bookmarksMap", map);
 
@@ -269,7 +269,7 @@ public class BookmarksToolbarBuilder {
 		bookmarksController.addBookmark(bookmark.getNode(), newDescriptor);
 	}
 
-	public int getComponentIndex(FreeplaneToolBar toolbar, Component component) {
+	int getComponentIndex(FreeplaneToolBar toolbar, Component component) {
 		Component[] components = toolbar.getComponents();
 		for (int i = 0; i < components.length; i++) {
 			if (components[i] == component) {

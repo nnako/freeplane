@@ -27,7 +27,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	public BookmarkDropTargetListener(FreeplaneToolBar toolbar, BookmarksController bookmarksController, BookmarksToolbarBuilder toolbarBuilder) {
 		this.visualFeedback = new DropVisualFeedback();
-		this.validator = new DropValidator(toolbar, toolbarBuilder, bookmarksController);
+		this.validator = new DropValidator(toolbar, toolbarBuilder);
 		this.executor = new DropExecutor(toolbar, bookmarksController);
 		this.hoverTimer = new HoverTimer(visualFeedback);
 	}
@@ -60,7 +60,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			int sourceIndex = (Integer) dtde.getTransferable().getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
 			Point dropPoint = dtde.getLocation();
 
-			DropValidationResult.DropValidation validation = validator.validateDrop(sourceIndex, targetButton, dropPoint);
+			DropValidation validation = validator.validateDrop(sourceIndex, targetButton, dropPoint);
 			if (!validation.isValid) {
 				dtde.rejectDrag();
 				visualFeedback.clearVisualFeedback(targetButton);
@@ -69,7 +69,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			}
 
 			dtde.acceptDrag(DnDConstants.ACTION_MOVE);
-			visualFeedback.showDropZoneIndicator(targetButton, validation.movesAfter);
+			visualFeedback.showDropZoneIndicator(targetButton, validation.dropsAfter);
 			hoverTimer.cancelHoverTimer();
 
 		} catch (Exception e) {
@@ -94,7 +94,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			}
 
 			Point dropPoint = dtde.getLocation();
-			DropValidationResult.NodeDropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
+			DropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
 
 			if (!validation.isValid) {
 				dtde.rejectDrag();
@@ -168,7 +168,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		int sourceIndex = (Integer) dtde.getTransferable().getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
 		Point dropPoint = dtde.getLocation();
 
-		DropValidationResult.DropValidation validation = validator.validateDrop(sourceIndex, targetButton, dropPoint);
+		DropValidation validation = validator.validateDrop(sourceIndex, targetButton, dropPoint);
 		if (!validation.isValid) {
 			dtde.rejectDrop();
 			return;
@@ -181,7 +181,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private void handleNodeDrop(DropTargetDropEvent dtde, JButton targetButton) {
 		Point dropPoint = dtde.getLocation();
-		DropValidationResult.NodeDropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
+		DropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
 
 		if (!validation.isValid) {
 			dtde.rejectDrop();

@@ -16,7 +16,7 @@ import org.freeplane.core.io.WriteManager;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.n3.nanoxml.XMLElement;
 
-public class BookmarksBuilder implements IExtensionElementWriter, IElementHandler {
+class BookmarksBuilder implements IExtensionElementWriter, IElementHandler {
 
 	private static final String XML_BOOKMARKS = "bookmarks";
 	private static final String XML_BOOKMARK = "bookmark";

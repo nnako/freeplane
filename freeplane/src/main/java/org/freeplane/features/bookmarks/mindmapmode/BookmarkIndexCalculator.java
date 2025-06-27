@@ -1,36 +1,26 @@
 package org.freeplane.features.bookmarks.mindmapmode;
 
 import java.awt.Point;
-import java.util.List;
 
 import javax.swing.JButton;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
-import org.freeplane.features.map.MapModel;
 
 class BookmarkIndexCalculator {
 	private final FreeplaneToolBar toolbar;
 	private final BookmarksToolbarBuilder toolbarBuilder;
-	private final BookmarksController bookmarksController;
 
-	BookmarkIndexCalculator(FreeplaneToolBar toolbar, BookmarksToolbarBuilder toolbarBuilder, BookmarksController bookmarksController) {
+	BookmarkIndexCalculator(FreeplaneToolBar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
 		this.toolbar = toolbar;
 		this.toolbarBuilder = toolbarBuilder;
-		this.bookmarksController = bookmarksController;
 	}
 
 	int calculateBookmarkMoveIndex(int sourceIndex, JButton targetButton, Point dropPoint) {
 		int targetIndex = toolbarBuilder.getComponentIndex(toolbar, targetButton);
 		boolean movesAfter = isDropAfter(targetButton, dropPoint);
-		
+
 		return movesAfter ? (sourceIndex < targetIndex ? targetIndex : targetIndex + 1)
 		        : (sourceIndex < targetIndex ? targetIndex - 1 : targetIndex);
-	}
-
-	int calculateNodeInsertionIndex(NodeBookmark targetBookmark, boolean dropAfter, MapModel map) {
-		List<NodeBookmark> currentBookmarks = bookmarksController.getBookmarks(map).getBookmarks();
-		int targetIndex = bookmarksController.findBookmarkPosition(currentBookmarks, targetBookmark);
-		return dropAfter ? targetIndex + 1 : targetIndex;
 	}
 
 	boolean isValidBookmarkMove(int sourceIndex, JButton targetButton, Point dropPoint) {
@@ -63,4 +53,4 @@ class BookmarkIndexCalculator {
 		int rightThird = targetButton.getWidth() * 2 / 3;
 		return dropPoint.x >= rightThird;
 	}
-} 
+}

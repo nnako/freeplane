@@ -14,7 +14,7 @@ public class NodeBookmark {
 	private final NodeModel node;
 	private final NodeBookmarkDescriptor descriptor;
 
-	public NodeBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
+	NodeBookmark(NodeModel node, NodeBookmarkDescriptor descriptor) {
 		super();
 		this.node = node;
 		this.descriptor = descriptor;
@@ -64,7 +64,7 @@ public class NodeBookmark {
 		return descriptor.getName();
 	}
 
-	public boolean opensAsRoot() {
+	boolean opensAsRoot() {
 		return descriptor.opensAsRoot();
 	}
 

@@ -38,6 +38,7 @@ class DropExecutor {
 			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
 
 		} catch (Exception e) {
+			// Ignore exceptions during bookmark creation (e.g., transferable data issues)
 			return false;
 		}
 	}

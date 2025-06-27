@@ -26,7 +26,7 @@ public class MapBookmarks implements IExtension {
 	private Map<String, NodeBookmarkDescriptor> bookmarks;
 	private Map<String, String> selectedNodesBySelectionRoot;
 
-	public static MapBookmarks of(MapModel map) {
+	static MapBookmarks of(MapModel map) {
 		MapBookmarks bookmarks = map.getExtension(MapBookmarks.class);
 		if(bookmarks == null) {
 			bookmarks = new MapBookmarks(map);
@@ -164,15 +164,15 @@ public class MapBookmarks implements IExtension {
 		return map;
 	}
 
-	public int size() {
+	int size() {
 		return bookmarks.size();
 	}
 
-	public boolean contains(String id) {
+	boolean contains(String id) {
 		return bookmarks.containsKey(id);
 	}
 
-	public boolean clear() {
+	boolean clear() {
 		if(bookmarks.isEmpty())
 			return false;
 		bookmarks.clear();
@@ -198,12 +198,12 @@ public class MapBookmarks implements IExtension {
 		        && Objects.equals(nodeIDs, other.nodeIDs);
 	}
 
-	public boolean opensAsRoot(NodeModel node) {
+	boolean opensAsRoot(NodeModel node) {
 		final NodeBookmarkDescriptor descriptor = bookmarks.get(node.getID());
 		return descriptor != null && descriptor.opensAsRoot();
 	}
 
-	public void onSelect(NodeModel node) {
+	void onSelect(NodeModel node) {
 		final IMapSelection selection = Controller.getCurrentController().getSelection();
 		final String rootId = selection.getSelectionRoot().getID();
 		final String nodeId = node.getID();

@@ -81,7 +81,7 @@ public class BookmarksController implements IExtension{
 		fireBookmarkChanged(node);
 	}
 
-	public void addBookmarkAtPosition(NodeModel node, NodeBookmarkDescriptor descriptor, int position) {
+	private void addBookmarkAtPosition(NodeModel node, NodeBookmarkDescriptor descriptor, int position) {
 		final MapModel map = node.getMap();
 		getBookmarks(map).addAtPosition(node.createID(), descriptor, position);
 		fireBookmarksChanged(map);
@@ -106,7 +106,7 @@ public class BookmarksController implements IExtension{
 
 	}
 
-	public void moveBookmark(NodeModel node, int index) {
+	void moveBookmark(NodeModel node, int index) {
 		final MapModel map = node.getMap();
 		if(getBookmarks(map).move(node.getID(), index))
 			fireBookmarksChanged(map);
@@ -129,7 +129,7 @@ public class BookmarksController implements IExtension{
 		toolbarBuilder.updateBookmarksToolbar(toolbar, map, selection);
 	}
 
-	public boolean createBookmarkFromNode(NodeModel draggedNode, MapModel map, int insertionIndex) {
+	boolean createBookmarkFromNode(NodeModel draggedNode, MapModel map, int insertionIndex) {
 		if (draggedNode == null) {
 			return false;
 		}
@@ -163,14 +163,14 @@ public class BookmarksController implements IExtension{
 		addBookmarkAtPosition(draggedNode, descriptor, insertionIndex);
 	}
 
-	public String suggestBookmarkNameFromText(NodeModel node) {
+	String suggestBookmarkNameFromText(NodeModel node) {
 		final String shortText = modeController.getExtension(TextController.class).getShortPlainText(node, 20, "");
 		final String plainText = shortText.replaceAll("\\s+\\n", " ");
 		final String normalizedText = CJKNormalizer.removeSpacesBetweenCJKCharacters(plainText);
 		return normalizedText.isEmpty() ? "Bookmark" : normalizedText;
 	}
 
-	public int findBookmarkPosition(List<NodeBookmark> bookmarks, NodeBookmark target) {
+	int findBookmarkPosition(List<NodeBookmark> bookmarks, NodeBookmark target) {
 		for (int i = 0; i < bookmarks.size(); i++) {
 			if (bookmarks.get(i).getNode().getID().equals(target.getNode().getID())) {
 				return i;

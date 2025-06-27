@@ -1,25 +1,26 @@
 package org.freeplane.features.bookmarks.mindmapmode;
 
+import java.awt.Cursor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragSource;
 
 class DragActionDetector {
-	
+
 	static class DragActionResult {
-		final int actionType;
-		final java.awt.Cursor cursor;
-		
-		DragActionResult(int actionType, java.awt.Cursor cursor) {
-			this.actionType = actionType;
+		final int dragAction;
+		final Cursor cursor;
+
+		private DragActionResult(int dragAction, Cursor cursor) {
+			this.dragAction = dragAction;
 			this.cursor = cursor;
 		}
 	}
-	
+
 	static DragActionResult detectDragAction(DragGestureEvent dge) {
 		int dragActionType = dge.getDragAction();
 		java.awt.Cursor cursor = getCursorByAction(dragActionType);
-		
+
 		if ((dge.getTriggerEvent().getModifiersEx() & java.awt.event.InputEvent.BUTTON2_DOWN_MASK) != 0) {
 			cursor = DragSource.DefaultCopyDrop;
 			dragActionType = DnDConstants.ACTION_COPY;
@@ -28,10 +29,10 @@ class DragActionDetector {
 			cursor = DragSource.DefaultLinkDrop;
 			dragActionType = DnDConstants.ACTION_LINK;
 		}
-		
+
 		return new DragActionResult(dragActionType, cursor);
 	}
-	
+
 	private static boolean isLinkDragEvent(final DragGestureEvent e) {
 	    return (e.getTriggerEvent().getModifiersEx() & java.awt.event.InputEvent.BUTTON3_DOWN_MASK) != 0;
     }
@@ -46,4 +47,4 @@ class DragActionDetector {
 				return DragSource.DefaultMoveDrop;
 		}
 	}
-} 
+}

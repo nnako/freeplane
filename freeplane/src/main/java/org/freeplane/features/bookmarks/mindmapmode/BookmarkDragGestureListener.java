@@ -22,11 +22,11 @@ class BookmarkDragGestureListener implements DragGestureListener {
 		NodeBookmark bookmark = (NodeBookmark) button.getClientProperty("bookmark");
 
 		DragActionDetector.DragActionResult actionResult = DragActionDetector.detectDragAction(dge);
-		
+
 		int sourceIndex = toolbarBuilder.getComponentIndex(toolbar, button);
-		BookmarkTransferables.CombinedTransferable transferable = 
-			BookmarkTransferableFactory.createCombinedTransferable(bookmark, sourceIndex, actionResult.actionType);
+		BookmarkTransferables.CombinedTransferable transferable =
+			BookmarkTransferableFactory.createCombinedTransferable(bookmark, sourceIndex, actionResult.dragAction);
 
 		dge.startDrag(actionResult.cursor, transferable);
 	}
-} 
+}
