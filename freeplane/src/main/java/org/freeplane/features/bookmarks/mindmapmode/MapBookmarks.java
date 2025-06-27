@@ -50,6 +50,21 @@ public class MapBookmarks implements IExtension {
 		}
 	}
 
+	void addAtPosition(String id, NodeBookmarkDescriptor bookmark, int position) {
+		if (bookmarks.put(id, bookmark) == null) {
+			List<String> visibleBookmarkIds = getVisibleBookmarkIds();
+			int insertPosition = Math.max(0, Math.min(position, visibleBookmarkIds.size()));
+			
+			if (insertPosition >= visibleBookmarkIds.size()) {
+				nodeIDs.add(id);
+			} else {
+				String targetNodeId = visibleBookmarkIds.get(insertPosition);
+				int targetIndex = nodeIDs.indexOf(targetNodeId);
+				nodeIDs.add(targetIndex, id);
+			}
+		}
+	}
+
 	boolean remove(String id) {
 		if (id == null) {
 			return false;
@@ -62,30 +77,34 @@ public class MapBookmarks implements IExtension {
 	}
 
 	boolean move(String id, int indexInVisibleList) {
-		if (isInvalidMoveRequest(id, indexInVisibleList)) {
+		if (!bookmarkExists(id)) {
 			return false;
 		}
 
-		List<String> visibleNodeIDs = getValidNodeIDsInOrder();
+		List<String> visibleBookmarks = getVisibleBookmarkIds();
 
-		if (isIndexOutOfBounds(indexInVisibleList, visibleNodeIDs) || isNodeNotVisible(id, visibleNodeIDs)) {
+		if (isIndexOutOfBounds(indexInVisibleList, visibleBookmarks) || !isBookmarkVisible(id, visibleBookmarks)) {
 			return false;
 		}
 
-		if (isAlreadyAtTargetPosition(id, indexInVisibleList, visibleNodeIDs)) {
+		if (isBookmarkAtTargetPosition(id, indexInVisibleList, visibleBookmarks)) {
 			return true;
 		}
 
-		reorderVisibleNodes(id, indexInVisibleList, visibleNodeIDs);
-		rebuildInternalNodeList(visibleNodeIDs);
+		moveBookmarkInList(id, indexInVisibleList, visibleBookmarks);
+		updateNodeIdList(visibleBookmarks);
 		return true;
 	}
 
-	private boolean isInvalidMoveRequest(String id, int index) {
-		return id == null || !bookmarks.containsKey(id) || map.getNodeForID(id) == null;
+	private boolean bookmarkExists(String id) {
+		return id != null && bookmarks.containsKey(id) && map.getNodeForID(id) != null;
 	}
 
-	private List<String> getValidNodeIDsInOrder() {
+	private boolean isBookmarkVisible(String id, List<String> visibleNodes) {
+		return visibleNodes.contains(id);
+	}
+
+	private List<String> getVisibleBookmarkIds() {
 		return nodeIDs.stream()
 			.filter(nodeId -> map.getNodeForID(nodeId) != null)
 			.collect(Collectors.toList());
@@ -95,27 +114,23 @@ public class MapBookmarks implements IExtension {
 		return index < 0 || index >= visibleNodes.size();
 	}
 
-	private boolean isNodeNotVisible(String id, List<String> visibleNodes) {
-		return !visibleNodes.contains(id);
+	private boolean isBookmarkAtTargetPosition(String id, int targetIndex, List<String> visibleBookmarks) {
+		return visibleBookmarks.indexOf(id) == targetIndex;
 	}
 
-	private boolean isAlreadyAtTargetPosition(String id, int targetIndex, List<String> visibleNodes) {
-		return visibleNodes.indexOf(id) == targetIndex;
+	private void moveBookmarkInList(String id, int targetIndex, List<String> visibleBookmarks) {
+		int currentIndex = visibleBookmarks.indexOf(id);
+		visibleBookmarks.remove(currentIndex);
+		visibleBookmarks.add(targetIndex, id);
 	}
 
-	private void reorderVisibleNodes(String id, int targetIndex, List<String> visibleNodes) {
-		int currentIndex = visibleNodes.indexOf(id);
-		visibleNodes.remove(currentIndex);
-		visibleNodes.add(targetIndex, id);
-	}
-
-	private void rebuildInternalNodeList(List<String> reorderedVisibleNodes) {
+	private void updateNodeIdList(List<String> reorderedVisibleBookmarks) {
 		List<String> newNodeIDs = new ArrayList<>();
 		int visibleIndex = 0;
 
 		for (String nodeId : nodeIDs) {
 			if (map.getNodeForID(nodeId) != null) {
-				newNodeIDs.add(reorderedVisibleNodes.get(visibleIndex++));
+				newNodeIDs.add(reorderedVisibleBookmarks.get(visibleIndex++));
 			} else {
 				newNodeIDs.add(nodeId);
 			}

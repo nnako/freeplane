@@ -14,11 +14,9 @@ import org.freeplane.core.ui.AFreeplaneAction;
 import org.freeplane.core.ui.components.FocusRequestor;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
-import org.freeplane.features.filter.condition.CJKNormalizer;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.ModeController;
-import org.freeplane.features.text.TextController;
 
 class BookmarkNodeAction extends AFreeplaneAction {
 	private static final long serialVersionUID = 1L;
@@ -66,9 +64,7 @@ class BookmarkNodeAction extends AFreeplaneAction {
 	}
 
 	private String suggestBookmarkNameFromText(final NodeModel node) {
-		final String shortText = modeController.getExtension(TextController.class).getShortPlainText(node, 20, "");
-		final String plainText = shortText.replaceAll("\\s+\\n", " ");
-		return CJKNormalizer.removeSpacesBetweenCJKCharacters(plainText);
+		return bookmarksController.suggestBookmarkNameFromText(node);
 	}
 
 	private BookmarkDialogComponents createDialogComponents(final IMapSelection selection, final NodeBookmark existingBookmark) {

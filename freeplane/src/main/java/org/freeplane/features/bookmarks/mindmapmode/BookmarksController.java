@@ -25,6 +25,8 @@ import org.freeplane.features.map.NodeChangeEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
+import org.freeplane.features.filter.condition.CJKNormalizer;
+import org.freeplane.features.text.TextController;
 
 public class BookmarksController implements IExtension{
 	public static final String SHOW_BOOKMARK_ICONS = "show_bookmark_icons";
@@ -79,6 +81,13 @@ public class BookmarksController implements IExtension{
 		fireBookmarkChanged(node);
 	}
 
+	public void addBookmarkAtPosition(NodeModel node, NodeBookmarkDescriptor descriptor, int position) {
+		final MapModel map = node.getMap();
+		getBookmarks(map).addAtPosition(node.createID(), descriptor, position);
+		fireBookmarksChanged(map);
+		fireBookmarkChanged(node);
+	}
+
 	public void removeBookmark(NodeModel node) {
 		final MapModel map = node.getMap();
 		if(getBookmarks(map).remove(node.getID())) {
@@ -120,4 +129,53 @@ public class BookmarksController implements IExtension{
 		toolbarBuilder.updateBookmarksToolbar(toolbar, map, selection);
 	}
 
+	public boolean createBookmarkFromNode(NodeModel draggedNode, MapModel map, int insertionIndex) {
+		if (draggedNode == null) {
+			return false;
+		}
+
+		NodeBookmark existingBookmark = getBookmarks(map).getBookmark(draggedNode.getID());
+		
+		if (existingBookmark != null) {
+			moveExistingBookmarkToPosition(existingBookmark, insertionIndex, map);
+		} else {
+			createNewBookmarkAtPosition(draggedNode, insertionIndex);
+		}
+
+		return true;
+	}
+
+	private void moveExistingBookmarkToPosition(NodeBookmark existingBookmark, int insertionIndex, MapModel map) {
+		List<NodeBookmark> currentBookmarks = getBookmarks(map).getBookmarks();
+		int currentPosition = findBookmarkPosition(currentBookmarks, existingBookmark);
+		
+		if (currentPosition != -1 && currentPosition < insertionIndex) {
+			insertionIndex = insertionIndex - 1;
+		}
+		
+		moveBookmark(existingBookmark.getNode(), insertionIndex);
+	}
+
+	private void createNewBookmarkAtPosition(NodeModel draggedNode, int insertionIndex) {
+		String bookmarkName = suggestBookmarkNameFromText(draggedNode);
+		NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, false);
+
+		addBookmarkAtPosition(draggedNode, descriptor, insertionIndex);
+	}
+
+	public String suggestBookmarkNameFromText(NodeModel node) {
+		final String shortText = modeController.getExtension(TextController.class).getShortPlainText(node, 20, "");
+		final String plainText = shortText.replaceAll("\\s+\\n", " ");
+		final String normalizedText = CJKNormalizer.removeSpacesBetweenCJKCharacters(plainText);
+		return normalizedText.isEmpty() ? "Bookmark" : normalizedText;
+	}
+
+	public int findBookmarkPosition(List<NodeBookmark> bookmarks, NodeBookmark target) {
+		for (int i = 0; i < bookmarks.size(); i++) {
+			if (bookmarks.get(i).getNode().getID().equals(target.getNode().getID())) {
+				return i;
+			}
+		}
+		return -1;
+	}
 }
