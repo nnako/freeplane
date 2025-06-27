@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Cursor;
 import java.awt.dnd.DnDConstants;

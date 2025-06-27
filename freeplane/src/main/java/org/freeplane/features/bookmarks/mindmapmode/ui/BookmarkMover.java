@@ -1,8 +1,11 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.MapModel;
 
 class BookmarkMover {

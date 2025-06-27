@@ -1,9 +1,11 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 
 class BookmarkTransferables {
 	static final DataFlavor BOOKMARK_FLAVOR = new DataFlavor(NodeBookmark.class, "NodeBookmark");

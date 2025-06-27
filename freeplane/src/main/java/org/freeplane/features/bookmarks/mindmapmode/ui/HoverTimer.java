@@ -1,7 +1,9 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import javax.swing.JButton;
 import javax.swing.Timer;
+
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 
 class HoverTimer {
 	private Timer hoverTimer;

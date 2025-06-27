@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
 import java.awt.Graphics;
@@ -29,6 +29,9 @@ import org.freeplane.core.ui.components.FocusRequestor;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
@@ -39,19 +42,19 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.FreeplaneTooltip;
 import org.freeplane.view.swing.map.NodeTooltipManager;
 
-class BookmarksToolbarBuilder {
+public class BookmarksToolbarBuilder {
 	private static final Icon BOOKMARK_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmarkAsRoot.svg").getIcon();
 	private static final Icon SELECTED_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon();
 	private static final Icon SELECTED_SUBTREE_ICON = IconStoreFactory.ICON_STORE.getUIIcon("selectedSubtreeBookmark.svg").getIcon();
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 
-	BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
+	public BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
 		this.modeController = modeController;
 		this.bookmarksController = bookmarksController;
 	}
 
-	void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
+	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
 		toolbar.removeAll();
 		toolbar.putClientProperty("bookmarksMap", map);
 

@@ -25,6 +25,7 @@ import org.freeplane.features.map.NodeChangeEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarksToolbarBuilder;
 import org.freeplane.features.filter.condition.CJKNormalizer;
 import org.freeplane.features.text.TextController;
 
@@ -106,7 +107,7 @@ public class BookmarksController implements IExtension{
 
 	}
 
-	void moveBookmark(NodeModel node, int index) {
+	public void moveBookmark(NodeModel node, int index) {
 		final MapModel map = node.getMap();
 		if(getBookmarks(map).move(node.getID(), index))
 			fireBookmarksChanged(map);
@@ -129,13 +130,13 @@ public class BookmarksController implements IExtension{
 		toolbarBuilder.updateBookmarksToolbar(toolbar, map, selection);
 	}
 
-	boolean createBookmarkFromNode(NodeModel draggedNode, MapModel map, int insertionIndex) {
+	public boolean createBookmarkFromNode(NodeModel draggedNode, MapModel map, int insertionIndex) {
 		if (draggedNode == null) {
 			return false;
 		}
 
 		NodeBookmark existingBookmark = getBookmarks(map).getBookmark(draggedNode.getID());
-		
+
 		if (existingBookmark != null) {
 			moveExistingBookmarkToPosition(existingBookmark, insertionIndex, map);
 		} else {
@@ -148,11 +149,11 @@ public class BookmarksController implements IExtension{
 	private void moveExistingBookmarkToPosition(NodeBookmark existingBookmark, int insertionIndex, MapModel map) {
 		List<NodeBookmark> currentBookmarks = getBookmarks(map).getBookmarks();
 		int currentPosition = findBookmarkPosition(currentBookmarks, existingBookmark);
-		
+
 		if (currentPosition != -1 && currentPosition < insertionIndex) {
 			insertionIndex = insertionIndex - 1;
 		}
-		
+
 		moveBookmark(existingBookmark.getNode(), insertionIndex);
 	}
 
@@ -170,7 +171,7 @@ public class BookmarksController implements IExtension{
 		return normalizedText.isEmpty() ? "Bookmark" : normalizedText;
 	}
 
-	int findBookmarkPosition(List<NodeBookmark> bookmarks, NodeBookmark target) {
+	public int findBookmarkPosition(List<NodeBookmark> bookmarks, NodeBookmark target) {
 		for (int i = 0; i < bookmarks.size(); i++) {
 			if (bookmarks.get(i).getNode().getID().equals(target.getNode().getID())) {
 				return i;

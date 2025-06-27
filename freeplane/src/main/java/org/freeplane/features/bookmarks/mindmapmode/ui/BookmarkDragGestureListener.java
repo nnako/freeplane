@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -6,6 +6,7 @@ import java.awt.dnd.DragGestureListener;
 import javax.swing.JButton;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 
 class BookmarkDragGestureListener implements DragGestureListener {
 	private final JButton button;

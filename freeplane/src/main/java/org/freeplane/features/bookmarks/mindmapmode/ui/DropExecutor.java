@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import java.util.List;
 import javax.swing.JButton;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;

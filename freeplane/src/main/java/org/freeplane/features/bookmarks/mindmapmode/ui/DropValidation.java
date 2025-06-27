@@ -1,4 +1,4 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 class DropValidation {
 	final boolean isValid;

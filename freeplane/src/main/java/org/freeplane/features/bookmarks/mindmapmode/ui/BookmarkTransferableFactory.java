@@ -1,8 +1,9 @@
-package org.freeplane.features.bookmarks.mindmapmode;
+package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.datatransfer.Transferable;
 import java.util.Collections;
 
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MapClipboardController.CopiedNodeSet;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
