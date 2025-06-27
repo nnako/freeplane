@@ -962,7 +962,13 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	            viewRectangle.y + deltaY,
 	            viewRectangle.width,
 	            viewRectangle.height);
-	    scrollRectToVisible(newViewRectangle);
+	    final Rectangle innerBounds = currentRootView.getBounds();
+	    final int spaceAround = currentRootView.getSpaceAround();
+	    innerBounds.x += -AUTOSCROLL_MARGIN/2 + spaceAround;
+	    innerBounds.y += -AUTOSCROLL_MARGIN/2 + spaceAround;
+	    innerBounds.width += AUTOSCROLL_MARGIN - spaceAround * 2;
+	    innerBounds.height += AUTOSCROLL_MARGIN - spaceAround * 2;
+	    scrollRectToVisible(newViewRectangle.intersection(innerBounds));
 	}
 
 	private int calculateAutoscrollAmount(int distanceToEdge) {
