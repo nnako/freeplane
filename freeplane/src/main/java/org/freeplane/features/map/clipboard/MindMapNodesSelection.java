@@ -26,6 +26,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.freeplane.core.util.LogUtils;
@@ -153,7 +154,7 @@ public class MindMapNodesSelection implements Transferable, ClipboardOwner {
 		this.dropActionContent = dropActionContent;
 	}
 
-	public void setNodeObjects(Collection<NodeModel> collection, boolean selectionContainsSingleNodes) {
+	public void setNodeObjects(List<NodeModel> collection, boolean selectionContainsSingleNodes) {
 	    nodes = collection;
 	    this.selectionContainsSingleNodes = selectionContainsSingleNodes;
     }
