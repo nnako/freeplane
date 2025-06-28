@@ -28,6 +28,8 @@ public class ToolbarLayout implements LayoutManager {
 
     private BlockEndPosition blockEndPosition;
 	private int maximumWidth = MAX_WIDTH_BY_PARENT_WIDTH;
+	private int gap = 0;
+	private boolean addsMargins = false;
 
 	enum BlockEndPosition{ON_SEPARATOR, ON_EVERY_SEPARATOR, ANYWHERE}
 	ToolbarLayout(BlockEndPosition blockEndPosition){
@@ -43,6 +45,23 @@ public class ToolbarLayout implements LayoutManager {
         this.maximumWidth = maximumWidth;
     }
 
+	public int getGap() {
+		return gap;
+	}
+
+	public void setGap(int horizontalGap, boolean addMargins) {
+		this.gap = horizontalGap;
+		this.addsMargins = addMargins;
+	}
+
+	public boolean addsMargins() {
+		return addsMargins;
+	}
+
+	public void setAddsMargins(boolean addsMargins) {
+		this.addsMargins = addsMargins;
+	}
+
     @Override
     public void addLayoutComponent(final String name, final Component comp) {
 	}
@@ -51,8 +70,11 @@ public class ToolbarLayout implements LayoutManager {
     public void layoutContainer(final Container container) {
 		if(! container.isVisible())
 			return;
+		int horizontalGap = gap;
+		int verticalGap = gap;
 		int blockWidth = 0;
 		int blockHeight = 0;
+		boolean hasVisibleComponentInBlock = false;
 		int lastBlockWidth = 0;
 		int lastBlockHeight = 0;
 		int lastBlockStart = 0;
@@ -60,29 +82,56 @@ public class ToolbarLayout implements LayoutManager {
 		Insets insets = container.getInsets();
 		int leftMargin = insets.left;
 		int height =  insets.top;
+		if (addsMargins) {
+			height += verticalGap;
+		}
 		final int maximumWidth = calculateMaxWidth(container) - insets.left - insets.right;
 		for (int i = 0;; i++) {
 			final Component component = i < container.getComponentCount() ? container.getComponent(i) : null;
 			if (component == null || component instanceof JSeparator || blockEndPosition == BlockEndPosition.ANYWHERE) {
-				if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + blockWidth > maximumWidth) {
+				int totalBlockWidth = blockWidth;
+				if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + totalBlockWidth > maximumWidth) {
 					int x = leftMargin;
+					if (addsMargins) {
+						x += horizontalGap;
+					}
+					int actualWidth = 0;
+					if (addsMargins) {
+						actualWidth += horizontalGap;
+					}
+					boolean addGap = false;
 					for (int j = lastBlockStart; j < lastBlockFinish; j++) {
 						final Component c = container.getComponent(j);
 						final int width = getPreferredWidth(c, maximumWidth);
+						if (addGap && c.isVisible()) {
+							x += horizontalGap;
+							actualWidth += horizontalGap;
+						}
 						c.setBounds(x, height, width, lastBlockHeight);
 						x += width;
+						actualWidth += width;
+						if (c.isVisible()) {
+							addGap = true;
+						}
 					}
-					height += lastBlockHeight;
-					lastBlockWidth = blockWidth;
+					if (addsMargins) {
+						actualWidth += horizontalGap;
+					}
+					assert actualWidth == lastBlockWidth : "Width calculation mismatch: calculated=" + lastBlockWidth + ", actual=" + actualWidth;
+					if (lastBlockHeight > 0) {
+						height += lastBlockHeight + verticalGap;
+					}
+					lastBlockWidth = totalBlockWidth;
 					lastBlockHeight = blockHeight;
 					lastBlockStart = lastBlockFinish;
 				}
 				else {
-					lastBlockWidth += blockWidth;
+					lastBlockWidth += totalBlockWidth;
 					lastBlockHeight = Math.max(blockHeight, lastBlockHeight);
 				}
 				lastBlockFinish = i;
 				blockWidth = blockHeight = 0;
+				hasVisibleComponentInBlock = false;
 			}
 			if (component == null) {
 				if (lastBlockStart == container.getComponentCount()) {
@@ -91,9 +140,18 @@ public class ToolbarLayout implements LayoutManager {
 				lastBlockFinish = container.getComponentCount();
 				continue;
 			}
+			if (component.isVisible() && hasVisibleComponentInBlock) {
+				blockWidth += horizontalGap;
+			}
 			blockWidth += getPreferredWidth(component, maximumWidth);
-			final Dimension compPreferredSize = component.getPreferredSize();
-			blockHeight = Math.max(compPreferredSize.height, blockHeight);
+			if (component.isVisible() && !hasVisibleComponentInBlock && addsMargins) {
+				blockWidth += 2 * horizontalGap;
+			}
+			if (component.isVisible()) {
+				hasVisibleComponentInBlock = true;
+				final Dimension compPreferredSize = component.getPreferredSize();
+				blockHeight = Math.max(compPreferredSize.height, blockHeight);
+			}
 		}
 	}
 
@@ -125,13 +183,19 @@ public class ToolbarLayout implements LayoutManager {
 
 	@Override
     public Dimension preferredLayoutSize(final Container container) {
-	    Insets insets = container.getInsets();
+		Insets insets = container.getInsets();
 		int maxWidth = calculateMaxWidth(container) - insets.left - insets.right;
+		int horizontalGap = gap;
+		int verticalGap = gap;
 		for(;;) {
 	        int width = 0;
 	        int height = 0;
+	        if (addsMargins) {
+	            height += verticalGap;
+	        }
 	        int blockWidth = 0;
 	        int blockHeight = 0;
+	        boolean hasVisibleComponentInBlock = false;
 	        int lastBlockWidth = 0;
 	        int lastBlockHeight = 0;
 	        int lastBlockStart = 0;
@@ -139,19 +203,23 @@ public class ToolbarLayout implements LayoutManager {
 	        for (int i = 0;; i++) {
 	            final Component component = i < container.getComponentCount() ? container.getComponent(i) : null;
 	            if (component == null || component instanceof JSeparator || blockEndPosition == BlockEndPosition.ANYWHERE) {
-	                if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + blockWidth > maxWidth) {
-	                    height += lastBlockHeight;
-	                    lastBlockWidth = blockWidth;
+	                int totalBlockWidth = blockWidth;
+	                if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + totalBlockWidth > maxWidth) {
+	                    if (lastBlockHeight > 0) {
+	                        height += lastBlockHeight + verticalGap;
+	                    }
+	                    lastBlockWidth = totalBlockWidth;
 	                    lastBlockHeight = blockHeight;
 	                    lastBlockStart = lastBlockFinish;
 	                }
 	                else {
-	                    lastBlockWidth += blockWidth;
+	                    lastBlockWidth += totalBlockWidth;
 	                    lastBlockHeight = Math.max(blockHeight, lastBlockHeight);
 	                }
 	                width = Math.max(width, lastBlockWidth);
 	                lastBlockFinish = i;
 	                blockWidth = blockHeight = 0;
+	                hasVisibleComponentInBlock = false;
 	            }
 	            if (component == null) {
 	                if (lastBlockStart == container.getComponentCount()) {
@@ -160,9 +228,21 @@ public class ToolbarLayout implements LayoutManager {
 	                lastBlockFinish = container.getComponentCount();
 	                continue;
 	            }
+	            if (component.isVisible() && hasVisibleComponentInBlock) {
+	                blockWidth += horizontalGap;
+	            }
 	            blockWidth += getPreferredWidth(component, maxWidth);
-	            final Dimension compPreferredSize = component.getPreferredSize();
-	            blockHeight = Math.max(compPreferredSize.height, blockHeight);
+	            if (component.isVisible() && !hasVisibleComponentInBlock && addsMargins) {
+	                blockWidth += 2 * horizontalGap;
+	            }
+	            if (component.isVisible()) {
+	                hasVisibleComponentInBlock = true;
+	                final Dimension compPreferredSize = component.getPreferredSize();
+	                blockHeight = Math.max(compPreferredSize.height, blockHeight);
+	            }
+	        }
+	        if (!addsMargins && height > 0) {
+	            height -= verticalGap;
 	        }
 	        if(maxWidth >= width) {
 	            Dimension preferredSize = new Dimension(width + insets.left + insets.right, height + insets.top + insets.bottom);
