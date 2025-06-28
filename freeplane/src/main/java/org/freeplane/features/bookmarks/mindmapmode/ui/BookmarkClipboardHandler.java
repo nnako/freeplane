@@ -19,6 +19,7 @@ import org.freeplane.features.map.MapModel;
 class BookmarkClipboardHandler {
 	private static final String COPY_ACTION_KEY = "bookmarkCopy";
 	private static final String PASTE_ACTION_KEY = "bookmarkPaste";
+	private static final String ENTER_ACTION_KEY = "bookmarkEnter";
 
 	private final BookmarksController bookmarksController;
 	private final DropExecutor dropExecutor;
@@ -47,12 +48,15 @@ class BookmarkClipboardHandler {
 
 		KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask);
 		KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask);
+		KeyStroke enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 
 		inputMap.put(copyKeyStroke, COPY_ACTION_KEY);
 		inputMap.put(pasteKeyStroke, PASTE_ACTION_KEY);
+		inputMap.put(enterKeyStroke, ENTER_ACTION_KEY);
 
 		actionMap.put(COPY_ACTION_KEY, new ButtonCopyAction(button));
 		actionMap.put(PASTE_ACTION_KEY, new ButtonPasteAction(button));
+		actionMap.put(ENTER_ACTION_KEY, new ButtonEnterAction(button));
 	}
 
 	@SuppressWarnings("serial")
@@ -80,6 +84,21 @@ class BookmarkClipboardHandler {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			pasteBookmarkAtButton(button);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private class ButtonEnterAction extends AbstractAction {
+		private final BookmarkButton button;
+
+		ButtonEnterAction(BookmarkButton button) {
+			this.button = button;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			button.doClick();
+			button.requestFocus();
 		}
 	}
 
