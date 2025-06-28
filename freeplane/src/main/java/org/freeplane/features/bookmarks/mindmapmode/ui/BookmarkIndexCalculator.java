@@ -7,10 +7,10 @@ import javax.swing.JButton;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 
 class BookmarkIndexCalculator {
-	private final FreeplaneToolBar toolbar;
+	private final BookmarkToolbar toolbar;
 	private final BookmarksToolbarBuilder toolbarBuilder;
 
-	BookmarkIndexCalculator(FreeplaneToolBar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
+	BookmarkIndexCalculator(BookmarkToolbar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
 		this.toolbar = toolbar;
 		this.toolbarBuilder = toolbarBuilder;
 	}
@@ -24,7 +24,7 @@ class BookmarkIndexCalculator {
 	}
 
 	boolean isValidBookmarkMove(int sourceIndex, JButton targetButton, Point dropPoint) {
-		FreeplaneToolBar targetToolbar = (FreeplaneToolBar) targetButton.getParent();
+		BookmarkToolbar targetToolbar = (BookmarkToolbar) targetButton.getParent();
 		if (targetToolbar != toolbar) {
 			return false;
 		}

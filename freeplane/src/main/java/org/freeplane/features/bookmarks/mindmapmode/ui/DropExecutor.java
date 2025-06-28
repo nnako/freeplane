@@ -18,9 +18,9 @@ import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 
 class DropExecutor {
 	private final BookmarksController bookmarksController;
-	private final FreeplaneToolBar toolbar;
+	private final BookmarkToolbar toolbar;
 
-	DropExecutor(FreeplaneToolBar toolbar, BookmarksController bookmarksController) {
+	DropExecutor(BookmarkToolbar toolbar, BookmarksController bookmarksController) {
 		this.toolbar = toolbar;
 		this.bookmarksController = bookmarksController;
 	}
@@ -61,7 +61,7 @@ class DropExecutor {
 	}
 
 	private MapModel getMapFromButton(JButton targetButton) {
-		FreeplaneToolBar toolbar = (FreeplaneToolBar) targetButton.getParent();
+		BookmarkToolbar toolbar = (BookmarkToolbar) targetButton.getParent();
 		return (MapModel) toolbar.getClientProperty("bookmarksMap");
 	}
 

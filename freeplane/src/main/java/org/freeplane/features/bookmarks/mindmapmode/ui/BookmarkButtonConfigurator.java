@@ -33,7 +33,7 @@ class BookmarkButtonConfigurator {
 	}
 
 	void configureButton(BookmarkButton button, NodeBookmark bookmark, 
-								FreeplaneToolBar toolbar, IMapSelection selection) {
+								BookmarkToolbar toolbar, IMapSelection selection) {
 		final NodeBookmarkDescriptor descriptor = bookmark.getDescriptor();
 		final NodeModel node = bookmark.getNode();
 		
@@ -63,7 +63,7 @@ class BookmarkButtonConfigurator {
 		button.setEnabled(isVisible);
 	}
 
-	private void setupDragAndDrop(BookmarkButton button, FreeplaneToolBar toolbar) {
+	private void setupDragAndDrop(BookmarkButton button, BookmarkToolbar toolbar) {
 		DragSource dragSource = DragSource.getDefaultDragSource();
 		dragSource.createDefaultDragGestureRecognizer(button, 
 			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE | DnDConstants.ACTION_LINK,

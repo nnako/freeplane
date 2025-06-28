@@ -49,8 +49,8 @@ public class ToolbarLayout implements LayoutManager {
 		return gap;
 	}
 
-	public void setGap(int horizontalGap, boolean addMargins) {
-		this.gap = horizontalGap;
+	public void setGap(int gap, boolean addMargins) {
+		this.gap = gap;
 		this.addsMargins = addMargins;
 	}
 

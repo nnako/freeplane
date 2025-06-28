@@ -12,6 +12,7 @@ import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
 import org.freeplane.features.icon.IStateIconProvider;
 import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.UIIcon;
@@ -125,7 +126,7 @@ public class BookmarksController implements IExtension{
 		return MapBookmarks.of(map);
 	}
 
-	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map) {
+	public void updateBookmarksToolbar(BookmarkToolbar toolbar, MapModel map) {
 		final IMapSelection selection = Controller.getCurrentController().getSelection();
 		toolbarBuilder.updateBookmarksToolbar(toolbar, map, selection);
 	}

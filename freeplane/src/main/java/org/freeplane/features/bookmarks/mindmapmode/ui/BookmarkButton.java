@@ -6,6 +6,7 @@ import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JToolTip;
+import javax.swing.plaf.ButtonUI;
 
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.NodeModel;
@@ -20,6 +21,7 @@ class BookmarkButton extends JButton {
 	BookmarkButton(NodeModel node, ModeController modeController) {
 		this.node = node;
 		this.modeController = modeController;
+		setOpaque(false);
 	}
 
 	@Override
@@ -49,5 +51,40 @@ class BookmarkButton extends JButton {
 
 	NodeModel getNode() {
 		return node;
+	}
+
+	public void clearVisualFeedback() {
+		BookmarkToolbar toolbar = getBookmarkToolbar();
+		if (toolbar != null) {
+			toolbar.clearVisualFeedback();
+		}
+	}
+
+	public void showNavigatedFeedback() {
+		BookmarkToolbar toolbar = getBookmarkToolbar();
+		if (toolbar != null) {
+			toolbar.showVisualFeedback(this, BookmarkToolbar.DropIndicatorType.NAVIGATE_FEEDBACK);
+		}
+	}
+
+	public void showDropZoneIndicator(boolean dropsAfter) {
+		BookmarkToolbar toolbar = getBookmarkToolbar();
+		if (toolbar != null) {
+			BookmarkToolbar.DropIndicatorType type = dropsAfter ? 
+				BookmarkToolbar.DropIndicatorType.DROP_AFTER : 
+				BookmarkToolbar.DropIndicatorType.DROP_BEFORE;
+			toolbar.showVisualFeedback(this, type);
+		}
+	}
+
+	public void showHoverFeedback() {
+		BookmarkToolbar toolbar = getBookmarkToolbar();
+		if (toolbar != null) {
+			toolbar.showVisualFeedback(this, BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
+		}
+	}
+	
+	private BookmarkToolbar getBookmarkToolbar() {
+		return (BookmarkToolbar) getParent();
 	}
 }

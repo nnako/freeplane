@@ -22,6 +22,8 @@ import org.freeplane.api.Quantity;
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.FreeplaneToolBar;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
+import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
@@ -68,7 +70,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
     private boolean isBookmarksToolbarVisible;
     private final MapOverviewImage mapOverviewImage;
 
-	private final FreeplaneToolBar bookmarksToolbar;
+	private final BookmarkToolbar bookmarksToolbar;
 
 	private final MapView mapView;
 
@@ -114,7 +116,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         if(isMindMapEditor) {
         	isBookmarksToolbarVisible = isMindMapEditor
         			&& viewController.isBookmarksToolbarVisible();
-        	bookmarksToolbar = new FreeplaneToolBar(SwingConstants.VERTICAL);
+        	bookmarksToolbar = new BookmarkToolbar();
         	bookmarksToolbar.setReducesButtonSize(false);
         	updateBookmarksToolbar();
         	bookmarksToolbar.setVisible(isBookmarksToolbarVisible);

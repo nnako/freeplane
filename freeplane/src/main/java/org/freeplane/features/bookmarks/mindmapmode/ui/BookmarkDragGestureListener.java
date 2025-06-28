@@ -19,7 +19,7 @@ class BookmarkDragGestureListener implements DragGestureListener {
 
 	@Override
 	public void dragGestureRecognized(DragGestureEvent dge) {
-		FreeplaneToolBar toolbar = (FreeplaneToolBar) button.getParent();
+		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
 		NodeBookmark bookmark = (NodeBookmark) button.getClientProperty("bookmark");
 
 		DragActionDetector.DragActionResult actionResult = DragActionDetector.detectDragAction(dge);

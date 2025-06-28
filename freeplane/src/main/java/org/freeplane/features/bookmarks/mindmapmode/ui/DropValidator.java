@@ -9,7 +9,7 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 class DropValidator {
 	private final BookmarkIndexCalculator indexCalculator;
 
-	DropValidator(FreeplaneToolBar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
+	DropValidator(BookmarkToolbar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
 		this.indexCalculator = new BookmarkIndexCalculator(toolbar, toolbarBuilder);
 	}
 

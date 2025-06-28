@@ -23,7 +23,7 @@ public class BookmarksToolbarBuilder {
 		this.buttonConfigurator = new BookmarkButtonConfigurator(bookmarksController, modeController, this);
 	}
 
-	public void updateBookmarksToolbar(FreeplaneToolBar toolbar, MapModel map, IMapSelection selection) {
+	public void updateBookmarksToolbar(BookmarkToolbar toolbar, MapModel map, IMapSelection selection) {
 		toolbar.removeAll();
 		toolbar.putClientProperty(BOOKMARKS_MAP_PROPERTY, map);
 
@@ -37,13 +37,13 @@ public class BookmarksToolbarBuilder {
 		toolbar.repaint();
 	}
 
-	private BookmarkButton createBookmarkButton(NodeBookmark bookmark, FreeplaneToolBar toolbar, IMapSelection selection) {
+	private BookmarkButton createBookmarkButton(NodeBookmark bookmark, BookmarkToolbar toolbar, IMapSelection selection) {
 		final BookmarkButton button = new BookmarkButton(bookmark.getNode(), modeController);
 		buttonConfigurator.configureButton(button, bookmark, toolbar, selection);
 		return button;
 	}
 
-	int getComponentIndex(FreeplaneToolBar toolbar, Component component) {
+	int getComponentIndex(BookmarkToolbar toolbar, Component component) {
 		Component[] components = toolbar.getComponents();
 		for (int i = 0; i < components.length; i++) {
 			if (components[i] == component) {

@@ -8,19 +8,17 @@ import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 class HoverTimer {
 	private Timer hoverTimer;
 	private static final int HOVER_DELAY_MS = 2000;
-	private final DropVisualFeedback visualFeedback;
 
-	HoverTimer(DropVisualFeedback visualFeedback) {
-		this.visualFeedback = visualFeedback;
+	HoverTimer() {
 	}
 
-	void startHoverTimer(JButton targetButton) {
+	void startHoverTimer(BookmarkButton targetButton) {
 		cancelHoverTimer();
 		NodeBookmark bookmark = (NodeBookmark) targetButton.getClientProperty("bookmark");
 
 		hoverTimer = new Timer(HOVER_DELAY_MS, e -> {
 			bookmark.open();
-			visualFeedback.showNavigatedFeedback(targetButton);
+			targetButton.showNavigatedFeedback();
 		});
 		hoverTimer.setRepeats(false);
 		hoverTimer.start();
@@ -32,4 +30,4 @@ class HoverTimer {
 			hoverTimer = null;
 		}
 	}
-} 
+}

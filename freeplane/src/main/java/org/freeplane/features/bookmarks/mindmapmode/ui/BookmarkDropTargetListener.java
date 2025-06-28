@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.JButton;
-
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
@@ -22,27 +20,24 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 
 class BookmarkDropTargetListener extends DropTargetAdapter {
-	private final DropVisualFeedback visualFeedback;
 	private final DropValidator validator;
 	private final DropExecutor executor;
 	private final HoverTimer hoverTimer;
 
-	public BookmarkDropTargetListener(FreeplaneToolBar toolbar, BookmarksController bookmarksController, BookmarksToolbarBuilder toolbarBuilder) {
-		this.visualFeedback = new DropVisualFeedback();
+	public BookmarkDropTargetListener(BookmarkToolbar toolbar, BookmarksController bookmarksController, BookmarksToolbarBuilder toolbarBuilder) {
 		this.validator = new DropValidator(toolbar, toolbarBuilder);
 		this.executor = new DropExecutor(toolbar, bookmarksController);
-		this.hoverTimer = new HoverTimer(visualFeedback);
+		this.hoverTimer = new HoverTimer();
 	}
 
 	@Override
 	public void dragEnter(DropTargetDragEvent dtde) {
-		JButton button = (JButton) dtde.getDropTargetContext().getComponent();
-		visualFeedback.saveOriginalBorder(button);
+		dragOver(dtde);
 	}
 
 	@Override
 	public void dragOver(DropTargetDragEvent dtde) {
-		JButton targetButton = (JButton) dtde.getDropTargetContext().getComponent();
+		BookmarkButton targetButton = (BookmarkButton) dtde.getDropTargetContext().getComponent();
 
 		if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
 			handleBookmarkDragOver(dtde, targetButton);
@@ -52,12 +47,12 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		}
 		else {
 			dtde.rejectDrag();
-			visualFeedback.clearVisualFeedback(targetButton);
+			targetButton.clearVisualFeedback();
 			hoverTimer.cancelHoverTimer();
 		}
 	}
 
-	private void handleBookmarkDragOver(DropTargetDragEvent dtde, JButton targetButton) {
+	private void handleBookmarkDragOver(DropTargetDragEvent dtde, BookmarkButton targetButton) {
 		try {
 			int sourceIndex = (Integer) dtde.getTransferable().getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
 			Point dropPoint = dtde.getLocation();
@@ -65,23 +60,23 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			DropValidation validation = validator.validateDrop(sourceIndex, targetButton, dropPoint);
 			if (!validation.isValid) {
 				dtde.rejectDrag();
-				visualFeedback.clearVisualFeedback(targetButton);
+				targetButton.clearVisualFeedback();
 				hoverTimer.cancelHoverTimer();
 				return;
 			}
 
 			dtde.acceptDrag(DnDConstants.ACTION_MOVE);
-			visualFeedback.showDropZoneIndicator(targetButton, validation.dropsAfter);
+			targetButton.showDropZoneIndicator(validation.dropsAfter);
 			hoverTimer.cancelHoverTimer();
 
 		} catch (Exception e) {
 			dtde.rejectDrag();
-			visualFeedback.clearVisualFeedback(targetButton);
+			targetButton.clearVisualFeedback();
 			hoverTimer.cancelHoverTimer();
 		}
 	}
 
-	private void handleNodeDragOver(DropTargetDragEvent dtde, JButton targetButton) {
+	private void handleNodeDragOver(DropTargetDragEvent dtde, BookmarkButton targetButton) {
 		try {
 			@SuppressWarnings("unchecked")
 			Collection<NodeModel> draggedNodesCollection = (Collection<NodeModel>) dtde.getTransferable()
@@ -90,7 +85,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 			if (draggedNodes.size() != 1) {
 				dtde.rejectDrag();
-				visualFeedback.clearVisualFeedback(targetButton);
+				targetButton.clearVisualFeedback();
 				hoverTimer.cancelHoverTimer();
 				return;
 			}
@@ -100,7 +95,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 			if (!validation.isValid) {
 				dtde.rejectDrag();
-				visualFeedback.clearVisualFeedback(targetButton);
+				targetButton.clearVisualFeedback();
 				hoverTimer.cancelHoverTimer();
 				return;
 			}
@@ -109,16 +104,16 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			dtde.acceptDrag(dragActionType);
 
 			if (validation.isInsertionDrop) {
-				visualFeedback.showNodeDropZoneIndicator(targetButton, validation.dropsAfter);
+				targetButton.showDropZoneIndicator(validation.dropsAfter);
 				hoverTimer.cancelHoverTimer();
 			} else {
-				visualFeedback.showHoverFeedback(targetButton);
+				targetButton.showHoverFeedback();
 				hoverTimer.startHoverTimer(targetButton);
 			}
 
 		} catch (Exception e) {
 			dtde.rejectDrag();
-			visualFeedback.clearVisualFeedback(targetButton);
+			targetButton.clearVisualFeedback();
 			hoverTimer.cancelHoverTimer();
 		}
 	}
@@ -138,14 +133,14 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	@Override
 	public void dragExit(DropTargetEvent dte) {
-		JButton button = (JButton) dte.getDropTargetContext().getComponent();
-		visualFeedback.clearVisualFeedback(button);
+		BookmarkButton button = (BookmarkButton) dte.getDropTargetContext().getComponent();
+		button.clearVisualFeedback();
 		hoverTimer.cancelHoverTimer();
 	}
 
 	@Override
 	public void drop(DropTargetDropEvent dtde) {
-		JButton targetButton = (JButton) dtde.getDropTargetContext().getComponent();
+		BookmarkButton targetButton = (BookmarkButton) dtde.getDropTargetContext().getComponent();
 		hoverTimer.cancelHoverTimer();
 
 		try {
@@ -161,11 +156,11 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		} catch (Exception e) {
 			dtde.dropComplete(false);
 		} finally {
-			visualFeedback.clearVisualFeedback(targetButton);
+			targetButton.clearVisualFeedback();
 		}
 	}
 
-	private void handleBookmarkDrop(DropTargetDropEvent dtde, JButton targetButton)
+	private void handleBookmarkDrop(DropTargetDropEvent dtde, BookmarkButton targetButton)
 	        throws UnsupportedFlavorException, IOException {
 		int sourceIndex = (Integer) dtde.getTransferable().getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
 		Point dropPoint = dtde.getLocation();
@@ -181,7 +176,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		dtde.dropComplete(true);
 	}
 
-	private void handleNodeDrop(DropTargetDropEvent dtde, JButton targetButton) {
+	private void handleNodeDrop(DropTargetDropEvent dtde, BookmarkButton targetButton) {
 		Point dropPoint = dtde.getLocation();
 		DropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
 
