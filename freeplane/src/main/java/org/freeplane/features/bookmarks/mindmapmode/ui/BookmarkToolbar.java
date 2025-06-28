@@ -16,7 +16,7 @@ import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
 
 public class BookmarkToolbar extends FreeplaneToolBar {
-	private static final int GAP = (int) (10 * UITools.FONT_SCALE_FACTOR);
+	static final int GAP = (int) (10 * UITools.FONT_SCALE_FACTOR);
 	private static final long serialVersionUID = 1L;
 
 	enum DropIndicatorType {
@@ -24,7 +24,8 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 		DROP_BEFORE,
 		DROP_AFTER,
 		HOVER_FEEDBACK,
-		NAVIGATE_FEEDBACK
+		NAVIGATE_FEEDBACK,
+		END_DROP_INDICATOR
 	}
 
 	private Component targetComponent;
@@ -57,6 +58,10 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 		showVisualFeedback(null, DropIndicatorType.NONE);
 	}
 
+	public void showEndDropIndicator() {
+		showVisualFeedback(this, DropIndicatorType.END_DROP_INDICATOR);
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -68,6 +73,9 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	}
 
 	private void paintVisualFeedback(Graphics g) {
+		if (indicatorType == DropIndicatorType.END_DROP_INDICATOR) {
+			paintEndDropLine(g);
+		} else {
 			Rectangle buttonBounds = targetComponent.getBounds();
 
 			switch (indicatorType) {
@@ -84,6 +92,7 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 				default:
 					break;
 			}
+		}
 	}
 
 	private void paintDropLine(Graphics g, Rectangle buttonBounds, boolean before) {
@@ -101,5 +110,19 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	private void paintHoverFeedback(Graphics g, Rectangle buttonBounds) {
 		paintDropLine(g, buttonBounds, GAP/2, false);
 		paintDropLine(g, buttonBounds, GAP/2, true);
+	}
+
+	private void paintEndDropLine(Graphics g) {
+		if(getComponentCount() == 0) {
+			final Insets insets = getInsets();
+			final Rectangle bounds = new Rectangle(getWidth() - insets.right - GAP,
+					getHeight() - insets.bottom,
+					GAP, getHeight() - insets.bottom - insets.top);
+			paintDropLine(g, bounds, GAP, true);
+		}
+		else {
+			final Rectangle bounds = getComponent(getComponentCount() - 1).getBounds();
+			paintDropLine(g, bounds, GAP, false);
+		}
 	}
 }

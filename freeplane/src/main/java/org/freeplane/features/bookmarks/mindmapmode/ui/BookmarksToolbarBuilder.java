@@ -1,6 +1,8 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
 import java.util.List;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
@@ -26,6 +28,7 @@ public class BookmarksToolbarBuilder {
 	public void updateBookmarksToolbar(BookmarkToolbar toolbar, MapModel map, IMapSelection selection) {
 		toolbar.removeAll();
 		toolbar.putClientProperty(BOOKMARKS_MAP_PROPERTY, map);
+		setupToolbarDropTarget(toolbar);
 
 		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
 		for (NodeBookmark bookmark : bookmarks) {
@@ -35,6 +38,14 @@ public class BookmarksToolbarBuilder {
 
 		toolbar.revalidate();
 		toolbar.repaint();
+	}
+
+	private void setupToolbarDropTarget(BookmarkToolbar toolbar) {
+		if (toolbar.getDropTarget() == null) {
+			DropTarget dropTarget = new DropTarget(toolbar,
+					DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE,
+					new BookmarkDropTargetListener(toolbar, bookmarksController, this));
+		}
 	}
 
 	private BookmarkButton createBookmarkButton(NodeBookmark bookmark, BookmarkToolbar toolbar, IMapSelection selection) {

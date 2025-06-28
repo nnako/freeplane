@@ -30,4 +30,8 @@ class DropValidator {
 
 		return DropValidation.forNodeDrop(true, isInsertionDrop, dropsAfter);
 	}
+
+	BookmarkIndexCalculator.ToolbarDropPosition calculateToolbarDropPosition(Point dropPoint) {
+		return indexCalculator.calculateToolbarDropPosition(dropPoint);
+	}
 }

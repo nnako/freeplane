@@ -60,30 +60,20 @@ class BookmarkButton extends JButton {
 		}
 	}
 
-	public void showNavigatedFeedback() {
+	public void showFeedback(BookmarkToolbar.DropIndicatorType type) {
 		BookmarkToolbar toolbar = getBookmarkToolbar();
 		if (toolbar != null) {
-			toolbar.showVisualFeedback(this, BookmarkToolbar.DropIndicatorType.NAVIGATE_FEEDBACK);
-		}
-	}
-
-	public void showDropZoneIndicator(boolean dropsAfter) {
-		BookmarkToolbar toolbar = getBookmarkToolbar();
-		if (toolbar != null) {
-			BookmarkToolbar.DropIndicatorType type = dropsAfter ? 
-				BookmarkToolbar.DropIndicatorType.DROP_AFTER : 
-				BookmarkToolbar.DropIndicatorType.DROP_BEFORE;
 			toolbar.showVisualFeedback(this, type);
 		}
 	}
 
-	public void showHoverFeedback() {
-		BookmarkToolbar toolbar = getBookmarkToolbar();
-		if (toolbar != null) {
-			toolbar.showVisualFeedback(this, BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
-		}
+	public void showDropZoneIndicator(boolean dropsAfter) {
+		BookmarkToolbar.DropIndicatorType type = dropsAfter ? 
+			BookmarkToolbar.DropIndicatorType.DROP_AFTER : 
+			BookmarkToolbar.DropIndicatorType.DROP_BEFORE;
+		showFeedback(type);
 	}
-	
+
 	private BookmarkToolbar getBookmarkToolbar() {
 		return (BookmarkToolbar) getParent();
 	}

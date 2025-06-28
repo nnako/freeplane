@@ -18,7 +18,7 @@ class HoverTimer {
 
 		hoverTimer = new Timer(HOVER_DELAY_MS, e -> {
 			bookmark.open();
-			targetButton.showNavigatedFeedback();
+			targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.NAVIGATE_FEEDBACK);
 		});
 		hoverTimer.setRepeats(false);
 		hoverTimer.start();

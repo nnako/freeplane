@@ -1,5 +1,7 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
+import java.awt.Component;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -13,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
+import org.freeplane.features.map.MapModel;
 
 class BookmarkDropTargetListener extends DropTargetAdapter {
 	private final DropValidator validator;
@@ -37,18 +39,33 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	@Override
 	public void dragOver(DropTargetDragEvent dtde) {
-		BookmarkButton targetButton = (BookmarkButton) dtde.getDropTargetContext().getComponent();
+		Component targetComponent = dtde.getDropTargetContext().getComponent();
 
-		if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
-			handleBookmarkDragOver(dtde, targetButton);
-		}
-		else if (dtde.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
-			handleNodeDragOver(dtde, targetButton);
-		}
-		else {
+		if (targetComponent instanceof BookmarkButton) {
+			BookmarkButton targetButton = (BookmarkButton) targetComponent;
+			if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
+				handleBookmarkDragOver(dtde, targetButton);
+			}
+			else if (dtde.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
+				handleNodeDragOver(dtde, targetButton);
+			}
+			else {
+				dtde.rejectDrag();
+				targetButton.clearVisualFeedback();
+				hoverTimer.cancelHoverTimer();
+			}
+		} else if (targetComponent instanceof BookmarkToolbar) {
+			BookmarkToolbar toolbar = (BookmarkToolbar) targetComponent;
+			if (dtde.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
+				handleNodeDragOverToolbar(dtde, toolbar);
+			}
+			else {
+				dtde.rejectDrag();
+				toolbar.clearVisualFeedback();
+				hoverTimer.cancelHoverTimer();
+			}
+		} else {
 			dtde.rejectDrag();
-			targetButton.clearVisualFeedback();
-			hoverTimer.cancelHoverTimer();
 		}
 	}
 
@@ -78,15 +95,9 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private void handleNodeDragOver(DropTargetDragEvent dtde, BookmarkButton targetButton) {
 		try {
-			@SuppressWarnings("unchecked")
-			Collection<NodeModel> draggedNodesCollection = (Collection<NodeModel>) dtde.getTransferable()
-			        .getTransferData(MindMapNodesSelection.mindMapNodeObjectsFlavor);
-			List<NodeModel> draggedNodes = new ArrayList<>(draggedNodesCollection);
-
-			if (draggedNodes.size() != 1) {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			if (draggedNode == null) {
 				dtde.rejectDrag();
-				targetButton.clearVisualFeedback();
-				hoverTimer.cancelHoverTimer();
 				return;
 			}
 
@@ -96,7 +107,6 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			if (!validation.isValid) {
 				dtde.rejectDrag();
 				targetButton.clearVisualFeedback();
-				hoverTimer.cancelHoverTimer();
 				return;
 			}
 
@@ -107,14 +117,13 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 				targetButton.showDropZoneIndicator(validation.dropsAfter);
 				hoverTimer.cancelHoverTimer();
 			} else {
-				targetButton.showHoverFeedback();
+				targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
 				hoverTimer.startHoverTimer(targetButton);
 			}
 
 		} catch (Exception e) {
 			dtde.rejectDrag();
 			targetButton.clearVisualFeedback();
-			hoverTimer.cancelHoverTimer();
 		}
 	}
 
@@ -133,22 +142,40 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	@Override
 	public void dragExit(DropTargetEvent dte) {
-		BookmarkButton button = (BookmarkButton) dte.getDropTargetContext().getComponent();
-		button.clearVisualFeedback();
+		Component targetComponent = dte.getDropTargetContext().getComponent();
+		if (targetComponent instanceof BookmarkButton) {
+			BookmarkButton button = (BookmarkButton) targetComponent;
+			button.clearVisualFeedback();
+		} else if (targetComponent instanceof BookmarkToolbar) {
+			BookmarkToolbar toolbar = (BookmarkToolbar) targetComponent;
+			toolbar.clearVisualFeedback();
+		}
 		hoverTimer.cancelHoverTimer();
 	}
 
 	@Override
 	public void drop(DropTargetDropEvent dtde) {
-		BookmarkButton targetButton = (BookmarkButton) dtde.getDropTargetContext().getComponent();
+		Component targetComponent = dtde.getDropTargetContext().getComponent();
 		hoverTimer.cancelHoverTimer();
 
 		try {
-			if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
-				handleBookmarkDrop(dtde, targetButton);
-			} else if (dtde.isDataFlavorSupported(
-			        MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
-				handleNodeDrop(dtde, targetButton);
+			if (targetComponent instanceof BookmarkButton) {
+				BookmarkButton targetButton = (BookmarkButton) targetComponent;
+				if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
+					handleBookmarkDrop(dtde, targetButton);
+				} else if (dtde.isDataFlavorSupported(
+						MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
+					handleNodeDrop(dtde, targetButton);
+				} else {
+					dtde.rejectDrop();
+				}
+			} else if (targetComponent instanceof BookmarkToolbar) {
+				BookmarkToolbar toolbar = (BookmarkToolbar) targetComponent;
+				if (dtde.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
+					handleNodeDropOnToolbar(dtde, toolbar);
+				} else {
+					dtde.rejectDrop();
+				}
 			} else {
 				dtde.rejectDrop();
 			}
@@ -156,7 +183,11 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		} catch (Exception e) {
 			dtde.dropComplete(false);
 		} finally {
-			targetButton.clearVisualFeedback();
+			if (targetComponent instanceof BookmarkButton) {
+				((BookmarkButton) targetComponent).clearVisualFeedback();
+			} else if (targetComponent instanceof BookmarkToolbar) {
+				((BookmarkToolbar) targetComponent).clearVisualFeedback();
+			}
 		}
 	}
 
@@ -185,15 +216,26 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			return;
 		}
 
-		NodeBookmark bookmark = (NodeBookmark) targetButton.getClientProperty("bookmark");
-		int dragActionType = getDropActionForDrop(dtde);
+		try {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			
+			if (draggedNode == null) {
+				dtde.rejectDrop();
+				return;
+			}
 
-		dtde.acceptDrop(dragActionType);
+			NodeBookmark bookmark = (NodeBookmark) targetButton.getClientProperty("bookmark");
+			int dragActionType = getDropActionForDrop(dtde);
 
-		boolean dropAfter = validation.isInsertionDrop ? validation.dropsAfter : true;
-		boolean success = executor.createBookmarkFromNode(dtde.getTransferable(), bookmark, dropAfter, targetButton);
+			dtde.acceptDrop(dragActionType);
 
-		dtde.dropComplete(success);
+			boolean dropAfter = validation.isInsertionDrop ? validation.dropsAfter : true;
+			boolean success = executor.createBookmarkFromNode(dtde.getTransferable(), bookmark, dropAfter, targetButton);
+
+			dtde.dropComplete(success);
+		} catch (Exception e) {
+			dtde.rejectDrop();
+		}
 	}
 
 	private int getDropActionForDrop(final DropTargetDropEvent dtde) {
@@ -207,5 +249,130 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		}
 
 		return dropAction;
+	}
+
+	private void handleNodeDragOverToolbar(DropTargetDragEvent dtde, BookmarkToolbar toolbar) {
+		try {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			if (draggedNode == null) {
+				dtde.rejectDrag();
+				return;
+			}
+
+			Point dropPoint = dtde.getLocation();
+			if (!isPointInContentArea(toolbar, dropPoint)) {
+				dtde.rejectDrag();
+				return;
+			}
+
+			BookmarkIndexCalculator.ToolbarDropPosition position = validator.calculateToolbarDropPosition(dropPoint);
+			
+			showToolbarDropFeedback(toolbar, position);
+			hoverTimer.cancelHoverTimer();
+
+			int dragActionType = getDropAction(dtde);
+			dtde.acceptDrag(dragActionType);
+
+		} catch (Exception e) {
+			dtde.rejectDrag();
+			toolbar.clearVisualFeedback();
+		}
+	}
+
+	private void handleNodeDropOnToolbar(DropTargetDropEvent dtde, BookmarkToolbar toolbar) {
+		try {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			if (draggedNode == null) {
+				dtde.rejectDrop();
+				return;
+			}
+
+			Point dropPoint = dtde.getLocation();
+			if (!isPointInContentArea(toolbar, dropPoint)) {
+				dtde.rejectDrop();
+				return;
+			}
+
+			BookmarkIndexCalculator.ToolbarDropPosition position = validator.calculateToolbarDropPosition(dropPoint);
+
+			int dragActionType = getDropActionForDrop(dtde);
+			dtde.acceptDrop(dragActionType);
+
+			boolean success = executor.createBookmarkFromNodeAtPosition(dtde, position.getInsertionIndex());
+			dtde.dropComplete(success);
+		} catch (Exception e) {
+			dtde.rejectDrop();
+		}
+	}
+
+	private boolean isPointInContentArea(BookmarkToolbar toolbar, Point point) {
+		Insets insets = toolbar.getInsets();
+		int x = point.x;
+		int y = point.y;
+		int width = toolbar.getWidth();
+		int height = toolbar.getHeight();
+		
+		return x >= insets.left && 
+		       x < (width - insets.right) && 
+		       y >= insets.top && 
+		       y < (height - insets.bottom);
+	}
+
+	private NodeModel extractSingleNode(DropTargetDragEvent dtde) throws Exception {
+		BookmarkToolbar toolbar = getToolbarFromEvent(dtde);
+		return extractSingleNode(dtde.getTransferable(), toolbar);
+	}
+
+	private NodeModel extractSingleNode(DropTargetDropEvent dtde) throws Exception {
+		BookmarkToolbar toolbar = getToolbarFromEvent(dtde);
+		return extractSingleNode(dtde.getTransferable(), toolbar);
+	}
+
+	private BookmarkToolbar getToolbarFromEvent(DropTargetEvent dte) {
+		Component component = dte.getDropTargetContext().getComponent();
+		if (component instanceof BookmarkToolbar) {
+			return (BookmarkToolbar) component;
+		} else if (component instanceof BookmarkButton) {
+			return (BookmarkToolbar) component.getParent();
+		}
+		throw new IllegalArgumentException("Event target is neither BookmarkToolbar nor BookmarkButton");
+	}
+
+	private NodeModel extractSingleNode(Transferable transferable, BookmarkToolbar toolbar) throws Exception {
+		@SuppressWarnings("unchecked")
+		Collection<NodeModel> draggedNodesCollection = (Collection<NodeModel>) transferable
+				.getTransferData(MindMapNodesSelection.mindMapNodeObjectsFlavor);
+		List<NodeModel> draggedNodes = new ArrayList<>(draggedNodesCollection);
+
+		if (draggedNodes.size() != 1) {
+			return null;
+		}
+
+		NodeModel draggedNode = draggedNodes.get(0);
+		MapModel nodeMap = draggedNode.getMap();
+		MapModel toolbarMap = (MapModel) toolbar.getClientProperty("bookmarksMap");
+		
+		return (nodeMap != null && nodeMap.equals(toolbarMap)) ? draggedNode : null;
+	}
+
+	private void showToolbarDropFeedback(BookmarkToolbar toolbar, BookmarkIndexCalculator.ToolbarDropPosition position) {
+		switch (position.type) {
+			case BEFORE_BUTTON:
+				if (position.buttonIndex < toolbar.getComponentCount()) {
+					BookmarkButton button = (BookmarkButton) toolbar.getComponent(position.buttonIndex);
+					button.showDropZoneIndicator(false); // before
+				}
+				break;
+			case AFTER_BUTTON:
+				if (position.buttonIndex < toolbar.getComponentCount()) {
+					BookmarkButton button = (BookmarkButton) toolbar.getComponent(position.buttonIndex);
+					button.showDropZoneIndicator(true); // after
+				}
+				break;
+			case AT_END:
+			default:
+				toolbar.showEndDropIndicator();
+				break;
+		}
 	}
 }

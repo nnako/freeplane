@@ -1,6 +1,9 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
+import java.awt.Component;
 import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,12 +38,13 @@ class DropExecutor {
 
 	boolean createBookmarkFromNode(Transferable transferable, NodeBookmark targetBookmark, boolean dropAfter, JButton targetButton) {
 		try {
-			NodeModel draggedNode = extractSingleNode(transferable);
+			MapModel map = getMapFromButton(targetButton);
+			BookmarkToolbar toolbar = (BookmarkToolbar) targetButton.getParent();
+			NodeModel draggedNode = extractSingleNode(transferable, toolbar);
 			if (draggedNode == null) {
 				return false;
 			}
 
-			MapModel map = getMapFromButton(targetButton);
 			int insertionIndex = calculateInsertionIndex(targetBookmark, dropAfter, map);
 
 			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
@@ -51,13 +55,85 @@ class DropExecutor {
 		}
 	}
 
-	private NodeModel extractSingleNode(Transferable transferable) throws Exception {
+	boolean createBookmarkFromNodeAtEnd(Transferable transferable, BookmarkToolbar toolbar) {
+		try {
+			NodeModel draggedNode = extractSingleNode(transferable, toolbar);
+			if (draggedNode == null) {
+				return false;
+			}
+
+			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			List<NodeBookmark> currentBookmarks = bookmarksController.getBookmarks(map).getBookmarks();
+			int insertionIndex = currentBookmarks.size();
+
+			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
+
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	boolean createBookmarkFromNodeAtPosition(Transferable transferable, BookmarkToolbar toolbar, int insertionIndex) {
+		try {
+			NodeModel draggedNode = extractSingleNode(transferable, toolbar);
+			if (draggedNode == null) {
+				return false;
+			}
+
+			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
+
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	boolean createBookmarkFromNodeAtPosition(DropTargetDropEvent dtde, int insertionIndex) {
+		try {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			if (draggedNode == null) {
+				return false;
+			}
+
+			BookmarkToolbar toolbar = getToolbarFromEvent(dtde);
+			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
+
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private NodeModel extractSingleNode(DropTargetDropEvent dtde) throws Exception {
+		BookmarkToolbar toolbar = getToolbarFromEvent(dtde);
+		return extractSingleNode(dtde.getTransferable(), toolbar);
+	}
+
+	private BookmarkToolbar getToolbarFromEvent(DropTargetEvent dte) {
+		Component component = dte.getDropTargetContext().getComponent();
+		if (component instanceof BookmarkToolbar) {
+			return (BookmarkToolbar) component;
+		} else if (component instanceof BookmarkButton) {
+			return (BookmarkToolbar) component.getParent();
+		}
+		throw new IllegalArgumentException("Event target is neither BookmarkToolbar nor BookmarkButton");
+	}
+
+	private NodeModel extractSingleNode(Transferable transferable, BookmarkToolbar toolbar) throws Exception {
 		@SuppressWarnings("unchecked")
 		Collection<NodeModel> draggedNodesCollection = (Collection<NodeModel>) transferable
 		        .getTransferData(MindMapNodesSelection.mindMapNodeObjectsFlavor);
 		List<NodeModel> draggedNodes = new ArrayList<>(draggedNodesCollection);
 
-		return draggedNodes.size() == 1 ? draggedNodes.get(0) : null;
+		if (draggedNodes.size() != 1) {
+			return null;
+		}
+
+		NodeModel draggedNode = draggedNodes.get(0);
+		MapModel nodeMap = draggedNode.getMap();
+		MapModel toolbarMap = (MapModel) toolbar.getClientProperty("bookmarksMap");
+		
+		return (nodeMap != null && nodeMap.equals(toolbarMap)) ? draggedNode : null;
 	}
 
 	private MapModel getMapFromButton(JButton targetButton) {
