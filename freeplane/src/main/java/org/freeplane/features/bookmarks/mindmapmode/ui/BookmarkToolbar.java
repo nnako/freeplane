@@ -221,4 +221,14 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 			paintDropLine(g, bounds, GAP, false);
 		}
 	}
+
+	public void requestInitialFocusInWindow() {
+		for(int i = 0; i < getComponentCount(); i++) {
+			final Component component = getComponent(i);
+			if(component.isEnabled() && component.isFocusable())
+				component.requestFocusInWindow();
+			return;
+		}
+		requestFocusInWindow();
+	}
 }

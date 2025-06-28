@@ -4,16 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
 
@@ -21,12 +20,11 @@ import org.freeplane.api.LengthUnit;
 import org.freeplane.api.Quantity;
 import org.freeplane.core.resources.IFreeplanePropertyListener;
 import org.freeplane.core.resources.ResourceController;
-import org.freeplane.core.ui.components.FreeplaneToolBar;
-import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
-import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.FocusBookmarkToolbarAction;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
 import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.INodeSelectionListener;
@@ -131,9 +129,26 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         add(mapViewScrollPane, BorderLayout.CENTER);
 
         mapView.addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
+            @Override
+			public void componentResized(ComponentEvent e) {
                 updateMapOverview();
             }
+        });
+
+        mapView.addPropertyChangeListener(FocusBookmarkToolbarAction.BOOKMARK_TOOLBAR_FOCUS_PROPERTY, ev -> {
+        	if(ev.getNewValue() != null) {
+        		mapView.putClientProperty(FocusBookmarkToolbarAction.BOOKMARK_TOOLBAR_FOCUS_PROPERTY, null);
+        		if(! isBookmarksToolbarVisible) {
+        			viewController.setBookmarksToolbarVisible(true);
+        		}
+        		final Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        		if(focusOwner == bookmarksToolbar || focusOwner != null && focusOwner.getParent() == bookmarksToolbar){
+        			mapView.getSelected().requestFocusInWindow();
+        		}
+        		else {
+        			bookmarksToolbar.requestInitialFocusInWindow();
+        		}
+        	}
         });
     }
 

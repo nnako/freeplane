@@ -49,6 +49,7 @@ public class BookmarksController implements IExtension{
 		readManager.addElementHandler("bookmark", bookmarksBuilder);
 		writeManager.addExtensionElementWriter(MapBookmarks.class, bookmarksBuilder);
 		modeController.addAction(new BookmarkNodeAction(modeController, this));
+		modeController.addAction(new FocusBookmarkToolbarAction());
 		modeController.getExtension(IconController.class).addStateIconProvider(new IStateIconProvider() {
 			@Override
 			public UIIcon getStateIcon(NodeModel node) {

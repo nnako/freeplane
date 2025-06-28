@@ -332,6 +332,7 @@
 				<Entry name="ToggleScrollbarsAction" />
 				<Entry name="ToggleMapOverviewAction" />
 				<Entry name="ToggleBookmarksToolbarAction" />
+				<Entry name="FocusBookmarkToolbarAction" />
 				<Entry name="ShowFormatPanel"/>
 			</Entry>
 			<Entry name="menu_viewmode" >
@@ -690,7 +691,7 @@
 		<Entry name="ToggleStatusAction" />
 		<Entry name="ToggleScrollbarsAction" />
 		<Entry name="ToggleMapOverviewAction" />
-		<Entry name="ToggleBookmarksToolbarAction" />
+        <Entry name="ToggleBookmarksToolbarAction" />
 		<Entry builder="separator" />
 		<Entry name="ShowFormatPanel" />
 		<Entry name="ShowHideNoteAction" accelerator="control GREATER" />
