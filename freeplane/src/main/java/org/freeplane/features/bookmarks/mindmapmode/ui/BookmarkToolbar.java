@@ -1,10 +1,15 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Rectangle;
 
+import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.plaf.ToolBarUI;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.ToolbarLayout;
@@ -28,11 +33,18 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	public BookmarkToolbar() {
 		super(SwingConstants.VERTICAL);
     	ToolbarLayout layout = (ToolbarLayout) getLayout();
-    	layout.setGap(GAP, true);
+    	layout.setGap(GAP, true, false);
 	}
 
-	public BookmarkToolbar(String name, int orientation) {
-		super(name, orientation);
+
+
+	@Override
+	public void setUI(ToolBarUI ui) {
+		super.setUI(ui);
+		final Border border = BorderFactory.createEtchedBorder();
+		setBorder(border);
+		final Insets borderInsets = border.getBorderInsets(this);
+		setMinimumSize(new Dimension(2 * GAP + borderInsets.left + borderInsets.right, 2 * GAP + borderInsets.top + borderInsets.bottom));
 	}
 
 	public void showVisualFeedback(Component button, DropIndicatorType type) {

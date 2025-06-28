@@ -29,7 +29,8 @@ public class ToolbarLayout implements LayoutManager {
     private BlockEndPosition blockEndPosition;
 	private int maximumWidth = MAX_WIDTH_BY_PARENT_WIDTH;
 	private int gap = 0;
-	private boolean addsMargins = false;
+	private boolean addsHorizontalMargins = false;
+	private boolean addsVerticalMargins = false;
 
 	enum BlockEndPosition{ON_SEPARATOR, ON_EVERY_SEPARATOR, ANYWHERE}
 	ToolbarLayout(BlockEndPosition blockEndPosition){
@@ -49,17 +50,10 @@ public class ToolbarLayout implements LayoutManager {
 		return gap;
 	}
 
-	public void setGap(int gap, boolean addMargins) {
+	public void setGap(int gap, boolean addsHorizontalMargins, boolean addsVerticalMargins) {
 		this.gap = gap;
-		this.addsMargins = addMargins;
-	}
-
-	public boolean addsMargins() {
-		return addsMargins;
-	}
-
-	public void setAddsMargins(boolean addsMargins) {
-		this.addsMargins = addsMargins;
+		this.addsHorizontalMargins = addsHorizontalMargins;
+		this.addsVerticalMargins = addsVerticalMargins;
 	}
 
     @Override
@@ -82,7 +76,7 @@ public class ToolbarLayout implements LayoutManager {
 		Insets insets = container.getInsets();
 		int leftMargin = insets.left;
 		int height =  insets.top;
-		if (addsMargins) {
+		if (addsVerticalMargins) {
 			height += verticalGap;
 		}
 		final int maximumWidth = calculateMaxWidth(container) - insets.left - insets.right;
@@ -92,11 +86,11 @@ public class ToolbarLayout implements LayoutManager {
 				int totalBlockWidth = blockWidth;
 				if (i > container.getComponentCount() || blockEndPosition == BlockEndPosition.ON_EVERY_SEPARATOR || lastBlockWidth + totalBlockWidth > maximumWidth) {
 					int x = leftMargin;
-					if (addsMargins) {
+					if (addsHorizontalMargins) {
 						x += horizontalGap;
 					}
 					int actualWidth = 0;
-					if (addsMargins) {
+					if (addsHorizontalMargins) {
 						actualWidth += horizontalGap;
 					}
 					boolean addGap = false;
@@ -114,7 +108,7 @@ public class ToolbarLayout implements LayoutManager {
 							addGap = true;
 						}
 					}
-					if (addsMargins) {
+					if (addsHorizontalMargins) {
 						actualWidth += horizontalGap;
 					}
 					assert actualWidth == lastBlockWidth : "Width calculation mismatch: calculated=" + lastBlockWidth + ", actual=" + actualWidth;
@@ -144,7 +138,7 @@ public class ToolbarLayout implements LayoutManager {
 				blockWidth += horizontalGap;
 			}
 			blockWidth += getPreferredWidth(component, maximumWidth);
-			if (component.isVisible() && !hasVisibleComponentInBlock && addsMargins) {
+			if (component.isVisible() && !hasVisibleComponentInBlock && addsHorizontalMargins) {
 				blockWidth += 2 * horizontalGap;
 			}
 			if (component.isVisible()) {
@@ -190,7 +184,7 @@ public class ToolbarLayout implements LayoutManager {
 		for(;;) {
 	        int width = 0;
 	        int height = 0;
-	        if (addsMargins) {
+	        if (addsVerticalMargins) {
 	            height += verticalGap;
 	        }
 	        int blockWidth = 0;
@@ -232,7 +226,7 @@ public class ToolbarLayout implements LayoutManager {
 	                blockWidth += horizontalGap;
 	            }
 	            blockWidth += getPreferredWidth(component, maxWidth);
-	            if (component.isVisible() && !hasVisibleComponentInBlock && addsMargins) {
+	            if (component.isVisible() && !hasVisibleComponentInBlock && addsHorizontalMargins) {
 	                blockWidth += 2 * horizontalGap;
 	            }
 	            if (component.isVisible()) {
@@ -241,11 +235,16 @@ public class ToolbarLayout implements LayoutManager {
 	                blockHeight = Math.max(compPreferredSize.height, blockHeight);
 	            }
 	        }
-	        if (!addsMargins && height > 0) {
+	        if (!addsVerticalMargins && height > 0) {
 	            height -= verticalGap;
 	        }
 	        if(maxWidth >= width) {
 	            Dimension preferredSize = new Dimension(width + insets.left + insets.right, height + insets.top + insets.bottom);
+	            final Dimension minimumSize = container.getMinimumSize();
+	            if(minimumSize != null) {
+					preferredSize.width = Math.max(preferredSize.width, minimumSize.width);
+					preferredSize.height = Math.max(preferredSize.height, minimumSize.height);
+				}
 	            return preferredSize;
 	        }
 	        else
