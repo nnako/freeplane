@@ -1,23 +1,45 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-import javax.swing.BorderFactory;
+import javax.swing.JList;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 import javax.swing.plaf.ToolBarUI;
 
 import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
+import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 
 public class BookmarkToolbar extends FreeplaneToolBar {
 	static final int GAP = (int) (10 * UITools.FONT_SCALE_FACTOR);
 	private static final long serialVersionUID = 1L;
+	@SuppressWarnings("serial")
+	private static final Border TOOLBAR_BORDER = new BookmarkToolbarBorder();
+
+
+	private static class BookmarkToolbarBorder extends EtchedBorder {
+		private static final long serialVersionUID = 1L;
+		static final private Color focusColor = new JList<>().getSelectionBackground();
+		@Override
+		public Color getHighlightColor(Component c) {
+			return c.hasFocus() ? focusColor : super.getHighlightColor(c);
+		}
+	}
 
 	enum DropIndicatorType {
 		NONE,
@@ -28,23 +50,84 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 		END_DROP_INDICATOR
 	}
 
+	private final BookmarkIndexCalculator indexCalculator;
 	private Component targetComponent;
 	private DropIndicatorType indicatorType = DropIndicatorType.NONE;
 
-	public BookmarkToolbar() {
+	public BookmarkToolbar(BookmarksController bookmarksController) {
 		super(SwingConstants.VERTICAL);
     	ToolbarLayout layout = (ToolbarLayout) getLayout();
     	layout.setGap(GAP, true, false);
+    	setDisablesFocus(false);
+    	setFocusable(true);
+    	setFocusCycleRoot(true);
+    	addFocusMouseListener();
+    	addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				repaint();
+			}
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				repaint();
+			}
+		});
+    	this.indexCalculator = new BookmarkIndexCalculator(this);
+
+    	new DropTarget(this,
+				DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE,
+				new BookmarkDropTargetListener(this, bookmarksController));
 	}
 
+	private void addFocusMouseListener() {
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					handleFocusOnClick(e.getPoint());
+				}
+			}
+		});
+	}
 
+	private void handleFocusOnClick(Point clickPoint) {
+		if (getComponentCount() == 0) {
+			requestFocusInWindow();
+		} else if (indexCalculator != null) {
+			BookmarkIndexCalculator.ToolbarDropPosition position = indexCalculator.calculateToolbarDropPosition(clickPoint);
+			Component componentToFocus = getComponentToFocus(position);
+			if (componentToFocus != null) {
+				componentToFocus.requestFocusInWindow();
+			} else {
+				requestFocusInWindow();
+			}
+		}
+	}
+
+	private Component getComponentToFocus(BookmarkIndexCalculator.ToolbarDropPosition position) {
+		switch (position.type) {
+			case BEFORE_BUTTON:
+			case AFTER_BUTTON:
+				if (position.buttonIndex >= 0 && position.buttonIndex < getComponentCount()) {
+					return getComponent(position.buttonIndex);
+				}
+				break;
+			case AT_END:
+				if (getComponentCount() > 0) {
+					return getComponent(getComponentCount() - 1);
+				}
+				break;
+		}
+		return null;
+	}
 
 	@Override
 	public void setUI(ToolBarUI ui) {
 		super.setUI(ui);
-		final Border border = BorderFactory.createEtchedBorder();
-		setBorder(border);
-		final Insets borderInsets = border.getBorderInsets(this);
+		setBorder(TOOLBAR_BORDER);
+		final Insets borderInsets = TOOLBAR_BORDER.getBorderInsets(this);
 		setMinimumSize(new Dimension(2 * GAP + borderInsets.left + borderInsets.right, 2 * GAP + borderInsets.top + borderInsets.bottom));
 	}
 
@@ -65,10 +148,20 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
 		if (targetComponent != null && indicatorType != DropIndicatorType.NONE) {
 			g.setColor(targetComponent.getForeground());
 			paintVisualFeedback(g);
+		}
+	}
+
+
+
+	@Override
+	protected void paintBorder(Graphics g) {
+		super.paintBorder(g);
+		if(hasFocus()) {
+			g.setColor(Color.BLUE);
+			g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
 		}
 	}
 

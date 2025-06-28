@@ -9,15 +9,13 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 
 class BookmarkIndexCalculator {
 	private final BookmarkToolbar toolbar;
-	private final BookmarksToolbarBuilder toolbarBuilder;
 
-	BookmarkIndexCalculator(BookmarkToolbar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
+	BookmarkIndexCalculator(BookmarkToolbar toolbar) {
 		this.toolbar = toolbar;
-		this.toolbarBuilder = toolbarBuilder;
 	}
 
 	int calculateBookmarkMoveIndex(int sourceIndex, JButton targetButton, Point dropPoint) {
-		int targetIndex = toolbarBuilder.getComponentIndex(toolbar, targetButton);
+		int targetIndex = toolbar.getComponentIndex(targetButton);
 		boolean movesAfter = isDropAfter(targetButton, dropPoint);
 
 		return movesAfter ? (sourceIndex < targetIndex ? targetIndex : targetIndex + 1)
@@ -30,7 +28,7 @@ class BookmarkIndexCalculator {
 			return false;
 		}
 
-		int targetIndex = toolbarBuilder.getComponentIndex(targetToolbar, targetButton);
+		int targetIndex = targetToolbar.getComponentIndex(targetButton);
 		if (targetIndex == sourceIndex) {
 			return false;
 		}
@@ -64,7 +62,7 @@ class BookmarkIndexCalculator {
 				BookmarkButton button = (BookmarkButton) component;
 				int buttonLeft = button.getX();
 				if (dropPoint.x >= buttonLeft - BookmarkToolbar.GAP && dropPoint.x <= buttonLeft + BookmarkToolbar.GAP) {
-					int buttonIndex = toolbarBuilder.getComponentIndex(toolbar, component);
+					int buttonIndex = toolbar.getComponentIndex(component);
 					return new ToolbarDropPosition(ToolbarDropPosition.Type.BEFORE_BUTTON, buttonIndex);
 				}
 			}
@@ -76,7 +74,7 @@ class BookmarkIndexCalculator {
 				BookmarkButton button = (BookmarkButton) component;
 				int buttonRight = button.getX() + button.getWidth();
 				if (dropPoint.x >= buttonRight - BookmarkToolbar.GAP && dropPoint.x <= buttonRight + BookmarkToolbar.GAP) {
-					int buttonIndex = toolbarBuilder.getComponentIndex(toolbar, component);
+					int buttonIndex = toolbar.getComponentIndex(component);
 					return new ToolbarDropPosition(ToolbarDropPosition.Type.AFTER_BUTTON, buttonIndex);
 				}
 			}

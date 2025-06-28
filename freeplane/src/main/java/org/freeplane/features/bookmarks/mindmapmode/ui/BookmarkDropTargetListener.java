@@ -26,8 +26,8 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 	private final DropExecutor executor;
 	private final HoverTimer hoverTimer;
 
-	public BookmarkDropTargetListener(BookmarkToolbar toolbar, BookmarksController bookmarksController, BookmarksToolbarBuilder toolbarBuilder) {
-		this.validator = new DropValidator(toolbar, toolbarBuilder);
+	public BookmarkDropTargetListener(BookmarkToolbar toolbar, BookmarksController bookmarksController) {
+		this.validator = new DropValidator(toolbar);
 		this.executor = new DropExecutor(toolbar, bookmarksController);
 		this.hoverTimer = new HoverTimer();
 	}

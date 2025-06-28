@@ -9,8 +9,8 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 class DropValidator {
 	private final BookmarkIndexCalculator indexCalculator;
 
-	DropValidator(BookmarkToolbar toolbar, BookmarksToolbarBuilder toolbarBuilder) {
-		this.indexCalculator = new BookmarkIndexCalculator(toolbar, toolbarBuilder);
+	DropValidator(BookmarkToolbar toolbar) {
+		this.indexCalculator = new BookmarkIndexCalculator(toolbar);
 	}
 
 	DropValidation validateDrop(int sourceIndex, JButton targetButton, Point dropPoint) {

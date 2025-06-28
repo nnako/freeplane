@@ -67,11 +67,11 @@ class BookmarkButtonConfigurator {
 		DragSource dragSource = DragSource.getDefaultDragSource();
 		dragSource.createDefaultDragGestureRecognizer(button, 
 			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE | DnDConstants.ACTION_LINK,
-			new BookmarkDragGestureListener(button, toolbarBuilder));
+			new BookmarkDragGestureListener(button));
 
 		DropTarget dropTarget = new DropTarget(button, 
 			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE, 
-			new BookmarkDropTargetListener(toolbar, bookmarksController, toolbarBuilder));
+			new BookmarkDropTargetListener(toolbar, bookmarksController));
 	}
 
 	private void addMouseListener(BookmarkButton button, NodeBookmark bookmark) {

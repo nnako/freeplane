@@ -116,7 +116,8 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         if(isMindMapEditor) {
         	isBookmarksToolbarVisible = isMindMapEditor
         			&& viewController.isBookmarksToolbarVisible();
-        	bookmarksToolbar = new BookmarkToolbar();
+        	BookmarksController bookmarksController = mapView.getModeController().getExtension(BookmarksController.class);
+        	bookmarksToolbar = new BookmarkToolbar(bookmarksController);
         	bookmarksToolbar.setReducesButtonSize(false);
         	updateBookmarksToolbar();
         	bookmarksToolbar.setVisible(isBookmarksToolbarVisible);

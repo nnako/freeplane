@@ -10,11 +10,9 @@ import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 
 class BookmarkDragGestureListener implements DragGestureListener {
 	private final JButton button;
-	private final BookmarksToolbarBuilder toolbarBuilder;
 
-	public BookmarkDragGestureListener(JButton button, BookmarksToolbarBuilder toolbarBuilder) {
+	public BookmarkDragGestureListener(JButton button) {
 		this.button = button;
-		this.toolbarBuilder = toolbarBuilder;
 	}
 
 	@Override
@@ -24,7 +22,7 @@ class BookmarkDragGestureListener implements DragGestureListener {
 
 		DragActionDetector.DragActionResult actionResult = DragActionDetector.detectDragAction(dge);
 
-		int sourceIndex = toolbarBuilder.getComponentIndex(toolbar, button);
+		int sourceIndex = toolbar.getComponentIndex(button);
 		BookmarkTransferables.CombinedTransferable transferable =
 			BookmarkTransferableFactory.createCombinedTransferable(bookmark, sourceIndex, actionResult.dragAction);
 
