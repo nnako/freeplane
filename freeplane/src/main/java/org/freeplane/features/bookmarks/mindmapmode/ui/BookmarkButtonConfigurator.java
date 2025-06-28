@@ -46,6 +46,7 @@ class BookmarkButtonConfigurator {
 		setButtonIcon(button, node, descriptor);
 		setButtonEnabledState(button, node, selection);
 		setupDragAndDrop(button, toolbar);
+		setupClipboardActions(button, toolbar);
 		addMouseListener(button, bookmark);
 	}
 
@@ -72,6 +73,11 @@ class BookmarkButtonConfigurator {
 		DropTarget dropTarget = new DropTarget(button, 
 			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE, 
 			new BookmarkDropTargetListener(toolbar, bookmarksController));
+	}
+
+	private void setupClipboardActions(BookmarkButton button, BookmarkToolbar toolbar) {
+		BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
+		clipboardHandler.setupButtonClipboardActions(button);
 	}
 
 	private void addMouseListener(BookmarkButton button, NodeBookmark bookmark) {

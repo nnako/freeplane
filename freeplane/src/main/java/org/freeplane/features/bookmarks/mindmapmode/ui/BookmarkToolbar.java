@@ -24,6 +24,7 @@ import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkIndexCalculator.ToolbarDropPosition.Type;
 
 public class BookmarkToolbar extends FreeplaneToolBar {
 	static final int GAP = (int) (10 * UITools.FONT_SCALE_FACTOR);
@@ -53,6 +54,8 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	private final BookmarkIndexCalculator indexCalculator;
 	private Component targetComponent;
 	private DropIndicatorType indicatorType = DropIndicatorType.NONE;
+	private final BookmarkClipboardHandler clipboardHandler;
+	private final DropExecutor dropExecutor;
 
 	public BookmarkToolbar(BookmarksController bookmarksController) {
 		super(SwingConstants.VERTICAL);
@@ -75,10 +78,18 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 			}
 		});
     	this.indexCalculator = new BookmarkIndexCalculator(this);
+    	this.dropExecutor = new DropExecutor(this, bookmarksController);
+    	this.clipboardHandler = new BookmarkClipboardHandler(bookmarksController, dropExecutor);
 
     	new DropTarget(this,
 				DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE,
 				new BookmarkDropTargetListener(this, bookmarksController));
+
+		clipboardHandler.setupToolbarClipboardActions(this);
+	}
+
+	public BookmarkClipboardHandler getClipboardHandler() {
+		return clipboardHandler;
 	}
 
 	private void addFocusMouseListener() {
@@ -107,20 +118,12 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	}
 
 	private Component getComponentToFocus(BookmarkIndexCalculator.ToolbarDropPosition position) {
-		switch (position.type) {
-			case BEFORE_BUTTON:
-			case AFTER_BUTTON:
-				if (position.buttonIndex >= 0 && position.buttonIndex < getComponentCount()) {
-					return getComponent(position.buttonIndex);
-				}
-				break;
-			case AT_END:
-				if (getComponentCount() > 0) {
-					return getComponent(getComponentCount() - 1);
-				}
-				break;
+		if (position.buttonIndex >= 0 && (position.type == Type.BEFORE_BUTTON && position.buttonIndex < getComponentCount()
+				|| position.type == Type.AFTER_BUTTON && position.buttonIndex < getComponentCount() - 1)) {
+			return getComponent(position.buttonIndex);
 		}
-		return null;
+		else
+			return this;
 	}
 
 	@Override

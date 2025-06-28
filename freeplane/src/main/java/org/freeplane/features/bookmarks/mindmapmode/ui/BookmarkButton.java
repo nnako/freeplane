@@ -6,7 +6,6 @@ import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JToolTip;
-import javax.swing.plaf.ButtonUI;
 
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.NodeModel;
@@ -68,8 +67,8 @@ class BookmarkButton extends JButton {
 	}
 
 	public void showDropZoneIndicator(boolean dropsAfter) {
-		BookmarkToolbar.DropIndicatorType type = dropsAfter ? 
-			BookmarkToolbar.DropIndicatorType.DROP_AFTER : 
+		BookmarkToolbar.DropIndicatorType type = dropsAfter ?
+			BookmarkToolbar.DropIndicatorType.DROP_AFTER :
 			BookmarkToolbar.DropIndicatorType.DROP_BEFORE;
 		showFeedback(type);
 	}
