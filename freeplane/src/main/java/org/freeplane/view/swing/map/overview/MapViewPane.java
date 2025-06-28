@@ -189,7 +189,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 	@Override
 	public void onSelect(NodeModel node) {
 		if(bookmarksToolbar != null && node.getMap() == mapView.getMap()) {
-			bookmarksToolbar.repaint();
+			SwingUtilities.invokeLater(bookmarksToolbar::repaint);
 		}
 	}
 
