@@ -152,7 +152,7 @@ public class BookmarksBuilderTest {
 		assertThat(bookmarksElement.getName()).isEqualTo("bookmarks");
 		assertThat(bookmarksElement.getChildren()).hasSize(1);
 
-		XMLElement bookmarkElement = (XMLElement) bookmarksElement.getChildren().get(0);
+		XMLElement bookmarkElement = bookmarksElement.getChildren().get(0);
 		assertThat(bookmarkElement.getName()).isEqualTo("bookmark");
 		assertThat(bookmarkElement.getAttribute("nodeId", null)).isEqualTo("validNode");
 		assertThat(bookmarkElement.getAttribute("name", null)).isEqualTo("Test Bookmark");

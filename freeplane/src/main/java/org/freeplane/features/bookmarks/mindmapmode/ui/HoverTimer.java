@@ -14,7 +14,7 @@ class HoverTimer {
 
 	void startHoverTimer(BookmarkButton targetButton) {
 		cancelHoverTimer();
-		NodeBookmark bookmark = (NodeBookmark) targetButton.getClientProperty("bookmark");
+		NodeBookmark bookmark = targetButton.getBookmark();
 
 		hoverTimer = new Timer(HOVER_DELAY_MS, e -> {
 			bookmark.open();

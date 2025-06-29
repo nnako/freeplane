@@ -18,10 +18,10 @@ import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
 
 class BookmarkPopupMenu extends JPopupMenu {
 	private static final int RENAME_TEXTFIELD_WIDTH = 40;
-	
+
 	private final BookmarksController bookmarksController;
 
-	BookmarkPopupMenu(NodeBookmark bookmark, JButton button, BookmarksController bookmarksController) {
+	BookmarkPopupMenu(NodeBookmark bookmark, BookmarksController bookmarksController) {
 		this.bookmarksController = bookmarksController;
 		buildMenu(bookmark);
 	}
@@ -63,7 +63,7 @@ class BookmarkPopupMenu extends JPopupMenu {
 		JCheckBoxMenuItem openAsRootItem = TranslatedElementFactory.createCheckboxMenuItem("bookmark.opens_as_root");
 		openAsRootItem.setSelected(bookmark.getDescriptor().opensAsRoot());
 		openAsRootItem.addActionListener(e -> toggleOpenAsRoot(bookmark));
-		
+
 		if (bookmark.getNode().isRoot()) {
 			openAsRootItem.setEnabled(false);
 		}
@@ -101,4 +101,4 @@ class BookmarkPopupMenu extends JPopupMenu {
 		);
 		bookmarksController.addBookmark(bookmark.getNode(), newDescriptor);
 	}
-} 
+}

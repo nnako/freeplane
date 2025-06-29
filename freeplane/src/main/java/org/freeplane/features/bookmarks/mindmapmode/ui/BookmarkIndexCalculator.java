@@ -5,8 +5,6 @@ import java.awt.Point;
 
 import javax.swing.JButton;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
-
 class BookmarkIndexCalculator {
 	private final BookmarkToolbar toolbar;
 

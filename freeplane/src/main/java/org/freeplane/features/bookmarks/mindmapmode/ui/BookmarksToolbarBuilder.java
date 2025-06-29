@@ -10,8 +10,6 @@ import org.freeplane.features.map.MapModel;
 import org.freeplane.features.mode.ModeController;
 
 public class BookmarksToolbarBuilder {
-	private static final String BOOKMARKS_MAP_PROPERTY = "bookmarksMap";
-
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 	private final BookmarkButtonConfigurator buttonConfigurator;
@@ -19,7 +17,7 @@ public class BookmarksToolbarBuilder {
 	public BookmarksToolbarBuilder(ModeController modeController, BookmarksController bookmarksController) {
 		this.modeController = modeController;
 		this.bookmarksController = bookmarksController;
-		this.buttonConfigurator = new BookmarkButtonConfigurator(bookmarksController, modeController, this);
+		this.buttonConfigurator = new BookmarkButtonConfigurator(bookmarksController, modeController);
 	}
 
 	public void updateBookmarksToolbar(BookmarkToolbar toolbar, MapModel map, IMapSelection selection) {
@@ -29,7 +27,6 @@ public class BookmarksToolbarBuilder {
 			focusIndex = toolbar.getComponentIndex(focusOwner);
 		}
 		toolbar.removeAll();
-		toolbar.putClientProperty(BOOKMARKS_MAP_PROPERTY, map);
 
 		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
 		for (NodeBookmark bookmark : bookmarks) {
@@ -50,7 +47,7 @@ public class BookmarksToolbarBuilder {
 	}
 
 	private BookmarkButton createBookmarkButton(NodeBookmark bookmark, BookmarkToolbar toolbar, IMapSelection selection) {
-		final BookmarkButton button = new BookmarkButton(bookmark.getNode(), modeController);
+		final BookmarkButton button = new BookmarkButton(bookmark, modeController);
 		buttonConfigurator.configureButton(button, bookmark, toolbar, selection);
 		return button;
 	}

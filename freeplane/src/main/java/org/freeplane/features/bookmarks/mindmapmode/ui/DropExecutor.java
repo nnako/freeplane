@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.MapBookmarks;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
@@ -29,7 +28,7 @@ class DropExecutor {
 	}
 
 	void moveBookmark(int sourceIndex, int targetIndex) {
-		MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+		MapModel map = toolbar.getMap();
 		MapBookmarks bookmarks = bookmarksController.getBookmarks(map);
 		NodeBookmark bookmarkToMove = bookmarks.getBookmarks().get(sourceIndex);
 		SwingUtilities.invokeLater(() -> bookmarksController.moveBookmark(bookmarkToMove
@@ -62,7 +61,7 @@ class DropExecutor {
 				return false;
 			}
 
-			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			MapModel map = toolbar.getMap();
 			List<NodeBookmark> currentBookmarks = bookmarksController.getBookmarks(map).getBookmarks();
 			int insertionIndex = currentBookmarks.size();
 
@@ -80,7 +79,7 @@ class DropExecutor {
 				return false;
 			}
 
-			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			MapModel map = toolbar.getMap();
 			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
 
 		} catch (Exception e) {
@@ -96,7 +95,7 @@ class DropExecutor {
 			}
 
 			BookmarkToolbar toolbar = getToolbarFromEvent(dtde);
-			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			MapModel map = toolbar.getMap();
 			return bookmarksController.createBookmarkFromNode(draggedNode, map, insertionIndex);
 
 		} catch (Exception e) {
@@ -131,14 +130,14 @@ class DropExecutor {
 
 		NodeModel draggedNode = draggedNodes.get(0);
 		MapModel nodeMap = draggedNode.getMap();
-		MapModel toolbarMap = (MapModel) toolbar.getClientProperty("bookmarksMap");
-		
+		MapModel toolbarMap = toolbar.getMap();
+
 		return (nodeMap != null && nodeMap.equals(toolbarMap)) ? draggedNode : null;
 	}
 
 	private MapModel getMapFromButton(JButton targetButton) {
 		BookmarkToolbar toolbar = (BookmarkToolbar) targetButton.getParent();
-		return (MapModel) toolbar.getClientProperty("bookmarksMap");
+		return toolbar.getMap();
 	}
 
 	private int calculateInsertionIndex(NodeBookmark targetBookmark, boolean dropAfter, MapModel map) {

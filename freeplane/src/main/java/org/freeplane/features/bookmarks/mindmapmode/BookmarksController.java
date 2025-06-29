@@ -11,7 +11,6 @@ import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
 import org.freeplane.core.resources.ResourceController;
-import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
 import org.freeplane.features.icon.IStateIconProvider;
 import org.freeplane.features.icon.IconController;

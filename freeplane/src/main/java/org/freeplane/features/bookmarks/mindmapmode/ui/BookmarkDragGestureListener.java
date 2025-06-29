@@ -5,20 +5,19 @@ import java.awt.dnd.DragGestureListener;
 
 import javax.swing.JButton;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 
 class BookmarkDragGestureListener implements DragGestureListener {
-	private final JButton button;
+	private final BookmarkButton button;
 
-	public BookmarkDragGestureListener(JButton button) {
+	public BookmarkDragGestureListener(BookmarkButton button) {
 		this.button = button;
 	}
 
 	@Override
 	public void dragGestureRecognized(DragGestureEvent dge) {
 		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
-		NodeBookmark bookmark = (NodeBookmark) button.getClientProperty("bookmark");
+		NodeBookmark bookmark = button.getBookmark();
 
 		DragActionDetector.DragActionResult actionResult = DragActionDetector.detectDragAction(dge);
 

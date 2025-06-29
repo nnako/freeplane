@@ -4,8 +4,6 @@ import java.awt.Point;
 
 import javax.swing.JButton;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
-
 class DropValidator {
 	private final BookmarkIndexCalculator indexCalculator;
 

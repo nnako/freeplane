@@ -7,6 +7,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JToolTip;
 
+import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.ModeController;
@@ -14,11 +15,15 @@ import org.freeplane.view.swing.map.FreeplaneTooltip;
 
 @SuppressWarnings("serial")
 class BookmarkButton extends JButton {
-	private final NodeModel node;
+	private final NodeBookmark bookmark;
+	public NodeBookmark getBookmark() {
+		return bookmark;
+	}
+
 	private final ModeController modeController;
 
-	BookmarkButton(NodeModel node, ModeController modeController) {
-		this.node = node;
+	BookmarkButton(NodeBookmark bookmark, ModeController modeController) {
+		this.bookmark = bookmark;
 		this.modeController = modeController;
 		setOpaque(false);
 	}
@@ -30,13 +35,13 @@ class BookmarkButton extends JButton {
 
 	@Override
 	public String getToolTipText() {
-		return modeController.createToolTip(node, this, TooltipTrigger.LINK);
+		return modeController.createToolTip(bookmark.getNode(), this, TooltipTrigger.LINK);
 	}
 
 	private FreeplaneTooltip createBookmarkTooltip() {
 		FreeplaneTooltip tip = new FreeplaneTooltip(getGraphicsConfiguration(), FreeplaneTooltip.TEXT_HTML, false);
 		tip.setBorder(BorderFactory.createEmptyBorder());
-		final URL url = node.getMap().getURL();
+		final URL url = bookmark.getNode().getMap().getURL();
 		if (url != null) {
 			tip.setBase(url);
 		} else {
@@ -49,7 +54,7 @@ class BookmarkButton extends JButton {
 	}
 
 	NodeModel getNode() {
-		return node;
+		return bookmark.getNode();
 	}
 
 	public void clearVisualFeedback() {

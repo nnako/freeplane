@@ -29,6 +29,7 @@ import org.freeplane.features.filter.Filter;
 import org.freeplane.features.map.IMapChangeListener;
 import org.freeplane.features.map.INodeSelectionListener;
 import org.freeplane.features.map.MapChangeEvent;
+import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeDeletionEvent;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
@@ -115,7 +116,7 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
         	isBookmarksToolbarVisible = isMindMapEditor
         			&& viewController.isBookmarksToolbarVisible();
         	BookmarksController bookmarksController = mapView.getModeController().getExtension(BookmarksController.class);
-        	bookmarksToolbar = new BookmarkToolbar(bookmarksController);
+        	bookmarksToolbar = new BookmarkToolbar(bookmarksController, mapView.getMap());
         	bookmarksToolbar.setReducesButtonSize(false);
         	updateBookmarksToolbar();
         	bookmarksToolbar.setVisible(isBookmarksToolbarVisible);
@@ -170,7 +171,10 @@ public class MapViewPane extends JPanel implements IFreeplanePropertyListener, I
 		if(property.equals(MapView.class)) {
 			if (event.getOldValue() == mapView) {
 				event.getMap().removeMapChangeListener(this);
-				mapView.getMap().addMapChangeListener(this);
+				final MapModel map = mapView.getMap();
+				map.addMapChangeListener(this);
+				if(bookmarksToolbar != null)
+					bookmarksToolbar.setMap(map);
 			}
 			else
 				return;

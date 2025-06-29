@@ -1,14 +1,15 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
+import java.awt.Point;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.SwingUtilities;
 
-import org.freeplane.core.ui.components.FreeplaneToolBar;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
@@ -18,36 +19,38 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.NodeTooltipManager;
 
 class BookmarkButtonConfigurator {
-	private static final String BOOKMARK_CLIENT_PROPERTY = "bookmark";
-	
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
-	private final BookmarksToolbarBuilder toolbarBuilder;
 
-	BookmarkButtonConfigurator(BookmarksController bookmarksController, 
-									  ModeController modeController,
-									  BookmarksToolbarBuilder toolbarBuilder) {
+	BookmarkButtonConfigurator(BookmarksController bookmarksController,
+									  ModeController modeController) {
 		this.bookmarksController = bookmarksController;
 		this.modeController = modeController;
-		this.toolbarBuilder = toolbarBuilder;
 	}
 
-	void configureButton(BookmarkButton button, NodeBookmark bookmark, 
+	void configureButton(BookmarkButton button, NodeBookmark bookmark,
 								BookmarkToolbar toolbar, IMapSelection selection) {
 		final NodeBookmarkDescriptor descriptor = bookmark.getDescriptor();
 		final NodeModel node = bookmark.getNode();
-		
+
 		button.setText(descriptor.getName());
-		button.addActionListener(action -> bookmark.open());
-		button.putClientProperty(BOOKMARK_CLIENT_PROPERTY, bookmark);
+		button.addActionListener(this::applyAction);
 		button.putClientProperty(NodeTooltipManager.TOOLTIP_LOCATION_PROPERTY, NodeTooltipManager.TOOLTIP_LOCATION_ABOVE);
-		
+
 		registerTooltip(button);
 		setButtonIcon(button, node, descriptor);
 		setButtonEnabledState(button, node, selection);
 		setupDragAndDrop(button, toolbar);
-		setupClipboardActions(button, toolbar);
-		addMouseListener(button, bookmark);
+		setupActionMap(button, toolbar);
+		addMouseListener(button);
+	}
+
+	private void applyAction(ActionEvent action) {
+		final BookmarkButton button = (BookmarkButton) action.getSource();
+		if((action.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK)
+			showBookmarkPopupMenu(button, new Point(0, button.getHeight() - 1));
+		else
+			button.getBookmark().open();
 	}
 
 	private void registerTooltip(BookmarkButton button) {
@@ -66,33 +69,38 @@ class BookmarkButtonConfigurator {
 
 	private void setupDragAndDrop(BookmarkButton button, BookmarkToolbar toolbar) {
 		DragSource dragSource = DragSource.getDefaultDragSource();
-		dragSource.createDefaultDragGestureRecognizer(button, 
+		dragSource.createDefaultDragGestureRecognizer(button,
 			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE | DnDConstants.ACTION_LINK,
 			new BookmarkDragGestureListener(button));
 
-		DropTarget dropTarget = new DropTarget(button, 
-			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE, 
+		@SuppressWarnings("unused")
+		DropTarget dropTarget = new DropTarget(button,
+			DnDConstants.ACTION_COPY | DnDConstants.ACTION_MOVE,
 			new BookmarkDropTargetListener(toolbar, bookmarksController));
 	}
 
-	private void setupClipboardActions(BookmarkButton button, BookmarkToolbar toolbar) {
+	private void setupActionMap(BookmarkButton button, BookmarkToolbar toolbar) {
 		BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
 		clipboardHandler.setupButtonClipboardActions(button);
 	}
 
-	private void addMouseListener(BookmarkButton button, NodeBookmark bookmark) {
+	private void addMouseListener(BookmarkButton button) {
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if (SwingUtilities.isRightMouseButton(e)) {
-					showBookmarkPopupMenu(e, bookmark, button);
+					showBookmarkPopupMenu(e);
 				}
 			}
 		});
 	}
 
-	private void showBookmarkPopupMenu(MouseEvent e, NodeBookmark bookmark, BookmarkButton button) {
-		BookmarkPopupMenu popup = new BookmarkPopupMenu(bookmark, button, bookmarksController);
-		popup.show(button, e.getX(), e.getY());
+	private void showBookmarkPopupMenu(MouseEvent e) {
+		showBookmarkPopupMenu((BookmarkButton)e.getComponent(), e.getPoint());
 	}
-} 
+
+	private void showBookmarkPopupMenu(BookmarkButton button, Point point) {
+		BookmarkPopupMenu popup = new BookmarkPopupMenu(button.getBookmark(), bookmarksController);
+		popup.show(button, point.x, point.y);
+	}
+}

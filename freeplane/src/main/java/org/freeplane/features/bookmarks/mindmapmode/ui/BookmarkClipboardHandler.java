@@ -118,7 +118,7 @@ class BookmarkClipboardHandler {
 
 	private void copyBookmark(BookmarkButton button) {
 		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
-		NodeBookmark bookmark = (NodeBookmark) button.getClientProperty("bookmark");
+		NodeBookmark bookmark = button.getBookmark();
 		int sourceIndex = toolbar.getComponentIndex(button);
 
 		BookmarkTransferables.CombinedTransferable transferable =
@@ -135,7 +135,7 @@ class BookmarkClipboardHandler {
 		}
 
 		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
-		NodeBookmark targetBookmark = (NodeBookmark) button.getClientProperty("bookmark");
+		NodeBookmark targetBookmark = button.getBookmark();
 
 		if (clipboardContents.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
 			handleBookmarkPaste(clipboardContents, targetBookmark, false, toolbar);
@@ -163,7 +163,7 @@ class BookmarkClipboardHandler {
 			boolean pasteAfter, BookmarkToolbar toolbar) {
 		try {
 			int sourceIndex = (Integer) transferable.getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
-			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			MapModel map = toolbar.getMap();
 			int targetIndex = bookmarksController.findBookmarkPosition(
 				bookmarksController.getBookmarks(map).getBookmarks(), targetBookmark);
 			int insertionIndex = pasteAfter ? targetIndex + 1 : targetIndex;
@@ -177,7 +177,7 @@ class BookmarkClipboardHandler {
 	private void handleBookmarkPasteAtEnd(Transferable transferable, BookmarkToolbar toolbar) {
 		try {
 			int sourceIndex = (Integer) transferable.getTransferData(BookmarkTransferables.BOOKMARK_FLAVOR);
-			MapModel map = (MapModel) toolbar.getClientProperty("bookmarksMap");
+			MapModel map = toolbar.getMap();
 			int insertionIndex = bookmarksController.getBookmarks(map).getBookmarks().size();
 
 			dropExecutor.moveBookmark(sourceIndex, insertionIndex);

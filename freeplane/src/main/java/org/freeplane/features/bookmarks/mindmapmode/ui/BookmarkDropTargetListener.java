@@ -218,13 +218,13 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 		try {
 			NodeModel draggedNode = extractSingleNode(dtde);
-			
+
 			if (draggedNode == null) {
 				dtde.rejectDrop();
 				return;
 			}
 
-			NodeBookmark bookmark = (NodeBookmark) targetButton.getClientProperty("bookmark");
+			NodeBookmark bookmark = targetButton.getBookmark();
 			int dragActionType = getDropActionForDrop(dtde);
 
 			dtde.acceptDrop(dragActionType);
@@ -266,7 +266,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			}
 
 			BookmarkIndexCalculator.ToolbarDropPosition position = validator.calculateToolbarDropPosition(dropPoint);
-			
+
 			showToolbarDropFeedback(toolbar, position);
 			hoverTimer.cancelHoverTimer();
 
@@ -311,10 +311,10 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		int y = point.y;
 		int width = toolbar.getWidth();
 		int height = toolbar.getHeight();
-		
-		return x >= insets.left && 
-		       x < (width - insets.right) && 
-		       y >= insets.top && 
+
+		return x >= insets.left &&
+		       x < (width - insets.right) &&
+		       y >= insets.top &&
 		       y < (height - insets.bottom);
 	}
 
@@ -350,8 +350,8 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 		NodeModel draggedNode = draggedNodes.get(0);
 		MapModel nodeMap = draggedNode.getMap();
-		MapModel toolbarMap = (MapModel) toolbar.getClientProperty("bookmarksMap");
-		
+		MapModel toolbarMap = toolbar.getMap();
+
 		return (nodeMap != null && nodeMap.equals(toolbarMap)) ? draggedNode : null;
 	}
 
