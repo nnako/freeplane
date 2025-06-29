@@ -70,7 +70,9 @@ public class BookmarksController implements IExtension{
 
 			@Override
 			public void onSelect(NodeModel node) {
-				node.getMap().getExtension(MapBookmarks.class).onSelect(node);
+				MapBookmarks bookmarks = node.getMap().getExtension(MapBookmarks.class);
+				if(bookmarks != null)
+					bookmarks.onSelect(node);
 			}
 
 		});
