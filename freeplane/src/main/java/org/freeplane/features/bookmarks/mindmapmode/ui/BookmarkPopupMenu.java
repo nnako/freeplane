@@ -29,6 +29,7 @@ class BookmarkPopupMenu extends JPopupMenu {
 	private void buildMenu(NodeBookmark bookmark) {
 		addGotoNodeMenuItem(bookmark);
 		addOpenAsRootDirectMenuItem(bookmark);
+		addOpenAsNewViewRootMenuItem(bookmark);
 		addSeparator();
 		addRemoveMenuItem(bookmark);
 		addRenameMenuItem(bookmark);
@@ -44,6 +45,12 @@ class BookmarkPopupMenu extends JPopupMenu {
 	private void addOpenAsRootDirectMenuItem(NodeBookmark bookmark) {
 		JMenuItem openAsRootDirectItem = TranslatedElementFactory.createMenuItem("bookmark.open_as_root");
 		openAsRootDirectItem.addActionListener(e -> bookmark.open(true));
+		add(openAsRootDirectItem);
+	}
+
+	private void addOpenAsNewViewRootMenuItem(NodeBookmark bookmark) {
+		JMenuItem openAsRootDirectItem = TranslatedElementFactory.createMenuItem("bookmark.open_as_new_view_root");
+		openAsRootDirectItem.addActionListener(e -> bookmark.openAsNewView());
 		add(openAsRootDirectItem);
 	}
 

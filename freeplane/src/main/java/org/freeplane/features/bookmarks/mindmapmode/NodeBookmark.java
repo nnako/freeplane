@@ -79,5 +79,10 @@ public class NodeBookmark {
 		return descriptor.opensAsRoot();
 	}
 
-
+	public void openAsNewView() {
+		final Controller controller = Controller.getCurrentController();
+		final IMapViewManager mapViewManager = controller.getMapViewManager();
+		mapViewManager.newMapView(node.getMap(), controller.getModeController());
+		open(true);
+	}
 }
