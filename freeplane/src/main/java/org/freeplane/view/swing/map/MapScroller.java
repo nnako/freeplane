@@ -273,8 +273,10 @@ class MapScroller {
         }
 		if (scrolledNode != null && scrollingDirective != ScrollingDirective.MAKE_NODE_VISIBLE) {
 			if (node != scrolledNode) {
-				if (scrollingDirective == ScrollingDirective.SCROLL_TO_BEST_ROOT_POSITION && !node.isRoot())
-					scrollingDirective = ScrollingDirective.SCROLL_NODE_TO_CENTER;
+				if (scrollingDirective == ScrollingDirective.SCROLL_TO_BEST_ROOT_POSITION && !node.isRoot()) {
+					showsSelectedAfterScroll = true;
+					return;
+				}
 				scrollNode(node, scrollingDirective, false);
 			}
 			return;
@@ -334,14 +336,12 @@ class MapScroller {
 		}
 
 		if(scrollsNodeTreeToVisible) {
-			final NodeView scrolledNode2 = scrolledNode;
-			scrollNodeTreeToVisible(scrolledNode2, slowScroll);
+			scrollNodeTreeToVisible(scrolledNode, slowScroll);
 		}
         showSelectedAfterScroll();
-		final NodeView scrolledNode3 = scrolledNode;
-		if(scrolledNode3 != null &&
+		if(scrolledNode != null &&
 		        (scrollingDirective == ScrollingDirective.MAKE_NODE_VISIBLE))
-			scrollNodeToVisible(scrolledNode3, extraWidth);
+			scrollNodeToVisible(scrolledNode, extraWidth);
 		this.scrolledNode = null;
 		scrollingDirective = ScrollingDirective.DONE;
 		anchor = null;
