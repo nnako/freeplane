@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
+import javax.swing.LayoutFocusTraversalPolicy;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
@@ -25,8 +26,13 @@ import org.freeplane.core.ui.components.ToolbarLayout;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkIndexCalculator.ToolbarDropPosition.Type;
+import org.freeplane.features.map.MapModel;
 
 public class BookmarkToolbar extends FreeplaneToolBar {
+	private static final LayoutFocusTraversalPolicy FOCUS_TRAVERSAL_POLICY = new LayoutFocusTraversalPolicy();
+	static {
+		FOCUS_TRAVERSAL_POLICY.setImplicitDownCycleTraversal(false);
+	}
 	static final int GAP = (int) (10 * UITools.FONT_SCALE_FACTOR);
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("serial")
@@ -56,14 +62,18 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	private DropIndicatorType indicatorType = DropIndicatorType.NONE;
 	private final BookmarkClipboardHandler clipboardHandler;
 	private final DropExecutor dropExecutor;
+	private MapModel map;
 
-	public BookmarkToolbar(BookmarksController bookmarksController) {
+	public BookmarkToolbar(BookmarksController bookmarksController, MapModel map) {
 		super(SwingConstants.VERTICAL);
+		this.map = map;
     	ToolbarLayout layout = (ToolbarLayout) getLayout();
     	layout.setGap(GAP, true, false);
     	setDisablesFocus(false);
     	setFocusable(true);
     	setFocusCycleRoot(true);
+    	final LayoutFocusTraversalPolicy policy = FOCUS_TRAVERSAL_POLICY;
+		setFocusTraversalPolicy(policy);
     	addFocusMouseListener();
     	addFocusListener(new FocusListener() {
 
@@ -86,6 +96,18 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 				new BookmarkDropTargetListener(this, bookmarksController));
 
 		clipboardHandler.setupToolbarClipboardActions(this);
+	}
+
+
+
+	public MapModel getMap() {
+		return map;
+	}
+
+
+
+	public void setMap(MapModel map) {
+		this.map = map;
 	}
 
 	public BookmarkClipboardHandler getClipboardHandler() {
