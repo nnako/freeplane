@@ -39,7 +39,6 @@ class BookmarkButtonConfigurator {
 
 		registerTooltip(button);
 		setButtonIcon(button, node, descriptor);
-		setButtonEnabledState(button, node, selection);
 		setupDragAndDrop(button, toolbar);
 		setupActionMap(button, toolbar);
 		addMouseListener(button);
@@ -60,11 +59,6 @@ class BookmarkButtonConfigurator {
 
 	private void setButtonIcon(BookmarkButton button, NodeModel node, NodeBookmarkDescriptor descriptor) {
 		button.setIcon(BookmarkIconFactory.createIcon(node, descriptor));
-	}
-
-	private void setButtonEnabledState(BookmarkButton button, NodeModel node, IMapSelection selection) {
-		final boolean isVisible = node.isVisible(selection.getFilter());
-		button.setEnabled(isVisible);
 	}
 
 	private void setupDragAndDrop(BookmarkButton button, BookmarkToolbar toolbar) {

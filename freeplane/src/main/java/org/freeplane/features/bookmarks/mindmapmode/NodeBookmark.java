@@ -5,6 +5,9 @@
  */
 package org.freeplane.features.bookmarks.mindmapmode;
 
+import org.freeplane.features.filter.Filter;
+import org.freeplane.features.filter.FilterController;
+import org.freeplane.features.filter.hidden.NodeVisibility;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
@@ -49,11 +52,19 @@ public class NodeBookmark {
 		if(selectedNode.isRoot()){
 			selection.selectRoot();
 		}
-		else {
+		else if(! NodeVisibility.isHidden(selectedNode)){
+			final Filter filter = selection.getFilter();
+			if(! selectedNode.isVisible(filter)) {
+				FilterController.getController(controller).applyNoFiltering(node.getMap());
+			}
 			controller.getModeController().getMapController().displayNode(selectedNode);
 			selection.selectAsTheOnlyOneSelected(selectedNode);
 			selection.scrollNodeTreeToVisible(selectedNode, false);
 		}
+
+//		final boolean isVisible = node.isVisible(selection.getFilter());
+//		button.setEnabled(isVisible);
+
 	}
 
 	public void open() {

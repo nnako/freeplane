@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import javax.swing.Icon;
 
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
+import org.freeplane.features.filter.hidden.NodeVisibility;
 import org.freeplane.features.icon.factory.IconStoreFactory;
 import org.freeplane.features.map.IMapSelection;
 import org.freeplane.features.map.NodeModel;
@@ -15,6 +16,8 @@ class BookmarkIconFactory {
 	private static final Icon BOOKMARK_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmarkAsRoot.svg").getIcon();
 	private static final Icon SELECTED_ROOT_ICON = IconStoreFactory.ICON_STORE.getUIIcon("currentRoot.svg").getIcon();
 	private static final Icon SELECTED_SUBTREE_ICON = IconStoreFactory.ICON_STORE.getUIIcon("selectedSubtreeBookmark.svg").getIcon();
+	private static final Icon HIDDEN_ICON = IconStoreFactory.ICON_STORE.getUIIcon("hidden.svg").getIcon();
+	private static final Icon REMOVE_FILTER_ICON = IconStoreFactory.ICON_STORE.getUIIcon("bookmark-remove-filter.svg").getIcon();
 
 	static Icon createIcon(NodeModel node, NodeBookmarkDescriptor descriptor) {
 		if (descriptor.opensAsRoot()) {
@@ -23,7 +26,6 @@ class BookmarkIconFactory {
 			return new SubtreeBookmarkIcon(node);
 		}
 	}
-
 	private static class RootBookmarkIcon implements Icon {
 		private final NodeModel node;
 
@@ -62,15 +64,21 @@ class BookmarkIconFactory {
 
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y) {
-			if (isBookmarkSubtreeSelected(node)) {
+			if(NodeVisibility.isHidden(node)) {
+				HIDDEN_ICON.paintIcon(c, g, x, y);
+				return;
+			}
+			final IMapSelection selection = Controller.getCurrentController().getSelection();
+			if(! node.isVisible(selection.getFilter())) {
+				REMOVE_FILTER_ICON.paintIcon(c, g, x, y);
+				return;
+			}
+			final NodeModel selected = selection.getSelected();
+			final boolean isBookmarkSubtreeSelected = selected == node || selected.isDescendantOf(node);
+
+			if (isBookmarkSubtreeSelected) {
 				SELECTED_SUBTREE_ICON.paintIcon(c, g, x, y);
 			}
-		}
-
-		private boolean isBookmarkSubtreeSelected(final NodeModel node) {
-			final IMapSelection selection = Controller.getCurrentController().getSelection();
-			final NodeModel selected = selection.getSelected();
-			return selected == node || selected.isDescendantOf(node);
 		}
 
 		@Override
@@ -83,4 +91,4 @@ class BookmarkIconFactory {
 			return SELECTED_SUBTREE_ICON.getIconHeight();
 		}
 	}
-} 
+}

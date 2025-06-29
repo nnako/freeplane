@@ -30,7 +30,6 @@ import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.features.filter.condition.ICondition;
 import org.freeplane.features.filter.hidden.NodeVisibility;
-import org.freeplane.features.filter.hidden.NodeVisibilityConfiguration;
 import org.freeplane.features.link.ConnectorModel;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
@@ -229,7 +228,8 @@ public class Filter implements IExtension {
 	 * freeplane.controller.filter.Filter#isVisible(freeplane.modes.MindMapNode)
 	 */
 	public boolean isVisible(final NodeModel node) {
-		return filteredElement == FilteredElement.CONNECTOR || accepts(node);
+		return filteredElement == FilteredElement.CONNECTOR && ! NodeVisibility.isHidden(node)
+				|| accepts(node);
 	}
 
 	public boolean isVisible(final ConnectorModel connector) {
@@ -249,8 +249,7 @@ public class Filter implements IExtension {
     }
 
     private boolean accepts(final NodeModel node, int options) {
-        if(node.getExtension(NodeVisibility.class) == NodeVisibility.HIDDEN
-				&& node.getMap().getRootNode().getExtension(NodeVisibilityConfiguration.class) != NodeVisibilityConfiguration.SHOW_HIDDEN_NODES)
+        if(NodeVisibility.isHidden(node))
 			return false;
 		if (condition == null || node.isRoot()) {
 			return true;
@@ -258,7 +257,6 @@ public class Filter implements IExtension {
 		FilterInfo filterInfo = getFilterInfo(node);
         return filterInfo.isNotChecked() || filterInfo.matches(options);
     }
-
 
 	void resetFilter(final NodeModel node) {
 		getFilterInfo(node).reset();
@@ -356,4 +354,8 @@ public class Filter implements IExtension {
                 updateDescendantResults(child, options, callbackOnUpdate);
         }
     }
+
+	public void reset(NodeModel node) {
+		getFilterInfo(node).reset();
+	}
 }
