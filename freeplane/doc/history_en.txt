@@ -3,6 +3,8 @@
 ==============================
 Node bookmarks (Navigate->Bookmark node, pop-up->Bookmark node)
 Bookmark ordering by drag and drop
+Add copy/paste between the map and the bookmarks bar
+Add shortcut Control+Shift+B for switching between the bookmark bar and the map
 Introduce option Preferences…->Behaviour->Selection->Sync only on branch change
 Default behavior changes to full-depth synchronization
 Add Next / Previous map view navigation for same map with Ctrl+Shift+N shortcut
