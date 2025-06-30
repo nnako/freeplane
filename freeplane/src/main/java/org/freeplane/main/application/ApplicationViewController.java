@@ -93,6 +93,8 @@ class ApplicationViewController extends FrameController {
 		controller.addAction(navigationPreviousMap);
 		navigationNextMap = new NavigationNextMapAction();
 		controller.addAction(navigationNextMap);
+		controller.addAction(new NavigationMapNextViewAction());
+		controller.addAction(new NavigationMapPreviousViewAction());
 		resourceController = (ApplicationResourceController) ResourceController.getResourceController();
 		this.frame = frame;
 	}
@@ -417,7 +419,7 @@ class ApplicationViewController extends FrameController {
 
 	@Override
 	public Component getCurrentRootComponent() {
-		final Component mapViewComponent = controller.getMapViewManager().getMapViewComponent();
+		final Component mapViewComponent = selectedMapView();
 		return mapViewComponent != null ? SwingUtilities.getRoot(mapViewComponent) : frame;
 	}
 
@@ -429,5 +431,19 @@ class ApplicationViewController extends FrameController {
 	@Override
 	public List<? extends Component> getMapViewVector() {
 		return mapViewWindows != null ? mapViewWindows.getMapViewVector() : null;
+	}
+
+	@Override
+	public void openMapNextView() {
+		mapViewWindows.selectMapNextView(selectedMapView());
+	}
+
+	@Override
+	public void openMapPreviousView() {
+		mapViewWindows.selectMapPreviousView(selectedMapView());
+	}
+
+	private  JComponent selectedMapView() {
+		return controller.getMapViewManager().getMapViewComponent();
 	}
 }

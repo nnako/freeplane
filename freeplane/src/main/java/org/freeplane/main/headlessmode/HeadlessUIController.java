@@ -270,4 +270,14 @@ public class HeadlessUIController extends FrameController {
 	public void shutdown() {
 		executorService.shutdown();
 	}
+
+	@Override
+	public void openMapNextView() {
+		throw methodNotImplementedException();
+	}
+
+	@Override
+	public void openMapPreviousView() {
+		throw methodNotImplementedException();
+	}
 }

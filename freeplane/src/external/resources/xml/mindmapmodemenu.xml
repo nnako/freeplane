@@ -510,8 +510,10 @@
 			</Entry>
 		</Entry>
 		<Entry name="navigate" builder="menu_navigate">
-			<Entry name="NavigationPreviousMapAction" />
-			<Entry name="NavigationNextMapAction" />
+            <Entry name="NavigationPreviousMapAction" />
+            <Entry name="NavigationNextMapAction" />
+            <Entry name="NavigationMapPreviousViewAction" />
+            <Entry name="NavigationMapNextViewAction" accelerator = "control shift N"/>
 			<Entry builder="separator" />
 			<Entry name="SetBooleanPropertyAction.synchronizeSelectionAcrossVisibleViews" />
 			<Entry name="SetBooleanMapViewPropertyAction.folding_follows_selection" />

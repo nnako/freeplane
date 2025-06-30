@@ -144,4 +144,14 @@ class DialogController extends FrameController {
 	public Component getMenuComponent() {
 		return dialog;
 	}
+
+	@Override
+	public void openMapNextView() {
+		throw new RuntimeException("Method not implemented");
+	}
+
+	@Override
+	public void openMapPreviousView() {
+		throw new RuntimeException("Method not implemented");
+	}
 }

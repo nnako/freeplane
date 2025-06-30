@@ -65,6 +65,7 @@ import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.features.map.MapModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.url.mindmapmode.DroppedMindMapOpener;
@@ -746,5 +747,32 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		tabAreaComponentsProperties.getComponentProperties().setBackgroundColor(null);
 		tabAreaComponentsProperties.getComponentProperties().setForegroundColor(null);
 		return classicDockingTheme;
+	}
+
+	public void selectMapNextView(JComponent current) {
+	    selectMapViewRelative(current,  1);
+	}
+
+	public void selectMapPreviousView(JComponent current) {
+	    selectMapViewRelative(current, -1);
+	}
+
+	private void selectMapViewRelative(JComponent current, int step) {
+	    if (!(current instanceof MapView)) return;
+	    int currentIndex = mapViews.indexOf(current);
+	    if (currentIndex < 0) return;
+	    MapModel map = ((MapView) current).getMap();
+	    int n = mapViews.size();
+	    int idx = Math.floorMod(currentIndex + step, n);
+	    while (idx != currentIndex) {
+	        Component c = mapViews.get(idx);
+	        if (c instanceof MapView && ((MapView) c).getMap() == map) {
+	            Controller.getCurrentController()
+	                      .getMapViewManager()
+	                      .changeToMapView(c);
+	            return;
+	        }
+	        idx = Math.floorMod(idx + step, n);
+	    }
 	}
 }
