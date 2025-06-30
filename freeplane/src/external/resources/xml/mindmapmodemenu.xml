@@ -332,7 +332,7 @@
 				<Entry name="ToggleScrollbarsAction" />
 				<Entry name="ToggleMapOverviewAction" />
 				<Entry name="ToggleBookmarksToolbarAction" />
-				<Entry name="FocusBookmarkToolbarAction" />
+				<Entry name="FocusBookmarkToolbarAction" accelerator="control shift B"/>
 				<Entry name="ShowFormatPanel"/>
 			</Entry>
 			<Entry name="menu_viewmode" >
