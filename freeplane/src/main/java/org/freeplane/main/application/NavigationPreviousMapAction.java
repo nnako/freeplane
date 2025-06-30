@@ -26,13 +26,12 @@ import org.freeplane.features.mode.Controller;
 
 class NavigationPreviousMapAction extends AFreeplaneAction {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
 	NavigationPreviousMapAction() {
 		super("NavigationPreviousMapAction");
-		setEnabled(false);
 	}
 
 	public void actionPerformed(final ActionEvent event) {

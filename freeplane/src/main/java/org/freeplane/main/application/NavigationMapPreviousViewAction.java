@@ -32,7 +32,6 @@ class NavigationMapPreviousViewAction extends AFreeplaneAction {
 
 	NavigationMapPreviousViewAction() {
 		super("NavigationMapPreviousViewAction");
-		setEnabled(false);
 	}
 
 	public void actionPerformed(final ActionEvent event) {
