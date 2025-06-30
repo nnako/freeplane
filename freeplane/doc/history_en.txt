@@ -3,6 +3,8 @@
 ==============================
 Node bookmarks (Navigate->Bookmark node, pop-up->Bookmark node)
 Bookmark ordering by drag and drop
+Introduce option Preferences…->Behaviour->Selection->Sync only on branch change
+Default behavior changes to full-depth synchronization
 Improve auto-scroll
 Bug fixes
 

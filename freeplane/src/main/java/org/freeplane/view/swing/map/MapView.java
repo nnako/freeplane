@@ -161,6 +161,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     private static final int ROOT_NODE_COMPONENT_INDEX = 0;
 	private static final String UNFOLD_ON_NAVIGATION = "unfold_on_navigation";
 	private static final String SYNCHRONIZE_SELECTION_ACROSS_VISIBLE_VIEWS_PROPERTY = "synchronizeSelectionAcrossVisibleViews";
+	private static final String SYNCHRONIZE_SELECTION_ONLY_ON_BRANCH_CHANGE = "synchronizeSelectionOnlyOnBranchChange";
 	private static final String SHOW_TAGS_ON_MINIMIZED_NODES_PROPERTY = "showTagsOnMinimizedNodes";
 
     private static final BasicStroke SELECTION_RECTANGLE_STROKE = new BasicStroke(2.0f * UITools.FONT_SCALE_FACTOR, BasicStroke.CAP_BUTT,
@@ -1429,6 +1430,12 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         return ResourceController.getResourceController().getBooleanProperty(SYNCHRONIZE_SELECTION_ACROSS_VISIBLE_VIEWS_PROPERTY);
     }
 
+    boolean synchronizesSelectionOnlyOnBranchChange() {
+        return ResourceController.getResourceController().getBooleanProperty(SYNCHRONIZE_SELECTION_ONLY_ON_BRANCH_CHANGE);
+    }
+
+
+
 	public int getSiblingMaxLevel() {
 		return siblingMaxLevel;
 	}
@@ -1693,7 +1700,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         NodeModel node = mainSelection.getSelected();
         NodeView selectedNodeView = getSelected();
         NodeModel selectedNode = selectedNodeView.getNode();
-        if(selectedNode.equals(node) || selectedNode.isDescendantOf(node))
+        if(selectedNode.equals(node) || synchronizesSelectionOnlyOnBranchChange() && selectedNode.isDescendantOf(node))
             return;
         NodeModel anotherMapViewRootNode = getRoot().getNode();
         if(anotherMapViewRootNode != node && ! node.isDescendantOf(anotherMapViewRootNode))
