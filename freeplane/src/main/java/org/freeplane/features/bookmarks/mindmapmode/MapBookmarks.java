@@ -206,7 +206,7 @@ public class MapBookmarks implements IExtension {
 	void onSelect(NodeModel node) {
 		final IMapSelection selection = Controller.getCurrentController().getSelection();
 		final String rootId = selection.getSelectionRoot().getID();
-		final String nodeId = node.getID();
+		final String nodeId = node.createID();
 		selectedNodesBySelectionRoot.put(rootId, nodeId);
 	}
 
