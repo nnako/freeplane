@@ -1,13 +1,16 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
-import java.awt.Point;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
@@ -47,7 +50,7 @@ class BookmarkButtonConfigurator {
 	private void applyAction(ActionEvent action) {
 		final BookmarkButton button = (BookmarkButton) action.getSource();
 		if((action.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK)
-			showBookmarkPopupMenu(button, new Point(0, button.getHeight() - 1));
+			showBookmarkPopupMenu(button);
 		else
 			button.getBookmark().open();
 	}
@@ -76,6 +79,18 @@ class BookmarkButtonConfigurator {
 	private void setupActionMap(BookmarkButton button, BookmarkToolbar toolbar) {
 		BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
 		clipboardHandler.setupButtonClipboardActions(button);
+		
+		Action showContextMenuAction = new AbstractAction("showContextMenu") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showBookmarkPopupMenu(button);
+			}
+		};
+		
+		button.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "showContextMenu");
+		button.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, KeyEvent.CTRL_DOWN_MASK), "showContextMenu");
+		
+		button.getActionMap().put("showContextMenu", showContextMenuAction);
 	}
 
 	private void addMouseListener(BookmarkButton button) {
@@ -83,18 +98,14 @@ class BookmarkButtonConfigurator {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if (SwingUtilities.isRightMouseButton(e)) {
-					showBookmarkPopupMenu(e);
+					showBookmarkPopupMenu(button);
 				}
 			}
 		});
 	}
-
-	private void showBookmarkPopupMenu(MouseEvent e) {
-		showBookmarkPopupMenu((BookmarkButton)e.getComponent(), e.getPoint());
-	}
-
-	private void showBookmarkPopupMenu(BookmarkButton button, Point point) {
+	private void showBookmarkPopupMenu(BookmarkButton button) {
 		BookmarkPopupMenu popup = new BookmarkPopupMenu(button.getBookmark(), bookmarksController);
-		popup.show(button, point.x, point.y);
+		int menuHeight = popup.getPreferredSize().height;
+		popup.show(button, 0, -menuHeight);
 	}
 }
