@@ -5,6 +5,7 @@ Node bookmarks (Navigate->Bookmark node, pop-up->Bookmark node)
 Bookmark ordering by drag and drop
 Introduce option Preferences…->Behaviour->Selection->Sync only on branch change
 Default behavior changes to full-depth synchronization
+Add Next / Previous map view navigation for same map with Ctrl+Shift+N shortcut
 Improve auto-scroll
 Bug fixes
 
