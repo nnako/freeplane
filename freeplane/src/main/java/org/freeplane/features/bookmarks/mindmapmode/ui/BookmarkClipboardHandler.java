@@ -4,6 +4,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.Component;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -121,7 +122,11 @@ class BookmarkClipboardHandler {
 	}
 
 	private void copyBookmark(BookmarkButton button) {
-		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
+		Component parent = button.getParent();
+		if (!(parent instanceof BookmarkToolbar)) {
+			return;
+		}
+		BookmarkToolbar toolbar = (BookmarkToolbar) parent;
 		NodeBookmark bookmark = button.getBookmark();
 		int sourceIndex = toolbar.getComponentIndex(button);
 
@@ -138,14 +143,17 @@ class BookmarkClipboardHandler {
 			return;
 		}
 
-		BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
+		Component parent = button.getParent();
+		if (!(parent instanceof BookmarkToolbar)) {
+			return;
+		}
+		BookmarkToolbar toolbar = (BookmarkToolbar) parent;
 		NodeBookmark targetBookmark = button.getBookmark();
 
 		if (clipboardContents.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
 			handleBookmarkPaste(clipboardContents, targetBookmark, false, toolbar);
 		} else if (clipboardContents.isDataFlavorSupported(
 				org.freeplane.features.map.clipboard.MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
-			// Add nodes as children to the bookmarked node instead of creating new bookmarks
 			NodeModel targetNode = targetBookmark.getNode();
 			((MMapClipboardController) MapClipboardController.getController()).paste(clipboardContents, targetNode, Side.BOTTOM_OR_RIGHT);
 		}

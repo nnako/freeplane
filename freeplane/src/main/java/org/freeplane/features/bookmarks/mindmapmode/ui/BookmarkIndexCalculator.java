@@ -13,7 +13,13 @@ class BookmarkIndexCalculator {
 	}
 
 	int calculateBookmarkMoveIndex(int sourceIndex, JButton targetButton, Point dropPoint) {
-		int targetIndex = toolbar.getComponentIndex(targetButton);
+		if (!(targetButton instanceof BookmarkButton)) {
+			return -1; // Invalid for non-BookmarkButton components
+		}
+		int targetIndex = getBookmarkButtonIndex(targetButton);
+		if (targetIndex < 0) {
+			return -1; // Invalid if button not found
+		}
 		boolean movesAfter = isDropAfter(targetButton, dropPoint);
 
 		return movesAfter ? (sourceIndex < targetIndex ? targetIndex : targetIndex + 1)
@@ -21,13 +27,17 @@ class BookmarkIndexCalculator {
 	}
 
 	boolean isValidBookmarkMove(int sourceIndex, JButton targetButton, Point dropPoint) {
-		BookmarkToolbar targetToolbar = (BookmarkToolbar) targetButton.getParent();
-		if (targetToolbar != toolbar) {
+		if (!(targetButton instanceof BookmarkButton)) {
+			return false; // Invalid for non-BookmarkButton components
+		}
+		
+		Component parent = targetButton.getParent();
+		if (!(parent instanceof BookmarkToolbar) || parent != toolbar) {
 			return false;
 		}
 
-		int targetIndex = targetToolbar.getComponentIndex(targetButton);
-		if (targetIndex == sourceIndex) {
+		int targetIndex = getBookmarkButtonIndex(targetButton);
+		if (targetIndex < 0 || targetIndex == sourceIndex) {
 			return false;
 		}
 
@@ -36,7 +46,7 @@ class BookmarkIndexCalculator {
 		}
 
 		int finalTargetIndex = calculateBookmarkMoveIndex(sourceIndex, targetButton, dropPoint);
-		return sourceIndex != finalTargetIndex;
+		return finalTargetIndex >= 0 && sourceIndex != finalTargetIndex;
 	}
 
 	boolean isInInsertionZone(JButton targetButton, Point dropPoint) {
@@ -60,8 +70,10 @@ class BookmarkIndexCalculator {
 				BookmarkButton button = (BookmarkButton) component;
 				int buttonLeft = button.getX();
 				if (dropPoint.x >= buttonLeft - BookmarkToolbar.GAP && dropPoint.x <= buttonLeft + BookmarkToolbar.GAP) {
-					int buttonIndex = toolbar.getComponentIndex(component);
-					return new ToolbarDropPosition(ToolbarDropPosition.Type.BEFORE_BUTTON, buttonIndex);
+					int buttonIndex = getBookmarkButtonIndex(component);
+					if (buttonIndex >= 0) {
+						return new ToolbarDropPosition(ToolbarDropPosition.Type.BEFORE_BUTTON, buttonIndex);
+					}
 				}
 			}
 		}
@@ -72,14 +84,40 @@ class BookmarkIndexCalculator {
 				BookmarkButton button = (BookmarkButton) component;
 				int buttonRight = button.getX() + button.getWidth();
 				if (dropPoint.x >= buttonRight - BookmarkToolbar.GAP && dropPoint.x <= buttonRight + BookmarkToolbar.GAP) {
-					int buttonIndex = toolbar.getComponentIndex(component);
-					return new ToolbarDropPosition(ToolbarDropPosition.Type.AFTER_BUTTON, buttonIndex);
+					int buttonIndex = getBookmarkButtonIndex(component);
+					if (buttonIndex >= 0) {
+						return new ToolbarDropPosition(ToolbarDropPosition.Type.AFTER_BUTTON, buttonIndex);
+					}
 				}
 			}
 		}
 		
 		// Default: at the end
-		return new ToolbarDropPosition(ToolbarDropPosition.Type.AT_END, components.length);
+		return new ToolbarDropPosition(ToolbarDropPosition.Type.AT_END, getBookmarkButtonCount());
+	}
+
+	private int getBookmarkButtonIndex(Component component) {
+		int bookmarkIndex = 0;
+		for (int i = 0; i < toolbar.getComponentCount(); i++) {
+			Component comp = toolbar.getComponent(i);
+			if (comp == component) {
+				return bookmarkIndex;
+			}
+			if (comp instanceof BookmarkButton) {
+				bookmarkIndex++;
+			}
+		}
+		return -1;
+	}
+
+	private int getBookmarkButtonCount() {
+		int count = 0;
+		for (Component component : toolbar.getComponents()) {
+			if (component instanceof BookmarkButton) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	static class ToolbarDropPosition {

@@ -115,7 +115,11 @@ class DropExecutor {
 		} else if (component instanceof BookmarkButton) {
 			return (BookmarkToolbar) component.getParent();
 		}
-		throw new IllegalArgumentException("Event target is neither BookmarkToolbar nor BookmarkButton");
+		Component parent = component.getParent();
+		if (parent instanceof BookmarkToolbar) {
+			return (BookmarkToolbar) parent;
+		}
+		throw new IllegalArgumentException("Event target is not associated with a BookmarkToolbar");
 	}
 
 	private NodeModel extractSingleNode(Transferable transferable, BookmarkToolbar toolbar) throws Exception {

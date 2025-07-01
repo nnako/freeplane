@@ -2,7 +2,12 @@ package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.util.List;
+import javax.swing.JButton;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.IMapSelection;
@@ -26,6 +31,7 @@ public class BookmarksToolbarBuilder {
 		if(focusOwner != null && focusOwner.getParent() == toolbar) {
 			focusIndex = toolbar.getComponentIndex(focusOwner);
 		}
+		
 		toolbar.removeAll();
 
 		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
@@ -34,13 +40,33 @@ public class BookmarksToolbarBuilder {
 			toolbar.add(button);
 			button.setFocusable(true);
 		}
+		
+		JButton testButton = new JButton("special action 1");
+		testButton.setFocusable(true);
+		testButton.addActionListener(e -> System.out.println("Test button clicked!"));
+		
+		buttonConfigurator.configureNonBookmarkComponent(testButton);
+		
+		toolbar.add(testButton);
+		
 		if(focusIndex >= 0) {
 			final int componentCount = toolbar.getComponentCount();
 			if(componentCount > focusIndex) {
-				toolbar.getComponent(focusIndex).requestFocusInWindow();
+				Component component = toolbar.getComponent(focusIndex);
+				if (component.isFocusable()) {
+					component.requestFocusInWindow();
+				}
 			}
-			else if(componentCount > 0)
-				toolbar.getComponent(componentCount - 1).requestFocusInWindow();
+			else if(componentCount > 0) {
+				// Find the last focusable component
+				for (int i = componentCount - 1; i >= 0; i--) {
+					Component component = toolbar.getComponent(i);
+					if (component.isFocusable()) {
+						component.requestFocusInWindow();
+						break;
+					}
+				}
+			}
 		}
 		toolbar.revalidate();
 		toolbar.repaint();

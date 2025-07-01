@@ -298,7 +298,11 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		} else if (component instanceof BookmarkButton) {
 			return (BookmarkToolbar) component.getParent();
 		}
-		throw new IllegalArgumentException("Event target is neither BookmarkToolbar nor BookmarkButton");
+		Component parent = component.getParent();
+		if (parent instanceof BookmarkToolbar) {
+			return (BookmarkToolbar) parent;
+		}
+		throw new IllegalArgumentException("Event target is not associated with a BookmarkToolbar");
 	}
 
 	private NodeModel extractSingleNode(Transferable transferable, BookmarkToolbar toolbar) throws Exception {
@@ -322,18 +326,23 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		switch (position.type) {
 			case BEFORE_BUTTON:
 				if (position.buttonIndex < toolbar.getComponentCount()) {
-					BookmarkButton button = (BookmarkButton) toolbar.getComponent(position.buttonIndex);
-					button.showDropZoneIndicator(false); // before
+					Component component = toolbar.getComponent(position.buttonIndex);
+					if (component instanceof BookmarkButton) {
+						BookmarkButton button = (BookmarkButton) component;
+						button.showFeedback(BookmarkToolbar.DropIndicatorType.DROP_BEFORE);
+					}
 				}
 				break;
 			case AFTER_BUTTON:
 				if (position.buttonIndex < toolbar.getComponentCount()) {
-					BookmarkButton button = (BookmarkButton) toolbar.getComponent(position.buttonIndex);
-					button.showDropZoneIndicator(true); // after
+					Component component = toolbar.getComponent(position.buttonIndex);
+					if (component instanceof BookmarkButton) {
+						BookmarkButton button = (BookmarkButton) component;
+						button.showFeedback(BookmarkToolbar.DropIndicatorType.DROP_AFTER);
+					}
 				}
 				break;
 			case AT_END:
-			default:
 				toolbar.showEndDropIndicator();
 				break;
 		}

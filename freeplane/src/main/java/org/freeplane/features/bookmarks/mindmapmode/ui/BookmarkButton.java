@@ -13,6 +13,8 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.FreeplaneTooltip;
 
+import java.awt.Component;
+
 @SuppressWarnings("serial")
 class BookmarkButton extends JButton {
 	private final NodeBookmark bookmark;
@@ -79,6 +81,7 @@ class BookmarkButton extends JButton {
 	}
 
 	private BookmarkToolbar getBookmarkToolbar() {
-		return (BookmarkToolbar) getParent();
+		Component parent = getParent();
+		return (parent instanceof BookmarkToolbar) ? (BookmarkToolbar) parent : null;
 	}
 }

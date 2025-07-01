@@ -1,8 +1,11 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
+import java.awt.Component;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -45,6 +48,15 @@ class BookmarkButtonConfigurator {
 		setupDragAndDrop(button, toolbar);
 		setupActionMap(button, toolbar);
 		addMouseListener(button);
+	}
+
+	void configureNonBookmarkComponent(Component component) {
+		new DropTarget(component, DnDConstants.ACTION_NONE, new DropTargetAdapter() {
+			@Override
+			public void drop(DropTargetDropEvent dtde) {
+				dtde.rejectDrop();
+			}
+		});
 	}
 
 	private void applyAction(ActionEvent action) {
