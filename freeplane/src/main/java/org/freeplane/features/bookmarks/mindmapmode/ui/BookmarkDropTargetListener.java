@@ -16,10 +16,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
-import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.NodeModel.Side;
+import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 import org.freeplane.features.map.MapModel;
+import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
+import org.freeplane.view.swing.ui.NodeDropUtils;
 
 class BookmarkDropTargetListener extends DropTargetAdapter {
 	private final DropValidator validator;
@@ -101,43 +104,23 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 				return;
 			}
 
-			Point dropPoint = dtde.getLocation();
-			DropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
-
-			if (!validation.isValid) {
+			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
+			if (!NodeDropUtils.isDragAcceptable(dtde, targetButton.getBookmark().getNode()) ||
+				!NodeDropUtils.isDropAcceptable(dtde.getTransferable(), targetButton.getBookmark().getNode(), dragActionType)) {
 				dtde.rejectDrag();
 				targetButton.clearVisualFeedback();
 				return;
 			}
 
-			int dragActionType = getDropAction(dtde);
 			dtde.acceptDrag(dragActionType);
 
-			if (validation.isInsertionDrop) {
-				targetButton.showDropZoneIndicator(validation.dropsAfter);
-				hoverTimer.cancelHoverTimer();
-			} else {
-				targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
-				hoverTimer.startHoverTimer(targetButton);
-			}
+			targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
+			hoverTimer.startHoverTimer(targetButton);
 
 		} catch (Exception e) {
 			dtde.rejectDrag();
 			targetButton.clearVisualFeedback();
 		}
-	}
-
-	private int getDropAction(final DropTargetDragEvent dtde) {
-		int dropAction = dtde.getDropAction();
-		final Transferable t = dtde.getTransferable();
-
-		if (t.isDataFlavorSupported(MindMapNodesSelection.dropCopyActionFlavor)) {
-			dropAction = DnDConstants.ACTION_COPY;
-		} else if (t.isDataFlavorSupported(MindMapNodesSelection.dropLinkActionFlavor)) {
-			dropAction = DnDConstants.ACTION_LINK;
-		}
-
-		return dropAction;
 	}
 
 	@Override
@@ -208,47 +191,27 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 	}
 
 	private void handleNodeDrop(DropTargetDropEvent dtde, BookmarkButton targetButton) {
-		Point dropPoint = dtde.getLocation();
-		DropValidation validation = validator.validateNodeDrop(targetButton, dropPoint);
-
-		if (!validation.isValid) {
-			dtde.rejectDrop();
-			return;
-		}
-
 		try {
-			NodeModel draggedNode = extractSingleNode(dtde);
+			final NodeModel targetNode = targetButton.getBookmark().getNode();
+			int dropAction = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
+			final Transferable t = dtde.getTransferable();
 
-			if (draggedNode == null) {
+			if (!NodeDropUtils.isDropAcceptable(dtde, targetNode, dropAction)) {
 				dtde.rejectDrop();
 				return;
 			}
 
-			NodeBookmark bookmark = targetButton.getBookmark();
-			int dragActionType = getDropActionForDrop(dtde);
-
-			dtde.acceptDrop(dragActionType);
-
-			boolean dropAfter = validation.isInsertionDrop ? validation.dropsAfter : true;
-			boolean success = executor.createBookmarkFromNode(dtde.getTransferable(), bookmark, dropAfter, targetButton);
-
-			dtde.dropComplete(success);
+			if (!dtde.isLocalTransfer()) {
+				dtde.acceptDrop(DnDConstants.ACTION_COPY);
+				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, Side.BOTTOM_OR_RIGHT, dropAction);
+			} else {
+				dtde.acceptDrop(dropAction);
+				NodeDropUtils.handleNodeDrop(t, targetNode, dropAction);
+			}
+			dtde.dropComplete(true);
 		} catch (Exception e) {
 			dtde.rejectDrop();
 		}
-	}
-
-	private int getDropActionForDrop(final DropTargetDropEvent dtde) {
-		int dropAction = dtde.getDropAction();
-		final Transferable t = dtde.getTransferable();
-
-		if (t.isDataFlavorSupported(MindMapNodesSelection.dropCopyActionFlavor)) {
-			dropAction = DnDConstants.ACTION_COPY;
-		} else if (t.isDataFlavorSupported(MindMapNodesSelection.dropLinkActionFlavor)) {
-			dropAction = DnDConstants.ACTION_LINK;
-		}
-
-		return dropAction;
 	}
 
 	private void handleNodeDragOverToolbar(DropTargetDragEvent dtde, BookmarkToolbar toolbar) {
@@ -270,7 +233,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			showToolbarDropFeedback(toolbar, position);
 			hoverTimer.cancelHoverTimer();
 
-			int dragActionType = getDropAction(dtde);
+			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
 			dtde.acceptDrag(dragActionType);
 
 		} catch (Exception e) {
@@ -295,7 +258,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 			BookmarkIndexCalculator.ToolbarDropPosition position = validator.calculateToolbarDropPosition(dropPoint);
 
-			int dragActionType = getDropActionForDrop(dtde);
+			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
 			dtde.acceptDrop(dragActionType);
 
 			boolean success = executor.createBookmarkFromNodeAtPosition(dtde, position.getInsertionIndex());

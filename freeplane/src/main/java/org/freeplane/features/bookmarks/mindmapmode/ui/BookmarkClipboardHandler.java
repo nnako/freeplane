@@ -15,6 +15,10 @@ import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.clipboard.ClipboardAccessor;
 import org.freeplane.features.map.MapModel;
+import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.NodeModel.Side;
+import org.freeplane.features.map.clipboard.MapClipboardController;
+import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 
 class BookmarkClipboardHandler {
 	private static final String COPY_ACTION_KEY = "bookmarkCopy";
@@ -141,7 +145,9 @@ class BookmarkClipboardHandler {
 			handleBookmarkPaste(clipboardContents, targetBookmark, false, toolbar);
 		} else if (clipboardContents.isDataFlavorSupported(
 				org.freeplane.features.map.clipboard.MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
-			dropExecutor.createBookmarkFromNode(clipboardContents, targetBookmark, false, button);
+			// Add nodes as children to the bookmarked node instead of creating new bookmarks
+			NodeModel targetNode = targetBookmark.getNode();
+			((MMapClipboardController) MapClipboardController.getController()).paste(clipboardContents, targetNode, Side.BOTTOM_OR_RIGHT);
 		}
 	}
 

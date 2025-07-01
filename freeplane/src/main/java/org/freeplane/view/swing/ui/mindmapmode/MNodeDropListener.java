@@ -72,6 +72,7 @@ import org.freeplane.view.swing.map.MapViewIconListComponent;
 import org.freeplane.view.swing.map.NodeView;
 import org.freeplane.view.swing.map.NodeViewFolder;
 import org.freeplane.view.swing.ui.MouseEventActor;
+import org.freeplane.view.swing.ui.NodeDropUtils;
 
 public class MNodeDropListener implements DropTargetListener {
 
@@ -186,96 +187,14 @@ public class MNodeDropListener implements DropTargetListener {
 	}
 
 	private boolean isDragAcceptable(final DropTargetDragEvent event) {
-		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
-		if(containsTags) {
-			try {
-				NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
-				List<Tag> nodeTags = nodeView.getMap().getModeController().getExtension(IconController.class).getTags(nodeView.getNode());
-				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
-				Tag tag = TagCategories.readTag(tagData);
-				if(nodeTags.contains(tag))
-					return false;
-			} catch (IOException | UnsupportedFlavorException e) {
-				return false;
-			}
-		}
-		if(event.getDropTargetContext().getComponent() instanceof MainView)
-			return event.isDataFlavorSupported(DataFlavor.stringFlavor)
-				||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
-				||event.isDataFlavorSupported(DataFlavor.imageFlavor);
-		else
-			return containsTags;
+		NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
+		return NodeDropUtils.isDragAcceptable(event, nodeView.getNode());
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event, int dropAction) {
-		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
-		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && ! containsTags) {
-			return false;
-		}
-		if (!event.isLocalTransfer())
-			return true;
-		if(containsTags) {
-			try {
-				NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
-				List<Tag> nodeTags = nodeView.getMap().getModeController().getExtension(IconController.class).getTags(nodeView.getNode());
-				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
-				Tag tag = TagCategories.readTag(tagData);
-				if(nodeTags.contains(tag))
-					return false;
-			} catch (IOException | UnsupportedFlavorException e) {
-				return false;
-			}
-		}
-
-		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
-			 return dropAction != DnDConstants.ACTION_LINK;
-		final List<NodeModel> droppedNodes;
-		try {
-			final Transferable t = event.getTransferable();
-			droppedNodes = getNodeObjects(t);
-		}
-		catch (Exception e) {
-			return dropAction != DnDConstants.ACTION_LINK;
-		}
 		final NodeModel node = getMainView(event.getDropTargetContext()).getNodeView().getNode();
-		if (dropAction == DnDConstants.ACTION_LINK) {
-			return areFromSameMap(node, droppedNodes);
-		}
-
-		if (dropAction == DnDConstants.ACTION_MOVE) {
-			return !isFromDescencantNode(node, droppedNodes);
-		}
-		return ! droppedNodesContainTargetNode(node, droppedNodes);
+		return NodeDropUtils.isDropAcceptable(event, node, dropAction);
 	}
-
-	private boolean droppedNodesContainTargetNode(final NodeModel targetNode, final List<NodeModel> droppedNodes) {
-		for (final NodeModel selected : droppedNodes) {
-			if (targetNode == selected)
-				return true;
-		}
-		return false;
-	}
-
-	private boolean areFromSameMap(final NodeModel targetNode, final Collection<NodeModel> droppedNodes) {
-		for (final NodeModel selected : droppedNodes) {
-			if (selected.getMap() != targetNode.getMap())
-				return false;
-		}
-		return true;
-	}
-
-	private boolean isFromDescencantNode(final NodeModel targetNode, final List<NodeModel> droppedNodes) {
-		for (final NodeModel selected : droppedNodes) {
-			if ((targetNode == selected) || targetNode.isDescendantOf(selected))
-				return true;
-		}
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<NodeModel> getNodeObjects(final Transferable t) throws UnsupportedFlavorException, IOException {
-	    return (List<NodeModel>) t.getTransferData(MindMapNodesSelection.mindMapNodeObjectsFlavor);
-    }
 
 	@Override
 	public void drop(final DropTargetDropEvent dtde) {
@@ -286,7 +205,7 @@ public class MNodeDropListener implements DropTargetListener {
 			mapView.select();
 			final NodeModel targetNode = targetNodeView.getNode();
 			final Controller controller = Controller.getCurrentController();
-			int dropAction = getDropAction(dtde);
+			int dropAction = NodeDropUtils.getDropAction(dtde);
 			final Transferable t = dtde.getTransferable();
 			mainView.stopDragOver();
 			mainView.repaint();
@@ -330,17 +249,17 @@ public class MNodeDropListener implements DropTargetListener {
 					        + " links to the same node", JOptionPane.YES_NO_OPTION);
 				}
 				if (yesorno == JOptionPane.YES_OPTION) {
-					for (final NodeModel sourceNodeModel : getNodeObjects(t)) {
+									for (final NodeModel sourceNodeModel : NodeDropUtils.getNodeObjects(t)) {
 
-						((MLinkController) LinkController.getController(modeController)).addConnector(
-						    sourceNodeModel, targetNode);
-					}
+					((MLinkController) LinkController.getController(modeController)).addConnector(
+					    sourceNodeModel, targetNode);
+				}
 				}
 			}
 			else {
 				if (DnDConstants.ACTION_MOVE == dropAction
 						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-						&& areFromSameMap(targetNode, getNodeObjects(t))) {
+						&& NodeDropUtils.areFromSameMap(targetNode, NodeDropUtils.getNodeObjects(t))) {
 					final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
 					final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
 					moveNodes(mapController, targetNode, t, insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD), isTopOrLeft);
@@ -388,22 +307,9 @@ public class MNodeDropListener implements DropTargetListener {
 		nodeFolder.reset();
 	}
 
-	private int getDropAction(final DropTargetDropEvent dtde) {
-		int dropAction = dtde.getDropAction();
-		final Transferable t = dtde.getTransferable();
-		if (t.isDataFlavorSupported(MindMapNodesSelection.dropCopyActionFlavor)) {
-			dropAction = DnDConstants.ACTION_COPY;
-		}
-		else if (t.isDataFlavorSupported(MindMapNodesSelection.dropLinkActionFlavor)) {
-			dropAction = DnDConstants.ACTION_LINK;
-		}
-
-		return dropAction;
-	}
-
 	private void moveNodes(final MMapController mapController, final NodeModel targetNode, Transferable t,
 			InsertionRelation insertionRelation, final boolean isTopOrLeft) throws UnsupportedFlavorException, IOException{
-		final List<NodeModel> movedNodes = getNodeObjects(t);
+		final List<NodeModel> movedNodes = NodeDropUtils.getNodeObjects(t);
 		MouseEventActor.INSTANCE.withMouseEvent( () -> {
 			if (insertionRelation != InsertionRelation.AS_CHILD) {
 				mapController.moveNodes(movedNodes, targetNode, insertionRelation);
