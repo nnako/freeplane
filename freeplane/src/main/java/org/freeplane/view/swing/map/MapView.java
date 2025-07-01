@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.function.Consumer;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -518,18 +519,18 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 			final MapController mapController = modeController.getMapController();
 			final NodeModel node = selectedNode.getNode();
 			mapController.onSelect(node);
-			synchronizeSelectionAcrossVisibleViews();
+			synchronizeAcrossVisibleViews(MapView::synchronizeSelection);
 		}
 
-        private void synchronizeSelectionAcrossVisibleViews() {
+        private void synchronizeAcrossVisibleViews(Consumer<MapView> method) {
             boolean synchronizesSelectionAcrossVisibleViews = synchronizesSelectionAcrossVisibleViews();
             if(synchronizesSelectionAcrossVisibleViews) {
                 List<Component> views = Controller.getCurrentController().getMapViewManager().getViews(viewedMap);
                 for(Component view:views) {
                     if (view != MapView.this && view instanceof MapView && view.isShowing())
-                        ((MapView)view).synchronizeSelection();
+                        method.accept(((MapView)view));
                 }
-			}
+            }
         }
 
 		private void clear() {
@@ -1699,6 +1700,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if(mySelectedNode.equals(primarySelectedNode) || synchronizesSelectionOnlyOnBranchChange() && mySelectedNode.isDescendantOf(primarySelectedNode))
             return;
         NodeModel myViewRootNode = getRoot().getNode();
+        if(myViewRootNode != primarySelection.getSelectionRoot())
+            synchronizeRoot();
         if(myViewRootNode != primarySelectedNode && ! primarySelectedNode.isDescendantOf(myViewRootNode))
             return;
         for(NodeModel nodeOrAncestor = primarySelectedNode; nodeOrAncestor != null; nodeOrAncestor = nodeOrAncestor.getParentNode()) {
@@ -1712,8 +1715,23 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         }
     }
 
+    void synchronizeRoot() {
+        if(isSelected())
+            return;
+        IMapSelection primarySelection = modeController.getController().getSelection();
+        if( primarySelection == null)
+            return;
+
+        NodeModel primaryRoot = primarySelection.getSelectionRoot();
+        NodeView myRootNodeView = getRoot();
+        NodeModel mySelectedRootNode = myRootNodeView.getNode();
+        if(! mySelectedRootNode.equals(primaryRoot)) {
+			setRootNode(primaryRoot);
+			synchronizeSelection();
+		}
     }
-	private void updateContentStyle() {
+
+    private void updateContentStyle() {
         final NodeStyleController style = Controller.getCurrentModeController().getExtension(NodeStyleController.class);
         final MapModel map = getMap();
         final MapStyleModel model = MapStyleModel.getExtension(map);
@@ -3254,6 +3272,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         MapController mapController = modeController.getMapController();
 		mapController.fireMapChanged(
                 new MapChangeEvent(this, getMap(), IMapViewManager.MapChangeEventProperty.MAP_VIEW_ROOT, null, null, false));
+		if(isSelected()) {
+			selection.synchronizeAcrossVisibleViews(MapView::synchronizeRoot);
+		}
     }
 
     static enum RootChange{JUMP_IN, JUMP_OUT, ANY}
