@@ -2,19 +2,20 @@ package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.KeyboardFocusManager;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 
+import org.dpolivaev.mnemonicsetter.MnemonicSetter;
 import org.freeplane.core.ui.components.FocusRequestor;
 import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmarkDescriptor;
+import org.freeplane.features.map.NodeModel;
 
 class BookmarkPopupMenu extends JPopupMenu {
 	private static final int RENAME_TEXTFIELD_WIDTH = 40;
@@ -31,9 +32,12 @@ class BookmarkPopupMenu extends JPopupMenu {
 		addOpenAsRootDirectMenuItem(bookmark);
 		addOpenAsNewViewRootMenuItem(bookmark);
 		addSeparator();
+		addRemoveNodeMenuItem(bookmark);
+		addSeparator();
 		addRemoveMenuItem(bookmark);
 		addRenameMenuItem(bookmark);
 		addOpenAsRootToggleMenuItem(bookmark);
+		MnemonicSetter.INSTANCE.setComponentMnemonics(this);
 	}
 
 	private void addGotoNodeMenuItem(NodeBookmark bookmark) {
@@ -58,6 +62,15 @@ class BookmarkPopupMenu extends JPopupMenu {
 		JMenuItem removeItem = TranslatedElementFactory.createMenuItem("bookmark.delete");
 		removeItem.addActionListener(e -> bookmarksController.removeBookmark(bookmark.getNode()));
 		add(removeItem);
+	}
+
+	private void addRemoveNodeMenuItem(NodeBookmark bookmark) {
+		final NodeModel node = bookmark.getNode();
+		if(! node.isRoot()) {
+			JMenuItem removeItem = TranslatedElementFactory.createMenuItem("DeleteAction.text");
+			removeItem.addActionListener(e -> bookmarksController.deleteNode(node));
+			add(removeItem);
+		}
 	}
 
 	private void addRenameMenuItem(NodeBookmark bookmark) {

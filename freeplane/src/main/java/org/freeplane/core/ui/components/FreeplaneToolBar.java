@@ -42,6 +42,7 @@ import org.freeplane.core.util.Compat;
  * @author Stefan Zechmeister
  */
 public class FreeplaneToolBar extends JToolBar {
+	public static final int FLOATING_HORIZONTAL = 2;
 	protected static Insets nullInsets = new Insets(0, 0, 0, 0);
 
 	private static final GridBagConstraints separatorConstraints = new GridBagConstraints();
@@ -64,7 +65,7 @@ public class FreeplaneToolBar extends JToolBar {
 	}
 
 	public FreeplaneToolBar(final String name, final int orientation) {
-		super(name, orientation);
+		super(name, orientation == FLOATING_HORIZONTAL ? HORIZONTAL : orientation);
 		this.disablesFocus = true;
 		this.reducesButtonSize = true;
 		this.setMargin(FreeplaneToolBar.nullInsets);
@@ -74,8 +75,12 @@ public class FreeplaneToolBar extends JToolBar {
 			GridBagLayout gridBagLayout = new UnitGridBagLayout();
 			super.setLayout(gridBagLayout);
 			setBorder(BorderFactory.createEmptyBorder());
-		} else
+		} else if(orientation == FLOATING_HORIZONTAL)
+			super.setLayout(ToolbarLayout.floatingHorizontal());
+		else if(orientation == SwingConstants.VERTICAL)
 			super.setLayout(ToolbarLayout.vertical());
+		else
+			throw new IllegalArgumentException();
 		addHierarchyBoundsListener(new HierarchyBoundsListener() {
 			@Override
 			public void ancestorResized(final HierarchyEvent e) {

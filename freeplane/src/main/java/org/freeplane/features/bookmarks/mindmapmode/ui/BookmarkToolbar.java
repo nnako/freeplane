@@ -65,7 +65,7 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	private MapModel map;
 
 	public BookmarkToolbar(BookmarksController bookmarksController, MapModel map) {
-		super(SwingConstants.VERTICAL);
+		super(FreeplaneToolBar.FLOATING_HORIZONTAL);
 		this.map = map;
     	ToolbarLayout layout = (ToolbarLayout) getLayout();
     	layout.setGap(GAP, true, false);

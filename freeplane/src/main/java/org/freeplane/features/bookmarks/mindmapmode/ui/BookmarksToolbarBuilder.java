@@ -2,12 +2,11 @@ package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
 import java.util.List;
+
 import javax.swing.JButton;
+
+import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.IMapSelection;
@@ -31,7 +30,7 @@ public class BookmarksToolbarBuilder {
 		if(focusOwner != null && focusOwner.getParent() == toolbar) {
 			focusIndex = toolbar.getComponentIndex(focusOwner);
 		}
-		
+
 		toolbar.removeAll();
 
 		List<NodeBookmark> bookmarks = bookmarksController.getBookmarks(map).getBookmarks();
@@ -40,15 +39,16 @@ public class BookmarksToolbarBuilder {
 			toolbar.add(button);
 			button.setFocusable(true);
 		}
-		
-		JButton testButton = new JButton("special action 1");
-		testButton.setFocusable(true);
-		testButton.addActionListener(e -> System.out.println("Test button clicked!"));
-		
-		buttonConfigurator.configureNonBookmarkComponent(testButton);
-		
-		toolbar.add(testButton);
-		
+
+		JButton addRootBranchButton = TranslatedElementFactory.createButtonWithIcon("bookmark.addRootBranch.icon", "bookmark.addRootBranch.text");
+		addRootBranchButton.setFocusable(true);
+		addRootBranchButton.addActionListener(e -> bookmarksController.addNewNode(map.getRootNode()));
+
+		buttonConfigurator.configureNonBookmarkComponent(addRootBranchButton);
+
+		toolbar.addSeparator();
+		toolbar.add(addRootBranchButton);
+
 		if(focusIndex >= 0) {
 			final int componentCount = toolbar.getComponentCount();
 			if(componentCount > focusIndex) {

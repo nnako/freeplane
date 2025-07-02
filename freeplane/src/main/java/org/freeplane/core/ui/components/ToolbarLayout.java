@@ -15,15 +15,19 @@ public class ToolbarLayout implements LayoutManager {
     public static final int MAX_WIDTH_BY_PARENT_WIDTH = -1;
 
     public static ToolbarLayout fix() {
-        return new ToolbarLayout(BlockEndPosition.ON_EVERY_SEPARATOR);
+        return new ToolbarLayout(BlockEndPosition.ON_EVERY_SEPARATOR, false);
     }
 
     public static ToolbarLayout horizontal() {
-        return new ToolbarLayout(BlockEndPosition.ON_SEPARATOR);
+        return new ToolbarLayout(BlockEndPosition.ON_SEPARATOR, false);
     }
 
     public static ToolbarLayout vertical() {
-        return new ToolbarLayout(BlockEndPosition.ANYWHERE);
+        return new ToolbarLayout(BlockEndPosition.ANYWHERE, true);
+    }
+
+    public static ToolbarLayout floatingHorizontal() {
+        return new ToolbarLayout(BlockEndPosition.ANYWHERE, false);
     }
 
     private BlockEndPosition blockEndPosition;
@@ -31,10 +35,12 @@ public class ToolbarLayout implements LayoutManager {
 	private int gap = 0;
 	private boolean addsHorizontalMargins = false;
 	private boolean addsVerticalMargins = false;
+	private final boolean isOrientationVertical;
 
 	enum BlockEndPosition{ON_SEPARATOR, ON_EVERY_SEPARATOR, ANYWHERE}
-	ToolbarLayout(BlockEndPosition blockEndPosition){
+	ToolbarLayout(BlockEndPosition blockEndPosition, boolean isOrientationVertical){
 		this.blockEndPosition = blockEndPosition;
+		this.isOrientationVertical = isOrientationVertical;
 
 	}
 
@@ -165,7 +171,7 @@ public class ToolbarLayout implements LayoutManager {
     }
 	private int getPreferredWidth(final Component c, final int maxWidth) {
 		final int width = ! c.isVisible() ? 0 :
-				c instanceof JSeparator && blockEndPosition == BlockEndPosition.ANYWHERE ? maxWidth :
+				c instanceof JSeparator && isOrientationVertical ? maxWidth :
 					c.getPreferredSize().width;
 		return width;
 	}

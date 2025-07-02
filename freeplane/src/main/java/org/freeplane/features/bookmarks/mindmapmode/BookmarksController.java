@@ -5,13 +5,25 @@
  */
 package org.freeplane.features.bookmarks.mindmapmode;
 
+import java.awt.KeyboardFocusManager;
 import java.util.List;
+
+import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
 import org.freeplane.core.resources.ResourceController;
+import org.freeplane.core.ui.components.FocusRequestor;
+import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
+import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
+import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarksToolbarBuilder;
+import org.freeplane.features.filter.condition.CJKNormalizer;
 import org.freeplane.features.icon.IStateIconProvider;
 import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.UIIcon;
@@ -23,10 +35,9 @@ import org.freeplane.features.map.MapController;
 import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeChangeEvent;
 import org.freeplane.features.map.NodeModel;
+import org.freeplane.features.map.mindmapmode.MMapController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
-import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarksToolbarBuilder;
-import org.freeplane.features.filter.condition.CJKNormalizer;
 import org.freeplane.features.text.TextController;
 
 public class BookmarksController implements IExtension{
@@ -35,11 +46,13 @@ public class BookmarksController implements IExtension{
 	private static final UIIcon bookmarkAsRootIcon= IconStoreFactory.ICON_STORE.getUIIcon("node-bookmark-root.svg");
 	private final ModeController modeController;
 	private final BookmarksToolbarBuilder toolbarBuilder;
+	private final BookmarkEditor bookmarkEditor;
 
 	public BookmarksController(ModeController modeController) {
 		super();
 		this.modeController = modeController;
 		this.toolbarBuilder = new BookmarksToolbarBuilder(modeController, this);
+		this.bookmarkEditor = new BookmarkEditor(this);
 		final MapController mapController = modeController.getMapController();
 		final ReadManager readManager = mapController.getReadManager();
 		final WriteManager writeManager = mapController.getWriteManager();
@@ -182,4 +195,52 @@ public class BookmarksController implements IExtension{
 		}
 		return -1;
 	}
+
+	public void handleBookmarkSelection(final IMapSelection selection) {
+		bookmarkEditor.handleBookmarkSelection(selection);
+	}
+
+	public void addNewNode(NodeModel parent) {
+		Object[] options = new Object[] {
+				TextUtils.getText("icon_button_ok"),
+				TextUtils.getText("cancel")
+			};
+		final JTextField nameInput = new JTextField("", 40);
+		FocusRequestor.requestFocus(nameInput);
+
+		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark.name");
+		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
+		opensAsRootCheckBox.setSelected(true);
+		final Box components = Box.createVerticalBox();
+		components.add(nameLabel);
+		components.add(nameInput);
+		components.add(opensAsRootCheckBox);
+
+		final String title = TextUtils.getText("menu_newNode");
+		int dialogResult = JOptionPane.showOptionDialog(
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner(),
+				components,
+				title,
+				JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options,
+				options[0]);
+		int OK_OPTION = 0;
+		if(dialogResult != OK_OPTION)
+			return;
+		final String content = nameInput.getText();
+		if(! content.isEmpty()) {
+			MMapController mapController = (MMapController) modeController.getMapController();
+			final NodeModel branchNode = mapController.addNewNode(parent, parent.getChildCount(), node -> node.setText(content));
+			addBookmark(branchNode, new NodeBookmarkDescriptor(content, opensAsRootCheckBox.isSelected()));
+		}
+
+	}
+
+	public void deleteNode(NodeModel node) {
+		MMapController mapController = (MMapController) modeController.getMapController();
+		mapController.deleteNode(node);
+	}
+
 }
