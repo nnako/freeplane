@@ -5,7 +5,6 @@ import java.awt.KeyboardFocusManager;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -51,33 +50,82 @@ class BookmarkEditor {
 		}
 	}
 
-	private final BookmarksController controller;
+	public static class BookmarkSelectionResult {
+		public enum Action {
+			ADD_BOOKMARKS,
+			DELETE_BOOKMARKS,
+			CANCEL
+		}
 
-	public BookmarkEditor(final BookmarksController controller) {
-		this.controller = controller;
+		private final Action action;
+		private final String bookmarkName;
+		private final boolean opensAsRoot;
+		private final boolean overwriteNames;
+
+		public BookmarkSelectionResult(Action action) {
+			this(action, null, false, false);
+		}
+
+		public BookmarkSelectionResult(Action action, String bookmarkName, boolean opensAsRoot, boolean overwriteNames) {
+			this.action = action;
+			this.bookmarkName = bookmarkName;
+			this.opensAsRoot = opensAsRoot;
+			this.overwriteNames = overwriteNames;
+		}
+
+		public Action getAction() {
+			return action;
+		}
+
+		public String getBookmarkName() {
+			return bookmarkName;
+		}
+
+		public boolean opensAsRoot() {
+			return opensAsRoot;
+		}
+
+		public boolean shouldOverwriteNames() {
+			return overwriteNames;
+		}
 	}
 
-	public void handleBookmarkSelection(final IMapSelection selection) {
-		final MapBookmarks bookmarks = controller.getBookmarks(selection.getSelected().getMap());
+	public BookmarkSelectionResult editBookmarksForSelection(final IMapSelection selection, final MapBookmarks bookmarks, final String suggestedBookmarkName) {
 		final boolean isSingleSelection = selection.size() == 1;
-		final boolean hasAnyBookmark = hasAnyExistingBookmarks(selection);
+		final boolean hasAnyBookmark = hasAnyExistingBookmarks(selection, bookmarks);
 
 		final BookmarkDialogComponents dialogComponents;
 		if (isSingleSelection) {
 			final NodeModel selectedNode = selection.getSelected();
 			final NodeBookmark existingBookmark = bookmarks.getBookmark(selectedNode.getID());
-			dialogComponents = createSingleNodeDialogComponents(selectedNode, existingBookmark);
+			dialogComponents = createSingleNodeDialogComponents(selectedNode, existingBookmark, suggestedBookmarkName);
 		} else {
 			dialogComponents = createMultipleNodesDialogComponents(hasAnyBookmark);
 		}
 
 		final Object[] options = createDialogOptions(hasAnyBookmark);
-		final int result = showBookmarkDialog(dialogComponents, options, "BookmarkNodeAction");
+		final int result = showBookmarkDialog(dialogComponents, options, "BookmarkNodeAction.text");
 
-		handleBookmarkDialogResult(result, selection, dialogComponents, bookmarks, isSingleSelection, hasAnyBookmark);
+		return createBookmarkSelectionResult(result, dialogComponents, isSingleSelection, hasAnyBookmark);
 	}
 
-	public BookmarkDialogComponents createSingleNodeDialogComponents(final NodeModel node, final NodeBookmark existingBookmark) {
+	public NodeBookmarkDescriptor showAddNewNodeDialog() {
+		final BookmarkDialogComponents dialogComponents = createNewNodeDialogComponents();
+		final Object[] options = createSimpleDialogOptions();
+		final int result = showBookmarkDialog(dialogComponents, options, "menu_newNode");
+
+		final int OK_OPTION = 0;
+		if (result != OK_OPTION) {
+			return null;
+		}
+		final String content = dialogComponents.getNameInput().getText().trim();
+		if (content.isEmpty()) {
+			return null;
+		}
+		return new NodeBookmarkDescriptor(content, dialogComponents.getOpensAsRootCheckBox().isSelected());
+	}
+
+	private BookmarkDialogComponents createSingleNodeDialogComponents(final NodeModel node, final NodeBookmark existingBookmark, final String suggestedBookmarkName) {
 		final boolean currentOpensAsRoot = existingBookmark != null ? existingBookmark.getDescriptor().opensAsRoot() : false;
 		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
 		opensAsRootCheckBox.setSelected(currentOpensAsRoot);
@@ -86,20 +134,11 @@ class BookmarkEditor {
 			opensAsRootCheckBox.setEnabled(false);
 		}
 
-		final String currentName = existingBookmark != null ? existingBookmark.getDescriptor().getName() : controller.suggestBookmarkNameFromText(node);
-		final JTextField nameInput = new JTextField(currentName, 40);
-		FocusRequestor.requestFocus(nameInput);
-
-		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark.name");
-		final Box components = Box.createVerticalBox();
-		components.add(nameLabel);
-		components.add(nameInput);
-		components.add(opensAsRootCheckBox);
-
-		return new BookmarkDialogComponents(components, nameInput, opensAsRootCheckBox);
+		final String currentName = existingBookmark != null ? existingBookmark.getDescriptor().getName() : suggestedBookmarkName;
+		return createNameAndRootComponents(currentName, opensAsRootCheckBox);
 	}
 
-	public BookmarkDialogComponents createMultipleNodesDialogComponents(final boolean hasAnyBookmark) {
+	private BookmarkDialogComponents createMultipleNodesDialogComponents(final boolean hasAnyBookmark) {
 		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
 		opensAsRootCheckBox.setSelected(false);
 
@@ -115,22 +154,14 @@ class BookmarkEditor {
 		}
 	}
 
-	public Object[] createDialogOptions(final boolean hasAnyBookmark) {
-		if (hasAnyBookmark) {
-			return new Object[] {
-				TextUtils.getText("icon_button_ok"),
-				TextUtils.getText("delete"),
-				TextUtils.getText("cancel")
-			};
-		} else {
-			return new Object[] {
-				TextUtils.getText("icon_button_ok"),
-				TextUtils.getText("cancel")
-			};
-		}
+	private BookmarkDialogComponents createNewNodeDialogComponents() {
+		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
+		opensAsRootCheckBox.setSelected(true);
+
+		return createNameAndRootComponents("", opensAsRootCheckBox, "bookmark.nodeContent");
 	}
 
-	public int showBookmarkDialog(final BookmarkDialogComponents dialogComponents, final Object[] options, final String titleKey) {
+	private int showBookmarkDialog(final BookmarkDialogComponents dialogComponents, final Object[] options, final String titleKey) {
 		final String title = TextUtils.getText(titleKey);
 		return JOptionPane.showOptionDialog(
 				KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner(),
@@ -143,58 +174,85 @@ class BookmarkEditor {
 				options[0]);
 	}
 
-	public boolean hasAnyExistingBookmarks(final IMapSelection selection) {
-		final MapBookmarks bookmarks = controller.getBookmarks(selection.getSelected().getMap());
-		return selection.getOrderedSelection().stream()
-			.anyMatch(node -> bookmarks.getBookmark(node.getID()) != null);
-	}
-
-	private void handleBookmarkDialogResult(final int result, final IMapSelection selection, final BookmarkDialogComponents dialogComponents, final MapBookmarks bookmarks, final boolean isSingleSelection, final boolean hasAnyBookmark) {
+	private BookmarkSelectionResult createBookmarkSelectionResult(final int result, final BookmarkDialogComponents dialogComponents, final boolean isSingleSelection, final boolean hasAnyBookmark) {
 		final int OK_OPTION = 0;
 		final int DELETE_OPTION = hasAnyBookmark ? 1 : -1;
 
 		if (result == OK_OPTION) {
-			if (isSingleSelection) {
-				addSingleBookmark(selection.getSelected(), dialogComponents);
-			} else {
-				addMultipleBookmarks(selection, bookmarks, dialogComponents);
-			}
-		} else if (result == DELETE_OPTION) {
-			for (NodeModel node : selection.getOrderedSelection()) {
-				controller.removeBookmark(node);
-			}
+			return isSingleSelection ? createSingleSelectionResult(dialogComponents) : createMultipleSelectionResult(dialogComponents);
 		}
+		
+		if (result == DELETE_OPTION) {
+			return new BookmarkSelectionResult(BookmarkSelectionResult.Action.DELETE_BOOKMARKS);
+		}
+		
+		return new BookmarkSelectionResult(BookmarkSelectionResult.Action.CANCEL);
 	}
 
-	private void addSingleBookmark(final NodeModel node, final BookmarkDialogComponents dialogComponents) {
+	private BookmarkSelectionResult createSingleSelectionResult(final BookmarkDialogComponents dialogComponents) {
 		final String bookmarkName = dialogComponents.getNameInput().getText().trim();
-		if (!bookmarkName.isEmpty()) {
-			final boolean opensAsRoot = dialogComponents.getOpensAsRootCheckBox().isSelected();
-			final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, opensAsRoot);
-			controller.addBookmark(node, descriptor);
+		if (bookmarkName.isEmpty()) {
+			return new BookmarkSelectionResult(BookmarkSelectionResult.Action.CANCEL);
 		}
+		final boolean opensAsRoot = dialogComponents.getOpensAsRootCheckBox().isSelected();
+		return new BookmarkSelectionResult(BookmarkSelectionResult.Action.ADD_BOOKMARKS, bookmarkName, opensAsRoot, false);
 	}
 
-	private void addMultipleBookmarks(final IMapSelection selection, final MapBookmarks bookmarks, final BookmarkDialogComponents dialogComponents) {
-		final boolean userWantsOpenAsRoot = dialogComponents.getOpensAsRootCheckBox().isSelected();
+	private BookmarkSelectionResult createMultipleSelectionResult(final BookmarkDialogComponents dialogComponents) {
+		final boolean opensAsRoot = dialogComponents.getOpensAsRootCheckBox().isSelected();
 		final JCheckBox overwriteNamesCheckBox = dialogComponents.getOverwriteNamesCheckBox();
 		final boolean shouldOverwriteNames = overwriteNamesCheckBox != null && overwriteNamesCheckBox.isSelected();
-
-		for (NodeModel node : selection.getOrderedSelection()) {
-			final String bookmarkName = getBookmarkName(node, bookmarks, shouldOverwriteNames);
-			final boolean opensAsRoot = node.isRoot() || userWantsOpenAsRoot;
-			final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, opensAsRoot);
-			controller.addBookmark(node, descriptor);
-		}
+		return new BookmarkSelectionResult(BookmarkSelectionResult.Action.ADD_BOOKMARKS, null, opensAsRoot, shouldOverwriteNames);
 	}
 
-	private String getBookmarkName(final NodeModel node, final MapBookmarks bookmarks, final boolean forceOverwrite) {
-		final NodeBookmark existing = bookmarks.getBookmark(node.getID());
+	private BookmarkDialogComponents createNameAndRootComponents(final String nameText, final JCheckBox opensAsRootCheckBox) {
+		final JTextField nameInput = createNameInput(nameText, "bookmark.name");
 
-		if (forceOverwrite || existing == null) {
-			return controller.suggestBookmarkNameFromText(node);
+		final Box components = Box.createVerticalBox();
+		components.add(nameInput);
+		components.add(opensAsRootCheckBox);
+
+		return new BookmarkDialogComponents(components, nameInput, opensAsRootCheckBox);
+	}
+
+	private BookmarkDialogComponents createNameAndRootComponents(final String nameText, final JCheckBox opensAsRootCheckBox, final String textKey) {
+		final JTextField nameInput = createNameInput(nameText, textKey);
+
+		final Box components = Box.createVerticalBox();
+		components.add(nameInput);
+		components.add(opensAsRootCheckBox);
+
+		return new BookmarkDialogComponents(components, nameInput, opensAsRootCheckBox);
+	}
+
+	private JTextField createNameInput(final String initialText, final String textKey) {
+		final JTextField nameInput = new JTextField(initialText, 40);
+		FocusRequestor.requestFocus(nameInput);
+		TranslatedElementFactory.createTitledBorder(nameInput, textKey);
+		return nameInput;
+	}
+
+	private Object[] createDialogOptions(final boolean hasAnyBookmark) {
+		if (hasAnyBookmark) {
+			return new Object[] {
+				TextUtils.getText("icon_button_ok"),
+				TextUtils.getText("delete"),
+				TextUtils.getText("cancel")
+			};
 		} else {
-			return existing.getDescriptor().getName();
+			return createSimpleDialogOptions();
 		}
 	}
-} 
+
+	private Object[] createSimpleDialogOptions() {
+		return new Object[] {
+			TextUtils.getText("icon_button_ok"),
+			TextUtils.getText("cancel")
+		};
+	}
+
+	private boolean hasAnyExistingBookmarks(final IMapSelection selection, final MapBookmarks bookmarks) {
+		return selection.getOrderedSelection().stream()
+			.anyMatch(node -> bookmarks.getBookmark(node.getID()) != null);
+	}
+}

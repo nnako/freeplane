@@ -21,6 +21,6 @@ class BookmarkNodeAction extends AFreeplaneAction {
 	@Override
 	public void actionPerformed(final ActionEvent e) {
 		final IMapSelection selection = modeController.getController().getSelection();
-		bookmarksController.handleBookmarkSelection(selection);
+		bookmarksController.editBookmarksForSelection(selection);
 	}
 }

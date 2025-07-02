@@ -5,22 +5,12 @@
  */
 package org.freeplane.features.bookmarks.mindmapmode;
 
-import java.awt.KeyboardFocusManager;
 import java.util.List;
-
-import javax.swing.Box;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 
 import org.freeplane.core.extension.IExtension;
 import org.freeplane.core.io.ReadManager;
 import org.freeplane.core.io.WriteManager;
 import org.freeplane.core.resources.ResourceController;
-import org.freeplane.core.ui.components.FocusRequestor;
-import org.freeplane.core.ui.textchanger.TranslatedElementFactory;
-import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarkToolbar;
 import org.freeplane.features.bookmarks.mindmapmode.ui.BookmarksToolbarBuilder;
 import org.freeplane.features.filter.condition.CJKNormalizer;
@@ -52,7 +42,7 @@ public class BookmarksController implements IExtension{
 		super();
 		this.modeController = modeController;
 		this.toolbarBuilder = new BookmarksToolbarBuilder(modeController, this);
-		this.bookmarkEditor = new BookmarkEditor(this);
+		this.bookmarkEditor = new BookmarkEditor();
 		final MapController mapController = modeController.getMapController();
 		final ReadManager readManager = mapController.getReadManager();
 		final WriteManager writeManager = mapController.getWriteManager();
@@ -196,46 +186,60 @@ public class BookmarksController implements IExtension{
 		return -1;
 	}
 
-	public void handleBookmarkSelection(final IMapSelection selection) {
-		bookmarkEditor.handleBookmarkSelection(selection);
+	public void editBookmarksForSelection(final IMapSelection selection) {
+		final MapBookmarks bookmarks = getBookmarks(selection.getSelected().getMap());
+		final String suggestedBookmarkName = selection.size() == 1 ? suggestBookmarkNameFromText(selection.getSelected()) : "";
+		
+		BookmarkEditor.BookmarkSelectionResult result = bookmarkEditor.editBookmarksForSelection(selection, bookmarks, suggestedBookmarkName);
+		if (result == null || result.getAction() == BookmarkEditor.BookmarkSelectionResult.Action.CANCEL) {
+			return;
+		}
+
+		if (result.getAction() == BookmarkEditor.BookmarkSelectionResult.Action.DELETE_BOOKMARKS) {
+			for (NodeModel node : selection.getOrderedSelection()) {
+				removeBookmark(node);
+			}
+		} else if (result.getAction() == BookmarkEditor.BookmarkSelectionResult.Action.ADD_BOOKMARKS) {
+			if (selection.size() == 1) {
+				addSingleBookmark(selection.getSelected(), result);
+			} else {
+				addMultipleBookmarks(selection, result);
+			}
+		}
+	}
+
+	private void addSingleBookmark(final NodeModel node, final BookmarkEditor.BookmarkSelectionResult result) {
+		final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(result.getBookmarkName(), result.opensAsRoot());
+		addBookmark(node, descriptor);
+	}
+
+	private void addMultipleBookmarks(final IMapSelection selection, final BookmarkEditor.BookmarkSelectionResult result) {
+		final MapBookmarks bookmarks = getBookmarks(selection.getSelected().getMap());
+		for (NodeModel node : selection.getOrderedSelection()) {
+			final String bookmarkName = getBookmarkName(node, bookmarks, result.shouldOverwriteNames());
+			final boolean opensAsRoot = node.isRoot() || result.opensAsRoot();
+			final NodeBookmarkDescriptor descriptor = new NodeBookmarkDescriptor(bookmarkName, opensAsRoot);
+			addBookmark(node, descriptor);
+		}
+	}
+
+	private String getBookmarkName(final NodeModel node, final MapBookmarks bookmarks, final boolean forceOverwrite) {
+		final NodeBookmark existing = bookmarks.getBookmark(node.getID());
+
+		if (forceOverwrite || existing == null) {
+			return suggestBookmarkNameFromText(node);
+		} else {
+			return existing.getDescriptor().getName();
+		}
 	}
 
 	public void addNewNode(NodeModel parent) {
-		Object[] options = new Object[] {
-				TextUtils.getText("icon_button_ok"),
-				TextUtils.getText("cancel")
-			};
-		final JTextField nameInput = new JTextField("", 40);
-		FocusRequestor.requestFocus(nameInput);
-
-		final JLabel nameLabel = TranslatedElementFactory.createLabel("bookmark.name");
-		final JCheckBox opensAsRootCheckBox = TranslatedElementFactory.createCheckBox("bookmark.opens_as_root");
-		opensAsRootCheckBox.setSelected(true);
-		final Box components = Box.createVerticalBox();
-		components.add(nameLabel);
-		components.add(nameInput);
-		components.add(opensAsRootCheckBox);
-
-		final String title = TextUtils.getText("menu_newNode");
-		int dialogResult = JOptionPane.showOptionDialog(
-				KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner(),
-				components,
-				title,
-				JOptionPane.YES_NO_CANCEL_OPTION,
-				JOptionPane.PLAIN_MESSAGE,
-				null,
-				options,
-				options[0]);
-		int OK_OPTION = 0;
-		if(dialogResult != OK_OPTION)
-			return;
-		final String content = nameInput.getText();
-		if(! content.isEmpty()) {
+		NodeBookmarkDescriptor result = bookmarkEditor.showAddNewNodeDialog();
+		if (result != null) {
 			MMapController mapController = (MMapController) modeController.getMapController();
-			final NodeModel branchNode = mapController.addNewNode(parent, parent.getChildCount(), node -> node.setText(content));
-			addBookmark(branchNode, new NodeBookmarkDescriptor(content, opensAsRootCheckBox.isSelected()));
+			final NodeModel branchNode = mapController.addNewNode(parent, parent.getChildCount(), node -> node.setText(result.getName()));
+			addBookmark(branchNode, result);
 		}
-
 	}
 
 	public void deleteNode(NodeModel node) {

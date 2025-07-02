@@ -44,28 +44,26 @@ public class BookmarksToolbarBuilder {
 		addRootBranchButton.setFocusable(true);
 		addRootBranchButton.addActionListener(e -> bookmarksController.addNewNode(map.getRootNode()));
 
-		buttonConfigurator.configureNonBookmarkComponent(addRootBranchButton);
+		final int buttonCount = toolbar.getComponentCount();
 
 		toolbar.addSeparator();
 		toolbar.add(addRootBranchButton);
 
+		for(int i = 0; i < 2; i++) {
+			final Component component = toolbar.getComponent(buttonCount + i);
+			buttonConfigurator.configureNonBookmarkComponent(component);
+		}
+
 		if(focusIndex >= 0) {
-			final int componentCount = toolbar.getComponentCount();
+			final int componentCount = buttonCount;
 			if(componentCount > focusIndex) {
 				Component component = toolbar.getComponent(focusIndex);
 				if (component.isFocusable()) {
 					component.requestFocusInWindow();
 				}
 			}
-			else if(componentCount > 0) {
-				// Find the last focusable component
-				for (int i = componentCount - 1; i >= 0; i--) {
-					Component component = toolbar.getComponent(i);
-					if (component.isFocusable()) {
-						component.requestFocusInWindow();
-						break;
-					}
-				}
+			else {
+				toolbar.requestFocusInWindow();
 			}
 		}
 		toolbar.revalidate();

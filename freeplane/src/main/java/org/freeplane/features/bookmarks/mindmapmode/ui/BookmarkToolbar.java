@@ -231,17 +231,8 @@ public class BookmarkToolbar extends FreeplaneToolBar {
 	}
 
 	private void paintEndDropLine(Graphics g) {
-		if(getComponentCount() == 0) {
-			final Insets insets = getInsets();
-			final Rectangle bounds = new Rectangle(getWidth() - insets.right - GAP,
-					getHeight() - insets.bottom,
-					GAP, getHeight() - insets.bottom - insets.top);
-			paintDropLine(g, bounds, GAP, true);
-		}
-		else {
-			final Rectangle bounds = getComponent(getComponentCount() - 1).getBounds();
-			paintDropLine(g, bounds, GAP, false);
-		}
+		final Rectangle bounds = getComponent(getComponentCount() - 2).getBounds();
+		paintDropLine(g, bounds, GAP, true);
 	}
 
 	public void requestInitialFocusInWindow() {
