@@ -104,18 +104,27 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 				return;
 			}
 
+			Point dropPoint = dtde.getLocation();
+			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
+			
 			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
-			if (!NodeDropUtils.isDragAcceptable(dtde, targetButton.getBookmark().getNode()) ||
-				!NodeDropUtils.isDropAcceptable(dtde.getTransferable(), targetButton.getBookmark().getNode(), dragActionType)) {
-				dtde.rejectDrag();
-				targetButton.clearVisualFeedback();
-				return;
+			
+			if (dropZone.isLateral()) {
+				dtde.acceptDrag(dragActionType);
+				targetButton.showDropZoneIndicator(dropZone.isAfter());
+				hoverTimer.cancelHoverTimer();
+			} else {
+				if (!NodeDropUtils.isDragAcceptable(dtde, targetButton.getBookmark().getNode()) ||
+					!NodeDropUtils.isDropAcceptable(dtde.getTransferable(), targetButton.getBookmark().getNode(), dragActionType)) {
+					dtde.rejectDrag();
+					targetButton.clearVisualFeedback();
+					return;
+				}
+
+				dtde.acceptDrag(dragActionType);
+				targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
+				hoverTimer.startHoverTimer(targetButton);
 			}
-
-			dtde.acceptDrag(dragActionType);
-
-			targetButton.showFeedback(BookmarkToolbar.DropIndicatorType.HOVER_FEEDBACK);
-			hoverTimer.startHoverTimer(targetButton);
 
 		} catch (Exception e) {
 			dtde.rejectDrag();
@@ -192,23 +201,40 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private void handleNodeDrop(DropTargetDropEvent dtde, BookmarkButton targetButton) {
 		try {
-			final NodeModel targetNode = targetButton.getBookmark().getNode();
-			int dropAction = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
-			final Transferable t = dtde.getTransferable();
-
-			if (!NodeDropUtils.isDropAcceptable(dtde, targetNode, dropAction)) {
+			NodeModel draggedNode = extractSingleNode(dtde);
+			if (draggedNode == null) {
 				dtde.rejectDrop();
 				return;
 			}
 
-			if (!dtde.isLocalTransfer()) {
-				dtde.acceptDrop(DnDConstants.ACTION_COPY);
-				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, Side.BOTTOM_OR_RIGHT, dropAction);
+			Point dropPoint = dtde.getLocation();
+			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
+			
+			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
+			
+			if (dropZone.isLateral()) {
+				dtde.acceptDrop(dragActionType);
+				boolean success = executor.createBookmarkFromNodeAtPosition(dtde, dropZone.getInsertionIndex());
+				dtde.dropComplete(success);
 			} else {
-				dtde.acceptDrop(dropAction);
-				NodeDropUtils.handleNodeDrop(t, targetNode, dropAction);
+				final NodeModel targetNode = targetButton.getBookmark().getNode();
+				int dropAction = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
+				final Transferable t = dtde.getTransferable();
+
+				if (!NodeDropUtils.isDropAcceptable(dtde, targetNode, dropAction)) {
+					dtde.rejectDrop();
+					return;
+				}
+
+				if (!dtde.isLocalTransfer()) {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY);
+					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, Side.BOTTOM_OR_RIGHT, dropAction);
+				} else {
+					dtde.acceptDrop(dropAction);
+					NodeDropUtils.handleNodeDrop(t, targetNode, dropAction);
+				}
+				dtde.dropComplete(true);
 			}
-			dtde.dropComplete(true);
 		} catch (Exception e) {
 			dtde.rejectDrop();
 		}
@@ -345,6 +371,47 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			case AT_END:
 				toolbar.showEndDropIndicator();
 				break;
+		}
+	}
+
+	private NodeDropZone determineNodeDropZone(BookmarkButton button, Point dropPoint) {
+		int buttonWidth = button.getWidth();
+		int edgeThreshold = Math.max(8, buttonWidth / 6);
+		
+		if (dropPoint.x <= edgeThreshold) {
+			BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
+			int buttonIndex = toolbar.getComponentIndex(button);
+			return new NodeDropZone(true, false, buttonIndex);
+		} else if (dropPoint.x >= buttonWidth - edgeThreshold) {
+			BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
+			int buttonIndex = toolbar.getComponentIndex(button);
+			return new NodeDropZone(true, true, buttonIndex + 1);
+		} else {
+			return new NodeDropZone(false, false, -1);
+		}
+	}
+
+	private static class NodeDropZone {
+		private final boolean lateral;
+		private final boolean after;
+		private final int insertionIndex;
+		
+		public NodeDropZone(boolean lateral, boolean after, int insertionIndex) {
+			this.lateral = lateral;
+			this.after = after;
+			this.insertionIndex = insertionIndex;
+		}
+		
+		public boolean isLateral() {
+			return lateral;
+		}
+		
+		public boolean isAfter() {
+			return after;
+		}
+		
+		public int getInsertionIndex() {
+			return insertionIndex;
 		}
 	}
 }
