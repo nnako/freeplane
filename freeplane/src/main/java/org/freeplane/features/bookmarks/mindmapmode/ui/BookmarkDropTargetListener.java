@@ -106,9 +106,9 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 			Point dropPoint = dtde.getLocation();
 			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
-			
+
 			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
-			
+
 			if (dropZone.isLateral()) {
 				dtde.acceptDrag(dragActionType);
 				targetButton.showDropZoneIndicator(dropZone.isAfter());
@@ -209,9 +209,9 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 			Point dropPoint = dtde.getLocation();
 			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
-			
+
 			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
-			
+
 			if (dropZone.isLateral()) {
 				dtde.acceptDrop(dragActionType);
 				boolean success = executor.createBookmarkFromNodeAtPosition(dtde, dropZone.getInsertionIndex());
@@ -376,8 +376,8 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private NodeDropZone determineNodeDropZone(BookmarkButton button, Point dropPoint) {
 		int buttonWidth = button.getWidth();
-		int edgeThreshold = Math.max(8, buttonWidth / 6);
-		
+		int edgeThreshold = Math.max(BookmarkToolbar.GAP, buttonWidth / 6);
+
 		if (dropPoint.x <= edgeThreshold) {
 			BookmarkToolbar toolbar = (BookmarkToolbar) button.getParent();
 			int buttonIndex = toolbar.getComponentIndex(button);
@@ -395,21 +395,21 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 		private final boolean lateral;
 		private final boolean after;
 		private final int insertionIndex;
-		
+
 		public NodeDropZone(boolean lateral, boolean after, int insertionIndex) {
 			this.lateral = lateral;
 			this.after = after;
 			this.insertionIndex = insertionIndex;
 		}
-		
+
 		public boolean isLateral() {
 			return lateral;
 		}
-		
+
 		public boolean isAfter() {
 			return after;
 		}
-		
+
 		public int getInsertionIndex() {
 			return insertionIndex;
 		}
