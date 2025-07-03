@@ -1,18 +1,25 @@
 package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -25,6 +32,58 @@ import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.NodeTooltipManager;
 
 class BookmarkButtonConfigurator {
+	private static final String COPY_ACTION_KEY = "bookmarkCopy";
+	private static final String PASTE_ACTION_KEY = "bookmarkPaste";
+	private static final String ENTER_ACTION_KEY = "bookmarkEnter";
+	private static final ButtonEnterAction CLICK_ACTION = new ButtonEnterAction();
+	private static final int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+	private static final KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask);
+	private static final KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask);
+	private static final KeyStroke enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+	private static final KeyStroke altEnterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_MASK);
+
+	@SuppressWarnings("serial")
+	private static class ButtonCopyAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			BookmarkButton button = (BookmarkButton) e.getSource();
+			Component parent = button.getParent();
+			if (parent instanceof BookmarkToolbar) {
+				BookmarkToolbar toolbar = (BookmarkToolbar) parent;
+				BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
+				clipboardHandler.copyBookmark(button);
+			}
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class ButtonPasteAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			BookmarkButton button = (BookmarkButton) e.getSource();
+			Component parent = button.getParent();
+			if (parent instanceof BookmarkToolbar) {
+				BookmarkToolbar toolbar = (BookmarkToolbar) parent;
+				BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
+				clipboardHandler.pasteBookmarkAtButton(button);
+			}
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class ButtonEnterAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			AbstractButton button = (AbstractButton) e.getSource();
+			button.doClick();
+			button.requestFocus();
+		}
+	}
+
 	private final BookmarksController bookmarksController;
 	private final ModeController modeController;
 
@@ -51,12 +110,18 @@ class BookmarkButtonConfigurator {
 	}
 
 	void configureNonBookmarkComponent(Component component) {
-		new DropTarget(component, DnDConstants.ACTION_NONE, new DropTargetAdapter() {
+		@SuppressWarnings("unused")
+		final DropTarget dropTarget = new DropTarget(component, DnDConstants.ACTION_NONE, new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetDropEvent dtde) {
 				dtde.rejectDrop();
 			}
 		});
+		if(component instanceof AbstractButton) {
+			final AbstractButton button = (AbstractButton)component;
+			button.getInputMap().put(enterKeyStroke, ENTER_ACTION_KEY);
+			button.getActionMap().put(ENTER_ACTION_KEY, CLICK_ACTION);
+		}
 	}
 
 	private void applyAction(ActionEvent action) {
@@ -94,12 +159,23 @@ class BookmarkButtonConfigurator {
 	}
 
 	private void setupActionMap(BookmarkButton button, BookmarkToolbar toolbar) {
-		BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
-		clipboardHandler.setupButtonClipboardActions(button);
+		InputMap inputMap = button.getInputMap(JComponent.WHEN_FOCUSED);
+		ActionMap actionMap = button.getActionMap();
+
+
+		inputMap.put(copyKeyStroke, COPY_ACTION_KEY);
+		inputMap.put(pasteKeyStroke, PASTE_ACTION_KEY);
+		inputMap.put(enterKeyStroke, ENTER_ACTION_KEY);
+		inputMap.put(altEnterKeyStroke, ENTER_ACTION_KEY);
+
+		actionMap.put(COPY_ACTION_KEY, new ButtonCopyAction());
+		actionMap.put(PASTE_ACTION_KEY, new ButtonPasteAction());
+		actionMap.put(ENTER_ACTION_KEY, CLICK_ACTION);
 
 		Action showContextMenuAction = new AbstractAction("showContextMenu") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				BookmarkButton button = (BookmarkButton) e.getSource();
 				showBookmarkPopupMenu(button);
 			}
 		};
@@ -120,6 +196,7 @@ class BookmarkButtonConfigurator {
 			}
 		});
 	}
+
 	private void showBookmarkPopupMenu(BookmarkButton button) {
 		BookmarkPopupMenu popup = new BookmarkPopupMenu(button.getBookmark(), bookmarksController);
 		int menuHeight = popup.getPreferredSize().height;

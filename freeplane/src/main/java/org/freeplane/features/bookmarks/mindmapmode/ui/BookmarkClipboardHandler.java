@@ -2,12 +2,9 @@ package org.freeplane.features.bookmarks.mindmapmode.ui;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Component;
 
-import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -23,10 +20,7 @@ import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 
 class BookmarkClipboardHandler {
-	private static final ButtonEnterAction CLICK_ACTION = new ButtonEnterAction();
-	private static final String COPY_ACTION_KEY = "bookmarkCopy";
 	private static final String PASTE_ACTION_KEY = "bookmarkPaste";
-	private static final String ENTER_ACTION_KEY = "bookmarkEnter";
 
 	private final BookmarksController bookmarksController;
 	private final DropExecutor dropExecutor;
@@ -47,81 +41,7 @@ class BookmarkClipboardHandler {
 		actionMap.put(PASTE_ACTION_KEY, new ToolbarPasteAction(toolbar));
 	}
 
-	void setupButtonClipboardActions(BookmarkButton button) {
-		InputMap inputMap = button.getInputMap(JComponent.WHEN_FOCUSED);
-		ActionMap actionMap = button.getActionMap();
-
-		int menuShortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
-		KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask);
-		KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask);
-		KeyStroke enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-		KeyStroke altEnterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_MASK);
-
-		inputMap.put(copyKeyStroke, COPY_ACTION_KEY);
-		inputMap.put(pasteKeyStroke, PASTE_ACTION_KEY);
-		inputMap.put(enterKeyStroke, ENTER_ACTION_KEY);
-		inputMap.put(altEnterKeyStroke, ENTER_ACTION_KEY);
-
-		actionMap.put(COPY_ACTION_KEY, new ButtonCopyAction(button));
-		actionMap.put(PASTE_ACTION_KEY, new ButtonPasteAction(button));
-		actionMap.put(ENTER_ACTION_KEY, CLICK_ACTION);
-	}
-
-	@SuppressWarnings("serial")
-	private class ButtonCopyAction extends AbstractAction {
-		private final BookmarkButton button;
-
-		ButtonCopyAction(BookmarkButton button) {
-			this.button = button;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			copyBookmark(button);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	private class ButtonPasteAction extends AbstractAction {
-		private final BookmarkButton button;
-
-		ButtonPasteAction(BookmarkButton button) {
-			this.button = button;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			pasteBookmarkAtButton(button);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	private static class ButtonEnterAction extends AbstractAction {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			BookmarkButton button = (BookmarkButton) e.getSource();
-			button.doClick();
-			button.requestFocus();
-		}
-	}
-
-	@SuppressWarnings("serial")
-	private class ToolbarPasteAction extends AbstractAction {
-		private final BookmarkToolbar toolbar;
-
-		ToolbarPasteAction(BookmarkToolbar toolbar) {
-			this.toolbar = toolbar;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			pasteBookmarkAtEnd(toolbar);
-		}
-	}
-
-	private void copyBookmark(BookmarkButton button) {
+	void copyBookmark(BookmarkButton button) {
 		Component parent = button.getParent();
 		if (!(parent instanceof BookmarkToolbar)) {
 			return;
@@ -137,7 +57,7 @@ class BookmarkClipboardHandler {
 		ClipboardAccessor.getInstance().setClipboardContents(transferable);
 	}
 
-	private void pasteBookmarkAtButton(BookmarkButton button) {
+	void pasteBookmarkAtButton(BookmarkButton button) {
 		Transferable clipboardContents = ClipboardAccessor.getInstance().getClipboardContents();
 		if (clipboardContents == null) {
 			return;
@@ -197,6 +117,20 @@ class BookmarkClipboardHandler {
 			dropExecutor.moveBookmark(sourceIndex, insertionIndex);
 		} catch (Exception e) {
 			// Handle paste error silently
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private class ToolbarPasteAction extends javax.swing.AbstractAction {
+		private final BookmarkToolbar toolbar;
+
+		ToolbarPasteAction(BookmarkToolbar toolbar) {
+			this.toolbar = toolbar;
+		}
+
+		@Override
+		public void actionPerformed(java.awt.event.ActionEvent e) {
+			pasteBookmarkAtEnd(toolbar);
 		}
 	}
 }

@@ -41,13 +41,13 @@ public class BookmarksToolbarBuilder {
 		}
 
 		JButton addRootBranchButton = TranslatedElementFactory.createButtonWithIcon("bookmark.addRootBranch.icon", "bookmark.addRootBranch.text");
-		addRootBranchButton.setFocusable(true);
 		addRootBranchButton.addActionListener(e -> bookmarksController.addNewNode(map.getRootNode()));
 
 		final int buttonCount = toolbar.getComponentCount();
 
 		toolbar.addSeparator();
 		toolbar.add(addRootBranchButton);
+		addRootBranchButton.setFocusable(true);
 
 		for(int i = 0; i < 2; i++) {
 			final Component component = toolbar.getComponent(buttonCount + i);
