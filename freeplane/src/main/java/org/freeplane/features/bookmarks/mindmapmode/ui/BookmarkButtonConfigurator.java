@@ -61,10 +61,15 @@ class BookmarkButtonConfigurator {
 
 	private void applyAction(ActionEvent action) {
 		final BookmarkButton button = (BookmarkButton) action.getSource();
-		if((action.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK)
+		if((action.getModifiers() & ActionEvent.CTRL_MASK) != 0)
 			showBookmarkPopupMenu(button);
-		else
-			button.getBookmark().open();
+		else {
+			final NodeBookmark bookmark = button.getBookmark();
+			if((action.getModifiers() & ActionEvent.ALT_MASK) != 0)
+				bookmark.alternativeOpen();
+			else
+				bookmark.open();
+		}
 	}
 
 	private void registerTooltip(BookmarkButton button) {
@@ -91,17 +96,17 @@ class BookmarkButtonConfigurator {
 	private void setupActionMap(BookmarkButton button, BookmarkToolbar toolbar) {
 		BookmarkClipboardHandler clipboardHandler = toolbar.getClipboardHandler();
 		clipboardHandler.setupButtonClipboardActions(button);
-		
+
 		Action showContextMenuAction = new AbstractAction("showContextMenu") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				showBookmarkPopupMenu(button);
 			}
 		};
-		
+
 		button.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "showContextMenu");
 		button.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, KeyEvent.CTRL_DOWN_MASK), "showContextMenu");
-		
+
 		button.getActionMap().put("showContextMenu", showContextMenuAction);
 	}
 

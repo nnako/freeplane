@@ -3,6 +3,7 @@ package org.freeplane.features.bookmarks.mindmapmode.ui;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Component;
 
@@ -22,6 +23,7 @@ import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 
 class BookmarkClipboardHandler {
+	private static final ButtonEnterAction CLICK_ACTION = new ButtonEnterAction();
 	private static final String COPY_ACTION_KEY = "bookmarkCopy";
 	private static final String PASTE_ACTION_KEY = "bookmarkPaste";
 	private static final String ENTER_ACTION_KEY = "bookmarkEnter";
@@ -54,14 +56,16 @@ class BookmarkClipboardHandler {
 		KeyStroke copyKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcutKeyMask);
 		KeyStroke pasteKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcutKeyMask);
 		KeyStroke enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+		KeyStroke altEnterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_MASK);
 
 		inputMap.put(copyKeyStroke, COPY_ACTION_KEY);
 		inputMap.put(pasteKeyStroke, PASTE_ACTION_KEY);
 		inputMap.put(enterKeyStroke, ENTER_ACTION_KEY);
+		inputMap.put(altEnterKeyStroke, ENTER_ACTION_KEY);
 
 		actionMap.put(COPY_ACTION_KEY, new ButtonCopyAction(button));
 		actionMap.put(PASTE_ACTION_KEY, new ButtonPasteAction(button));
-		actionMap.put(ENTER_ACTION_KEY, new ButtonEnterAction(button));
+		actionMap.put(ENTER_ACTION_KEY, CLICK_ACTION);
 	}
 
 	@SuppressWarnings("serial")
@@ -93,15 +97,11 @@ class BookmarkClipboardHandler {
 	}
 
 	@SuppressWarnings("serial")
-	private class ButtonEnterAction extends AbstractAction {
-		private final BookmarkButton button;
-
-		ButtonEnterAction(BookmarkButton button) {
-			this.button = button;
-		}
+	private static class ButtonEnterAction extends AbstractAction {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			BookmarkButton button = (BookmarkButton) e.getSource();
 			button.doClick();
 			button.requestFocus();
 		}

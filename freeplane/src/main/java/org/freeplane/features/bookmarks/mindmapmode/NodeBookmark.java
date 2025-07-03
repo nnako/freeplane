@@ -49,22 +49,24 @@ public class NodeBookmark {
 		}
 		else
 			selectedNode = node;
-		if(selectedNode.isRoot()){
-			selection.selectRoot();
-		}
-		else if(! NodeVisibility.isHidden(selectedNode)){
+		if(! NodeVisibility.isHidden(selectedNode)){
+			if(selection.getSelectionRoot() != selectedNode
+					&& ! selectedNode.isDescendantOf(selection.getSelectionRoot())) {
+				mapViewManager.setViewRoot(node.getMap().getRootNode());
+			}
 			final Filter filter = selection.getFilter();
 			if(! selectedNode.isVisible(filter)) {
 				FilterController.getController(controller).applyNoFiltering(node.getMap());
 			}
 			controller.getModeController().getMapController().displayNode(selectedNode);
-			selection.selectAsTheOnlyOneSelected(selectedNode);
-			selection.scrollNodeTreeToVisible(selectedNode, false);
+			if(selectedNode.isRoot()){
+				selection.selectRoot();
+			}
+			else {
+				selection.selectAsTheOnlyOneSelected(selectedNode);
+				selection.scrollNodeTreeToVisible(selectedNode, false);
+			}
 		}
-
-//		final boolean isVisible = node.isVisible(selection.getFilter());
-//		button.setEnabled(isVisible);
-
 	}
 
 	public void open() {
@@ -84,5 +86,9 @@ public class NodeBookmark {
 		final IMapViewManager mapViewManager = controller.getMapViewManager();
 		mapViewManager.newMapView(node.getMap(), controller.getModeController());
 		open(true);
+	}
+
+	public void alternativeOpen() {
+		open(!opensAsRoot());
 	}
 }
