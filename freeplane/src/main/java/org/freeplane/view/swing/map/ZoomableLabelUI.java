@@ -393,6 +393,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 		ZoomableLabel lbl = ((ZoomableLabel) e.getSource());
 		String propertyName = e.getPropertyName();
 		if (propertyName == "text" || "font" == propertyName || "foreground" == propertyName
+				|| "horizontalAlignment" == propertyName
 				|| ("ancestor" == propertyName || "graphicsConfiguration" == propertyName) && e.getNewValue() != null
 				|| ZoomableLabel.CUSTOM_CSS == propertyName)
 			updateRendererOnPropertyChange(lbl, propertyName);
