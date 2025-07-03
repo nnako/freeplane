@@ -71,9 +71,6 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		if(e.getButton() == MouseEvent.BUTTON1
 		        && Compat.isPlainEvent(e)
 		        && isInFoldingRegion(e)) {
-		    doubleClickTimer.cancel();
-		    MouseEventActor.INSTANCE.withMouseEvent( () ->
-		        mapController.toggleFoldedAndScroll(node));
 		    return;
 		}
 
@@ -255,8 +252,26 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		mapView.select();
 		doubleClickTimer.cancel();
 		popupMenuIsShown = false;
-		if (Compat.isPopupTrigger(e))
+		if (Compat.isPopupTrigger(e)) {
 			showPopupMenu(e);
+		} else
+			if(e.getButton() == MouseEvent.BUTTON1
+			&& Compat.isPlainEvent(e)
+			&& isInFoldingRegion(e)) {
+				final MainView component = (MainView) e.getComponent();
+				NodeView nodeView = component.getNodeView();
+				if (nodeView == null)
+					return;
+
+				final NodeModel node = nodeView.getNode();
+				final ModeController mc = nodeView.getMap().getModeController();
+				final MapController mapController = mc.getMapController();
+				doubleClickTimer.cancel();
+				MouseEventActor.INSTANCE.withMouseEvent( () ->
+				mapController.toggleFoldedAndScroll(node));
+				return;
+			}
+
 	}
 
 	@Override
