@@ -98,18 +98,16 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private void handleNodeDragOver(DropTargetDragEvent dtde, BookmarkButton targetButton) {
 		try {
-			NodeModel draggedNode = extractSingleNode(dtde);
-			if (draggedNode == null) {
-				dtde.rejectDrag();
-				return;
-			}
-
 			Point dropPoint = dtde.getLocation();
 			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
 
 			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
-
 			if (dropZone.isLateral()) {
+				NodeModel draggedNode = extractSingleNode(dtde);
+				if (draggedNode == null) {
+					dtde.rejectDrag();
+					return;
+				}
 				dtde.acceptDrag(dragActionType);
 				targetButton.showDropZoneIndicator(dropZone.isAfter());
 				hoverTimer.cancelHoverTimer();
@@ -201,18 +199,17 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 
 	private void handleNodeDrop(DropTargetDropEvent dtde, BookmarkButton targetButton) {
 		try {
-			NodeModel draggedNode = extractSingleNode(dtde);
-			if (draggedNode == null) {
-				dtde.rejectDrop();
-				return;
-			}
-
 			Point dropPoint = dtde.getLocation();
 			NodeDropZone dropZone = determineNodeDropZone(targetButton, dropPoint);
 
 			int dragActionType = NodeDropUtils.getDropAction(dtde.getTransferable(), dtde.getDropAction());
 
 			if (dropZone.isLateral()) {
+				NodeModel draggedNode = extractSingleNode(dtde);
+				if (draggedNode == null) {
+					dtde.rejectDrop();
+					return;
+				}
 				dtde.acceptDrop(dragActionType);
 				boolean success = executor.createBookmarkFromNodeAtPosition(dtde, dropZone.getInsertionIndex());
 				dtde.dropComplete(success);
