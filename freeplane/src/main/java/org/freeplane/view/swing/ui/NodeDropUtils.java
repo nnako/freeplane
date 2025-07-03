@@ -1,6 +1,5 @@
 package org.freeplane.view.swing.ui;
 
-import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
-import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.icon.IconController;
 import org.freeplane.features.icon.Tag;
@@ -102,7 +100,7 @@ public class NodeDropUtils {
 
 		try {
 			final List<NodeModel> droppedNodes = getNodeObjects(transferable);
-			
+
 			if (dropAction == DnDConstants.ACTION_LINK) {
 				return areFromSameMap(targetNode, droppedNodes);
 			}
@@ -130,6 +128,11 @@ public class NodeDropUtils {
 				return false;
 		}
 		return true;
+	}
+
+	public static boolean areFromSameMap(Transferable transferable, NodeModel targetNode) throws UnsupportedFlavorException, IOException {
+		final List<NodeModel> draggedNodes = getNodeObjects(transferable);
+		return areFromSameMap(targetNode, draggedNodes);
 	}
 
 	public static boolean isFromDescendantNode(final NodeModel targetNode, final List<NodeModel> droppedNodes) {
@@ -166,34 +169,15 @@ public class NodeDropUtils {
 		return getDropAction(dtde.getTransferable(), dtde.getDropAction());
 	}
 
-	public static void handleNodeDrop(Transferable transferable, NodeModel targetNode, int dropAction) 
-			throws UnsupportedFlavorException, IOException {
-		final Controller controller = Controller.getCurrentController();
-		ModeController modeController = controller.getModeController();
-		final MMapController mapController = (MMapController) modeController.getMapController();
 
-		if ((dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY)) {
-			if (!mapController.isWriteable(targetNode)) {
-				final String message = TextUtils.getText("node_is_write_protected");
-				UITools.errorMessage(message);
-				return;
-			}
-		}
 
-		if (dropAction == DnDConstants.ACTION_LINK) {
-			handleLinkAction(transferable, targetNode, controller, modeController);
-		} else {
-			handleMoveOrCopyAction(transferable, targetNode, dropAction, mapController, controller);
-		}
-	}
-
-	private static void handleLinkAction(Transferable transferable, NodeModel targetNode, 
+	public static void handleLinkAction(Transferable transferable, NodeModel targetNode,
 			Controller controller, ModeController modeController) throws UnsupportedFlavorException, IOException {
 		int yesorno = JOptionPane.YES_OPTION;
 		if (controller.getSelection().size() >= 5) {
-			yesorno = JOptionPane.showConfirmDialog(controller.getViewController().getCurrentRootComponent(), 
-				TextUtils.getText("lots_of_links_warning"), 
-				Integer.toString(controller.getSelection().size()) + " links to the same node", 
+			yesorno = JOptionPane.showConfirmDialog(controller.getViewController().getCurrentRootComponent(),
+				TextUtils.getText("lots_of_links_warning"),
+				Integer.toString(controller.getSelection().size()) + " links to the same node",
 				JOptionPane.YES_NO_OPTION);
 		}
 		if (yesorno == JOptionPane.YES_OPTION) {
@@ -204,34 +188,31 @@ public class NodeDropUtils {
 		}
 	}
 
-	private static void handleMoveOrCopyAction(Transferable transferable, NodeModel targetNode, int dropAction, 
-			MMapController mapController, Controller controller) throws UnsupportedFlavorException, IOException {
-		if (DnDConstants.ACTION_MOVE == dropAction
-				&& transferable.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-				&& areFromSameMap(targetNode, getNodeObjects(transferable))) {
-			final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
-			final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
-			moveNodesToTarget(mapController, targetNode, transferable);
+	public static void handleMoveOrCopyAction(Transferable transferable, NodeModel targetNode,
+			int dropAction, boolean isLocalTransfer, InsertionRelation insertionRelation, Side side)
+			throws UnsupportedFlavorException, IOException {
 
-			MouseEventActor.INSTANCE.withMouseEvent( () ->
-				controller.getSelection().replaceSelection(array));
+		final MMapController mapController = (MMapController) Controller.getCurrentModeController().getMapController();
+
+		if (DnDConstants.ACTION_MOVE == dropAction && isLocalTransfer && areFromSameMap(transferable, targetNode)) {
+			final List<NodeModel> movedNodes = getNodeObjects(transferable);
+			MouseEventActor.INSTANCE.withMouseEvent(() -> {
+				if (insertionRelation != InsertionRelation.AS_CHILD) {
+					mapController.moveNodes(movedNodes, targetNode, insertionRelation);
+					mapController.setSide(movedNodes, targetNode.getSide());
+				} else {
+					List<NodeModel> nodesChangingParent = movedNodes.stream()
+						.filter(node -> targetNode != node.getParentNode())
+						.collect(Collectors.toList());
+					mapController.moveNodes(movedNodes, targetNode, insertionRelation);
+					mapController.setSide(nodesChangingParent.isEmpty() ? movedNodes : nodesChangingParent, side);
+				}
+			});
 		}
 		else if (DnDConstants.ACTION_COPY == dropAction || DnDConstants.ACTION_MOVE == dropAction) {
-			((MMapClipboardController) MapClipboardController.getController()).paste(transferable, targetNode, Side.BOTTOM_OR_RIGHT);
-			MouseEventActor.INSTANCE.withMouseEvent( () ->
-				controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
+			((MMapClipboardController) MapClipboardController.getController()).paste(transferable, targetNode, side, dropAction);
 		}
 	}
 
-	public static void moveNodesToTarget(final MMapController mapController, final NodeModel targetNode, Transferable transferable)
-			throws UnsupportedFlavorException, IOException {
-		final List<NodeModel> movedNodes = getNodeObjects(transferable);
-		MouseEventActor.INSTANCE.withMouseEvent( () -> {
-			List<NodeModel> nodesChangingParent = movedNodes.stream()
-				.filter(node -> targetNode != node.getParentNode())
-				.collect(Collectors.toList());
-			mapController.moveNodes(movedNodes, targetNode, InsertionRelation.AS_CHILD);
-			mapController.setSide(nodesChangingParent.isEmpty() ? movedNodes : nodesChangingParent, Side.BOTTOM_OR_RIGHT);
-		});
-	}
-} 
+
+}

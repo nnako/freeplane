@@ -16,12 +16,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.freeplane.features.bookmarks.mindmapmode.BookmarksController;
+import org.freeplane.features.map.MapModel;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeModel.Side;
-import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
-import org.freeplane.features.map.MapModel;
-import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
+import org.freeplane.features.map.mindmapmode.InsertionRelation;
 import org.freeplane.view.swing.ui.NodeDropUtils;
 
 class BookmarkDropTargetListener extends DropTargetAdapter {
@@ -223,13 +222,8 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 					return;
 				}
 
-				if (!dtde.isLocalTransfer()) {
-					dtde.acceptDrop(DnDConstants.ACTION_COPY);
-					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, Side.BOTTOM_OR_RIGHT, dropAction);
-				} else {
-					dtde.acceptDrop(dropAction);
-					NodeDropUtils.handleNodeDrop(t, targetNode, dropAction);
-				}
+							dtde.acceptDrop(dtde.isLocalTransfer() ? dropAction : DnDConstants.ACTION_COPY);
+			NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), InsertionRelation.AS_CHILD, Side.DEFAULT);
 				dtde.dropComplete(true);
 			}
 		} catch (Exception e) {

@@ -591,7 +591,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
                 	addSelectionForHooks();
                 }
                 else{
-                    select(currentRootView);
+                	selectedNode = null;
                 }
             }
         }
@@ -3258,6 +3258,8 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
             rootsHistory.clear();
             mapRootView.resetLayoutPropertiesRecursively();
             updateSelectedNode();
+            if(selection.selectedNode == null)
+            	selection.select(currentRootView);
             fireRootChanged();
             currentRootView.updateIcons();
             setSiblingMaxLevel(getSelected());

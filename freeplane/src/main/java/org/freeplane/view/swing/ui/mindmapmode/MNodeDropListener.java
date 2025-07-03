@@ -23,9 +23,7 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetContext;
@@ -34,34 +32,22 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.freeplane.core.resources.ResourceController;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
-import org.freeplane.features.icon.IconController;
-import org.freeplane.features.icon.Tag;
-import org.freeplane.features.icon.TagCategories;
-import org.freeplane.features.icon.mindmapmode.TagSelection;
-import org.freeplane.features.link.LinkController;
-import org.freeplane.features.link.mindmapmode.MLinkController;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeModel.Side;
-import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 import org.freeplane.features.map.mindmapmode.InsertionRelation;
 import org.freeplane.features.map.mindmapmode.MMapController;
-import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.MainView;
@@ -221,6 +207,7 @@ public class MNodeDropListener implements DropTargetListener {
             final boolean dropAsSibling = dragOverRelation.isSibling();
 			ModeController modeController = controller.getModeController();
 			final MMapController mapController = (MMapController) modeController.getMapController();
+
 			if ((dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY)) {
 				final NodeModel parent = dropAsSibling ? targetNode.getParentNode() : targetNode;
 				if (!mapController.isWriteable(parent)) {
@@ -234,48 +221,36 @@ public class MNodeDropListener implements DropTargetListener {
 			if (!dtde.isLocalTransfer()) {
 				adjustFoldingOnDrop(targetNodeView, dragOverRelation);
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
-				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
-				((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
-						dropAsSibling ? sides.get(dragOverRelation) : side, dropAction);
+				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+				InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
+				NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
 				dtde.dropComplete(true);
 				return;
 			}
 			dtde.acceptDrop(dropAction);
 			if (dropAction == DnDConstants.ACTION_LINK) {
-				int yesorno = JOptionPane.YES_OPTION;
-				if (controller.getSelection().size() >= 5) {
-					yesorno = JOptionPane.showConfirmDialog(controller.getViewController().getCurrentRootComponent(), TextUtils
-					    .getText("lots_of_links_warning"), Integer.toString(controller.getSelection().size())
-					        + " links to the same node", JOptionPane.YES_NO_OPTION);
-				}
-				if (yesorno == JOptionPane.YES_OPTION) {
-									for (final NodeModel sourceNodeModel : NodeDropUtils.getNodeObjects(t)) {
-
-					((MLinkController) LinkController.getController(modeController)).addConnector(
-					    sourceNodeModel, targetNode);
-				}
-				}
+				NodeDropUtils.handleLinkAction(t, targetNode, controller, modeController);
 			}
 			else {
-				if (DnDConstants.ACTION_MOVE == dropAction
-						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-						&& NodeDropUtils.areFromSameMap(targetNode, NodeDropUtils.getNodeObjects(t))) {
-					final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
-					final NodeModel[] array = selecteds.toArray(new NodeModel[selecteds.size()]);
-					moveNodes(mapController, targetNode, t, insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD), isTopOrLeft);
+				final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
+				final NodeModel[] selectedArray = selecteds.toArray(new NodeModel[selecteds.size()]);
 
+				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+				InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
+
+				NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
+
+				if (DnDConstants.ACTION_MOVE == dropAction && dtde.isLocalTransfer()
+						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
+						&& NodeDropUtils.areFromSameMap(t, targetNode)) {
 					if(dropAsSibling || ! targetNodeView.isFolded())
-						MouseEventActor.INSTANCE.withMouseEvent( () ->
-							controller.getSelection().replaceSelection(array));
+						MouseEventActor.INSTANCE.withMouseEvent(() ->
+							controller.getSelection().replaceSelection(selectedArray));
 					else
-						MouseEventActor.INSTANCE.withMouseEvent( () ->
+						MouseEventActor.INSTANCE.withMouseEvent(() ->
 							mapView.selectAsTheOnlyOneSelected(targetNodeView));
-				}
-				else if (DnDConstants.ACTION_COPY == dropAction || DnDConstants.ACTION_MOVE == dropAction) {
-					Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT :  Side.BOTTOM_OR_RIGHT;
-					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode,
-							dropAsSibling ? sides.get(dragOverRelation) : side);
-					MouseEventActor.INSTANCE.withMouseEvent( () ->
+				} else {
+					MouseEventActor.INSTANCE.withMouseEvent(() ->
 						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
 				}
 			}
@@ -307,22 +282,7 @@ public class MNodeDropListener implements DropTargetListener {
 		nodeFolder.reset();
 	}
 
-	private void moveNodes(final MMapController mapController, final NodeModel targetNode, Transferable t,
-			InsertionRelation insertionRelation, final boolean isTopOrLeft) throws UnsupportedFlavorException, IOException{
-		final List<NodeModel> movedNodes = NodeDropUtils.getNodeObjects(t);
-		MouseEventActor.INSTANCE.withMouseEvent( () -> {
-			if (insertionRelation != InsertionRelation.AS_CHILD) {
-				mapController.moveNodes(movedNodes, targetNode, insertionRelation);
-				mapController.setSide(movedNodes, targetNode.getSide());
-			}
-			else {
-				List<NodeModel> nodesChangingParent = movedNodes.stream().filter(node -> targetNode != node.getParentNode()).collect(Collectors.toList());
-				mapController.moveNodes(movedNodes, targetNode, insertionRelation);
-				Side side = isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-				mapController.setSide(side == Side.DEFAULT ? nodesChangingParent : movedNodes, side);
-			}
-		});
-	}
+
 
 	@Override
 	public void dropActionChanged(final DropTargetDragEvent e) {

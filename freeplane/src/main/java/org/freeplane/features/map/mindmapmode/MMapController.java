@@ -705,17 +705,17 @@ public class MMapController extends MapController {
 
     public void moveNodes(final List<NodeModel> children, final NodeModel target, InsertionRelation insertionRelation) {
     	if(insertionRelation == InsertionRelation.AS_CHILD) {
-        FreeNode r = Controller.getCurrentModeController().getExtension(FreeNode.class);
-        for(NodeModel node : children){
-            final IExtension extension = node.getExtension(FreeNode.class);
-            if (extension != null) {
-                r.undoableToggleHook(node, extension);
-                if (MapStyleModel.FLOATING_STYLE.equals(LogicalStyleModel.getStyle(node)))
-                    ((MLogicalStyleController)MLogicalStyleController.getController(getMModeController())).setStyle(node, null);
-            }
-        }
-        int position = target.getChildCount();
-        moveNodes(children, target, position);
+    		FreeNode r = Controller.getCurrentModeController().getExtension(FreeNode.class);
+    		for(NodeModel node : children){
+    			final IExtension extension = node.getExtension(FreeNode.class);
+    			if (extension != null) {
+    				r.undoableToggleHook(node, extension);
+    				if (MapStyleModel.FLOATING_STYLE.equals(LogicalStyleModel.getStyle(node)))
+    					((MLogicalStyleController)MLogicalStyleController.getController(getMModeController())).setStyle(node, null);
+    			}
+    		}
+    		int position = target.getChildCount();
+    		moveNodes(children, target, position);
     	}
     	else {
     		final NodeModel newParent = target.getParentNode();
