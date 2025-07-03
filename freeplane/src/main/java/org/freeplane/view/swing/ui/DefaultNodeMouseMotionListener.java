@@ -65,8 +65,7 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		    return;
 
 		final NodeModel node = nodeView.getNode();
-		Controller currentController = Controller.getCurrentController();
-        final ModeController mc = currentController.getModeController();
+        final ModeController mc = nodeView.getMap().getModeController();
 		final MapController mapController = mc.getMapController();
 		if(e.getButton() == MouseEvent.BUTTON1
 		        && Compat.isPlainEvent(e)
@@ -219,16 +218,16 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 		Point point = e.getPoint();
         String link = node.getLink(point);
 		boolean followLink = link != null;
-		Controller currentController = Controller.getCurrentController();
+		final ModeController modeController = node.getNodeView().getMap().getModeController();
         if(! followLink){
         	followLink = node.isClickableLink(point);
         	if(followLink){
-				link = LinkController.getController(currentController.getModeController()).getLinkShortText(node.getNodeView().getNode());
+				link = LinkController.getController(modeController).getLinkShortText(node.getNodeView().getNode());
         	}
         }
         final Cursor requiredCursor;
         if(followLink){
-			currentController.getViewController().out(link);
+        	modeController.getController().getViewController().out(link);
 			requiredCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 			node.setMouseArea(MouseArea.LINK);
         }
@@ -297,11 +296,11 @@ public class DefaultNodeMouseMotionListener implements IMouseListener {
 	}
 
 	private void showFoldingPopup(MouseEvent e) {
-		ModeController mc = Controller.getCurrentController().getModeController();
+		final NodeView nodeView = nodeSelector.getRelatedNodeView(e);
+		ModeController mc = nodeView.getMap().getModeController();
 		final FoldingController foldingController = mc.getExtension(FoldingController.class);
 		if(foldingController == null)
 			return;
-		final NodeView nodeView = nodeSelector.getRelatedNodeView(e);
 		final JPopupMenu popupmenu = foldingController.createFoldingPopupMenu(nodeView.getNode());
 		AutoHide.start(popupmenu);
 		new NodePopupMenuDisplayer().showMenuAndConsumeEvent(popupmenu, e);

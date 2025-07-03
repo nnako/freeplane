@@ -122,10 +122,11 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 				&& doubleClickTimer.getDelay() > 0;
 		if (shouldEditOrResetPosition) {
 			final MainView mainView = (MainView) e.getComponent();
+			final ModeController modeController = mainView.getNodeView().getMap().getModeController();
+			final Controller controller = modeController.getController();
 			if (mainView.getMouseArea().equals(MouseArea.MOTION)) {
-				final Controller controller = Controller.getCurrentController();
 				MLocationController locationController = (MLocationController) LocationController
-				    .getController(controller.getModeController());
+				    .getController(modeController);
 				if (e.getModifiersEx() == 0) {
 					final NodeView nodeV = mainView.getNodeView();
 					final NodeModel node = nodeV.getNode();
@@ -285,8 +286,7 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 			final Point point = e.getPoint();
 			UITools.convertPointToAncestor(draggedNodeView, point, JScrollPane.class);
 			findGridPoint(point);
-			Controller controller = Controller.getCurrentController();
-            ModeController modeController = controller.getModeController();
+            ModeController modeController = mapView.getModeController();
 			final Point dragNextPoint = point;
 			boolean changesDistanceBetweenChildren = Compat.isCtrlEvent(e);
 			boolean usesHorizontalLayout = draggedNodeView.getAncestorWithVisibleContent().usesHorizontalLayout();
@@ -416,7 +416,6 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 		}
 		final NodeModel node = getNode();
 		final ModeController modeController = draggedNodeView.getMap().getModeController();
-		final Controller controller = modeController.getController();
 		final NodeView parentView = draggedNodeView.getParentView();
 		if(parentView == null) {
 		    resetPositions();
@@ -424,8 +423,7 @@ public class MNodeMotionListener extends DefaultNodeMouseMotionListener implemen
 		    return;
 		}
 		NodeModel parentNode = parentView.getNode();
-        MLocationController locationController = (MLocationController) LocationController.getController(controller
-                .getModeController());
+        MLocationController locationController = (MLocationController) LocationController.getController(modeController);
         final Quantity<LengthUnit> parentVGap = locationController.getCommonVGapBetweenChildren(parentNode);
         final Quantity<LengthUnit> baseHGap = locationController.getBaseHGapToChildren(parentNode);
 		Quantity<LengthUnit> hgap = LocationModel.getModel(node).getHGap();
