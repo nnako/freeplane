@@ -55,11 +55,66 @@ public class NodeDropUtils {
 				||containsTags;
 	}
 
+	public static boolean isDragAcceptableForGenericTarget(final DropTargetDragEvent event, NodeModel targetNode) {
+		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
+		if(containsTags) {
+			try {
+				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
+				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
+				Tag tag = TagCategories.readTag(tagData);
+				if(nodeTags.contains(tag))
+					return false;
+			} catch (IOException | UnsupportedFlavorException e) {
+				return false;
+			}
+		}
+		return event.isDataFlavorSupported(DataFlavor.stringFlavor)
+			||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
+			||event.isDataFlavorSupported(DataFlavor.imageFlavor)
+			||containsTags;
+	}
+
 	public static boolean isDropAcceptable(final DropTargetDropEvent event, NodeModel targetNode, int dropAction) {
 		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
 		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && ! containsTags) {
 			return false;
 		}
+		if (!event.isLocalTransfer())
+			return true;
+		if(containsTags) {
+			try {
+				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
+				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
+				Tag tag = TagCategories.readTag(tagData);
+				if(nodeTags.contains(tag))
+					return false;
+			} catch (IOException | UnsupportedFlavorException e) {
+				return false;
+			}
+		}
+
+		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
+			 return dropAction != DnDConstants.ACTION_LINK;
+		final List<NodeModel> droppedNodes;
+		try {
+			final Transferable t = event.getTransferable();
+			droppedNodes = getNodeObjects(t);
+		}
+		catch (Exception e) {
+			return dropAction != DnDConstants.ACTION_LINK;
+		}
+		if (dropAction == DnDConstants.ACTION_LINK) {
+			return areFromSameMap(targetNode, droppedNodes);
+		}
+
+		if (dropAction == DnDConstants.ACTION_MOVE) {
+			return !isFromDescendantNode(targetNode, droppedNodes);
+		}
+		return !droppedNodesContainTargetNode(targetNode, droppedNodes);
+	}
+
+	public static boolean isDropAcceptableForGenericTarget(final DropTargetDropEvent event, NodeModel targetNode, int dropAction) {
+		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
 		if (!event.isLocalTransfer())
 			return true;
 		if(containsTags) {
