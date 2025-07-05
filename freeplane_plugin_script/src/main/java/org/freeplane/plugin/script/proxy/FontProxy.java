@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.freeplane.plugin.script.proxy;
 
@@ -53,6 +53,16 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 		return NodeStyleModel.isStrikedThrough(getDelegate()) != null;
 	}
 
+	@Override
+	public boolean isUnderlined() {
+		return getStyleController().isUnderlined(getDelegate(), StyleOption.FOR_UNSELECTED_NODE);
+	}
+
+	@Override
+	public boolean isUnderlinedSet() {
+		return NodeStyleModel.isUnderlined(getDelegate()) != null;
+	}
+
 	public boolean isNameSet() {
 		return NodeStyleModel.getFontFamilyName(getDelegate()) != null;
 	}
@@ -93,6 +103,11 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 	@Override
 	public void setStrikedThrough(boolean strikedThrough) {
 		getStyleController().setStrikedThrough(getDelegate(), strikedThrough);
+	}
+
+	@Override
+	public void setUnderlined(boolean underlined) {
+		getStyleController().setUnderlined(getDelegate(), underlined);
 	}
 
 	public void setName(final String name) {

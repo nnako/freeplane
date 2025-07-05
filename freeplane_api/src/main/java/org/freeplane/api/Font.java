@@ -18,6 +18,8 @@ public interface Font extends FontRO {
 
 	void setStrikedThrough(boolean strikedThrough);
 
+	void setUnderlined(boolean underlined);
+
 	void setName(String name);
 
 	void setSize(int size);

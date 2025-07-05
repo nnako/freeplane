@@ -14,6 +14,10 @@ public interface FontRO {
 
 	boolean isItalicSet();
 
+	boolean isUnderlined();
+
+	boolean isUnderlinedSet();
+
 	boolean isStrikedThrough();
 
 	boolean isStrikedThroughSet();

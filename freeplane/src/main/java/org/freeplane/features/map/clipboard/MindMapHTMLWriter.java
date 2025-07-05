@@ -20,6 +20,7 @@
 package org.freeplane.features.map.clipboard;
 
 import static org.freeplane.features.nodestyle.FontUtils.isStrikedThrough;
+import static org.freeplane.features.nodestyle.FontUtils.isUnderlined;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -190,8 +191,17 @@ class MindMapHTMLWriter {
 			if ((defaultFont == null || !defaultFont.isBold()) && font.isBold()) {
 				fontStyle.append("font-weight: bold; ");
 			}
-			if ((defaultFont == null || !isStrikedThrough(defaultFont)) && isStrikedThrough(font)) {
-				fontStyle.append("text-decoration: line-through; ");
+			boolean isUnderlinedByDefault = defaultFont != null && isUnderlined(defaultFont);
+			boolean isUnderlined = isUnderlined(font);
+			boolean isStrikedThroughByDefault = defaultFont != null && isStrikedThrough(defaultFont);
+			boolean isStrikedThrough = isStrikedThrough(font);
+
+			if (!isUnderlinedByDefault && isUnderlined && !isStrikedThroughByDefault && isStrikedThrough) {
+			    fontStyle.append("text-decoration: underline line-through; ");
+			} else if (!isUnderlinedByDefault && isUnderlined) {
+			    fontStyle.append("text-decoration: underline; ");
+			} else if (!isStrikedThroughByDefault && isStrikedThrough) {
+			    fontStyle.append("text-decoration: line-through; ");
 			}
 		}
 		return fontStyle.toString();

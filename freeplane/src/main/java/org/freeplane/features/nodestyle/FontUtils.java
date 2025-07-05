@@ -17,4 +17,16 @@ public class FontUtils {
 	public static boolean isStrikedThrough(final Font font) {
 		return TextAttribute.STRIKETHROUGH_ON.equals(font.getAttributes().get(TextAttribute.STRIKETHROUGH));
 	}
+	@SuppressWarnings("unchecked")
+	public static Font underline(final Font font) {
+		@SuppressWarnings("rawtypes")
+		final Map attributes = font.getAttributes();
+		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+		Font newFont = new Font(attributes);
+		return newFont;
+	}
+
+	public static boolean isUnderlined(final Font font) {
+		return TextAttribute.UNDERLINE_ON.equals(font.getAttributes().get(TextAttribute.UNDERLINE));
+	}
 }

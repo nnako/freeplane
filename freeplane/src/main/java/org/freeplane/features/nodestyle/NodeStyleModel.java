@@ -92,6 +92,11 @@ public class NodeStyleModel implements IExtension, Cloneable {
 		return styleModel == null ? null : styleModel.isBold();
 	}
 
+	public static Boolean isUnderlined(final NodeModel node) {
+		final NodeStyleModel styleModel = node.getExtension(NodeStyleModel.class);
+		return styleModel == null ? null : styleModel.isUnderlined();
+	}
+
 	public static Boolean isStrikedThrough(NodeModel node) {
 		final NodeStyleModel styleModel = node.getExtension(NodeStyleModel.class);
 		return styleModel == null ? null : styleModel.isStrikedThrough();
@@ -177,6 +182,7 @@ public class NodeStyleModel implements IExtension, Cloneable {
 	private String fontFamilyName = null;
 	private Integer fontSize = null;
 	private Boolean isBold = null;
+	private Boolean isUnderlined = null;
 	private Boolean isStrikedThrough = null;
 	private Boolean isItalic = null;
 	private NodeGeometryModel shapeConfiguration = NodeGeometryModel.NULL_SHAPE;
@@ -197,6 +203,8 @@ public class NodeStyleModel implements IExtension, Cloneable {
 	        to.setBackgroundColor(backgroundColor);
 	    if(isBold != null)
 	        to.setBold(isBold);
+	    if(isUnderlined != null)
+	        to.setUnderlined(isUnderlined);
 	    if(fontFamilyName != null)
 	        to.setFontFamilyName(fontFamilyName);
 	    if(fontSize != null)
@@ -250,6 +258,10 @@ public class NodeStyleModel implements IExtension, Cloneable {
 		return isBold;
 	}
 
+	public Boolean isUnderlined() {
+		return isUnderlined;
+	}
+
 	public Boolean isStrikedThrough() {
 		return isStrikedThrough;
 	}
@@ -272,6 +284,10 @@ public class NodeStyleModel implements IExtension, Cloneable {
 
 	public void setBold(final Boolean isBold) {
 		this.isBold = isBold;
+	}
+
+	public void setUnderlined(final Boolean isUnderline) {
+		this.isUnderlined = isUnderline;
 	}
 
 	public void setStrikedThrough(final Boolean isStrikedThrough) {

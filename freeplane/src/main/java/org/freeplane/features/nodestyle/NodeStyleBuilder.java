@@ -54,6 +54,7 @@ class NodeStyleBuilder implements IElementDOMHandler, IExtensionElementWriter, I
 		Integer fontSize;
 		Boolean isBold;
 		Boolean isStrikedThrough;
+		Boolean isUnderlined;
 		Boolean isItalic;
 	}
 
@@ -84,6 +85,7 @@ class NodeStyleBuilder implements IElementDOMHandler, IExtensionElementWriter, I
 				nodeStyleModel.setFontSize(fp.fontSize);
 				nodeStyleModel.setItalic(fp.isItalic);
 				nodeStyleModel.setBold(fp.isBold);
+				nodeStyleModel.setUnderlined(fp.isUnderlined);
 				nodeStyleModel.setStrikedThrough(fp.isStrikedThrough);
 				return;
 			}
@@ -187,6 +189,12 @@ class NodeStyleBuilder implements IElementDOMHandler, IExtensionElementWriter, I
 			public void setAttribute(final Object userObject, final String value) {
 				final FontProperties fp = (FontProperties) userObject;
 				fp.isStrikedThrough = value.equals("true");
+			}
+		});
+		reader.addAttributeHandler("font", "UNDERLINED", new IAttributeHandler() {
+			public void setAttribute(final Object userObject, final String value) {
+				final FontProperties fp = (FontProperties) userObject;
+				fp.isUnderlined = value.equals("true");
 			}
 		});
 		reader.addAttributeHandler("font", "ITALIC", new IAttributeHandler() {
@@ -537,6 +545,11 @@ class NodeStyleBuilder implements IElementDOMHandler, IExtensionElementWriter, I
 			final Boolean bold = forceFormatting ? Boolean.valueOf(nsc.isBold(node, StyleOption.FOR_UNSELECTED_NODE)) : style.isBold();
 			if (bold != null) {
 				fontElement.setAttribute("BOLD", bold ? "true" : "false");
+				isRelevant = true;
+			}
+			final Boolean underlined = forceFormatting ? Boolean.valueOf(nsc.isUnderlined(node, StyleOption.FOR_UNSELECTED_NODE)) : style.isUnderlined();
+			if (underlined != null) {
+				fontElement.setAttribute("UNDERLINED", underlined ? "true" : "false");
 				isRelevant = true;
 			}
 			final Boolean strikedThrough = forceFormatting ? Boolean.valueOf(nsc.isStrikedThrough(node, StyleOption.FOR_UNSELECTED_NODE)) : style.isStrikedThrough();

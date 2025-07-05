@@ -163,6 +163,9 @@ public class MNodeStyleController extends NodeStyleController {
 			if (null != whichStyle.isBold()) {
 				fromStyle.setBold(null);
 			}
+			if (null != whichStyle.isUnderlined()) {
+				fromStyle.setUnderlined(null);
+			}
 			if (null != whichStyle.isItalic()) {
 				fromStyle.setItalic(null);
 			}
@@ -237,6 +240,7 @@ public class MNodeStyleController extends NodeStyleController {
 		super(modeController);
 		modeController.registerExtensionCopier(new StyleCopier(modeController));
 		modeController.addAction(new BoldAction());
+		modeController.addAction(new UnderlineAction());
 		modeController.addAction(new StrikeThroughAction());
 		modeController.addAction(new ItalicAction());
 		modeController.addAction(new CopyFormat());
@@ -447,6 +451,39 @@ public class MNodeStyleController extends NodeStyleController {
 			public void undo() {
 				final NodeStyleModel styleModel = NodeStyleModel.getModel(node);
 				styleModel.setBold(oldBold);
+				getModeController().getMapController().nodeChanged(node);
+			}
+		};
+		modeController.execute(actor, node.getMap());
+	}
+
+	/**
+	 * @param underline
+	 */
+	public void setUnderlined(final NodeModel node, final Boolean underline) {
+		final Boolean oldUnderline = NodeStyleModel.isUnderlined(node);
+		if (oldUnderline == underline || oldUnderline != null && oldUnderline.equals(underline)) {
+			return;
+		}
+		createOwnStyleModel(node);
+		final ModeController modeController = getModeController();
+		final IActor actor = new IActor() {
+			@Override
+			public void act() {
+				final NodeStyleModel styleModel = NodeStyleModel.getModel(node);
+				styleModel.setUnderlined(underline);
+				getModeController().getMapController().nodeChanged(node);
+			}
+
+			@Override
+			public String getDescription() {
+				return "setUnderlined";
+			}
+
+			@Override
+			public void undo() {
+				final NodeStyleModel styleModel = NodeStyleModel.getModel(node);
+				styleModel.setUnderlined(oldUnderline);
 				getModeController().getMapController().nodeChanged(node);
 			}
 		};

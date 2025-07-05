@@ -401,6 +401,7 @@ public class NodeStyleController implements IExtension {
 	private Font getStyleFont(final Font baseFont, final MapModel map, final Collection<IStyle> collection) {
 		final MapStyleModel model = MapStyleModel.getExtension(map);
 		Boolean bold = null;
+		Boolean underline = null;
 		Boolean strikedThrough = null;
         Boolean italic = null;
         String fontFamilyName = null;
@@ -415,13 +416,14 @@ public class NodeStyleController implements IExtension {
 				continue;
 			}
 			if (bold == null) bold = styleModel.isBold();
+			if (underline == null) underline = styleModel.isUnderlined();
 			if (strikedThrough == null) strikedThrough = styleModel.isStrikedThrough();
 			if (italic == null) italic = styleModel.isItalic();
 			if (fontFamilyName == null) fontFamilyName = styleModel.getFontFamilyName();
 			if (fontSize == null) fontSize = styleModel.getFontSize();
-			if(bold != null && italic != null && fontFamilyName != null && fontSize != null && strikedThrough == null) break;
+			if(bold != null && underline != null && italic != null && fontFamilyName != null && fontSize != null && strikedThrough == null) break;
 		}
-		return createFont(baseFont, fontFamilyName, fontSize, bold, italic, strikedThrough);
+		return createFont(baseFont, fontFamilyName, fontSize, bold, italic, underline, strikedThrough);
 	}
 
 	public HorizontalTextAlignment getHorizontalTextAlignment(final NodeModel node, StyleOption option) {
@@ -432,8 +434,9 @@ public class NodeStyleController implements IExtension {
 		return textWritingDirectionHandlers.getProperty(node, option);
 	}
 
-	private Font createFont(final Font baseFont, String family, Integer size, Boolean bold, Boolean italic, Boolean strikedThrough) {
-		if (family == null && size == null && bold == null && italic == null) {
+	private Font createFont(final Font baseFont, String family, Integer size,
+			Boolean bold, Boolean italic, Boolean underline, Boolean strikedThrough) {
+		if (family == null && size == null && bold == null && italic == null && underline == null) {
 			return baseFont;
 		}
 		if (family == null) {
@@ -455,12 +458,17 @@ public class NodeStyleController implements IExtension {
 		if (italic) {
 			style += Font.ITALIC;
 		}
-		final Font font = new Font(family, style, size);
-		if(strikedThrough == TextAttribute.STRIKETHROUGH_ON) {
-			return FontUtils.strikeThrough(font);
+		Font font = new Font(family, style, size);
+		if(strikedThrough == Boolean.TRUE) {
+			font =  FontUtils.strikeThrough(font);
 		}
-		else
-			return font;
+		if(strikedThrough == TextAttribute.STRIKETHROUGH_ON) {
+			font =  FontUtils.strikeThrough(font);
+		}
+		if(underline == Boolean.TRUE) {
+			font =  FontUtils.underline(font);
+		}
+		return font;
 	}
 
 	private NodeGeometryModel getStyleShape(final MapModel map, final Collection<IStyle> style) {
@@ -571,6 +579,10 @@ public class NodeStyleController implements IExtension {
 
 	public boolean isBold(final NodeModel node, StyleOption option) {
 		return getFont(node, option).isBold();
+	}
+
+	public boolean isUnderlined(final NodeModel node, StyleOption option) {
+		return FontUtils.isUnderlined(getFont(node, option));
 	}
 
 	public boolean isItalic(final NodeModel node, StyleOption option) {

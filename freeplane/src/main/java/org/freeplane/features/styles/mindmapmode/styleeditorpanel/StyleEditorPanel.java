@@ -145,6 +145,7 @@ public class StyleEditorPanel extends JPanel {
                 new FontNameControlGroup(),
                 new FontSizeControlGroup(),
                 new FontBoldControlGroup(),
+                new FontUnderlineControlGroup(),
                 new FontStrikeThroughControlGroup(),
                 new FontItalicControlGroup(),
                 new NodeHorizontalTextAlignmentControlGroup(),

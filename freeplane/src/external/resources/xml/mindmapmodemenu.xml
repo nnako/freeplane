@@ -71,10 +71,11 @@
 			<Entry name="TextWritingDirectionAction.RIGHT_TO_LEFT" />
 			<Entry builder="panel" />
 		</Entry>
-		<Entry builder="main_toolbar_font_name" usedBy="EDITOR" row="1"  width="6"/>
+		<Entry builder="main_toolbar_font_name" usedBy="EDITOR" row="1"  width="7"/>
 		<Entry name="font" usedBy="EDITOR" row="2">
 			<Entry name="BoldAction" />
 			<Entry name="ItalicAction" />
+			<Entry name="UnderlineAction" />
 			<Entry name="StrikeThroughAction" />
 			<Entry name="NodeColorAction" />
 			<Entry builder="main_toolbar_font_size" />
@@ -424,6 +425,7 @@
 						<Entry name="menu_coreFormat">
 							<Entry name="BoldAction" accelerator="control B" />
 							<Entry name="ItalicAction" accelerator="control I" />
+							<Entry name="UnderlineAction" />
 							<Entry name="StrikeThroughAction"/>
 							<Entry name="IncreaseNodeFontAction" accelerator="control PLUS" />
 							<Entry name="DecreaseNodeFontAction" accelerator="control MINUS" />

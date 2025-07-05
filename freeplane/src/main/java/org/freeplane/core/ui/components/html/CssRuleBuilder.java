@@ -51,7 +51,14 @@ public class CssRuleBuilder {
 		if (font.isItalic()) {
 			rule.append(" font-style: italic;");
 		}
-		if(FontUtils.isStrikedThrough(font)) {
+		boolean isUnderlined = FontUtils.isUnderlined(font);
+		boolean isStrikedThrough = FontUtils.isStrikedThrough(font);
+
+		if (isUnderlined && isStrikedThrough) {
+			rule.append(" text-decoration: underline line-through;");
+		} else if (isUnderlined) {
+			rule.append(" text-decoration: underline;");
+		} else if (isStrikedThrough) {
 			rule.append(" text-decoration: line-through;");
 		}
 	}
