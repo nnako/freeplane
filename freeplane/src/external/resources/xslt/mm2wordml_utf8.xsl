@@ -96,12 +96,39 @@
 						</w:pPr>
 						<w:r>
 							<w:t>
+								<!-- adds "{i:<icon name>} " ahead of a header if an icon is assigned;
+									 actually adding the icon itself would require to extract it from the jar
+									 and to base64encode-insert it, neither can be done in an xslt -->
+								<xsl:if test="icon/@BUILTIN">
+									<xsl:text>{i:</xsl:text>
+									<xsl:value-of select="icon/@BUILTIN" />
+									<xsl:text>} </xsl:text>
+								</xsl:if>
+
 								<xsl:call-template name="output-node-core" />
 							</w:t>
 						</w:r>
 					</w:p>
 					<xsl:call-template name="output-added-richcontent"><xsl:with-param name="contentType" select="'DETAILS'"/></xsl:call-template>
 					<xsl:call-template name="output-added-richcontent"><xsl:with-param name="contentType" select="'NOTE'"/></xsl:call-template>
+
+					<!-- add one line with all attributes as "[<key>: <value>]..." -->
+					<xsl:if test="count(attribute) > 0">
+						<w:p>
+							<w:r>
+								<w:t>
+									<xsl:for-each select="attribute">
+										<xsl:text>[</xsl:text>
+										<xsl:value-of select="@NAME" />
+										<xsl:text>: </xsl:text>
+										<xsl:value-of select="@VALUE" />
+										<xsl:text>]</xsl:text>
+									</xsl:for-each>
+								</w:t>
+							</w:r>
+						</w:p>
+					</xsl:if>
+
 					<!--
 						if the level is higher than maxlevel, or if the current node is
 						marked with LastHeading, we start outputting normal paragraphs,
