@@ -45,9 +45,11 @@ import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.map.NodeModel.Side;
+import org.freeplane.features.map.clipboard.MapClipboardController;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 import org.freeplane.features.map.mindmapmode.InsertionRelation;
 import org.freeplane.features.map.mindmapmode.MMapController;
+import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.view.swing.map.MainView;
@@ -232,17 +234,16 @@ public class MNodeDropListener implements DropTargetListener {
 				NodeDropUtils.handleLinkAction(t, targetNode, controller, modeController);
 			}
 			else {
-				final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
-				final NodeModel[] selectedArray = selecteds.toArray(new NodeModel[selecteds.size()]);
-
-				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-				InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
-
-				NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
-
 				if (DnDConstants.ACTION_MOVE == dropAction && dtde.isLocalTransfer()
 						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
 						&& NodeDropUtils.areFromSameMap(t, targetNode)) {
+					final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
+					final NodeModel[] selectedArray = selecteds.toArray(new NodeModel[selecteds.size()]);
+					
+					Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+					InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
+					NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
+
 					if(dropAsSibling || ! targetNodeView.isFolded())
 						MouseEventActor.INSTANCE.withMouseEvent(() ->
 							controller.getSelection().replaceSelection(selectedArray));
@@ -250,6 +251,8 @@ public class MNodeDropListener implements DropTargetListener {
 						MouseEventActor.INSTANCE.withMouseEvent(() ->
 							mapView.selectAsTheOnlyOneSelected(targetNodeView));
 				} else {
+					Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, side, dropAction);
 					MouseEventActor.INSTANCE.withMouseEvent(() ->
 						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
 				}

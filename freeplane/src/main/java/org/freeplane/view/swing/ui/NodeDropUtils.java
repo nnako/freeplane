@@ -29,6 +29,7 @@ import org.freeplane.features.map.mindmapmode.MMapController;
 import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
+import org.freeplane.view.swing.map.MainView;
 import org.freeplane.view.swing.map.MapViewIconListComponent;
 
 public class NodeDropUtils {
@@ -46,13 +47,13 @@ public class NodeDropUtils {
 				return false;
 			}
 		}
-		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && !containsTags)
-			return containsTags;
-		else
+		if(event.getDropTargetContext().getComponent() instanceof MainView)
 			return event.isDataFlavorSupported(DataFlavor.stringFlavor)
 				||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
 				||event.isDataFlavorSupported(DataFlavor.imageFlavor)
 				||containsTags;
+		else
+			return containsTags;
 	}
 
 	public static boolean isDragAcceptableForGenericTarget(final DropTargetDragEvent event, NodeModel targetNode) {
