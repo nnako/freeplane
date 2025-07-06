@@ -50,7 +50,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 			if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
 				handleBookmarkDragOver(dtde, targetButton);
 			}
-			else if (NodeDropUtils.isDragAcceptableForGenericTarget(dtde, targetButton.getBookmark().getNode())) {
+			else if (NodeDropUtils.isDragAcceptable(dtde, targetButton.getBookmark().getNode(), NodeDropUtils.AcceptedContent.ANY)) {
 				handleNodeDragOver(dtde, targetButton);
 			}
 			else {
@@ -149,7 +149,7 @@ class BookmarkDropTargetListener extends DropTargetAdapter {
 				BookmarkButton targetButton = (BookmarkButton) targetComponent;
 				if (dtde.isDataFlavorSupported(BookmarkTransferables.BOOKMARK_FLAVOR)) {
 					handleBookmarkDrop(dtde, targetButton);
-				} else if (NodeDropUtils.isDropAcceptableForGenericTarget(dtde, targetButton.getBookmark().getNode(), NodeDropUtils.getDropAction(dtde))) {
+				} else if (NodeDropUtils.isDropAcceptable(dtde, targetButton.getBookmark().getNode(), NodeDropUtils.getDropAction(dtde), NodeDropUtils.AcceptedContent.ANY)) {
 					handleNodeDrop(dtde, targetButton);
 				} else {
 					dtde.rejectDrop();

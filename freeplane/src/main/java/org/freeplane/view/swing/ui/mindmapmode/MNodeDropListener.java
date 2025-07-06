@@ -24,7 +24,9 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
+import java.io.IOException;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetContext;
 import java.awt.dnd.DropTargetDragEvent;
@@ -176,88 +178,48 @@ public class MNodeDropListener implements DropTargetListener {
 
 	private boolean isDragAcceptable(final DropTargetDragEvent event) {
 		NodeView nodeView = getMainView(event.getDropTargetContext()).getNodeView();
-		return NodeDropUtils.isDragAcceptable(event, nodeView.getNode());
+		NodeDropUtils.AcceptedContent acceptedContent = determineAcceptedContent(event.getDropTargetContext());
+		return NodeDropUtils.isDragAcceptable(event, nodeView.getNode(), acceptedContent);
+	}
+	
+	private NodeDropUtils.AcceptedContent determineAcceptedContent(DropTargetContext context) {
+		Component component = context.getComponent();
+		if (component instanceof MainView) {
+			return NodeDropUtils.AcceptedContent.ANY;
+		} else if (component instanceof MapViewIconListComponent) {
+			return NodeDropUtils.AcceptedContent.ONLY_TAGS;
+		} else {
+			return NodeDropUtils.AcceptedContent.ANY;
+		}
 	}
 
 	private boolean isDropAcceptable(final DropTargetDropEvent event, int dropAction) {
 		final NodeModel node = getMainView(event.getDropTargetContext()).getNodeView().getNode();
-		return NodeDropUtils.isDropAcceptable(event, node, dropAction);
+		NodeDropUtils.AcceptedContent acceptedContent = determineAcceptedContent(event.getDropTargetContext());
+		return NodeDropUtils.isDropAcceptable(event, node, dropAction, acceptedContent);
 	}
 
 	@Override
 	public void drop(final DropTargetDropEvent dtde) {
 		try {
-			final MainView mainView = getMainView(dtde.getDropTargetContext());
-			final NodeView targetNodeView = mainView.getNodeView();
-			final MapView mapView = targetNodeView.getMap();
-			mapView.select();
-			final NodeModel targetNode = targetNodeView.getNode();
-			final Controller controller = Controller.getCurrentController();
-			int dropAction = NodeDropUtils.getDropAction(dtde);
-			final Transferable t = dtde.getTransferable();
-			mainView.stopDragOver();
-			mainView.repaint();
-			if (!isDropAcceptable(dtde, dropAction)) {
+			DropContext context = prepareDropContext(dtde);
+			
+			if (!validateDrop(dtde, context)) {
 				dtde.rejectDrop();
 				return;
 			}
-			DragOverRelation dragOverRelation = mainView.dragOverRelation(dtde);
-			if(dragOverRelation == DragOverRelation.NOT_AVAILABLE) {
-			    dtde.rejectDrop();
-			    return;
+			
+			if (isExternalDrop(dtde)) {
+				handleExternalDrop(dtde, context);
+			} else if (isLinkAction(context.dropAction)) {
+				handleLinkAction(dtde, context);
+			} else if (isLocalNodeMove(dtde, context)) {
+				handleLocalNodeMove(dtde, context);
+			} else {
+				handleClipboardContentDrop(dtde, context);
 			}
-            final boolean dropAsSibling = dragOverRelation.isSibling();
-			ModeController modeController = controller.getModeController();
-			final MMapController mapController = (MMapController) modeController.getMapController();
-
-			if ((dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY)) {
-				final NodeModel parent = dropAsSibling ? targetNode.getParentNode() : targetNode;
-				if (!mapController.isWriteable(parent)) {
-					dtde.rejectDrop();
-					final String message = TextUtils.getText("node_is_write_protected");
-					UITools.errorMessage(message);
-					return;
-				}
-			}
-			final boolean isTopOrLeft = dragOverRelation == DragOverRelation.CHILD_BEFORE;
-			if (!dtde.isLocalTransfer()) {
-				adjustFoldingOnDrop(targetNodeView, dragOverRelation);
-				dtde.acceptDrop(DnDConstants.ACTION_COPY);
-				Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-				InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
-				NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
-				dtde.dropComplete(true);
-				return;
-			}
-			dtde.acceptDrop(dropAction);
-			if (dropAction == DnDConstants.ACTION_LINK) {
-				NodeDropUtils.handleLinkAction(t, targetNode, controller, modeController);
-			}
-			else {
-				if (DnDConstants.ACTION_MOVE == dropAction && dtde.isLocalTransfer()
-						&& t.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)
-						&& NodeDropUtils.areFromSameMap(t, targetNode)) {
-					final Collection<NodeModel> selecteds = mapController.getSelectedNodes();
-					final NodeModel[] selectedArray = selecteds.toArray(new NodeModel[selecteds.size()]);
-					
-					Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-					InsertionRelation insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
-					NodeDropUtils.handleMoveOrCopyAction(t, targetNode, dropAction, dtde.isLocalTransfer(), insertionRelation, side);
-
-					if(dropAsSibling || ! targetNodeView.isFolded())
-						MouseEventActor.INSTANCE.withMouseEvent(() ->
-							controller.getSelection().replaceSelection(selectedArray));
-					else
-						MouseEventActor.INSTANCE.withMouseEvent(() ->
-							mapView.selectAsTheOnlyOneSelected(targetNodeView));
-				} else {
-					Side side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
-					((MMapClipboardController) MapClipboardController.getController()).paste(t, targetNode, side, dropAction);
-					MouseEventActor.INSTANCE.withMouseEvent(() ->
-						controller.getSelection().selectAsTheOnlyOneSelected(targetNode));
-				}
-			}
-			adjustFoldingOnDrop(targetNodeView, dragOverRelation);
+			
+			adjustFoldingOnDrop(context.targetNodeView, context.dragOverRelation);
 		}
 		catch (final Exception e) {
 			LogUtils.severe("Drop exception:", e);
@@ -265,6 +227,140 @@ public class MNodeDropListener implements DropTargetListener {
 			return;
 		}
 		dtde.dropComplete(true);
+	}
+	
+	private static class DropContext {
+		final MainView mainView;
+		final NodeView targetNodeView;
+		final MapView mapView;
+		final NodeModel targetNode;
+		final Controller controller;
+		final ModeController modeController;
+		final MMapController mapController;
+		final int dropAction;
+		final Transferable transferable;
+		final DragOverRelation dragOverRelation;
+		final boolean dropAsSibling;
+		final boolean isTopOrLeft;
+		final Side side;
+		final InsertionRelation insertionRelation;
+		
+		DropContext(DropTargetDropEvent dtde, MNodeDropListener listener) {
+			this.mainView = listener.getMainView(dtde.getDropTargetContext());
+			this.targetNodeView = mainView.getNodeView();
+			this.mapView = targetNodeView.getMap();
+			this.targetNode = targetNodeView.getNode();
+			this.controller = Controller.getCurrentController();
+			this.modeController = controller.getModeController();
+			this.mapController = (MMapController) modeController.getMapController();
+			this.dropAction = NodeDropUtils.getDropAction(dtde);
+			this.transferable = dtde.getTransferable();
+			this.dragOverRelation = mainView.dragOverRelation(dtde);
+			this.dropAsSibling = dragOverRelation.isSibling();
+			this.isTopOrLeft = dragOverRelation == DragOverRelation.CHILD_BEFORE;
+			this.side = dropAsSibling ? sides.get(dragOverRelation) : isTopOrLeft ? Side.TOP_OR_LEFT : Side.BOTTOM_OR_RIGHT;
+			this.insertionRelation = insertionRelations.getOrDefault(dragOverRelation, InsertionRelation.AS_CHILD);
+		}
+	}
+	
+	private DropContext prepareDropContext(final DropTargetDropEvent dtde) {
+		DropContext context = new DropContext(dtde, this);
+		context.mapView.select();
+		context.mainView.stopDragOver();
+		context.mainView.repaint();
+		return context;
+	}
+	
+	private boolean validateDrop(final DropTargetDropEvent dtde, DropContext context) {
+		if (!isDropAcceptable(dtde, context.dropAction)) {
+			return false;
+		}
+		
+		if (context.dragOverRelation == DragOverRelation.NOT_AVAILABLE) {
+			return false;
+		}
+		
+		if (requiresWriteableParent(context.dropAction)) {
+			final NodeModel parent = context.dropAsSibling ? context.targetNode.getParentNode() : context.targetNode;
+			if (!context.mapController.isWriteable(parent)) {
+				final String message = TextUtils.getText("node_is_write_protected");
+				UITools.errorMessage(message);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private boolean requiresWriteableParent(int dropAction) {
+		return dropAction == DnDConstants.ACTION_MOVE || dropAction == DnDConstants.ACTION_COPY;
+	}
+	
+	private boolean isExternalDrop(final DropTargetDropEvent dtde) {
+		return !dtde.isLocalTransfer();
+	}
+	
+	private boolean isLinkAction(int dropAction) {
+		return dropAction == DnDConstants.ACTION_LINK;
+	}
+	
+	private boolean isLocalNodeMove(final DropTargetDropEvent dtde, DropContext context) {
+		if (context.dropAction != DnDConstants.ACTION_MOVE || !dtde.isLocalTransfer()) {
+			return false;
+		}
+		
+		if (!context.transferable.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor)) {
+			return false;
+		}
+		
+		try {
+			return NodeDropUtils.areFromSameMap(context.transferable, context.targetNode);
+		} catch (UnsupportedFlavorException | IOException e) {
+			return false;
+		}
+	}
+	
+	private void handleExternalDrop(final DropTargetDropEvent dtde, DropContext context) throws Exception {
+		adjustFoldingOnDrop(context.targetNodeView, context.dragOverRelation);
+		dtde.acceptDrop(DnDConstants.ACTION_COPY);
+		NodeDropUtils.handleMoveOrCopyAction(context.transferable, context.targetNode, 
+			context.dropAction, false, context.insertionRelation, context.side);
+	}
+	
+	private void handleLinkAction(final DropTargetDropEvent dtde, DropContext context) throws Exception {
+		dtde.acceptDrop(context.dropAction);
+		NodeDropUtils.handleLinkAction(context.transferable, context.targetNode, 
+			context.controller, context.modeController);
+	}
+	
+	private void handleLocalNodeMove(final DropTargetDropEvent dtde, DropContext context) throws Exception {
+		dtde.acceptDrop(context.dropAction);
+		
+		final Collection<NodeModel> selectedNodes = context.mapController.getSelectedNodes();
+		final NodeModel[] selectedArray = selectedNodes.toArray(new NodeModel[selectedNodes.size()]);
+		
+		NodeDropUtils.handleMoveOrCopyAction(context.transferable, context.targetNode, 
+			context.dropAction, true, context.insertionRelation, context.side);
+
+		updateSelectionAfterNodeMove(context, selectedArray);
+	}
+	
+	private void updateSelectionAfterNodeMove(DropContext context, NodeModel[] selectedArray) {
+		if (context.dropAsSibling || !context.targetNodeView.isFolded()) {
+			MouseEventActor.INSTANCE.withMouseEvent(() ->
+				context.controller.getSelection().replaceSelection(selectedArray));
+		} else {
+			MouseEventActor.INSTANCE.withMouseEvent(() ->
+				context.mapView.selectAsTheOnlyOneSelected(context.targetNodeView));
+		}
+	}
+	
+	private void handleClipboardContentDrop(final DropTargetDropEvent dtde, DropContext context) throws Exception {
+		dtde.acceptDrop(context.dropAction);
+		((MMapClipboardController) MapClipboardController.getController())
+			.paste(context.transferable, context.targetNode, context.side, context.dropAction);
+		MouseEventActor.INSTANCE.withMouseEvent(() ->
+			context.controller.getSelection().selectAsTheOnlyOneSelected(context.targetNode));
 	}
 
 

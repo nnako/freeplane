@@ -29,95 +29,76 @@ import org.freeplane.features.map.mindmapmode.MMapController;
 import org.freeplane.features.map.mindmapmode.clipboard.MMapClipboardController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
-import org.freeplane.view.swing.map.MainView;
-import org.freeplane.view.swing.map.MapViewIconListComponent;
 
 public class NodeDropUtils {
 
-	public static boolean isDragAcceptable(final DropTargetDragEvent event, NodeModel targetNode) {
-		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
-		if(containsTags) {
-			try {
-				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
-				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
-				Tag tag = TagCategories.readTag(tagData);
-				if(nodeTags.contains(tag))
-					return false;
-			} catch (IOException | UnsupportedFlavorException e) {
-				return false;
-			}
-		}
-		if(event.getDropTargetContext().getComponent() instanceof MainView)
-			return event.isDataFlavorSupported(DataFlavor.stringFlavor)
-				||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
-				||event.isDataFlavorSupported(DataFlavor.imageFlavor)
-				||containsTags;
-		else
-			return containsTags;
+	public enum AcceptedContent {
+		ANY,
+		ONLY_TAGS
 	}
 
-	public static boolean isDragAcceptableForGenericTarget(final DropTargetDragEvent event, NodeModel targetNode) {
-		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
-		if(containsTags) {
-			try {
-				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
-				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
-				Tag tag = TagCategories.readTag(tagData);
-				if(nodeTags.contains(tag))
-					return false;
-			} catch (IOException | UnsupportedFlavorException e) {
-				return false;
-			}
-		}
-		return event.isDataFlavorSupported(DataFlavor.stringFlavor)
-			||event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
-			||event.isDataFlavorSupported(DataFlavor.imageFlavor)
-			||containsTags;
+	public static boolean isDragAcceptable(final DropTargetDragEvent event, NodeModel targetNode, AcceptedContent acceptedContent) {
+		return checkDragAcceptability(event, targetNode, acceptedContent);
 	}
-
-	public static boolean isDropAcceptable(final DropTargetDropEvent event, NodeModel targetNode, int dropAction) {
-		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
-		if(event.getDropTargetContext().getComponent() instanceof MapViewIconListComponent && ! containsTags) {
+	
+	private static boolean isDraggingDuplicateTag(final DropTargetDragEvent event, NodeModel targetNode) {
+		if (!event.isDataFlavorSupported(TagSelection.tagFlavor)) {
 			return false;
 		}
-		if (!event.isLocalTransfer())
-			return true;
-		if(containsTags) {
-			try {
-				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
-				String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
-				Tag tag = TagCategories.readTag(tagData);
-				if(nodeTags.contains(tag))
-					return false;
-			} catch (IOException | UnsupportedFlavorException e) {
-				return false;
-			}
-		}
-
-		if (! event.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
-			 return dropAction != DnDConstants.ACTION_LINK;
-		final List<NodeModel> droppedNodes;
+		
 		try {
-			final Transferable t = event.getTransferable();
-			droppedNodes = getNodeObjects(t);
+			List<Tag> existingNodeTags = Controller.getCurrentModeController()
+				.getExtension(IconController.class).getTags(targetNode);
+			String tagData = (String) event.getTransferable().getTransferData(TagSelection.tagFlavor);
+			Tag draggedTag = TagCategories.readTag(tagData);
+			return existingNodeTags.contains(draggedTag);
+		} catch (IOException | UnsupportedFlavorException e) {
+			return true;
 		}
-		catch (Exception e) {
-			return dropAction != DnDConstants.ACTION_LINK;
-		}
-		if (dropAction == DnDConstants.ACTION_LINK) {
-			return areFromSameMap(targetNode, droppedNodes);
-		}
+	}
+	
 
-		if (dropAction == DnDConstants.ACTION_MOVE) {
-			return !isFromDescendantNode(targetNode, droppedNodes);
-		}
-		return !droppedNodesContainTargetNode(targetNode, droppedNodes);
+	
+	private static boolean containsFilesStringsImagesOrTags(final DropTargetDragEvent event) {
+		return event.isDataFlavorSupported(DataFlavor.stringFlavor)
+			|| event.isDataFlavorSupported(MindMapNodesSelection.fileListFlavor)
+			|| event.isDataFlavorSupported(DataFlavor.imageFlavor)
+			|| event.isDataFlavorSupported(TagSelection.tagFlavor);
+	}
+	
+	private static boolean containsTags(final DropTargetDragEvent event) {
+		return event.isDataFlavorSupported(TagSelection.tagFlavor);
 	}
 
-	public static boolean isDropAcceptableForGenericTarget(final DropTargetDropEvent event, NodeModel targetNode, int dropAction) {
+	private static boolean checkDragAcceptability(final DropTargetDragEvent event, NodeModel targetNode, AcceptedContent acceptedContent) {
+		if (isDraggingDuplicateTag(event, targetNode)) {
+			return false;
+		}
+		
+		switch (acceptedContent) {
+			case ANY:
+				return containsFilesStringsImagesOrTags(event);
+			case ONLY_TAGS:
+				return containsTags(event);
+			default:
+				return false;
+		}
+	}
+
+	public static boolean isDropAcceptable(final DropTargetDropEvent event, NodeModel targetNode, int dropAction, AcceptedContent acceptedContent) {
+		return validateDropAcceptability(event, targetNode, dropAction, acceptedContent);
+	}
+	
+	private static boolean validateDropAcceptability(final DropTargetDropEvent event, NodeModel targetNode, int dropAction, AcceptedContent acceptedContent) {
 		boolean containsTags = event.isDataFlavorSupported(TagSelection.tagFlavor);
+		
+		if (acceptedContent == AcceptedContent.ONLY_TAGS && !containsTags) {
+			return false;
+		}
+		
 		if (!event.isLocalTransfer())
 			return true;
+			
 		if(containsTags) {
 			try {
 				List<Tag> nodeTags = Controller.getCurrentModeController().getExtension(IconController.class).getTags(targetNode);
@@ -150,7 +131,11 @@ public class NodeDropUtils {
 		return !droppedNodesContainTargetNode(targetNode, droppedNodes);
 	}
 
-	public static boolean isDropAcceptable(Transferable transferable, NodeModel targetNode, int dropAction) {
+
+
+
+
+	public static boolean canAcceptNodeTransfer(Transferable transferable, NodeModel targetNode, int dropAction) {
 		if (!transferable.isDataFlavorSupported(MindMapNodesSelection.mindMapNodeObjectsFlavor))
 			return dropAction != DnDConstants.ACTION_LINK;
 
