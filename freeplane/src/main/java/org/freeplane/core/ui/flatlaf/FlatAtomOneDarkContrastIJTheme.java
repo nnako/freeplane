@@ -1,8 +1,6 @@
 package org.freeplane.core.ui.flatlaf;
 
-import com.formdev.flatlaf.IntelliJTheme;
-
-public class FlatAtomOneDarkContrastIJTheme extends IntelliJTheme.ThemeLaf
+public class FlatAtomOneDarkContrastIJTheme extends CustomThemeLaf
 {
 	private static final long serialVersionUID = 1L;
 	public static final String NAME = "Atom One Dark Contrast (Material)";

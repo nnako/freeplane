@@ -1,8 +1,6 @@
 package org.freeplane.core.ui.flatlaf;
 
-import com.formdev.flatlaf.IntelliJTheme;
-
-public class FlatSolarizedLightIJTheme extends IntelliJTheme.ThemeLaf
+public class FlatSolarizedLightIJTheme extends CustomThemeLaf
 {
 	private static final long serialVersionUID = 1L;
 	public static final String NAME = "Solarized Light";
