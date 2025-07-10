@@ -286,8 +286,8 @@ class VerticalNodeViewLayoutStrategy {
                 	if (isFreeNode) {
                 		assignFreeChildVerticalPosition(index, childShiftY, child);
                 	} else {
-                    	handleFirstVisibleChildAlignment();
                 		if (childRegularHeight != 0) {
+                			handleFirstVisibleChildAlignment();
                 			assignRegularChildVerticalPosition(index, child, childRegularHeight, childShiftY);
                 			visibleLaidOutChildCounter++;
                 			lastRegularChild = child;
