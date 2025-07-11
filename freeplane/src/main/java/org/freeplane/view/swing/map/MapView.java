@@ -3311,9 +3311,9 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		    nextSelectedNode = newRootView;
 		if(newRootWasFolded) {
 			newRootView.fireFoldingChanged();
-	        currentRootView.updateIcons();
 	        setSiblingMaxLevel(getSelected());
 		}
+		newRootView.updateIcons();
 		newRootView.resetLayoutPropertiesRecursively();
 		fireRootChanged();
 		if(nextSelectedNode.isDisplayable()) {
