@@ -18,6 +18,20 @@ public enum TextWritingDirection {
     private final static String separator = File.separator;
     private final static String separatorReplacement = LEFT_TO_RIGHT.isolated(File.separator);
 
+    public static boolean containsRTL(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            byte dir = Character.getDirectionality(ch);
+            if (dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+                dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC ||
+                dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING ||
+                dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public final ComponentOrientation componentOrientation;
     private final char embedded;
     private final char overwritten;
@@ -44,8 +58,9 @@ public enum TextWritingDirection {
     }
 
     public String isolatePathSeparators(String path) {
-    	return embedded(path.replace(separator, separatorReplacement));
+    	return containsRTL(path) ? embedded(path.replace(separator, separatorReplacement)) : path;
     }
+
 
     public String isolated(String text) {
         return addControlCharacters(text, isolated, popIsolation);
