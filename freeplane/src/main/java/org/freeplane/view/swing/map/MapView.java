@@ -977,7 +977,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 	    return distanceToEdge * distanceToEdge * 2 / AUTOSCROLL_MARGIN;
 	}
 
-	boolean frameLayoutCompleted() {
+	boolean isFrameLayoutCompleted() {
 		final Frame frame = JOptionPane.getFrameForComponent(this);
 		final Insets frameInsets = frame.getInsets();
 		final Component rootPane = frame.getComponent(0);
@@ -2993,7 +2993,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
     }
 
 	void scrollViewAfterLayout() {
-		if(isDisplayable() && ! selection.selectionChanged) {
+		if(isDisplayable() && ! selection.selectionChanged && isFrameLayoutCompleted()) {
 			if(scrollsViewAfterLayout ) {
 				scrollsViewAfterLayout  = false;
 				mapScroller.scrollView();
