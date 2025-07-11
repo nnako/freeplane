@@ -1689,7 +1689,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if(isSelected())
             return;
         IMapSelection primarySelection = modeController.getController().getSelection();
-        if( primarySelection == null)
+        if( primarySelection == null || primarySelection.getMap() != viewedMap)
             return;
 
         if (getSelectedNodes().size() > 1)
@@ -1719,7 +1719,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
         if(isSelected())
             return;
         IMapSelection primarySelection = modeController.getController().getSelection();
-        if( primarySelection == null)
+        if( primarySelection == null || primarySelection.getMap() != viewedMap)
             return;
 
         NodeModel primaryRoot = primarySelection.getSelectionRoot();
