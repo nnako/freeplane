@@ -48,7 +48,6 @@ import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.note.NoteModel;
 import org.freeplane.features.note.NoteStyleAccessor;
 import org.freeplane.features.styles.MapStyle;
-import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.text.TextController;
 
 class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMapLifeCycleListener {
@@ -284,6 +283,6 @@ class NoteManager implements INodeSelectionListener, IMapSelectionListener, IMap
 		else
 			return Controller.getCurrentModeController()
 					.getExtension(NodeStyleController.class)
-					.getTextWritingDirection(node, StyleOption.FOR_UNSELECTED_NODE);
+					.getTextWritingDirection(node);
 	}
 }

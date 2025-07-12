@@ -28,7 +28,6 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.nodestyle.NodeStyleModel;
 import org.freeplane.features.nodestyle.mindmapmode.MNodeStyleController;
-import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 
@@ -61,7 +60,7 @@ class NodeTextWritingDirectionControlGroup implements ControlGroup {
 		void setStyleOnExternalChange(NodeModel node) {
 			final NodeStyleController styleController = NodeStyleController.getController();
 			final TextWritingDirection style = NodeStyleModel.getTextWritingDirection(node);
-			final TextWritingDirection viewStyle = styleController.getTextWritingDirection(node, StyleOption.FOR_UNSELECTED_NODE);
+			final TextWritingDirection viewStyle = styleController.getTextWritingDirection(node);
 			mSetNodeTextDirection.setValue(style != null);
 			mNodeTextDirection.setValue(viewStyle.name());
 		}

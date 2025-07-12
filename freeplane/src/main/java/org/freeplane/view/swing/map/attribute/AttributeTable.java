@@ -791,7 +791,7 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 		else {
 			final TextWritingDirection textDirection = NodeStyleController
 					.getController(Controller.getCurrentModeController())
-					.getTextWritingDirection(node, StyleOption.FOR_UNSELECTED_NODE);
+					.getTextWritingDirection(getAttributeTableModel().getNode());
 			editorComponent.setComponentOrientation(textDirection.componentOrientation);
 		}
 		return super.prepareEditor(tce, row, col);

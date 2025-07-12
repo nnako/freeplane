@@ -94,7 +94,6 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.ModeController;
 import org.freeplane.features.mode.mindmapmode.MModeController;
 import org.freeplane.features.nodestyle.NodeStyleController;
-import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 import org.freeplane.features.text.DetailModel;
 import org.freeplane.features.text.TextController;
 import org.freeplane.features.ui.IMapViewManager;
@@ -711,7 +710,7 @@ class NodeList implements IExtension {
             private String getNodeTextWithAncestorNodes(final NodeModel mindMapNode) {
                 NodeModel rootNode = mindMapNode.getMap().getRootNode();
                 TextWritingDirection direction = NodeStyleController.getController()
-                        .getTextWritingDirection(rootNode, StyleOption.FOR_UNSELECTED_NODE);
+                        .getTextWritingDirection(rootNode);
                 String separator = TextWritingDirection.LEFT_TO_RIGHT.isolated(" " +
                         (TextWritingDirection.LEFT_TO_RIGHT == direction ? "->" : "<-")
                         + " ");

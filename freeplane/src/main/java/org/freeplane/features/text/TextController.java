@@ -286,7 +286,7 @@ public class TextController implements IExtension {
 	public String getShortPlainText(NodeModel nodeModel, int maximumCharacters, String continuationMark) {
 		String adaptedText = getPlainTransformedTextWithoutNodeNumber(nodeModel);
 		String shortText = TextUtils.getShortText(adaptedText, maximumCharacters, continuationMark);
-		TextWritingDirection textWritingDirection = modeController.getExtension(NodeStyleController.class).getTextWritingDirection(nodeModel, StyleOption.FOR_UNSELECTED_NODE);
+		TextWritingDirection textWritingDirection = modeController.getExtension(NodeStyleController.class).getTextWritingDirection(nodeModel);
 		return textWritingDirection == TextWritingDirection.RIGHT_TO_LEFT ? TextWritingDirection.RIGHT_TO_LEFT.embedded(shortText) : shortText;
 	}
 

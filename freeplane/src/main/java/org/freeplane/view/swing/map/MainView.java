@@ -591,7 +591,7 @@ public class MainView extends ZoomableLabel {
 	void updateTextWritingDirection(NodeView node) {
 		final TextWritingDirection textDirection = NodeStyleController
 		        .getController(node.getMap().getModeController())
-		        .getTextWritingDirection(node.getNode(), node.getStyleOption());
+		        .getTextWritingDirection(node.getNode());
 		setComponentOrientation(textDirection.componentOrientation);
 	}
 

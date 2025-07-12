@@ -457,7 +457,7 @@ class NodeStyleBuilder implements IElementDOMHandler, IExtensionElementWriter, I
 			writer.addAttribute("TEXT_ALIGN", textAlignment.toString());
 		}
 		final TextWritingDirection textDirection = forceFormatting ?
-		        nsc.getTextWritingDirection(node, StyleOption.FOR_UNSELECTED_NODE) : style.getTextWritingDirection();
+		        nsc.getTextWritingDirection(node) : style.getTextWritingDirection();
 		if (textDirection != null) {
 			writer.addAttribute("TEXT_WRITING_DIRECTION", textDirection.toString());
 		}

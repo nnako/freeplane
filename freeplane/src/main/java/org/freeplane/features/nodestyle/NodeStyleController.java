@@ -430,8 +430,8 @@ public class NodeStyleController implements IExtension {
 		return horizontalTextAlignmentHandlers.getProperty(node, option);
 	}
 
-	public TextWritingDirection getTextWritingDirection(final NodeModel node, StyleOption option) {
-		return textWritingDirectionHandlers.getProperty(node, option);
+	public TextWritingDirection getTextWritingDirection(final NodeModel node) {
+		return textWritingDirectionHandlers.getProperty(node, StyleOption.FOR_UNSELECTED_NODE);
 	}
 
 	private Font createFont(final Font baseFont, String family, Integer size,

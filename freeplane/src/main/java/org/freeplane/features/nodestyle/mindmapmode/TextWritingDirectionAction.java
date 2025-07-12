@@ -28,7 +28,6 @@ import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.features.nodestyle.NodeStyleModel;
-import org.freeplane.features.styles.LogicalStyleController.StyleOption;
 
 @SelectableAction(checkOnNodeChange = true)
 class TextWritingDirectionAction extends AMultipleNodeAction {
@@ -64,7 +63,7 @@ class TextWritingDirectionAction extends AMultipleNodeAction {
 
 	private boolean isTextWritingDirectionSetByStyle() {
 		final NodeModel node = Controller.getCurrentModeController().getMapController().getSelectedNode();
-		return textDirection.equals(NodeStyleController.getController().getTextWritingDirection(node, StyleOption.FOR_UNSELECTED_NODE));
+		return textDirection.equals(NodeStyleController.getController().getTextWritingDirection(node));
 	}
 
 	@Override

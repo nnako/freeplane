@@ -1070,7 +1070,7 @@ public class MNodeStyleController extends NodeStyleController {
 				.withColor(getColor(selectedNode, StyleOption.FOR_UNSELECTED_NODE))
 				.withBackground(getBackgroundColor(selectedNode, StyleOption.FOR_UNSELECTED_NODE))
 				.withAlignment(getHorizontalTextAlignment(selectedNode, StyleOption.FOR_UNSELECTED_NODE).swingConstant)
-				.withDirection(getTextWritingDirection(selectedNode, StyleOption.FOR_UNSELECTED_NODE) ));
+				.withDirection(getTextWritingDirection(selectedNode) ));
 		ruleBuilder.append("}\n");
 		CssEditor cssEditor = new CssEditor(ruleBuilder.toString());
 		if (cssEditor.editCss(css) == JOptionPane.OK_OPTION)
