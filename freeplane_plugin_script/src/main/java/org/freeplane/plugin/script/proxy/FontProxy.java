@@ -54,12 +54,12 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 	}
 
 	@Override
-	public boolean isUnderlined() {
+	public boolean isUnderline() {
 		return getStyleController().isUnderlined(getDelegate(), StyleOption.FOR_UNSELECTED_NODE);
 	}
 
 	@Override
-	public boolean isUnderlinedSet() {
+	public boolean isUnderlineSet() {
 		return NodeStyleModel.isUnderlined(getDelegate()) != null;
 	}
 
@@ -106,8 +106,8 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 	}
 
 	@Override
-	public void setUnderlined(boolean underlined) {
-		getStyleController().setUnderlined(getDelegate(), underlined);
+	public void setUnderline(boolean underline) {
+		getStyleController().setUnderlined(getDelegate(), underline);
 	}
 
 	public void setName(final String name) {

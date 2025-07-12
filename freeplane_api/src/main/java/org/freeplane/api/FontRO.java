@@ -14,9 +14,9 @@ public interface FontRO {
 
 	boolean isItalicSet();
 
-	boolean isUnderlined();
+	boolean isUnderline();
 
-	boolean isUnderlinedSet();
+	boolean isUnderlineSet();
 
 	boolean isStrikedThrough();
 
