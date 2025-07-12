@@ -6,7 +6,10 @@ public interface Font extends FontRO {
 
 	void resetItalic();
 
+	@Deprecated
 	void resetStrikedThrough();
+
+	void resetStrikethrough();
 
 	void resetName();
 
@@ -16,9 +19,12 @@ public interface Font extends FontRO {
 
 	void setItalic(boolean italic);
 
+	@Deprecated
 	void setStrikedThrough(boolean strikedThrough);
 
-	void setUnderlined(boolean underlined);
+	void setStrikethrough(boolean strikethrough);
+
+	void setUnderline(boolean underline);
 
 	void setName(String name);
 

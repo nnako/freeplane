@@ -34,14 +34,14 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 
 
 public class FontUnderlineControlGroup implements ControlGroup {
-	static final String NODE_FONT_UNDERLINE = "nodefontsunderline";
+	static final String NODE_FONT_UNDERLINE = "nodefontunderline";
 
-	private RevertingProperty mSetNodeFontUnderilne;
-	private BooleanProperty mNodeFontUnderilne;
-	private FontUnderilneChangeListener propertyChangeListener;
+	private RevertingProperty mSetNodeFontUnderline;
+	private BooleanProperty mNodeFontUnderline;
+	private FontUnderlineChangeListener propertyChangeListener;
 
-	private class FontUnderilneChangeListener extends ControlGroupChangeListener {
-		public FontUnderilneChangeListener(final RevertingProperty mSet,final IPropertyControl mProperty) {
+	private class FontUnderlineChangeListener extends ControlGroupChangeListener {
+		public FontUnderlineChangeListener(final RevertingProperty mSet, final IPropertyControl mProperty) {
 			super(mSet, mProperty);
 		}
 
@@ -50,7 +50,7 @@ public class FontUnderlineControlGroup implements ControlGroup {
 			final MNodeStyleController styleController = (MNodeStyleController) Controller
 			.getCurrentModeController().getExtension(
 					NodeStyleController.class);
-			styleController.setStrikedThrough(node, enabled ? mNodeFontUnderilne.getBooleanValue() : null);
+			styleController.setUnderlined(node, enabled ? mNodeFontUnderline.getBooleanValue() : null);
 		}
 
 		@Override
@@ -58,14 +58,14 @@ public class FontUnderlineControlGroup implements ControlGroup {
 			final NodeStyleController styleController = NodeStyleController.getController();
 			final Boolean underlined = NodeStyleModel.isUnderlined(node);
 			final Boolean viewUnderlined = styleController.isUnderlined(node, StyleOption.FOR_UNSELECTED_NODE);
-			mSetNodeFontUnderilne.setValue(underlined != null);
-			mNodeFontUnderilne.setValue(viewUnderlined);
+			mSetNodeFontUnderline.setValue(underlined != null);
+			mNodeFontUnderline.setValue(viewUnderlined);
 		}
 
         @Override
         void adjustForStyle(NodeModel node) {
-            StylePropertyAdjuster.adjustPropertyControl(node, mSetNodeFontUnderilne);
-            StylePropertyAdjuster.adjustPropertyControl(node, mNodeFontUnderilne);
+            StylePropertyAdjuster.adjustPropertyControl(node, mSetNodeFontUnderline);
+            StylePropertyAdjuster.adjustPropertyControl(node, mNodeFontUnderline);
         }
 	}
 
@@ -76,12 +76,12 @@ public class FontUnderlineControlGroup implements ControlGroup {
 
 	@Override
 	public void addControlGroup(DefaultFormBuilder formBuilder) {
-		mSetNodeFontUnderilne = new RevertingProperty();
-		mNodeFontUnderilne = new BooleanProperty(NODE_FONT_UNDERLINE);
-		propertyChangeListener = new FontUnderilneChangeListener(mSetNodeFontUnderilne, mNodeFontUnderilne);
-		mSetNodeFontUnderilne.addPropertyChangeListener(propertyChangeListener);
-		mNodeFontUnderilne.addPropertyChangeListener(propertyChangeListener);
-		mNodeFontUnderilne.appendToForm(formBuilder);
-		mSetNodeFontUnderilne.appendToForm(formBuilder);
+		mSetNodeFontUnderline = new RevertingProperty();
+		mNodeFontUnderline = new BooleanProperty(NODE_FONT_UNDERLINE);
+		propertyChangeListener = new FontUnderlineChangeListener(mSetNodeFontUnderline, mNodeFontUnderline);
+		mSetNodeFontUnderline.addPropertyChangeListener(propertyChangeListener);
+		mNodeFontUnderline.addPropertyChangeListener(propertyChangeListener);
+		mNodeFontUnderline.appendToForm(formBuilder);
+		mSetNodeFontUnderline.appendToForm(formBuilder);
 	}
 }

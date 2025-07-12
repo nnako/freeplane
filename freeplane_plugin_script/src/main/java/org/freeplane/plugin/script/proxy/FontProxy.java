@@ -49,17 +49,27 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 	}
 
 	@Override
+	public boolean isStrikethrough() {
+		return getStyleController().isStrikedThrough(getDelegate(), StyleOption.FOR_UNSELECTED_NODE);
+	}
+
+	@Override
 	public boolean isStrikedThroughSet() {
 		return NodeStyleModel.isStrikedThrough(getDelegate()) != null;
 	}
 
 	@Override
-	public boolean isUnderlined() {
+	public boolean isStrikethroughSet() {
+		return NodeStyleModel.isStrikedThrough(getDelegate()) != null;
+	}
+
+	@Override
+	public boolean isUnderline() {
 		return getStyleController().isUnderlined(getDelegate(), StyleOption.FOR_UNSELECTED_NODE);
 	}
 
 	@Override
-	public boolean isUnderlinedSet() {
+	public boolean isUnderlineSet() {
 		return NodeStyleModel.isUnderlined(getDelegate()) != null;
 	}
 
@@ -81,6 +91,11 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 
 	@Override
 	public void resetStrikedThrough() {
+		getStyleController().setStrikedThrough(getDelegate(), null);
+	}
+
+	@Override
+	public void resetStrikethrough() {
 		getStyleController().setStrikedThrough(getDelegate(), null);
 	}
 
@@ -106,8 +121,13 @@ class FontProxy extends AbstractProxy<NodeModel> implements Proxy.Font {
 	}
 
 	@Override
-	public void setUnderlined(boolean underlined) {
-		getStyleController().setUnderlined(getDelegate(), underlined);
+	public void setStrikethrough(boolean strikethrough) {
+		getStyleController().setStrikedThrough(getDelegate(), strikethrough);
+	}
+
+	@Override
+	public void setUnderline(boolean underline) {
+		getStyleController().setUnderlined(getDelegate(), underline);
 	}
 
 	public void setName(final String name) {

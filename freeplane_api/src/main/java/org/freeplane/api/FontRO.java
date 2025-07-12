@@ -14,13 +14,19 @@ public interface FontRO {
 
 	boolean isItalicSet();
 
-	boolean isUnderlined();
+	boolean isUnderline();
 
-	boolean isUnderlinedSet();
+	boolean isUnderlineSet();
 
+	@Deprecated
 	boolean isStrikedThrough();
 
+	boolean isStrikethrough();
+
+	@Deprecated
 	boolean isStrikedThroughSet();
+
+	boolean isStrikethroughSet();
 
 	boolean isNameSet();
 
