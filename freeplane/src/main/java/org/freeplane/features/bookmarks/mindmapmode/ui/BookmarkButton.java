@@ -7,10 +7,12 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JToolTip;
 
+import org.freeplane.api.TextWritingDirection;
 import org.freeplane.features.bookmarks.mindmapmode.NodeBookmark;
 import org.freeplane.features.map.ITooltipProvider.TooltipTrigger;
 import org.freeplane.features.map.NodeModel;
 import org.freeplane.features.mode.ModeController;
+import org.freeplane.features.nodestyle.NodeStyleController;
 import org.freeplane.view.swing.map.FreeplaneTooltip;
 
 import java.awt.Component;
@@ -43,7 +45,13 @@ class BookmarkButton extends JButton {
 	private FreeplaneTooltip createBookmarkTooltip() {
 		FreeplaneTooltip tip = new FreeplaneTooltip(getGraphicsConfiguration(), FreeplaneTooltip.TEXT_HTML, false);
 		tip.setBorder(BorderFactory.createEmptyBorder());
-		final URL url = bookmark.getNode().getMap().getURL();
+		final NodeModel node = bookmark.getNode();
+		final TextWritingDirection textDirection = NodeStyleController
+		        .getController(modeController)
+		        .getTextWritingDirection(node);
+		tip.setComponentOrientation(textDirection.componentOrientation);
+
+		final URL url = node.getMap().getURL();
 		if (url != null) {
 			tip.setBase(url);
 		} else {

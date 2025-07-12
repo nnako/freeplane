@@ -785,16 +785,20 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 		editorComponent.setOpaque(true);
 		final Font font = editorComponent.getFont();
 		editorComponent.setFont(font.deriveFont(font.getSize2D() * getZoom()));
+		setComponentOrientation(editorComponent);
+		return super.prepareEditor(tce, row, col);
+	}
+
+	private void setComponentOrientation(final JComponent component) {
 		final NodeView nodeView = getNodeViewAncestor();
 		if(nodeView != null)
-			editorComponent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
+			component.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
 		else {
 			final TextWritingDirection textDirection = NodeStyleController
 					.getController(Controller.getCurrentModeController())
 					.getTextWritingDirection(getAttributeTableModel().getNode());
-			editorComponent.setComponentOrientation(textDirection.componentOrientation);
+			component.setComponentOrientation(textDirection.componentOrientation);
 		}
-		return super.prepareEditor(tce, row, col);
 	}
 
 	@Override
@@ -827,7 +831,7 @@ class AttributeTable extends JTable implements IColumnWidthChangeListener {
 	@Override
 	public JToolTip createToolTip() {
 		FreeplaneTooltip tip = new FreeplaneTooltip(this.getGraphicsConfiguration(), "text/html", true);
-
+		setComponentOrientation(tip);
 		final URL url = attributeView.getNode().getMap().getURL();
 		if (url != null) {
 			tip.setBase(url);

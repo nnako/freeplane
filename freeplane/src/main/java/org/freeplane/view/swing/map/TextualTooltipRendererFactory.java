@@ -1,7 +1,7 @@
 package org.freeplane.view.swing.map;
 
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -11,7 +11,7 @@ import java.security.AccessControlException;
 
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -29,11 +29,11 @@ class TextualTooltipRendererFactory {
 	private int maximumWidth;
 	private final String contentType;
 	private final JRestrictedSizeScrollPane scrollPane;
-	private JComponent component;
-	private URL baseUrl;
+	private final JComponent component;
+	private final URL baseUrl;
 	TextualTooltipRendererFactory(
 	        String contentType, URL baseUrl, String tipText, JComponent component,
-	        Dimension tooltipSize, boolean honorDisplayProperties){
+	        ComponentOrientation componentOrientation, Dimension tooltipSize, boolean honorDisplayProperties){
 		this.contentType = contentType;
 		this.baseUrl = baseUrl;
 		this.component = component;
@@ -50,6 +50,7 @@ class TextualTooltipRendererFactory {
 			styleSheet.addRule("table {border: 0; border-spacing: 0;}");
 			styleSheet.addRule("th, td {border: 1px solid;}");
 		}
+		tip.setComponentOrientation(componentOrientation);
 		tip.setEditable(false);
 		tip.setMargin(new Insets(0, 0, 0, 0));
 		final LinkOpener linkOpener = new LinkOpener(this::getNode);
@@ -57,8 +58,8 @@ class TextualTooltipRendererFactory {
 		tip.addMouseMotionListener(linkOpener);
 
 		scrollPane = new JRestrictedSizeScrollPane(tip);
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		final int scrollBarWidth = scrollPane.getVerticalScrollBar().getPreferredSize().width;
 		tooltipSize.width -= scrollBarWidth;
 		scrollPane.setMaximumSize(tooltipSize);

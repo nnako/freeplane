@@ -46,6 +46,7 @@ public class FreeplaneTooltip extends JToolTip {
 					final URI absoluteUri = uri.isAbsolute() ? uri : baseUrl.toURI().resolve(uri);
 					if(! absoluteUri.getScheme().equals("file") || new File(absoluteUri).canRead()) {
 						final JComponent imageViewer = new ImageRendererFactory().createRenderer(viewerFactory, absoluteUri, tooltipSize);
+						imageViewer.setComponentOrientation(getComponentOrientation());
 						add(imageViewer);
 						return;
 					}
@@ -55,7 +56,9 @@ public class FreeplaneTooltip extends JToolTip {
 		catch (URISyntaxException e) {
 			// fall through
 		}
-		final TextualTooltipRendererFactory tooltipScrollPaneFactory = new TextualTooltipRendererFactory(contentType, baseUrl, tipText, getComponent(), tooltipSize, honorDisplayProperties);
+		final TextualTooltipRendererFactory tooltipScrollPaneFactory = new TextualTooltipRendererFactory(
+				contentType, baseUrl, tipText, getComponent(), getComponentOrientation(),
+				tooltipSize, honorDisplayProperties);
 		add(tooltipScrollPaneFactory.getTooltipRenderer());
 	}
 
