@@ -676,7 +676,6 @@ public class EditNodeTextField extends EditNodeBase {
 	private final ZoomableLabel parent;
 	private NodeView nodeView;
 	private Font font;
-	private float zoom;
 	private final PasteAction pasteAction;
 	private final BoldAction boldAction;
 	private final ItalicAction italicAction;
@@ -754,7 +753,7 @@ public class EditNodeTextField extends EditNodeBase {
 		final MTextController textController = (MTextController) TextController.getController(modeController);
 		nodeView = (NodeView) SwingUtilities.getAncestorOfClass(NodeView.class, parent);
 		font = parent.getFont();
-		zoom = viewController.getZoom();
+		float zoom = viewController.getZoom();
 		if (zoom != 1F) {
 			final float fontSize = (int) (Math.rint(font.getSize() * zoom));
 			font = font.deriveFont(fontSize);
