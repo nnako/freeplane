@@ -22,16 +22,18 @@ package org.freeplane.view.swing.map;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import javax.swing.SwingConstants;
+
 /**
  * @author Dimitry Polivaev
  * Mar 5, 2011
  */
 @SuppressWarnings("serial")
-public
-final class DetailsView extends ZoomableLabel {
+public class DetailsView extends ZoomableLabel {
     public DetailsView() {
         super();
-   }
+        setHorizontalTextPosition(SwingConstants.RIGHT);
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -45,6 +47,6 @@ final class DetailsView extends ZoomableLabel {
     	}
         super.paintComponent(g);
     }
-	
+
 
 }

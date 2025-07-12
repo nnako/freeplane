@@ -23,10 +23,11 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import java.util.Objects;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 import org.freeplane.core.ui.IMouseListener;
 import org.freeplane.core.util.LogUtils;
@@ -45,8 +46,6 @@ import org.freeplane.features.text.TextController;
 import org.freeplane.view.swing.ui.DefaultMapMouseListener;
 import org.freeplane.view.swing.ui.DetailsViewMouseListener;
 
-import com.jgoodies.common.base.Objects;
-
 class NodeViewFactory {
 	private static NodeViewFactory factory;
 
@@ -64,7 +63,7 @@ class NodeViewFactory {
 		newView.getMap().getModeController().onViewCreated(newView);
 	}
 
-	JComponent newContentPane(final NodeView view) {
+	JComponent newContentPane() {
 		return new ContentPane();
 	}
 
@@ -200,7 +199,8 @@ class NodeViewFactory {
 		label.addMouseListener(NOTE_MOUSE_LISTENER);
 		label.addMouseMotionListener(NOTE_MOUSE_LISTENER);
 		label.setIcon(NoteController.bwNoteIcon);
-		label.setVerticalTextPosition(JLabel.TOP);
+		label.setHorizontalTextPosition(SwingConstants.RIGHT);
+		label.setVerticalTextPosition(SwingConstants.TOP);
 		return label;
 	}
 
@@ -245,7 +245,9 @@ class NodeViewFactory {
 				noteView = NodeViewFactory.getInstance().createNoteViewer();
 				nodeView.addContent(noteView, NodeView.NOTE_VIEWER_POSITION);
 			}
+			Objects.requireNonNull(noteView);
 			noteView.setFont(map.getNoteFont());
+			noteView.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
 			noteView.setForeground(map.getNoteForeground());
 			final Color noteBackground = map.getNoteBackground();
 			noteView.setBackground(noteBackground != null ? noteBackground : map.getBackground());
@@ -288,7 +290,6 @@ class NodeViewFactory {
 			else {
 				detailContent.setFont(map.getDetailFont());
 				detailContent.setHorizontalAlignment(map.getDetailHorizontalAlignment());
-				detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
 				detailContent.setIcon(ArrowIcon.UP);
 				String text;
 				try {
@@ -306,6 +307,7 @@ class NodeViewFactory {
 			}
 			detailContent.setForeground(map.getDetailForeground());
 			detailContent.setBackground(map.getDetailBackground());
+			detailContent.setComponentOrientation(nodeView.getMainView().getComponentOrientation());
 			NodeCss detailCss = map.getDetailCss();
 			detailContent.setStyleSheet(detailCss.css, detailCss.getStyleSheet());
 		}

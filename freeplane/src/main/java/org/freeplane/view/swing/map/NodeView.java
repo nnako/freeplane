@@ -273,7 +273,7 @@ public class NodeView extends JComponent implements INodeView {
 		if (contentPane == null) {
 			Window windowAncestor = SwingUtilities.getWindowAncestor(mainView);
 			boolean hasFocus = windowAncestor != null && windowAncestor.getMostRecentFocusOwner() == mainView;
-			contentPane = NodeViewFactory.getInstance().newContentPane(this);
+			contentPane = NodeViewFactory.getInstance().newContentPane();
 			final int index = getComponentCount() - 1;
 			remove(index);
 			contentPane.add(mainView);
