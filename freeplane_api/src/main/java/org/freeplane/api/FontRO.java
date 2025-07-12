@@ -18,9 +18,15 @@ public interface FontRO {
 
 	boolean isUnderlineSet();
 
+	@Deprecated
 	boolean isStrikedThrough();
 
+	boolean isStrikethrough();
+
+	@Deprecated
 	boolean isStrikedThroughSet();
+
+	boolean isStrikethroughSet();
 
 	boolean isNameSet();
 
