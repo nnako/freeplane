@@ -898,15 +898,13 @@ public class EditNodeTextField extends EditNodeBase {
 		final ZoomableLabelUI parentUI = parent.getUI();
 		final Rectangle textR = parentUI.getAvailableTextR(parent);
 		Point mouseEventPoint = null;
-		if (firstEvent == null) {
-			MouseEvent currentEvent = eventQueue.getMouseEvent();
-			if(currentEvent != null){
-				MouseEvent mouseEvent = currentEvent;
-				if(mouseEvent.getComponent().equals(parent)){
-					mouseEventPoint = mouseEvent.getPoint();
-					mouseEventPoint.x -= textR.x;
-					mouseEventPoint.y -= textR.y;
-				}
+		if (firstEvent instanceof MouseEvent) {
+			MouseEvent currentEvent = (MouseEvent) firstEvent;
+			MouseEvent mouseEvent = currentEvent;
+			if(mouseEvent.getComponent().equals(parent)){
+				mouseEventPoint = mouseEvent.getPoint();
+				mouseEventPoint.x -= textR.x;
+				mouseEventPoint.y -= textR.y;
 			}
 		}
 
@@ -957,7 +955,7 @@ public class EditNodeTextField extends EditNodeBase {
 			mapView.add(textfield, 0);
 
 		redispatchKeyEvents(textfield, firstEvent);
-		if (firstEvent == null) {
+		if (firstEvent instanceof MouseEvent) {
 			final int caretPosition;
 			final int textLength = document.getLength();
 			if(mouseEventPoint != null)
