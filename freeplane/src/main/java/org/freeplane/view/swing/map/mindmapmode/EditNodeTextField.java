@@ -311,7 +311,7 @@ public class EditNodeTextField extends EditNodeBase {
 		}
 
 	    final HTMLDocument document = (HTMLDocument) textfield.getDocument();
-	    document.getStyleSheet().addRule("body { width: " + (maxWidth - 1) + "}");
+	    document.getStyleSheet().addRule("body { width: " + maxWidth + "}");
 	    // bad hack: call "setEditable" only to update view
 	    textfield.setEditable(false);
 	    textfield.setEditable(true);
