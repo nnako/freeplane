@@ -3307,7 +3307,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 		else
 		    rootsHistory.clear();
-		if(! nextSelectedNode.isContentVisible())
+		if(nextSelectedNode.getParent() == null || ! nextSelectedNode.isContentVisible())
 		    nextSelectedNode = newRootView;
 		if(newRootWasFolded) {
 			newRootView.fireFoldingChanged();
@@ -3324,7 +3324,7 @@ public class MapView extends JPanel implements Printable, Autoscroll, IMapChange
 		}
 		revalidate();
 		repaint();
-		if(rootChange == RootChange.ANY)
+		if(rootChange == RootChange.ANY || nextSelectedNode == newRootView)
 		    mapScroller.scrollToRootNode();
 	}
 
