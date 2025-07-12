@@ -913,7 +913,6 @@ public class EditNodeTextField extends EditNodeBase {
 		textFieldMinimumSize.height = Math.max(textFieldMinimumSize.height, textR.height + 2 * textFieldBorderWidth);
 		int textFieldX = Math.max(0, textR.x  - textFieldBorderWidth);
 		int textFieldY = Math.max(0, textR.y  - textFieldBorderWidth);
-		textfield.setSize(textFieldMinimumSize.width, textFieldMinimumSize.height);
         verticalSpace = Math.max(textFieldY, parent.getHeight() - textFieldMinimumSize.height);
 		final Dimension newParentSize = new Dimension(textFieldX + textFieldMinimumSize.width + parentInsets.right,
 				verticalSpace + textFieldMinimumSize.height);
