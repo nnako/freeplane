@@ -38,7 +38,7 @@
 					<choice value="always_save_folding" />
 				</combo>
 				<boolean name="save_modification_times" />
-				<boolean name="save_last_visited_node" />
+				<boolean name="save_last_position_in_map" />
 				<path name="default_save_dir" dir="true"/>
 			</separator>
 			<separator name="automatic_save">
