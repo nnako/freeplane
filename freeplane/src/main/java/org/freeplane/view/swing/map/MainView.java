@@ -592,7 +592,10 @@ public class MainView extends ZoomableLabel {
 		final TextWritingDirection textDirection = NodeStyleController
 		        .getController(node.getMap().getModeController())
 		        .getTextWritingDirection(node.getNode());
+		final boolean wasValid = isValid();
 		setComponentOrientation(textDirection.componentOrientation);
+		if(wasValid && ! isValid())
+			revalidate();
 	}
 
 

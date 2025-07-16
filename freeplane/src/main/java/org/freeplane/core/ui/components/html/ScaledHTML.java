@@ -19,10 +19,12 @@
  */
 package org.freeplane.core.ui.components.html;
 
+import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.font.TextAttribute;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
@@ -43,15 +45,26 @@ import javax.swing.text.html.StyleSheet;
 import org.freeplane.core.util.HtmlUtils;
 
 public class ScaledHTML extends BasicHTML{
+	/**  Set the document-wide run direction so GlyphView and TextLayout
+	 *   apply the Unicode BiDi algorithm with the right base level.  */
 
-    /**
-     * Create an html renderer for the given component and
-     * string of html.
-     */
-    static Renderer createHTMLView(JLabel c, String html) {
-        ScaledEditorKit kit = SynchronousScaledEditorKit.create();
-        Document doc = kit.createDefaultDocument(c);
-        Object base = c.getClientProperty(documentBaseKey);
+	private static void applyComponentOrientation(Document doc,
+			ComponentOrientation o) {
+		// (1) global flag – required for correct run order
+		doc.putProperty(TextAttribute.RUN_DIRECTION,
+				o.isLeftToRight()
+				? TextAttribute.RUN_DIRECTION_LTR
+						: TextAttribute.RUN_DIRECTION_RTL);
+	}
+	/**
+	 * Create an html renderer for the given component and
+	 * string of html.
+	 */
+	static Renderer createHTMLView(JLabel c, String html) {
+		ScaledEditorKit kit = SynchronousScaledEditorKit.create();
+		Document doc = kit.createDefaultDocument(c);
+		applyComponentOrientation(doc, c.getComponentOrientation());
+		Object base = c.getClientProperty(documentBaseKey);
         if (base instanceof URL) {
             ((HTMLDocument)doc).setBase((URL)base);
         }
@@ -60,6 +73,8 @@ public class ScaledHTML extends BasicHTML{
             kit.read(r, doc, 0);
         } catch (Throwable e) {
         }
+
+
         ViewFactory f = kit.getViewFactory();
         View hview = f.create(doc.getDefaultRootElement());
         Renderer v = new Renderer(c, f, hview);
