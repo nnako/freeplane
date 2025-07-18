@@ -82,8 +82,11 @@ public class BookmarkToolbarPane extends JComponent implements IMapViewChangeLis
             public void windowAdded(DockingWindow addedToWindow, DockingWindow addedWindow) {
             	if ((currentSelectedMapView == null
             			|| ! currentSelectedMapView.isSelected()) && (addedWindow instanceof View)
-            			&& SwingUtilities.isDescendingFrom(addedWindow, rootWindow))
-            		updateToolbarForMapView(getContainedMapView((View) addedWindow));
+            			&& SwingUtilities.isDescendingFrom(addedWindow, rootWindow)) {
+					final MapView mapView = getContainedMapView((View) addedWindow);
+					if(mapView != null)
+						updateToolbarForMapView(mapView);
+				}
             }
 
             @Override
