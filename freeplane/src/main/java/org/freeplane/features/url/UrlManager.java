@@ -91,15 +91,15 @@ public class UrlManager implements IExtension {
 	    if (uri == null  || uri.isAbsolute()) {
 	        return uri;
 	    }
+	    final String path = uri.getPath();
 	    try {
 	        URL context = map.getURL();
 	        if(context == null)
 	            return null;
-	        
-	        URL resolvedUrl = new URL(context, uri.toString());
-	        return URI.create(resolvedUrl.toString());
+	        final URL url = new URL(context, path != null && path.isEmpty() ? "." : path);
+	        return new URI(url.getProtocol(), url.getHost(), url.getPath(), uri.getQuery(), uri.getFragment());
 	    }
-	    catch (final IllegalArgumentException e) {
+	    catch (final URISyntaxException e) {
 	        LogUtils.severe(e);
 	        return null;
 	    }
