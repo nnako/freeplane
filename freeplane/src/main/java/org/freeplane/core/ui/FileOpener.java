@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import org.freeplane.core.ui.components.UITools;
 import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.icon.mindmapmode.TagSelection;
 import org.freeplane.features.map.clipboard.MindMapNodesSelection;
 
@@ -106,7 +107,7 @@ public class FileOpener implements DropTargetListener {
 						final String urlString = matcher.group();
 						if(isMindMapUrl(urlString)) {
 							try {
-								final URI uri = new URI(urlString);
+								final URI uri = URIUtils.createURIFromString(urlString);
 								final URL url = new URL(uri.getScheme(), uri.getHost() == null ? "" : uri.getHost(), uri.getPath());
 								final File file = Compat.urlToFile(url);
 								if(! file.exists() || file.isDirectory())

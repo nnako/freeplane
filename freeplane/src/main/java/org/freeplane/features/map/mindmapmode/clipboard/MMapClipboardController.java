@@ -60,6 +60,7 @@ import org.freeplane.core.util.HtmlUtils;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.attribute.Attribute;
 import org.freeplane.features.attribute.AttributeController;
 import org.freeplane.features.attribute.NodeAttributeTableModel;
@@ -963,7 +964,7 @@ public class MMapClipboardController extends MapClipboardController implements M
 		URI uri = null;
 		if (link != null) {
 			try {
-				URI linkUri = new URI(link);
+				URI linkUri = URIUtils.createURIFromString(link);
 				uri = linkUri;
 
 				File absoluteFile = UrlManager.getController().getAbsoluteFile(map, uri);

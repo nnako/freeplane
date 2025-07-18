@@ -49,6 +49,7 @@ import org.freeplane.features.mode.NodeHookDescriptor;
 import org.freeplane.features.mode.PersistentNodeHook;
 import org.freeplane.features.ui.INodeViewLifeCycleListener;
 import org.freeplane.features.ui.ViewController;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.url.UrlManager;
 import org.freeplane.n3.nanoxml.XMLElement;
 import org.freeplane.view.swing.features.progress.mindmapmode.ProgressIcons;
@@ -615,18 +616,21 @@ public class ViewerController extends PersistentNodeHook implements INodeViewLif
 		try {
 			final String attrUri = element.getAttribute("URI", null);
 			if (attrUri != null) {
-				final URI uri = new URI(attrUri);
-				final ExternalResource previewUrl = new ExternalResource(uri);
-				final String attrSize = element.getAttribute("SIZE", null);
-				if (attrSize != null) {
-					final float size = Float.parseFloat(attrSize);
-					previewUrl.setZoom(size);
+				final URI uri = URIUtils.createURIFromString(attrUri);
+				if (uri != null) {
+					final ExternalResource previewUrl = new ExternalResource(uri);
+					final String attrSize = element.getAttribute("SIZE", null);
+					if (attrSize != null) {
+						final float size = Float.parseFloat(attrSize);
+						previewUrl.setZoom(size);
+					}
+					Controller.getCurrentModeController().getMapController().nodeChanged(node);
+					return previewUrl;
 				}
-				Controller.getCurrentModeController().getMapController().nodeChanged(node);
-				return previewUrl;
 			}
 		}
 		catch (final URISyntaxException e) {
+			LogUtils.warn("Failed to create URI from attribute: " + element.getAttribute("URI", null), e);
 		}
 		return null;
 	}

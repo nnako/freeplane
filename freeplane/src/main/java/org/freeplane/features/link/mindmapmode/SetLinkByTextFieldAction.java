@@ -35,6 +35,7 @@ import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.clipboard.ClipboardAccessor;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.link.NodeLinks;
@@ -68,7 +69,7 @@ class SetLinkByTextFieldAction extends AFreeplaneAction {
 			if (t != null && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				try {
 					final String plainTextFromClipboard = t.getTransferData(DataFlavor.stringFlavor).toString().trim();
-					new URI(plainTextFromClipboard);
+					URIUtils.createURIFromString(plainTextFromClipboard);
 					linkAsString = plainTextFromClipboard;
 				}
 				catch (final Exception ex) {

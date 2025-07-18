@@ -62,6 +62,7 @@ import org.freeplane.core.undo.IActor;
 import org.freeplane.core.util.Compat;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.link.ConnectorArrows;
 import org.freeplane.features.link.ConnectorModel;
 import org.freeplane.features.link.ConnectorShape;
@@ -673,7 +674,7 @@ public class MLinkController extends LinkController {
 	public void setLink(final NodeModel node, final String link, final int linkType) {
 		if (link != null && !"".equals(link)) {
 			try {
-				final URI uri = new URI(link);
+				final URI uri = URIUtils.createURIFromString(link);
 				setLink(node, uri, linkType);
 			}
 			catch (final URISyntaxException e) {

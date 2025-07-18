@@ -31,6 +31,7 @@ import org.freeplane.core.ui.menubuilders.generic.UserRole;
 import org.freeplane.core.util.Hyperlink;
 import org.freeplane.core.util.LogUtils;
 import org.freeplane.core.util.TextUtils;
+import org.freeplane.core.util.URIUtils;
 import org.freeplane.features.link.LinkController;
 import org.freeplane.features.mode.Controller;
 import org.freeplane.features.mode.mindmapmode.MModeController;
@@ -53,7 +54,7 @@ class OpenURLMapAction extends AFreeplaneAction {
 		if(urlText != null){
 			try {
 				String fixedUri = new FreeplaneUriConverter().fixPartiallyDecodedFreeplaneUriComingFromInternetExplorer(urlText);
-				URI uri = new URI(fixedUri);
+				URI uri = URIUtils.createURIFromString(fixedUri);
 				LinkController.getController().loadHyperlink(new Hyperlink(uri));
 			}
 			catch (Exception ex) {

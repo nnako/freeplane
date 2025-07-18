@@ -91,6 +91,28 @@ public class UrlManager implements IExtension {
 	    if (uri == null  || uri.isAbsolute()) {
 	        return uri;
 	    }
+	    
+	    // Handle opaque URIs
+	    if (uri.isOpaque()) {
+	        // For opaque file URIs (like "file:a.txt#id_1"), we need to resolve them
+	        if ("file".equals(uri.getScheme())) {
+	            try {
+	                URL context = map.getURL();
+	                if(context == null)
+	                    return null;
+	                // Use the commit approach for opaque file URIs
+	                URL resolvedUrl = new URL(context, uri.toString());
+	                return URI.create(resolvedUrl.toString());
+	            }
+	            catch (final IllegalArgumentException e) {
+	                LogUtils.severe(e);
+	                return null;
+	            }
+	        }
+	        // For other opaque URIs (like mailto:), return as-is
+	        return uri;
+	    }
+	    
 	    final String path = uri.getPath();
 	    try {
 	        URL context = map.getURL();
