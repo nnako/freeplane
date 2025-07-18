@@ -196,6 +196,8 @@ public class BookmarkToolbarPane extends JComponent implements IMapViewChangeLis
     }
 
     private void updateToolbarForMapView(MapView mapView) {
+    	if(currentSelectedMapView == mapView)
+    		return;
         if (currentMap != null) {
             currentMap.removeMapChangeListener(this);
         }
@@ -303,6 +305,11 @@ public class BookmarkToolbarPane extends JComponent implements IMapViewChangeLis
 
     @Override
     public void onSelect(NodeModel node) {
+        if(currentSelectedMapView == null) {
+        	final Component selectedMapView = Controller.getCurrentController().getMapViewManager().getMapViewComponent();
+        	if(selectedMapView instanceof MapView && SwingUtilities.isDescendingFrom(selectedMapView, rootWindow))
+        		updateToolbarForMapView((MapView) selectedMapView);
+        }
         if (currentSelectedMapView != null && currentSelectedMapView.isSelected()) {
             updateBookmarksToolbarLater();
         }
