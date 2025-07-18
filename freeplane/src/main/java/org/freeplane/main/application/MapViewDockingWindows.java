@@ -19,6 +19,7 @@
  */
 package org.freeplane.main.application;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
@@ -71,6 +72,7 @@ import org.freeplane.features.ui.IMapViewChangeListener;
 import org.freeplane.features.url.mindmapmode.DroppedMindMapOpener;
 import org.freeplane.view.swing.map.MapView;
 import org.freeplane.view.swing.map.NodeView;
+import org.freeplane.view.swing.map.overview.BookmarkToolbarPane;
 import org.freeplane.view.swing.map.overview.MapViewPane;
 import org.freeplane.view.swing.ui.DefaultMapMouseListener;
 
@@ -128,6 +130,7 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	private byte[] emptyConfigurations;
 	private final MapViewSerializer viewSerializer;
 	private DockingWindowsTheme theme;
+	private final java.util.Map<Window, BookmarkToolbarPane> bookmarkToolbarPanes = new java.util.HashMap<>();
 
 	public MapViewDockingWindows() {
 		viewSerializer = new MapViewSerializer();
@@ -194,6 +197,8 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 							iconColorReplacer = new IconColorReplacer(((Window) UITools.getMenuComponent()).getIconImages());
 						final List<Image> iconImages = iconColorReplacer.getNextIconImages();
 						((Window)topLevelAncestor).setIconImages(iconImages);
+
+						createBookmarkToolbarPaneForFrame((Window) topLevelAncestor, addedWindow);
 					}
 				}
 				setTabPolicies(addedWindow);
@@ -220,6 +225,12 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	                if (removedFromWindow == rootWindow) {
 	                	final TabAreaProperties tabAreaProperties = ((TabWindow)removedWindow).getTabWindowProperties().getTabbedPanelProperties().getTabAreaProperties();
 	                    tabAreaProperties.setTabAreaVisiblePolicy(TabAreaVisiblePolicy.ALWAYS);
+                    }
+                }
+                else if(removedWindow instanceof FloatingWindow) {
+                    final Container topLevelAncestor = removedWindow.getTopLevelAncestor();
+                    if(topLevelAncestor instanceof Window) {
+                        removeBookmarkToolbarPaneForFrame((Window) topLevelAncestor);
                     }
                 }
             }
@@ -522,6 +533,10 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 	    return rootWindow;
     }
 
+	public RootWindow getRootWindow() {
+	    return rootWindow;
+    }
+
 	public void saveLayout(){
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 		try {
@@ -726,6 +741,33 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		final ArrayList<Component> orderedMapViews = new ArrayList<Component>(mapViews.size());
 		addMapViews(orderedMapViews, rootWindow);
 		return orderedMapViews;
+	}
+
+	private void createBookmarkToolbarPaneForFrame(Window frame, DockingWindow floatingWindow) {
+		if (frame instanceof JFrame) {
+			JFrame jFrame = (JFrame) frame;
+			Container contentPane = jFrame.getContentPane();
+
+			Component centralComponent = null;
+			if (contentPane.getLayout() instanceof BorderLayout) {
+				centralComponent = ((BorderLayout) contentPane.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+			}
+
+			BookmarkToolbarPane bookmarkToolbarPane = new BookmarkToolbarPane(floatingWindow);
+			bookmarkToolbarPanes.put(frame, bookmarkToolbarPane);
+
+			if (centralComponent != null) {
+				contentPane.remove(centralComponent);
+			}
+			contentPane.add(bookmarkToolbarPane, BorderLayout.CENTER);
+		}
+	}
+
+	private void removeBookmarkToolbarPaneForFrame(Window frame) {
+		BookmarkToolbarPane bookmarkToolbarPane = bookmarkToolbarPanes.remove(frame);
+		if (bookmarkToolbarPane != null) {
+			bookmarkToolbarPane.dispose();
+		}
 	}
 
 	private void addMapViews(ArrayList<Component> orderedMapViews, DockingWindow window) {

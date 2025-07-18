@@ -60,6 +60,7 @@ import org.freeplane.features.mode.Controller;
 import org.freeplane.features.ui.FrameController;
 import org.freeplane.features.ui.IMapViewManager;
 import org.freeplane.view.swing.map.MapView;
+import org.freeplane.view.swing.map.overview.BookmarkToolbarPane;
 
 class ApplicationViewController extends FrameController {
 	private static final String SPLIT_PANE_LAST_LEFT_POSITION = "split_pane_last_left_position";
@@ -85,6 +86,7 @@ class ApplicationViewController extends FrameController {
 	final private ApplicationResourceController resourceController;
 	private JComponent mapPane;
 	private MapViewDockingWindows mapViewWindows;
+	private BookmarkToolbarPane mainBookmarkToolbarPane;
     public ApplicationViewController( Controller controller, final IMapViewManager mapViewController,
 	                                 final JFrame frame) {
 		super(controller, mapViewController, "");
@@ -340,11 +342,11 @@ class ApplicationViewController extends FrameController {
 		mSplitPane.setResizeWeight(1.0d);
 		mapViewWindows = new MapViewDockingWindows();
 		mapPane = mapViewWindows.getMapPane();
+		
+		mainBookmarkToolbarPane = new BookmarkToolbarPane(mapViewWindows.getRootWindow());
 		Container contentPane = frame.getContentPane();
 		contentPane.setLayout(new BorderLayoutWithVisibleCenterComponent());
-        contentPane.add(mSplitPane, BorderLayout.CENTER);
-		mSplitPane.setLeftComponent(mapPane);
-		mSplitPane.setRightComponent(null);
+        contentPane.add(mainBookmarkToolbarPane, BorderLayout.CENTER);
 		initFrame(frame);
 		super.init(controller);
 	}
