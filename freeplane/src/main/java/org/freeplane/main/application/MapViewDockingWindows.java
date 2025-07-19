@@ -529,10 +529,6 @@ class MapViewDockingWindows implements IMapViewChangeListener {
 		}
 	}
 
-	public JComponent getMapPane() {
-	    return rootWindow;
-    }
-
 	public RootWindow getRootWindow() {
 	    return rootWindow;
     }

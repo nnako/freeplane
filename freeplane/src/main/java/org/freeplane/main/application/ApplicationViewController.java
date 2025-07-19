@@ -84,7 +84,6 @@ class ApplicationViewController extends FrameController {
 	final private NavigationNextMapAction navigationNextMap;
 	final private NavigationPreviousMapAction navigationPreviousMap;
 	final private ApplicationResourceController resourceController;
-	private JComponent mapPane;
 	private MapViewDockingWindows mapViewWindows;
 	private BookmarkToolbarPane mainBookmarkToolbarPane;
     public ApplicationViewController( Controller controller, final IMapViewManager mapViewController,
@@ -131,22 +130,22 @@ class ApplicationViewController extends FrameController {
 		mSplitPane.setRightComponent(null);
 		if ("right".equals(mLocationPreferenceValue)) {
 			mSplitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-			mSplitPane.setLeftComponent(mapPane);
+			mSplitPane.setLeftComponent(mainBookmarkToolbarPane);
 			mSplitPane.setRightComponent(pMindMapComponent);
 		}
 		else if ("left".equals(mLocationPreferenceValue)) {
 			mSplitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 			mSplitPane.setLeftComponent(pMindMapComponent);
-			mSplitPane.setRightComponent(mapPane);
+			mSplitPane.setRightComponent(mainBookmarkToolbarPane);
 		}
 		else if ("top".equals(mLocationPreferenceValue)) {
 			mSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 			mSplitPane.setLeftComponent(pMindMapComponent);
-			mSplitPane.setRightComponent(mapPane);
+			mSplitPane.setRightComponent(mainBookmarkToolbarPane);
 		}
 		else {
 			mSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-			mSplitPane.setLeftComponent(mapPane);
+			mSplitPane.setLeftComponent(mainBookmarkToolbarPane);
 			mSplitPane.setRightComponent(pMindMapComponent);
 		}
 		if(focusOwner != null && SwingUtilities.isDescendingFrom(focusOwner, mSplitPane)) {
@@ -218,7 +217,7 @@ class ApplicationViewController extends FrameController {
 		mMindMapComponent = null;
 		mSplitPane.setLeftComponent(null);
 		mSplitPane.setRightComponent(null);
-		mSplitPane.setLeftComponent(mapPane);
+		mSplitPane.setLeftComponent(mainBookmarkToolbarPane);
 		final Controller controller = Controller.getCurrentModeController().getController();
 		final IMapSelection selection = controller.getSelection();
 		if(selection == null){
@@ -341,12 +340,12 @@ class ApplicationViewController extends FrameController {
 		};
 		mSplitPane.setResizeWeight(1.0d);
 		mapViewWindows = new MapViewDockingWindows();
-		mapPane = mapViewWindows.getMapPane();
-		
 		mainBookmarkToolbarPane = new BookmarkToolbarPane(mapViewWindows.getRootWindow());
 		Container contentPane = frame.getContentPane();
 		contentPane.setLayout(new BorderLayoutWithVisibleCenterComponent());
-        contentPane.add(mainBookmarkToolbarPane, BorderLayout.CENTER);
+        contentPane.add(mSplitPane, BorderLayout.CENTER);
+		mSplitPane.setLeftComponent(mainBookmarkToolbarPane);
+		mSplitPane.setRightComponent(null);
 		initFrame(frame);
 		super.init(controller);
 	}
