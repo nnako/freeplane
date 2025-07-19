@@ -399,6 +399,9 @@
 				<xsl:attribute name="alt">
 					<xsl:value-of select="@BUILTIN" />
 				</xsl:attribute>
+				<xsl:attribute name="height">
+					<xsl:value-of select="@height" />
+				</xsl:attribute>
 			</xsl:element>
 			<xsl:text> </xsl:text>
 		</xsl:for-each>
