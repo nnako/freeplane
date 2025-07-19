@@ -287,7 +287,6 @@ class VerticalNodeViewLayoutStrategy {
                 		assignFreeChildVerticalPosition(index, childShiftY, child);
                 	} else {
                 		if (childRegularHeight != 0) {
-                			handleFirstVisibleChildAlignment();
                 			assignRegularChildVerticalPosition(index, child, childRegularHeight, childShiftY);
                 			visibleLaidOutChildCounter++;
                 			lastRegularChild = child;
@@ -315,7 +314,7 @@ class VerticalNodeViewLayoutStrategy {
         else if (childNodesAlignment == ChildNodesAlignment.BEFORE_PARENT
                 && contentSize.height > 0
                 && !isFirstVisibleLaidOutChild()) {
-            totalSideShiftY -= calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize);
+            totalSideShiftY -= calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize) + childCloudHeight/2;;
         }
         calculateRelativeCoordinatesForContentAndBothSides(laysOutLeftSide);
     }
@@ -418,6 +417,11 @@ class VerticalNodeViewLayoutStrategy {
     	final int spaceBetweenContent = topContentY - bottomContentY;
     	int lastChildCloudHeight = this.childCloudHeight;
     	this.childCloudHeight = CloudHeightCalculator.INSTANCE.getAdditionalCloudHeight(child);
+    	if (isFirstVisibleLaidOutChild()
+		        && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
+		        && contentSize.height > 0) {
+		    y += calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize) + childCloudHeight/2;
+		}
     	int availableSpace = 0;
     	int upperGap = 0;
     	if(! isFirstVisibleLaidOutChild()) {
@@ -546,14 +550,6 @@ class VerticalNodeViewLayoutStrategy {
         }
     }
 
-
-    private void handleFirstVisibleChildAlignment() {
-        if (isFirstVisibleLaidOutChild()
-                && childNodesAlignment == ChildNodesAlignment.AFTER_PARENT
-                && contentSize.height > 0) {
-            y += calculateAddedDistanceFromParentToChildren(minimalGapBetweenChildren, contentSize);
-        }
-    }
 
     private void assignSummaryChildVerticalPosition(int index,
                                    NodeViewLayoutHelper child,
