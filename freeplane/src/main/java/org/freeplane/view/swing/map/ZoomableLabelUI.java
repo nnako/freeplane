@@ -252,6 +252,18 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			}
 			break;
 		}}
+		if (zLabel.useFractionalMetrics()) {
+			final int alignment = zLabel.getEffectiveHorizontalAlignment();
+			final int shift = (int) (textR.width * (1 - EXTRA_SCALING_FACTOR));
+			if (alignment == SwingConstants.RIGHT) {
+				textR.x += shift;
+			} else if (alignment == SwingConstants.CENTER) {
+				textR.x += shift/2;
+			}
+			if(iconR.x != viewR.x)
+				iconR.x += shift;
+		}
+
 		return bidiSafeText;
 	}
 
@@ -312,14 +324,18 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			}
 		}
 	}
+	final static float EXTRA_SCALING_FACTOR = 0.97f;
 
 	@Override
 	public void paint(final Graphics g, final JComponent label) {
-		final ZoomableLabel mainView = (ZoomableLabel) label;
-		if (!mainView.useFractionalMetrics()) {
+		paint(g, (ZoomableLabel) label);
+	}
+
+	private void paint(final Graphics g, final ZoomableLabel label) {
+		if (!label.useFractionalMetrics()) {
 			try {
 				isPainting = true;
-				superPaintSafe(g, mainView);
+				superPaintSafe(g, label);
 			}
 			finally {
 				isPainting = false;
@@ -333,11 +349,10 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, newRenderingHintFM);
 		}
 		final AffineTransform transform = g2.getTransform();
-		final float factor = 0.97f;
-		final float zoom = mainView.getZoom() * factor;
-		if(mainView.getVerticalAlignment() == SwingConstants.CENTER) {
+		final float zoom = label.getZoom() * EXTRA_SCALING_FACTOR;
+		if(label.getVerticalAlignment() == SwingConstants.CENTER) {
 			final float translationFactorY = 0.5f;
-			g2.translate(0, mainView.getHeight() * (1f - factor) * translationFactorY);
+			g2.translate(0, label.getHeight() * (1f - EXTRA_SCALING_FACTOR) * translationFactorY);
 		}
 		g2.scale(zoom, zoom);
 		final boolean htmlViewSet = null != label.getClientProperty(BasicHTML.propertyKey);
@@ -346,7 +361,7 @@ public class ZoomableLabelUI extends BasicLabelUI {
 			if(htmlViewSet){
 				ScaledHTML.resetPainter();
 			}
-			superPaintSafe(g, mainView);
+			superPaintSafe(g, label);
 		}
 		finally {
 			isPainting = false;
